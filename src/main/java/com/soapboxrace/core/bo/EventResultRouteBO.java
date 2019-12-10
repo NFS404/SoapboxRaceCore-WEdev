@@ -118,26 +118,27 @@ public class EventResultRouteBO {
 		// The fastest racer of his team will bring a win on this race, depending on opponent's teams position - Hypercycle
 		int targetCarClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
 		TeamsEntity racerTeamEntity = personaEntity.getTeam();
-		Long racerTeamId = racerTeamEntity.getTeamId();
-		Long team1 = eventSessionEntity.getTeam1Id();
-		Long team2 = eventSessionEntity.getTeam2Id();
-		Long teamWinner = eventSessionEntity.getTeamWinner();
-		OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);					
-			if ((racerTeamId == team1 || racerTeamId == team2) && defaultCar.getCustomCar().getCarClassHash() == targetCarClass && teamWinner == null) {
-				eventSessionEntity.setTeamWinner(racerTeamId);
-				eventSessionDao.update(eventSessionEntity);
-				
-				racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + racerTeamEntity.getTeamName() + " has won this event! +1P, total: " + racerTeamEntity.getTeamPoints()), activePersonaId);
-				System.out.println("racerTeamWins TEST");
-			}
+		if (racerTeamEntity != null) {
+			Long racerTeamId = racerTeamEntity.getTeamId();
+			Long team1 = eventSessionEntity.getTeam1Id();
+			Long team2 = eventSessionEntity.getTeam2Id();
+			Long teamWinner = eventSessionEntity.getTeamWinner();
+			OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);					
+				if ((racerTeamId == team1 || racerTeamId == team2) && defaultCar.getCustomCar().getCarClassHash() == targetCarClass && teamWinner == null) {
+					eventSessionEntity.setTeamWinner(racerTeamId);
+					eventSessionDao.update(eventSessionEntity);
+					
+					racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + racerTeamEntity.getTeamName() + " has won this event! +1P, total: " + racerTeamEntity.getTeamPoints()), activePersonaId);
+					System.out.println("racerTeamWins TEST");
+				}
 
-		if (teamWinner != null && teamWinner != racerTeamId) {
-			TeamsEntity winnerTeam = teamsDAO.findById(teamWinner);
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeam.getTeamName() + " has won this event! +1P, total: " + winnerTeam.getTeamPoints()), activePersonaId);
-			System.out.println("racerTeamFails TEST");
+			if (teamWinner != null && teamWinner != racerTeamId) {
+				TeamsEntity winnerTeam = teamsDAO.findById(teamWinner);
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeam.getTeamName() + " has won this event! +1P, total: " + winnerTeam.getTeamPoints()), activePersonaId);
+				System.out.println("racerTeamFails TEST");
+			}
 		}
-		
 		return routeEventResult;
 	}
 
