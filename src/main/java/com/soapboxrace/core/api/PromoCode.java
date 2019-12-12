@@ -47,4 +47,14 @@ public class PromoCode {
 		}
 		return bo.usePromoCode(promoCode, email, password, nickname, token);
 	}
+	
+	@POST
+	@Path("/useDebug")
+	@Produces(MediaType.TEXT_HTML)
+	public String useDebug(@FormParam("adminToken") String adminToken, @FormParam("premiumType") String premiumType, @FormParam("extraMoney") String extraMoney, @FormParam("nickname") String nickname, @FormParam("timeYear") String timeYear, @FormParam("timeMonth") String timeMonth, @FormParam("timeDay") String timeDay) {
+		if (adminToken != null && !parameterBO.getStrParam("ADMIN_TOKEN").equals(adminToken)) {
+			return "ERROR: invalid token";
+		}
+		return bo.useDebug(premiumType, extraMoney, nickname, timeYear, timeMonth, timeDay);
+	}
 }

@@ -22,7 +22,6 @@ import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.PromoCodeEntity;
 import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.jaxb.http.AchievementState;
-import com.soapboxrace.jaxb.http.ProfileData;
 
 @Stateless
 public class PromoCodeBO {
@@ -250,14 +249,82 @@ public class PromoCodeBO {
 		}
 	}
 	
+	// debug temporary premium activation stuff - Hypercycle
+	public String useDebug(String premiumType, String extraMoney, String nickname, String timeYear, String timeMonth, String timeDay) {
+		UserEntity userEntity = null;
+		PersonaEntity personaEntity = personaDao.findByName(nickname);
+		if (personaEntity == null) {
+			return "ERROR: wrong nickname";
+		}
+		userEntity = personaEntity.getUser();
+		double extraMoneyConvert = Double.parseDouble(extraMoney);
+		// yes yes, parsing the single string would be more efficient
+		int timeYearConvert = Integer.parseInt(timeYear);
+		int timeMonthConvert = Integer.parseInt(timeMonth);
+		int timeDayConvert = Integer.parseInt(timeDay);
+		switch (premiumType) {
+		    case "powerup":
+		    	premiumAchievementApply(126, personaEntity);
+		    	userEntity.setExtraMoney(extraMoneyConvert);
+		    	userDao.update(userEntity);
+				return nickname + " - DONE";
+		    case "base":
+		    	premiumAchievementApply(126, personaEntity);
+		    	premiumAchievementApply(501, personaEntity);
+		    	userEntity.setExtraMoney(extraMoneyConvert);
+		    	userEntity.setPremium(true);
+		    	userEntity.setPremiumType(premiumType);
+		    	userEntity.setPremiumDate(LocalDate.of(timeYearConvert, timeMonthConvert, timeDayConvert));
+		    	userDao.update(userEntity);
+				return nickname + " - DONE";
+		    case "plus":
+		    	premiumAchievementApply(126, personaEntity);
+		    	premiumAchievementApply(501, personaEntity);
+		    	premiumAchievementApply(502, personaEntity);
+		    	userEntity.setExtraMoney(extraMoneyConvert);
+		    	userEntity.setPremium(true);
+		    	userEntity.setPremiumType(premiumType);
+		    	userEntity.setPremiumDate(LocalDate.of(timeYearConvert, timeMonthConvert, timeDayConvert));
+		    	userDao.update(userEntity);
+				return nickname + " - DONE";
+		    case "full":
+		    	premiumAchievementApply(126, personaEntity);
+		    	premiumAchievementApply(501, personaEntity);
+		    	premiumAchievementApply(502, personaEntity);
+		    	premiumAchievementApply(503, personaEntity);
+		    	userEntity.setExtraMoney(extraMoneyConvert);
+		    	userEntity.setPremium(true);
+		    	userEntity.setPremiumType(premiumType);
+		    	userEntity.setPremiumDate(LocalDate.of(timeYearConvert, timeMonthConvert, timeDayConvert));
+		    	userDao.update(userEntity);
+				return nickname + " - DONE";
+		    case "unlim":
+		    	premiumAchievementApply(126, personaEntity);
+		    	premiumAchievementApply(501, personaEntity);
+		    	premiumAchievementApply(502, personaEntity);
+		    	premiumAchievementApply(503, personaEntity);
+		    	premiumAchievementApply(504, personaEntity);
+		    	userEntity.setExtraMoney(extraMoneyConvert);
+		    	userEntity.setPremium(true);
+		    	userEntity.setPremiumType(premiumType);
+		    	userEntity.setPremiumDate(LocalDate.of(timeYearConvert, timeMonthConvert, timeDayConvert));
+		    	userDao.update(userEntity);
+				return nickname + " - DONE";
+            default:
+            	return "ERROR: invaild infos, try again";
+		}
+	}
+	
 	private void premiumAchievementApply (int rankId, PersonaEntity personaEntity) {
 		AchievementRankEntity achievementRankEntity = achievementRankDao.findById((long) rankId);
-		AchievementStateEntity achievementStateEntity = new AchievementStateEntity();
-		achievementStateEntity.setAchievedOn(LocalDateTime.now());
-		achievementStateEntity.setAchievementRank(achievementRankEntity);
-		achievementStateEntity.setAchievementState(AchievementState.COMPLETED);
-		achievementStateEntity.setPersona(personaEntity);
-		achievementStateDao.insert(achievementStateEntity);
+		if (achievementStateDao.findByPersonaAchievementRank(personaEntity, achievementRankEntity) == null) {
+			AchievementStateEntity achievementStateEntity = new AchievementStateEntity();
+			achievementStateEntity.setAchievedOn(LocalDateTime.now());
+			achievementStateEntity.setAchievementRank(achievementRankEntity);
+			achievementStateEntity.setAchievementState(AchievementState.COMPLETED);
+			achievementStateEntity.setPersona(personaEntity);
+			achievementStateDao.insert(achievementStateEntity);
+		}
 	}
 	
 	private void premiumCarSlots (int carSlots, UserEntity userEntity) {
