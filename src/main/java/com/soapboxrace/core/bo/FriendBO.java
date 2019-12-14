@@ -8,12 +8,17 @@ import javax.ejb.Stateless;
 
 import com.soapboxrace.core.dao.FriendListDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.ReportDAO;
+import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.jpa.FriendListEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
+import com.soapboxrace.core.jpa.ReportEntity;
+import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.jpa.TokenSessionEntity;
 import com.soapboxrace.core.xmpp.OpenFireRestApiCli;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.ArrayOfBadgePacket;
 import com.soapboxrace.jaxb.http.ArrayOfFriendPersona;
 import com.soapboxrace.jaxb.http.FriendPersona;
@@ -40,6 +45,9 @@ public class FriendBO {
 
 	@EJB
 	private PersonaBO personaBO;
+	
+	@EJB
+	private TeamsBO teamsBO;
 
 	@EJB
 	private OpenFireSoapBoxCli openFireSoapBoxCli;
@@ -49,6 +57,12 @@ public class FriendBO {
 
 	@EJB
 	private TokenSessionDAO tokenSessionDAO;
+	
+	@EJB
+	private TeamsDAO teamsDAO;
+	
+	@EJB
+	private ReportDAO reportDAO;
 
 	public PersonaFriendsList getFriendListFromUserId(Long userId) {
 		ArrayOfFriendPersona arrayOfFriendPersona = new ArrayOfFriendPersona();
@@ -87,57 +101,200 @@ public class FriendBO {
 		friendPersonaList.add(friendPersona);
 	}
 
+	// Teams actions parser into "add a friend" window - Hypercycle
+	// FIXME for unknown reason, XMPP messages can go into timeouts there
+	// so i did some weird 'else' outputs for messages
 	public FriendResult sendFriendRequest(Long personaId, String displayName, String reqMessage) {
+		boolean teamsActionInit = false;
 		PersonaEntity personaSender = personaDAO.findById(personaId);
-		PersonaEntity personaInvited = personaDAO.findByName(displayName);
-
-		if (personaSender == null || personaInvited == null) {
+		if (displayName.contains("/TEAMJOIN ")) {
+			teamsActionInit = true;
+			String teamName = displayName.replaceFirst("/TEAMJOIN ", "");
+			TeamsEntity teamToJoin = teamsDAO.findByName(teamName);
+			if (teamToJoin == null) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This team is not exist."), personaId);
+				return null;
+			}
+			if (personaSender.getLevel() < 30) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### To participate on teams, LVL 30 and higher is required."), personaId);
+				return null;
+			}
+			if (!teamToJoin.getOpenEntry()) {
+				Long teamleaderId = teamToJoin.getLeader().getPersonaId();
+				List<ReportEntity> teamInviteCheck = reportDAO.findTeamInvite(teamleaderId, personaId);
+				if (!teamInviteCheck.isEmpty()) {
+					teamsBO.teamJoinIG(personaSender, teamToJoin);
+					reportDAO.deleteTeamInvite(teamleaderId, personaId);
+//					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You're joined to team!"), personaId);
+					return null;
+				}
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This team is invite-only."), personaId);
+				return null;
+			}
+			if (personaSender.getTeam() == teamToJoin) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You already on this team..."), personaId);
+				return null;
+			}
+			if (personaSender.getTeam() != null) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You already on another team..."), personaId);
+				return null;
+			}
+			if (teamToJoin.getPlayersCount() >= 8) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This team is full."), personaId);
+				return null;
+			}
+			else {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You're joined to team!"), personaId);
+			}
+			teamsBO.teamJoinIG(personaSender, teamToJoin);
 			return null;
 		}
-
-		if (personaSender.getPersonaId() == personaInvited.getPersonaId()) {
+		if (displayName.contains("/TEAMLEAVE")) {
+			teamsActionInit = true;
+			TeamsEntity playerTeamLeave = personaSender.getTeam();
+			if (playerTeamLeave == null) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Get a team first..."), personaId);
+				return null;
+			}
+			if (playerTeamLeave.getLeader() == personaSender) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You can't leave your own team."), personaId);
+				return null;
+			}
+			else {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You left this team."), personaId);
+			}
+			teamsBO.teamLeaveIG(personaSender, playerTeamLeave);
 			return null;
 		}
-
-		FriendListEntity friendListEntity = friendListDAO.findByOwnerIdAndFriendPersona(personaSender.getUser().getId(), personaInvited.getPersonaId());
-		if (friendListEntity != null) {
+		if (displayName.contains("/TEAMKICK ")) {
+			teamsActionInit = true;
+			TeamsEntity leaderTeam = personaSender.getTeam();
+			String badTeammateName = displayName.replaceFirst("/TEAMKICK ", "");
+			PersonaEntity badTeammate = personaDAO.findByName(badTeammateName);
+			if (leaderTeam == null) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Get a team first..."), personaId);
+				return null;
+			}
+			if (leaderTeam.getLeader() != personaSender) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You're is not a team leader."), personaId);
+				return null;
+			}
+			if (leaderTeam.getLeader() == personaSender) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You can't leave your own team."), personaId);
+				return null;
+			}
+			if (badTeammate == null) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Wrong nickname."), personaId);
+				return null;
+			}
+			if (badTeammate.getTeam() != leaderTeam) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This player is not on your team..."), personaId);
+				return null;
+			}
+			else {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Player is no longer on this team."), personaId);
+			}
+			teamsBO.teamLeaveIG(badTeammate, leaderTeam);
 			return null;
 		}
+		if (displayName.contains("/TEAMPLAYERS ")) {
+			teamsActionInit = true;
+			String teamPlayers = "";
+			String teamName = displayName.replaceFirst("/TEAMPLAYERS ", "");
+			TeamsEntity teamToCheck = teamsDAO.findByName(teamName);
+			if (teamToCheck == null) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This team is not exist."), personaId);
+				return null;
+			}
+			if (teamToCheck.getPlayersCount() >= 1) {
+				List<PersonaEntity> listOfProfiles = teamToCheck.getListOfTeammates();
+				for (PersonaEntity personaEntityTeam : listOfProfiles) {
+					teamPlayers = teamPlayers.concat(personaEntityTeam.getName() + " ");
+				}
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Team players: " + teamPlayers), personaId);
+				return null;
+			}
+			return null;
+		}
+		if (displayName.contains("/TEAMENTRY ")) {
+			teamsActionInit = true;
+			TeamsEntity leaderTeam = personaSender.getTeam();
+			String entryValue = displayName.replaceFirst("/TEAMENTRY ", "");
+			boolean openEntryBool = false;
+			if (entryValue.contentEquals("PUBLIC")) {
+				openEntryBool = true;
+			}
+			if (entryValue.contentEquals("PRIVATE")) {
+				openEntryBool = false;
+			}
+			if (leaderTeam == null) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Get a team first..."), personaId);
+				return null;
+			}
+			if (leaderTeam.getLeader() != personaSender) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You're is not a team leader."), personaId);
+				return null;
+			}
+			if (leaderTeam.getOpenEntry() == openEntryBool) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Team already has that status."), personaId);
+				return null;
+			}
+			if (entryValue.contentEquals("PUBLIC") || entryValue.contentEquals("PRIVATE")) {
+				teamsBO.teamEntryIG(openEntryBool, leaderTeam);
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Team's entry rule has changed"), personaId);
+				return null;
+			}
+			return null;
+		}
+		// default add-a-friend interaction
+		if (!teamsActionInit) {
+			PersonaEntity personaInvited = personaDAO.findByName(displayName);
+			if (personaSender == null || personaInvited == null) {
+				return null;
+			}
+			if (personaSender.getPersonaId() == personaInvited.getPersonaId()) {
+				return null;
+			}
+			FriendListEntity friendListEntity = friendListDAO.findByOwnerIdAndFriendPersona(personaSender.getUser().getId(), personaInvited.getPersonaId());
+			if (friendListEntity != null) {
+				return null;
+			}
+			XMPP_FriendPersonaType friendPersonaType = new XMPP_FriendPersonaType();
+			friendPersonaType.setIconIndex(personaSender.getIconIndex());
+			friendPersonaType.setLevel(personaSender.getLevel());
+			friendPersonaType.setName(personaSender.getName());
+			friendPersonaType.setOriginalName(personaSender.getName());
+			friendPersonaType.setPersonaId(personaSender.getPersonaId());
+			friendPersonaType.setPresence(3);
+			friendPersonaType.setUserId(personaSender.getUser().getId());
 
-		XMPP_FriendPersonaType friendPersonaType = new XMPP_FriendPersonaType();
-		friendPersonaType.setIconIndex(personaSender.getIconIndex());
-		friendPersonaType.setLevel(personaSender.getLevel());
-		friendPersonaType.setName(personaSender.getName());
-		friendPersonaType.setOriginalName(personaSender.getName());
-		friendPersonaType.setPersonaId(personaSender.getPersonaId());
-		friendPersonaType.setPresence(3);
-		friendPersonaType.setUserId(personaSender.getUser().getId());
+			XmppFriend xmppFriend = new XmppFriend(personaInvited.getPersonaId(), openFireSoapBoxCli);
+			xmppFriend.sendFriendRequest(friendPersonaType);
 
-		XmppFriend xmppFriend = new XmppFriend(personaInvited.getPersonaId(), openFireSoapBoxCli);
-		xmppFriend.sendFriendRequest(friendPersonaType);
+			// Insert db record for invited player
+			FriendListEntity friendListInsert = new FriendListEntity();
+			friendListInsert.setUserOwnerId(personaInvited.getUser().getId());
+			friendListInsert.setUserId(personaSender.getUser().getId());
+			friendListInsert.setPersonaId(personaSender.getPersonaId());
+			friendListInsert.setIsAccepted(false);
+			friendListDAO.insert(friendListInsert);
 
-		// Insert db record for invited player
-		FriendListEntity friendListInsert = new FriendListEntity();
-		friendListInsert.setUserOwnerId(personaInvited.getUser().getId());
-		friendListInsert.setUserId(personaSender.getUser().getId());
-		friendListInsert.setPersonaId(personaSender.getPersonaId());
-		friendListInsert.setIsAccepted(false);
-		friendListDAO.insert(friendListInsert);
+			FriendPersona friendPersona = new FriendPersona();
+			friendPersona.setIconIndex(personaInvited.getIconIndex());
+			friendPersona.setLevel(personaInvited.getLevel());
+			friendPersona.setName(personaInvited.getName());
+			friendPersona.setOriginalName(personaInvited.getName());
+			friendPersona.setPersonaId(personaInvited.getPersonaId());
+			friendPersona.setPresence(0);
+			friendPersona.setSocialNetwork(0);
+			friendPersona.setUserId(personaInvited.getUser().getId());
 
-		FriendPersona friendPersona = new FriendPersona();
-		friendPersona.setIconIndex(personaInvited.getIconIndex());
-		friendPersona.setLevel(personaInvited.getLevel());
-		friendPersona.setName(personaInvited.getName());
-		friendPersona.setOriginalName(personaInvited.getName());
-		friendPersona.setPersonaId(personaInvited.getPersonaId());
-		friendPersona.setPresence(0);
-		friendPersona.setSocialNetwork(0);
-		friendPersona.setUserId(personaInvited.getUser().getId());
-
-		FriendResult friendResult = new FriendResult();
-		friendResult.setPersona(friendPersona);
-		friendResult.setResult(0);
-		return friendResult;
+			FriendResult friendResult = new FriendResult();
+			friendResult.setPersona(friendPersona);
+			friendResult.setResult(0);
+			return friendResult;
+		}
+		return null;
 	}
 
 	public PersonaBase sendResponseFriendRequest(Long personaId, Long friendPersonaId, int resolution) {

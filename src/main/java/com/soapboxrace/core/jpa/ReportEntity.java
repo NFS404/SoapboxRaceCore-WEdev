@@ -4,10 +4,17 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "REPORT")
+@NamedQueries({ @NamedQuery(name = "ReportEntity.findTeamInvite", //
+		query = "SELECT obj FROM ReportEntity obj WHERE obj.personaId = :personaId AND obj.abuserPersonaId = :abuserPersonaId AND obj.description = '/teaminvite'"),
+		@NamedQuery(name = "ReportEntity.deleteTeamInvite", //
+		query = "DELETE FROM ReportEntity obj WHERE obj.personaId = :personaId AND obj.abuserPersonaId = :abuserPersonaId AND obj.description = '/teaminvite'") //
+})
 public class ReportEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

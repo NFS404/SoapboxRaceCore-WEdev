@@ -2,6 +2,7 @@
 package com.soapboxrace.core.jpa;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -35,6 +37,9 @@ public class TeamsEntity {
 	@ManyToOne
 	@JoinColumn(name = "LEADERID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "TEAMS_PERSONA_FK"))
 	private PersonaEntity persona;
+	
+	@OneToMany(mappedBy = "team", targetEntity = PersonaEntity.class)
+	private List<PersonaEntity> listOfTeammates;
 
 	@Column(name = "created")
 	private LocalDateTime created;
@@ -71,6 +76,10 @@ public class TeamsEntity {
 		this.teamId = teamId;
 	}
 
+	public List<PersonaEntity> getListOfTeammates() {
+		return listOfTeammates;
+	}
+	
 	public PersonaEntity getLeader() {
 		return persona;
 	}

@@ -1,9 +1,6 @@
 package com.soapboxrace.core.bo;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
@@ -12,20 +9,14 @@ import javax.mail.Session;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import com.soapboxrace.core.dao.AchievementRankDAO;
-import com.soapboxrace.core.dao.AchievementStateDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
-import com.soapboxrace.core.dao.PromoCodeDAO;
 import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.UserDAO;
-import com.soapboxrace.core.jpa.AchievementRankEntity;
-import com.soapboxrace.core.jpa.AchievementStateEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
-import com.soapboxrace.core.jpa.PromoCodeEntity;
 import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.jpa.UserEntity;
-import com.soapboxrace.jaxb.http.AchievementState;
-import com.soapboxrace.jaxb.http.ProfileData;
+import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppChat;
 
 @Stateless
 public class TeamsBO {
@@ -41,6 +32,9 @@ public class TeamsBO {
 	
 	@EJB
 	private ParameterBO parameterBO;
+	
+	@EJB
+	private OpenFireSoapBoxCli openFireSoapBoxCli;
 
 	@Resource(mappedName = "java:jboss/mail/Gmail")
 	private Session mailSession;
@@ -79,6 +73,29 @@ public class TeamsBO {
 		teamsDao.update(teamsEntity);
 		System.out.println("Player " + nickname + " has joined to team " + teamName);
 		return "DONE: you're joined to team " + teamName;
+	}
+	
+	// Teams In-Game interactions
+	public void teamJoinIG(PersonaEntity personaEntity, TeamsEntity teamsEntity) {
+		personaEntity.setTeam(teamsEntity);
+		teamsEntity.setPlayersCount(teamsEntity.getPlayersCount() + 1);
+		personaDao.update(personaEntity);
+		teamsDao.update(teamsEntity);
+		System.out.println("joined to team");
+	}
+	
+	public void teamLeaveIG(PersonaEntity personaEntity, TeamsEntity teamsEntity) {
+		personaEntity.setTeam(null);
+		teamsEntity.setPlayersCount(teamsEntity.getPlayersCount() - 1);
+		personaDao.update(personaEntity);
+		teamsDao.update(teamsEntity);
+		System.out.println("has leave team or kicked");
+	}
+	
+	public void teamEntryIG(boolean openEntryValue, TeamsEntity teamsEntity) {
+		teamsEntity.setOpenEntry(openEntryValue);
+		teamsDao.update(teamsEntity);
+		System.out.println("team changed their entry rule");
 	}
 	
 	public String teamCreate(String teamName, String leaderName, boolean openEntry) {

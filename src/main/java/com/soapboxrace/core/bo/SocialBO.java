@@ -8,6 +8,8 @@ import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.ReportDAO;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ReportEntity;
+import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppChat;
 
 @Stateless
 public class SocialBO {
@@ -21,6 +23,9 @@ public class SocialBO {
 	@EJB
 	private DiscordWebhook discordBot;
 	
+	@EJB
+	private OpenFireSoapBoxCli openFireSoapBoxCli;
+	
 	public void sendReport(Long personaId, Long abuserPersonaId, Integer petitionType, String description, Integer customCarID, Integer chatMinutes, Long hacksDetected) {
 		ReportEntity reportEntity = new ReportEntity();
 		PersonaEntity personaEntityAbuser = personaDao.findById(abuserPersonaId);
@@ -30,6 +35,10 @@ public class SocialBO {
 		reportEntity.setChatMinutes(chatMinutes);
 		reportEntity.setCustomCarID(customCarID);
 		reportEntity.setDescription(description);
+		if (description.startsWith("/teaminvite") && personaEntitySender.getTeam() != null) {
+			description = "/teaminvite";
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Team invite has been sent."), personaId);
+		}
 		reportEntity.setPersonaId(personaId);
 		reportEntity.setPetitionType(petitionType);
 		reportEntity.setHacksDetected(hacksDetected);
