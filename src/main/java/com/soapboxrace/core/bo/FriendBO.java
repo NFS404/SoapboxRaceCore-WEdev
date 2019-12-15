@@ -143,9 +143,6 @@ public class FriendBO {
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This team is full."), personaId);
 				return null;
 			}
-			else {
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You're joined to team!"), personaId);
-			}
 			teamsBO.teamJoinIG(personaSender, teamToJoin);
 			return null;
 		}
@@ -159,9 +156,6 @@ public class FriendBO {
 			if (playerTeamLeave.getLeader() == personaSender) {
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You can't leave your own team."), personaId);
 				return null;
-			}
-			else {
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You left this team."), personaId);
 			}
 			teamsBO.teamLeaveIG(personaSender, playerTeamLeave);
 			return null;

@@ -8,6 +8,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
+import com.soapboxrace.core.jpa.ReportEntity;
 import com.soapboxrace.core.jpa.TeamsEntity;
 
 @Stateless
@@ -20,6 +21,11 @@ public class TeamsDAO extends BaseDAO<TeamsEntity> {
 
 	public TeamsEntity findById(Long id) {
 		return entityManager.find(TeamsEntity.class, id);
+	}
+	
+	public List<TeamsEntity> findAllTeams() {
+		TypedQuery<TeamsEntity> query = entityManager.createNamedQuery("TeamsEntity.findAllTeams", TeamsEntity.class);
+		return query.getResultList();
 	}
 	
 	public TeamsEntity findByName(String teamName) {

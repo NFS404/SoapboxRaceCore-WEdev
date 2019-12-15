@@ -1,17 +1,21 @@
 package com.soapboxrace.core.bo;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 import javax.mail.Session;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.UserDAO;
+import com.soapboxrace.core.jpa.FriendListEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.jpa.UserEntity;
@@ -35,6 +39,9 @@ public class TeamsBO {
 	
 	@EJB
 	private OpenFireSoapBoxCli openFireSoapBoxCli;
+	
+	@EJB
+	private DiscordWebhook discordBot;
 
 	@Resource(mappedName = "java:jboss/mail/Gmail")
 	private Session mailSession;
@@ -77,19 +84,29 @@ public class TeamsBO {
 	
 	// Teams In-Game interactions
 	public void teamJoinIG(PersonaEntity personaEntity, TeamsEntity teamsEntity) {
+		String playerName = personaEntity.getName();
+		String teamName = teamsEntity.getTeamName();
 		personaEntity.setTeam(teamsEntity);
 		teamsEntity.setPlayersCount(teamsEntity.getPlayersCount() + 1);
 		personaDao.update(personaEntity);
 		teamsDao.update(teamsEntity);
-		System.out.println("joined to team");
+		String message = ":heavy_minus_sign:"
+        		+ "\n:inbox_tray: **|** Nгрок **" + playerName + "** вступает в команду **" + teamName + "**."
+        		+ "\n:inbox_tray: **|** Player **" + playerName + "** has joined to team **" + teamName + "**.";
+		discordBot.sendMessage(message, true);
 	}
 	
 	public void teamLeaveIG(PersonaEntity personaEntity, TeamsEntity teamsEntity) {
+		String playerName = personaEntity.getName();
+		String teamName = teamsEntity.getTeamName();
 		personaEntity.setTeam(null);
 		teamsEntity.setPlayersCount(teamsEntity.getPlayersCount() - 1);
 		personaDao.update(personaEntity);
 		teamsDao.update(teamsEntity);
-		System.out.println("has leave team or kicked");
+		String message = ":heavy_minus_sign:"
+        		+ "\n:outbox_tray: **|** Nгрок **" + playerName + "** покинул команду **" + teamName + "**."
+        		+ "\n:outbox_tray: **|** Player **" + playerName + "** left the team **" + teamName + "**.";
+		discordBot.sendMessage(message, true);
 	}
 	
 	public void teamEntryIG(boolean openEntryValue, TeamsEntity teamsEntity) {
@@ -117,6 +134,7 @@ public class TeamsBO {
 		TeamsEntity teamsEntityNew = new TeamsEntity();
 		teamsEntityNew.setTeamName(teamName);
 		teamsEntityNew.setLeader(personaEntityLeader);
+		String teamLeaderNickname = personaEntityLeader.getName();
 		teamsEntityNew.setOpenEntry(openEntry);
 		teamsEntityNew.setPlayersCount(1);
 		teamsEntityNew.setActive(true);
@@ -124,8 +142,30 @@ public class TeamsBO {
 		personaEntityLeader.setTeam(teamsEntityNew);
 		personaDao.update(personaEntityLeader);
 		teamsDao.insert(teamsEntityNew);
-		System.out.println("New team " + teamName + " is created");
+		String message = ":heavy_minus_sign:"
+        		+ "\n:newspaper: **|** Создана новая команда: **" + teamName + "**, лидер: **" + teamLeaderNickname + "**."
+        		+ "\n:newspaper: **|** New team is created: **" + teamName + "**, leader is: **" + teamLeaderNickname + "**.";
+		discordBot.sendMessage(message, true);
 		return "DONE: new team " + teamName + " is created";
+	}
+	
+	// Output teams leaderboard every hour into Discord
+	@Schedule(hour = "*/1", persistent = false)
+	public void teamStatsDiscord() {
+		if (parameterBO.getBoolParam("DISCORD_ONLINECOUNT")) {
+			List<TeamsEntity> teamsList = teamsDao.findAllTeams();
+			String messageAppend = "";
+			for (TeamsEntity team : teamsList) {
+				messageAppend = messageAppend.concat("\n:busts_in_silhouette: **" + team.getTeamName() + "** - **" +
+			team.getPlayersCount() + "P** - " + team.getTeamPoints() + ":small_orange_diamond:");
+			}
+			String message = ":heavy_minus_sign:"
+	        		+ "\n:city_sunset: **|** Season 1 (*19.12.2019 : 19.01.2020*)"
+	        		+ "\n:military_medal: **|** Текущая статистика команд / Current team stats:\n"
+	        		+ messageAppend;
+			
+			discordBot.sendMessage(message, true);
+		}
 	}
 
 	private UserEntity checkLogin(String email, String password) {

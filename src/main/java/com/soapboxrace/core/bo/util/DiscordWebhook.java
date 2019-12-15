@@ -37,4 +37,8 @@ public class DiscordWebhook {
 	public void sendMessage(String message) {
 		sendMessage(message, parameterBO.getStrParam("DISCORD_WEBHOOK_DEFAULTURL"), parameterBO.getStrParam("DISCORD_WEBHOOK_DEFAULTNAME"));
 	}
+	
+	public void sendMessage(String message, boolean teamAction) {
+		sendMessage(message, parameterBO.getStrParam("DISCORD_WEBHOOK_TEAMSURL"), parameterBO.getStrParam("DISCORD_WEBHOOK_DEFAULTNAME"));
+	}
 }

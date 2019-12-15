@@ -3,6 +3,7 @@ package com.soapboxrace.core.bo;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
@@ -60,6 +61,9 @@ public class EventResultRouteBO {
 	
 	@EJB
 	private ParameterBO parameterBO;
+	
+	@EJB
+	private DiscordWebhook discordBot;
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -127,9 +131,17 @@ public class EventResultRouteBO {
 				if ((racerTeamId == team1 || racerTeamId == team2) && defaultCar.getCustomCar().getCarClassHash() == targetCarClass && teamWinner == null) {
 					eventSessionEntity.setTeamWinner(racerTeamId);
 					eventSessionDao.update(eventSessionEntity);
-					
+					String winnerPlayerName = personaEntity.getName();
+					String winnerTeamName = racerTeamEntity.getTeamName();
 					racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
-					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + racerTeamEntity.getTeamName() + " has won this event! +1P, total: " + racerTeamEntity.getTeamPoints()), activePersonaId);
+					teamsDAO.update(racerTeamEntity);
+					int winnerTeamPointsFinal = racerTeamEntity.getTeamPoints();
+					
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeamName + " has won this event! +1P, total: " + winnerTeamPointsFinal), activePersonaId);
+					String message = ":heavy_minus_sign:"
+			        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде (*итого очков: " + winnerTeamPointsFinal + "*)."
+			        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race (*points: " + winnerTeamPointsFinal + "*).";
+					discordBot.sendMessage(message, true);
 					System.out.println("racerTeamWins TEST");
 				}
 

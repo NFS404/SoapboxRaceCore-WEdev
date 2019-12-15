@@ -20,7 +20,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "TEAMS")
 @NamedQueries({ //
-		@NamedQuery(name = "TeamsEntity.findByName", query = "SELECT obj FROM TeamsEntity obj WHERE obj.teamName = :teamName") //
+		@NamedQuery(name = "TeamsEntity.findByName", query = "SELECT obj FROM TeamsEntity obj WHERE obj.teamName = :teamName"),
+		@NamedQuery(name = "TeamsEntity.findAllTeams", query = "SELECT obj FROM TeamsEntity obj WHERE obj.active = true ORDER BY obj.teamPoints DESC") //
 })
 public class TeamsEntity {
 
