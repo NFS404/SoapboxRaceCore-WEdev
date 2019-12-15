@@ -130,6 +130,7 @@ public class EventResultRouteBO {
 		sendXmppPacket(eventSessionId, activePersonaId, routeArbitrationPacket);
 		
 		// The fastest racer of his team will bring a win on this race, depending on opponent's teams position - Hypercycle
+		// carClass 0 = open races for all classes
 		int targetCarClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
 		TeamsEntity racerTeamEntity = personaEntity.getTeam();
 		if (racerTeamEntity != null && eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check()) {
@@ -138,7 +139,7 @@ public class EventResultRouteBO {
 			Long team2 = eventSessionEntity.getTeam2Id();
 			Long teamWinner = eventSessionEntity.getTeamWinner();
 			OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);					
-				if ((racerTeamId == team1 || racerTeamId == team2) && defaultCar.getCustomCar().getCarClassHash() == targetCarClass && teamWinner == null) {
+				if ((racerTeamId == team1 || racerTeamId == team2) && (defaultCar.getCustomCar().getCarClassHash() == targetCarClass || targetCarClass == 0) && teamWinner == null) {
 					eventSessionEntity.setTeamWinner(racerTeamId);
 					eventSessionDao.update(eventSessionEntity);
 					String winnerPlayerName = personaEntity.getName();
