@@ -316,6 +316,7 @@ public class LobbyBO {
 		lobbyInfoType.setLobbyId(lobbyInviteId);
 		
 		// 2 teams can be inside of one race - Hypercycle
+		// FIXME team 1 almost never knows it's opponent + team can't exit - no 'exit' event for team
 		boolean teamIsAssigned = false;
 		Long teamRacerPersona = personaId;
 		PersonaEntity personaEntityRacer = personaDao.findById(teamRacerPersona);

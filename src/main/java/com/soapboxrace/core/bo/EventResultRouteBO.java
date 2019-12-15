@@ -101,6 +101,16 @@ public class EventResultRouteBO {
 			routeEntrantResult.setPersonaId(racer.getPersonaId());
 			routeEntrantResult.setRanking(racer.getRank());
 			routeEntrantResult.setTopSpeed(racer.getTopSpeed());
+			if (eventSessionEntity.getTeam1Id() != null) {
+				if (!eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam1Id() == personaDAO.findById(racer.getPersonaId()).getTeam().getTeamId()) {
+					eventSessionEntity.setTeam1Check(true);
+					eventSessionDao.update(eventSessionEntity);
+				}
+				if (!eventSessionEntity.getTeam2Check() && eventSessionEntity.getTeam2Id() == personaDAO.findById(racer.getPersonaId()).getTeam().getTeamId()) {
+					eventSessionEntity.setTeam2Check(true);
+					eventSessionDao.update(eventSessionEntity);
+				}
+			}
 			arrayOfRouteEntrantResult.getRouteEntrantResult().add(routeEntrantResult);
 		}
 
@@ -122,7 +132,7 @@ public class EventResultRouteBO {
 		// The fastest racer of his team will bring a win on this race, depending on opponent's teams position - Hypercycle
 		int targetCarClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
 		TeamsEntity racerTeamEntity = personaEntity.getTeam();
-		if (racerTeamEntity != null) {
+		if (racerTeamEntity != null && eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check()) {
 			Long racerTeamId = racerTeamEntity.getTeamId();
 			Long team1 = eventSessionEntity.getTeam1Id();
 			Long team2 = eventSessionEntity.getTeam2Id();

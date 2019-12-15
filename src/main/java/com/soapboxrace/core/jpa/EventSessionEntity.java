@@ -37,6 +37,12 @@ public class EventSessionEntity {
 	
 	@Column(name = "TEAMWINNER")
 	private Long teamWinner;
+	
+	@Column(name = "TEAM1CHECK")
+	private boolean team1Check;
+	
+	@Column(name = "TEAM2CHECK")
+	private boolean team2Check;
 
 	public Long getId() {
 		return id;
@@ -92,5 +98,21 @@ public class EventSessionEntity {
 
 	public void setTeamWinner(Long teamWinner) {
 		this.teamWinner = teamWinner;
+	}
+	
+	public boolean getTeam1Check() {
+		return team1Check;
+	}
+
+	public void setTeam1Check(boolean team1Check) {
+		this.team1Check = team1Check;
+	}
+	
+	public boolean getTeam2Check() {
+		return team2Check;
+	}
+
+	public void setTeam2Check(boolean team2Check) {
+		this.team2Check = team2Check;
 	}
 }
