@@ -101,7 +101,7 @@ public class EventResultRouteBO {
 			routeEntrantResult.setPersonaId(racer.getPersonaId());
 			routeEntrantResult.setRanking(racer.getRank());
 			routeEntrantResult.setTopSpeed(racer.getTopSpeed());
-			if (eventSessionEntity.getTeam1Id() != null) {
+			if (eventSessionEntity.getTeam1Id() != null && eventSessionEntity.getTeam2Id() != null) {
 				if (!eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam1Id() == personaDAO.findById(racer.getPersonaId()).getTeam().getTeamId()) {
 					eventSessionEntity.setTeam1Check(true);
 					eventSessionDao.update(eventSessionEntity);
