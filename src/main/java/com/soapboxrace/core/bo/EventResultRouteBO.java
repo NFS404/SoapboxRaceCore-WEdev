@@ -101,12 +101,14 @@ public class EventResultRouteBO {
 			routeEntrantResult.setPersonaId(racer.getPersonaId());
 			routeEntrantResult.setRanking(racer.getRank());
 			routeEntrantResult.setTopSpeed(racer.getTopSpeed());
-			if (eventSessionEntity.getTeam1Id() != null && eventSessionEntity.getTeam2Id() != null) {
-				if (!eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam1Id() == personaDAO.findById(racer.getPersonaId()).getTeam().getTeamId()) {
+			System.out.println("TEST Team1id = " + eventSessionEntity.getTeam1Id() + ", TEST team2id = " + eventSessionEntity.getTeam2Id());
+			Long playerTeamIdCheck = personaDAO.findById(racer.getPersonaId()).getTeam().getTeamId();
+			if (eventSessionEntity.getTeam1Id() != null && eventSessionEntity.getTeam2Id() != null && playerTeamIdCheck != null) {
+				if (!eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam1Id() == playerTeamIdCheck) {
 					eventSessionEntity.setTeam1Check(true);
 					eventSessionDao.update(eventSessionEntity);
 				}
-				if (!eventSessionEntity.getTeam2Check() && eventSessionEntity.getTeam2Id() == personaDAO.findById(racer.getPersonaId()).getTeam().getTeamId()) {
+				if (!eventSessionEntity.getTeam2Check() && eventSessionEntity.getTeam2Id() == playerTeamIdCheck) {
 					eventSessionEntity.setTeam2Check(true);
 					eventSessionDao.update(eventSessionEntity);
 				}
@@ -150,16 +152,14 @@ public class EventResultRouteBO {
 					
 					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeamName + " has won this event! +1P, total: " + winnerTeamPointsFinal), activePersonaId);
 					String message = ":heavy_minus_sign:"
-			        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде (*итого очков: " + winnerTeamPointsFinal + "*)."
-			        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race (*points: " + winnerTeamPointsFinal + "*).";
+			        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде (*итого очков: " + winnerTeamPointsFinal + ", сессия " + eventSessionEntity.getId() + "*)."
+			        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race (*points: " + winnerTeamPointsFinal + ", session " + eventSessionEntity.getId() + "*).";
 					discordBot.sendMessage(message, true);
-					System.out.println("racerTeamWins TEST");
 				}
 
 			if (teamWinner != null && teamWinner != racerTeamId) {
 				TeamsEntity winnerTeam = teamsDAO.findById(teamWinner);
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeam.getTeamName() + " has won this event! +1P, total: " + winnerTeam.getTeamPoints()), activePersonaId);
-				System.out.println("racerTeamFails TEST");
 			}
 		}
 		return routeEventResult;

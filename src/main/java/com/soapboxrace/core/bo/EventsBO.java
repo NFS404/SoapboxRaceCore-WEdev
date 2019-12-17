@@ -7,12 +7,17 @@ import java.util.Random;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.RewardVO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.TreasureHuntDAO;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.SkillModRewardType;
+import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.jpa.TreasureHuntEntity;
+import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.Accolades;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
 import com.soapboxrace.jaxb.http.ArrayOfLuckyDrawBox;
@@ -44,6 +49,15 @@ public class EventsBO {
 
 	@EJB
 	private AchievementsBO achievementsBO;
+	
+	@EJB
+	private TeamsDAO teamsDAO;
+	
+	@EJB
+	private OpenFireSoapBoxCli openFireSoapBoxCli;
+	
+	@EJB
+	private DiscordWebhook discordBot;
 
 	public TreasureHuntEventSession getTreasureHuntEventSession(Long activePersonaId) {
 		TreasureHuntEntity treasureHuntEntity = treasureHuntDao.findById(activePersonaId);
@@ -104,6 +118,20 @@ public class EventsBO {
 		treasureHuntEntity.setCoinsCollected(2147483647);
 		treasureHuntEntity.setNumCoins(0);
 		treasureHuntDao.update(treasureHuntEntity);
+		
+		PersonaEntity playerEntity = personaDao.findById(activePersonaId);
+		TeamsEntity racerTeamEntity = playerEntity.getTeam();
+		racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
+		int winnerTeamPointsFinal = racerTeamEntity.getTeamPoints();
+		String winnerPlayerName = playerEntity.getName();
+		String winnerTeamName = racerTeamEntity.getTeamName();
+		teamsDAO.update(racerTeamEntity);
+		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You're complete a daily Treasure Hunt! +1P, total: " + winnerTeamPointsFinal), activePersonaId);
+		String message = ":heavy_minus_sign:"
+        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** выполнил ежедневный сбор алмазов! Его команда **" + winnerTeamName + "** получает **1** балл (*итого очков: " + winnerTeamPointsFinal + "*)."
+        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** has completed a daily Treasure Hunt! His team **" + winnerTeamName + "** got a **1** point (*points: " + winnerTeamPointsFinal + "*).";
+		discordBot.sendMessage(message, true);
+		
 		return MarshalXML.marshal(getTreasureHuntAccolades(activePersonaId, treasureHuntEntity));
 	}
 
