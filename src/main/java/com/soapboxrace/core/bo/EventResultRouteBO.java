@@ -102,15 +102,18 @@ public class EventResultRouteBO {
 			routeEntrantResult.setRanking(racer.getRank());
 			routeEntrantResult.setTopSpeed(racer.getTopSpeed());
 			System.out.println("TEST Team1id = " + eventSessionEntity.getTeam1Id() + ", TEST team2id = " + eventSessionEntity.getTeam2Id());
-			Long playerTeamIdCheck = personaDAO.findById(racer.getPersonaId()).getTeam().getTeamId();
-			if (eventSessionEntity.getTeam1Id() != null && eventSessionEntity.getTeam2Id() != null && playerTeamIdCheck != null) {
-				if (!eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam1Id() == playerTeamIdCheck) {
-					eventSessionEntity.setTeam1Check(true);
-					eventSessionDao.update(eventSessionEntity);
-				}
-				if (!eventSessionEntity.getTeam2Check() && eventSessionEntity.getTeam2Id() == playerTeamIdCheck) {
-					eventSessionEntity.setTeam2Check(true);
-					eventSessionDao.update(eventSessionEntity);
+			TeamsEntity teamsEntityTest = personaDAO.findById(racer.getPersonaId()).getTeam();
+			if (teamsEntityTest != null) {
+				Long playerTeamIdCheck = teamsEntityTest.getTeamId();
+				if (eventSessionEntity.getTeam1Id() != null && eventSessionEntity.getTeam2Id() != null && playerTeamIdCheck != null) {
+					if (!eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam1Id() == playerTeamIdCheck) {
+						eventSessionEntity.setTeam1Check(true);
+						eventSessionDao.update(eventSessionEntity);
+					}
+					if (!eventSessionEntity.getTeam2Check() && eventSessionEntity.getTeam2Id() == playerTeamIdCheck) {
+						eventSessionEntity.setTeam2Check(true);
+						eventSessionDao.update(eventSessionEntity);
+					}
 				}
 			}
 			arrayOfRouteEntrantResult.getRouteEntrantResult().add(routeEntrantResult);

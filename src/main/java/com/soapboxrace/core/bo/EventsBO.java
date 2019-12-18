@@ -122,16 +122,18 @@ public class EventsBO {
 		if (!isBroken) {
 			PersonaEntity playerEntity = personaDao.findById(activePersonaId);
 			TeamsEntity racerTeamEntity = playerEntity.getTeam();
-			racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
-			int winnerTeamPointsFinal = racerTeamEntity.getTeamPoints();
-			String winnerPlayerName = playerEntity.getName();
-			String winnerTeamName = racerTeamEntity.getTeamName();
-			teamsDAO.update(racerTeamEntity);
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You're complete a daily Treasure Hunt! +1P, total: " + winnerTeamPointsFinal), activePersonaId);
-			String message = ":heavy_minus_sign:"
-	        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** выполнил ежедневный сбор алмазов! Его команда **" + winnerTeamName + "** получает **1** балл (*итого очков: " + winnerTeamPointsFinal + "*)."
-	        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** has completed a daily Treasure Hunt! His team **" + winnerTeamName + "** got a **1** point (*points: " + winnerTeamPointsFinal + "*).";
-			discordBot.sendMessage(message, true);
+			if (racerTeamEntity != null) {
+				racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
+				int winnerTeamPointsFinal = racerTeamEntity.getTeamPoints();
+				String winnerPlayerName = playerEntity.getName();
+				String winnerTeamName = racerTeamEntity.getTeamName();
+				teamsDAO.update(racerTeamEntity);
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You're complete a daily Treasure Hunt! +1P, total: " + winnerTeamPointsFinal), activePersonaId);
+				String message = ":heavy_minus_sign:"
+		        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** выполнил ежедневный сбор алмазов! Его команда **" + winnerTeamName + "** получает **1** балл (*итого очков: " + winnerTeamPointsFinal + "*)."
+		        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** has completed a daily Treasure Hunt! His team **" + winnerTeamName + "** got a **1** point (*points: " + winnerTeamPointsFinal + "*).";
+				discordBot.sendMessage(message, true);
+			}
 		}
 		
 		return MarshalXML.marshal(getTreasureHuntAccolades(activePersonaId, treasureHuntEntity));
