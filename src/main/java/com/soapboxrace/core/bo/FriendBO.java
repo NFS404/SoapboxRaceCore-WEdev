@@ -122,7 +122,7 @@ public class FriendBO {
 			if (!teamToJoin.getOpenEntry()) {
 				Long teamleaderId = teamToJoin.getLeader().getPersonaId();
 				List<ReportEntity> teamInviteCheck = reportDAO.findTeamInvite(teamleaderId, personaId);
-				if (!teamInviteCheck.isEmpty()) {
+				if (!teamInviteCheck.isEmpty() && teamToJoin.getPlayersCount() < 8) {
 					teamsBO.teamJoinIG(personaSender, teamToJoin);
 					reportDAO.deleteTeamInvite(teamleaderId, personaId);
 //					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You're joined to team!"), personaId);
