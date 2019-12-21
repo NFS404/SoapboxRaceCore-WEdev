@@ -45,6 +45,12 @@ public class EventDataDAO extends BaseDAO<EventDataEntity> {
 		query.setParameter("eventSessionId", eventSessionId);
 		return query.getResultList();
 	}
+	
+	public List<EventDataEntity> getRacersRanked(Long eventSessionId) {
+		TypedQuery<EventDataEntity> query = entityManager.createNamedQuery("EventDataEntity.getRacersRanked", EventDataEntity.class);
+		query.setParameter("eventSessionId", eventSessionId);
+		return query.getResultList();
+	}
 		
 	public EventDataEntity findByPersonaAndEventSessionId(Long personaId, Long eventSessionId) {
 		TypedQuery<EventDataEntity> query = entityManager.createNamedQuery("EventDataEntity.findByPersonaAndEventSessionId", EventDataEntity.class);

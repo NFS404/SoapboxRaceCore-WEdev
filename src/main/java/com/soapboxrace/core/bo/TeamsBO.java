@@ -12,15 +12,20 @@ import javax.mail.Session;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.dao.EventDataDAO;
+import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.UserDAO;
+import com.soapboxrace.core.jpa.EventDataEntity;
+import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.FriendListEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
+import com.soapboxrace.jaxb.http.OwnedCarTrans;
 
 @Stateless
 public class TeamsBO {
@@ -38,10 +43,22 @@ public class TeamsBO {
 	private ParameterBO parameterBO;
 	
 	@EJB
+	private EventSessionDAO eventSessionDAO;
+	
+	@EJB
 	private OpenFireSoapBoxCli openFireSoapBoxCli;
 	
 	@EJB
 	private DiscordWebhook discordBot;
+	
+	@EJB
+	private EventDataDAO eventDataDao;
+	
+	@EJB
+	private PersonaBO personaBO;
+	
+	@EJB
+	private EventSessionDAO eventSessionDao;
 
 	@Resource(mappedName = "java:jboss/mail/Gmail")
 	private Session mailSession;
@@ -107,6 +124,73 @@ public class TeamsBO {
         		+ "\n:outbox_tray: **|** Nгрок **" + playerName + "** покинул команду **" + teamName + "**."
         		+ "\n:outbox_tray: **|** Player **" + playerName + "** left the team **" + teamName + "**.";
 		discordBot.sendMessage(message, true);
+	}
+	
+	// Basic 1-ball team race, based on racers ranks (they should be correct on DB...), win 1 min timeout
+	// The fastest racer of his team will bring a win on this race, depending on opponent's teams position - Hypercycle
+	// carClass 0 = open races for all classes
+	public void teamAccoladesBasic(Long eventSessionId) {
+		try {
+			Thread.sleep(60000);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		EventSessionEntity eventSessionEntity = eventSessionDAO.findById(eventSessionId);
+		String message = "";
+//		System.out.println("TEST teamAccoladesBasic sleep, count " + count + ", team1check: " + eventSessionEntity.getTeam1Check() + ", team2check: " + eventSessionEntity.getTeam2Check());
+		
+		if (eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check()) {
+			int targetCarClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
+			Long teamWinner = eventSessionEntity.getTeamWinner();
+			Long team1 = eventSessionEntity.getTeam1Id();
+			Long team2 = eventSessionEntity.getTeam2Id();
+			// Placeholder
+			String winnerPlayerName = "!pls fix!";
+			String winnerTeamName = "!pls fix!";
+			int winnerTeamPoints = 0;
+//			System.out.println("TEST teamAccoladesBasic teamCheck");
+			for (EventDataEntity racer : eventDataDao.getRacersRanked(eventSessionId)) {
+				TeamsEntity racerTeamEntity = personaDao.findById(racer.getPersonaId()).getTeam();
+//				System.out.println("TEST teamAccoladesBasic racers");
+				if (racerTeamEntity != null && teamWinner == null) {
+					Long racerTeamId = racerTeamEntity.getTeamId();
+//					System.out.println("TEST teamAccoladesBasic teamEntityAndWinner");
+					if ((racerTeamId == team1 || racerTeamId == team2)) {
+						OwnedCarTrans defaultCar = personaBO.getDefaultCar(racer.getPersonaId());
+//						System.out.println("TEST teamAccoladesBasic defaultCar");
+						if (defaultCar.getCustomCar().getCarClassHash() == targetCarClass || targetCarClass == 0) {
+							teamWinner = racerTeamId;
+							eventSessionEntity.setTeamWinner(racerTeamId);
+							eventSessionDao.update(eventSessionEntity);
+							
+							PersonaEntity personaEntity = personaDao.findById(racer.getPersonaId());
+							winnerPlayerName = personaEntity.getName();
+							winnerTeamName = racerTeamEntity.getTeamName();
+							racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
+							winnerTeamPoints = racerTeamEntity.getTeamPoints();
+							teamsDao.update(racerTeamEntity);
+//							System.out.println("TEST teamAccoladesBasic teamFinishProper");
+							
+							message = ":heavy_minus_sign:"
+					        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде (*итого очков: " + winnerTeamPoints + ", сессия " + eventSessionEntity.getId() + "*)."
+					        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race (*points: " + winnerTeamPoints + ", session " + eventSessionEntity.getId() + "*).";
+							discordBot.sendMessage(message, true);
+						}
+					}
+				}
+				if (teamWinner != null) {
+//					System.out.println("TEST teamAccoladesBasic teamLoser");
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeamName + " has won this event! +1P, total: " + winnerTeamPoints), racer.getPersonaId());
+			    }
+				if (teamWinner == null) {
+//					System.out.println("TeamAccolades forfeit end for session " + eventSessionId);
+					message = ":heavy_minus_sign:"
+			        		+ "\n:thinking: **|** Никто из игроков команд не финишировал за минуту после одиночного гонщика (*сессия " + eventSessionEntity.getId() + "*)."
+			        		+ "\n:thinking: **|** Nobody from both teams is finished after lone player on 1 minute (*session " + eventSessionEntity.getId() + "*).";
+					discordBot.sendMessage(message, true);
+			    }
+			}
+		}
 	}
 	
 	public void teamEntryIG(boolean openEntryValue, TeamsEntity teamsEntity) {

@@ -18,7 +18,6 @@ import com.soapboxrace.core.xmpp.XmppEvent;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
 import com.soapboxrace.jaxb.http.ArrayOfRouteEntrantResult;
 import com.soapboxrace.jaxb.http.ExitPath;
-import com.soapboxrace.jaxb.http.OwnedCarTrans;
 import com.soapboxrace.jaxb.http.RouteArbitrationPacket;
 import com.soapboxrace.jaxb.http.RouteEntrantResult;
 import com.soapboxrace.jaxb.http.RouteEventResult;
@@ -57,6 +56,9 @@ public class EventResultRouteBO {
 	private TeamsDAO teamsDAO;
 	
 	@EJB
+	private TeamsBO teamsBo;
+	
+	@EJB
 	private PersonaBO personaBO;
 	
 	@EJB
@@ -74,7 +76,13 @@ public class EventResultRouteBO {
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 		achievementsBO.applyRaceAchievements(eventDataEntity, routeArbitrationPacket, personaEntity);
 		achievementsBO.applyAirTimeAchievement(routeArbitrationPacket, personaEntity);
-
+		
+		Long team1id = eventSessionEntity.getTeam1Id();
+		Long team2id = eventSessionEntity.getTeam2Id();
+		boolean preRegTeams = false;
+		if (team1id != null && team2id != null) {
+			preRegTeams = true;
+		}
 		updateEventDataEntity(eventDataEntity, routeArbitrationPacket);
 
 		// RouteArbitrationPacket
@@ -101,16 +109,16 @@ public class EventResultRouteBO {
 			routeEntrantResult.setPersonaId(racer.getPersonaId());
 			routeEntrantResult.setRanking(racer.getRank());
 			routeEntrantResult.setTopSpeed(racer.getTopSpeed());
-			System.out.println("TEST Team1id = " + eventSessionEntity.getTeam1Id() + ", TEST team2id = " + eventSessionEntity.getTeam2Id());
+			// Does both teams are in actual race? This is checking a racers for their teamIds
 			TeamsEntity teamsEntityTest = personaDAO.findById(racer.getPersonaId()).getTeam();
 			if (teamsEntityTest != null) {
 				Long playerTeamIdCheck = teamsEntityTest.getTeamId();
-				if (eventSessionEntity.getTeam1Id() != null && eventSessionEntity.getTeam2Id() != null && playerTeamIdCheck != null) {
-					if (!eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam1Id() == playerTeamIdCheck) {
+				if (preRegTeams && playerTeamIdCheck != null) {
+					if (!eventSessionEntity.getTeam1Check() && team1id == playerTeamIdCheck) {
 						eventSessionEntity.setTeam1Check(true);
 						eventSessionDao.update(eventSessionEntity);
 					}
-					if (!eventSessionEntity.getTeam2Check() && eventSessionEntity.getTeam2Id() == playerTeamIdCheck) {
+					if (!eventSessionEntity.getTeam2Check() && team2id == playerTeamIdCheck) {
 						eventSessionEntity.setTeam2Check(true);
 						eventSessionDao.update(eventSessionEntity);
 					}
@@ -132,39 +140,8 @@ public class EventResultRouteBO {
 		routeEventResult.setInviteLifetimeInMilliseconds(0);
 		routeEventResult.setLobbyInviteId(0);
 		routeEventResult.setPersonaId(activePersonaId);
-		sendXmppPacket(eventSessionId, activePersonaId, routeArbitrationPacket);
+		sendXmppPacket(eventSessionId, activePersonaId, routeArbitrationPacket, preRegTeams);
 		
-		// The fastest racer of his team will bring a win on this race, depending on opponent's teams position - Hypercycle
-		// carClass 0 = open races for all classes
-		int targetCarClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
-		TeamsEntity racerTeamEntity = personaEntity.getTeam();
-		if (racerTeamEntity != null && eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check()) {
-			Long racerTeamId = racerTeamEntity.getTeamId();
-			Long team1 = eventSessionEntity.getTeam1Id();
-			Long team2 = eventSessionEntity.getTeam2Id();
-			Long teamWinner = eventSessionEntity.getTeamWinner();
-			OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);					
-				if ((racerTeamId == team1 || racerTeamId == team2) && (defaultCar.getCustomCar().getCarClassHash() == targetCarClass || targetCarClass == 0) && teamWinner == null) {
-					eventSessionEntity.setTeamWinner(racerTeamId);
-					eventSessionDao.update(eventSessionEntity);
-					String winnerPlayerName = personaEntity.getName();
-					String winnerTeamName = racerTeamEntity.getTeamName();
-					racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
-					teamsDAO.update(racerTeamEntity);
-					int winnerTeamPointsFinal = racerTeamEntity.getTeamPoints();
-					
-					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeamName + " has won this event! +1P, total: " + winnerTeamPointsFinal), activePersonaId);
-					String message = ":heavy_minus_sign:"
-			        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде (*итого очков: " + winnerTeamPointsFinal + ", сессия " + eventSessionEntity.getId() + "*)."
-			        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race (*points: " + winnerTeamPointsFinal + ", session " + eventSessionEntity.getId() + "*).";
-					discordBot.sendMessage(message, true);
-				}
-
-			if (teamWinner != null && teamWinner != racerTeamId) {
-				TeamsEntity winnerTeam = teamsDAO.findById(teamWinner);
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeam.getTeamName() + " has won this event! +1P, total: " + winnerTeam.getTeamPoints()), activePersonaId);
-			}
-		}
 		return routeEventResult;
 	}
 
@@ -177,14 +154,15 @@ public class EventResultRouteBO {
 		eventDataEntity.setRank(arbitrationPacket.getRank());
 	}
 
-	private void sendXmppPacket(Long eventSessionId, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket) {
+	private void sendXmppPacket(Long eventSessionId, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, boolean preRegTeams) {
 		XMPP_RouteEntrantResultType xmppRouteResult = new XMPP_RouteEntrantResultType();
 		xmppRouteResult.setBestLapDurationInMilliseconds(routeArbitrationPacket.getBestLapDurationInMilliseconds());
 		xmppRouteResult.setEventDurationInMilliseconds(routeArbitrationPacket.getEventDurationInMilliseconds());
 		xmppRouteResult.setEventSessionId(eventSessionId);
 		xmppRouteResult.setFinishReason(routeArbitrationPacket.getFinishReason());
 		xmppRouteResult.setPersonaId(activePersonaId);
-		xmppRouteResult.setRanking(routeArbitrationPacket.getRank());
+		int playerRank = routeArbitrationPacket.getRank();
+		xmppRouteResult.setRanking(playerRank);
 		xmppRouteResult.setTopSpeed(routeArbitrationPacket.getTopSpeed());
 
 		XMPP_ResponseTypeRouteEntrantResult routeEntrantResultResponse = new XMPP_ResponseTypeRouteEntrantResult();
@@ -194,10 +172,14 @@ public class EventResultRouteBO {
 			if (!racer.getPersonaId().equals(activePersonaId)) {
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendRaceEnd(routeEntrantResultResponse);
-				if (routeArbitrationPacket.getRank() == 1) {
+				if (playerRank == 1) {
 					xmppEvent.sendEventTimingOut(eventSessionId);
 				}
 			}
+		}
+		// Initiate the final team action check, only if both teams are registered for event
+		if (playerRank == 1 && preRegTeams) {
+			teamsBo.teamAccoladesBasic(eventSessionId);
 		}
 	}
 
