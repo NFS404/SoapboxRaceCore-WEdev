@@ -165,33 +165,41 @@ public class FriendBO {
 			return null;
 		}
 		if (displayName.contains("/TEAMKICK ")) {
+			System.out.println("TeamKick init");
 			teamsActionInit = true;
 			TeamsEntity leaderTeam = personaSender.getTeam();
 			String badTeammateName = displayName.replaceFirst("/TEAMKICK ", "");
 			PersonaEntity badTeammate = personaDAO.findByName(badTeammateName);
 			if (leaderTeam == null) {
+				System.out.println("TeamKick leaderTeam null");
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Get a team first..."), personaId);
 				return null;
 			}
 			if (leaderTeam.getLeader() != personaSender) {
+				System.out.println("TeamKick wrongLeader");
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You're is not a team leader."), personaId);
 				return null;
 			}
-			if (leaderTeam.getLeader() == personaSender) {
+			if (leaderTeam.getLeader() == badTeammate) {
+				System.out.println("TeamKick KickYourself");
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You can't leave your own team."), personaId);
 				return null;
 			}
 			if (badTeammate == null) {
+				System.out.println("TeamKick wrongNick");
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Wrong nickname."), personaId);
 				return null;
 			}
 			if (badTeammate.getTeam() != leaderTeam) {
+				System.out.println("TeamKick wrongPlayerTeam");
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This player is not on your team..."), personaId);
 				return null;
 			}
 			else {
+				System.out.println("TeamKick else");
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Player is no longer on this team."), personaId);
 			}
+			System.out.println("TeamKick leave init");
 			teamsBO.teamLeaveIG(badTeammate, leaderTeam);
 			return null;
 		}
