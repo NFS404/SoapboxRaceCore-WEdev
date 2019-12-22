@@ -322,7 +322,7 @@ public class LobbyBO {
 		Long teamRacerPersona = personaId;
 		PersonaEntity personaEntityRacer = personaDao.findById(teamRacerPersona);
 		TeamsEntity racerTeamEntity = personaEntityRacer.getTeam();
-		if (racerTeamEntity != null) {
+		if (racerTeamEntity != null && racerTeamEntity.getActive()) {
 			int serverCarClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
 			OwnedCarTrans defaultCar = personaBO.getDefaultCar(personaId);
 			int playerCarClass = defaultCar.getCustomCar().getCarClassHash();

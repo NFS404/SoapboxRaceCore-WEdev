@@ -137,6 +137,7 @@ public class TeamsBO {
 		}
 		EventSessionEntity eventSessionEntity = eventSessionDAO.findById(eventSessionId);
 		String message = "";
+		String messageDebug = "";
 //		System.out.println("TEST teamAccoladesBasic sleep, count " + count + ", team1check: " + eventSessionEntity.getTeam1Check() + ", team2check: " + eventSessionEntity.getTeam2Check());
 		
 		if (eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check()) {
@@ -150,7 +151,10 @@ public class TeamsBO {
 			int winnerTeamPoints = 0;
 //			System.out.println("TEST teamAccoladesBasic teamCheck");
 			for (EventDataEntity racer : eventDataDao.getRacersRanked(eventSessionId)) {
-				TeamsEntity racerTeamEntity = personaDao.findById(racer.getPersonaId()).getTeam();
+				PersonaEntity racerEntity = personaDao.findById(racer.getPersonaId());
+				messageDebug = messageDebug.concat(racer.getRank() + " - " + racerEntity.getName() + " - " + racer.getEventDurationInMilliseconds() + " ms \n");
+				
+				TeamsEntity racerTeamEntity = racerEntity.getTeam();
 //				System.out.println("TEST teamAccoladesBasic racers");
 				if (racerTeamEntity != null && teamWinner == null) {
 					Long racerTeamId = racerTeamEntity.getTeamId();
@@ -163,8 +167,7 @@ public class TeamsBO {
 							eventSessionEntity.setTeamWinner(racerTeamId);
 							eventSessionDao.update(eventSessionEntity);
 							
-							PersonaEntity personaEntity = personaDao.findById(racer.getPersonaId());
-							winnerPlayerName = personaEntity.getName();
+							winnerPlayerName = racerEntity.getName();
 							winnerTeamName = racerTeamEntity.getTeamName();
 							racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
 							winnerTeamPoints = racerTeamEntity.getTeamPoints();
@@ -172,21 +175,22 @@ public class TeamsBO {
 //							System.out.println("TEST teamAccoladesBasic teamFinishProper");
 							
 							message = ":heavy_minus_sign:"
-					        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде (*итого очков: " + winnerTeamPoints + ", сессия " + eventSessionEntity.getId() + "*)."
-					        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race (*points: " + winnerTeamPoints + ", session " + eventSessionEntity.getId() + "*).";
+					        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде (*итого очков: " + winnerTeamPoints + ", сессия " + eventSessionId + "*)."
+					        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race (*points: " + winnerTeamPoints + ", session " + eventSessionId + "*)."
+					        		+ "\n" + messageDebug;
 							discordBot.sendMessage(message, true);
 						}
 					}
 				}
 				if (teamWinner != null) {
 //					System.out.println("TEST teamAccoladesBasic teamLoser");
-					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeamName + " has won this event! +1P, total: " + winnerTeamPoints), racer.getPersonaId());
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeamName + " has won the event! +1P, total: " + winnerTeamPoints + ", session " + eventSessionId), racer.getPersonaId());
 			    }
 				if (teamWinner == null) {
 //					System.out.println("TeamAccolades forfeit end for session " + eventSessionId);
 					message = ":heavy_minus_sign:"
-			        		+ "\n:thinking: **|** Никто из игроков команд не финишировал за минуту после одиночного гонщика (*сессия " + eventSessionEntity.getId() + "*)."
-			        		+ "\n:thinking: **|** Nobody from both teams is finished after lone player on 1 minute (*session " + eventSessionEntity.getId() + "*).";
+			        		+ "\n:thinking: **|** Никто из игроков команд не финишировал за минуту после одиночного гонщика (*сессия " + eventSessionId + "*)."
+			        		+ "\n:thinking: **|** Nobody from both teams is finished after lone player on 1 minute (*session " + eventSessionId + "*).";
 					discordBot.sendMessage(message, true);
 			    }
 			}
