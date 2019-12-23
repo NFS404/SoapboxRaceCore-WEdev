@@ -140,7 +140,16 @@ public class EventResultRouteBO {
 		routeEventResult.setInviteLifetimeInMilliseconds(0);
 		routeEventResult.setLobbyInviteId(0);
 		routeEventResult.setPersonaId(activePersonaId);
-		sendXmppPacket(eventSessionId, activePersonaId, routeArbitrationPacket, preRegTeams);
+		sendXmppPacket(eventSessionId, activePersonaId, routeArbitrationPacket);
+		// Initiate the final team action check, only if both teams are registered for event
+		if (eventDataEntity.getRank() == 1 && preRegTeams) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					teamsBo.teamAccoladesBasic(eventSessionId);
+				}
+			}).start();
+		}
 		
 		return routeEventResult;
 	}
@@ -154,7 +163,7 @@ public class EventResultRouteBO {
 		eventDataEntity.setRank(arbitrationPacket.getRank());
 	}
 
-	private void sendXmppPacket(Long eventSessionId, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, boolean preRegTeams) {
+	private void sendXmppPacket(Long eventSessionId, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket) {
 		XMPP_RouteEntrantResultType xmppRouteResult = new XMPP_RouteEntrantResultType();
 		xmppRouteResult.setBestLapDurationInMilliseconds(routeArbitrationPacket.getBestLapDurationInMilliseconds());
 		xmppRouteResult.setEventDurationInMilliseconds(routeArbitrationPacket.getEventDurationInMilliseconds());
@@ -177,10 +186,5 @@ public class EventResultRouteBO {
 				}
 			}
 		}
-		// Initiate the final team action check, only if both teams are registered for event
-		if (playerRank == 1 && preRegTeams) {
-			teamsBo.teamAccoladesBasic(eventSessionId);
-		}
 	}
-
 }

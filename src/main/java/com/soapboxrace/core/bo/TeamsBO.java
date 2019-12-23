@@ -152,8 +152,6 @@ public class TeamsBO {
 //			System.out.println("TEST teamAccoladesBasic teamCheck");
 			for (EventDataEntity racer : eventDataDao.getRacersRanked(eventSessionId)) {
 				PersonaEntity racerEntity = personaDao.findById(racer.getPersonaId());
-				messageDebug = messageDebug.concat(racer.getRank() + " - " + racerEntity.getName() + " - " + racer.getEventDurationInMilliseconds() + " ms \n");
-				
 				TeamsEntity racerTeamEntity = racerEntity.getTeam();
 //				System.out.println("TEST teamAccoladesBasic racers");
 				if (racerTeamEntity != null && teamWinner == null) {
@@ -174,6 +172,7 @@ public class TeamsBO {
 							teamsDao.update(racerTeamEntity);
 //							System.out.println("TEST teamAccoladesBasic teamFinishProper");
 							
+							messageDebug = teamAccoladesDebugTimes(eventSessionId);
 							message = ":heavy_minus_sign:"
 					        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде (*итого очков: " + winnerTeamPoints + ", сессия " + eventSessionId + "*)."
 					        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race (*points: " + winnerTeamPoints + ", session " + eventSessionId + "*)."
@@ -195,6 +194,16 @@ public class TeamsBO {
 			    }
 			}
 		}
+	}
+	
+	private String teamAccoladesDebugTimes(Long eventSessionId) {
+		String messageDebug = "";
+		List<EventDataEntity> listOfRacers = eventDataDao.getRacersRanked(eventSessionId);
+		for (EventDataEntity racerDebug : listOfRacers) {
+			PersonaEntity racerEntityDebug = personaDao.findById(racerDebug.getPersonaId());
+			messageDebug = messageDebug.concat(racerDebug.getRank() + " - " + racerEntityDebug.getName() + " - " + racerDebug.getEventDurationInMilliseconds() + " ms \n");
+		}
+		return messageDebug;
 	}
 	
 	public void teamEntryIG(boolean openEntryValue, TeamsEntity teamsEntity) {
