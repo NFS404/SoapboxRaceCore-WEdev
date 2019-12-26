@@ -185,14 +185,14 @@ public class TeamsBO {
 //					System.out.println("TEST teamAccoladesBasic teamLoser");
 					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeamName + " has won the event! +1P, total: " + winnerTeamPoints + ", session " + eventSessionId), racer.getPersonaId());
 			    }
-				if (teamWinner == null) {
-//					System.out.println("TeamAccolades forfeit end for session " + eventSessionId);
-					message = ":heavy_minus_sign:"
-			        		+ "\n:thinking: **|** Никто из игроков команд не финишировал за минуту после одиночного гонщика (*сессия " + eventSessionId + "*)."
-			        		+ "\n:thinking: **|** Nobody from both teams is finished after lone player on 1 minute (*session " + eventSessionId + "*).";
-					discordBot.sendMessage(message, true);
-			    }
 			}
+			if (teamWinner == null) {
+//				System.out.println("TeamAccolades forfeit end for session " + eventSessionId);
+				message = ":heavy_minus_sign:"
+		        		+ "\n:thinking: **|** Никто из игроков команд не финишировал за минуту после одиночного гонщика (*сессия " + eventSessionId + "*)."
+		        		+ "\n:thinking: **|** Nobody from both teams is finished after lone player on 1 minute (*session " + eventSessionId + "*).";
+				discordBot.sendMessage(message, true);
+		    }
 		}
 	}
 	

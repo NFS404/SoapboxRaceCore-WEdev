@@ -128,7 +128,6 @@ public class EventsBO {
 				String winnerPlayerName = playerEntity.getName();
 				String winnerTeamName = racerTeamEntity.getTeamName();
 				teamsDAO.update(racerTeamEntity);
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You're complete a daily Treasure Hunt! +1P, total: " + winnerTeamPointsFinal), activePersonaId);
 				String message = ":heavy_minus_sign:"
 		        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** выполнил ежедневный сбор алмазов! Его команда **" + winnerTeamName + "** получает **1** балл (*итого очков: " + winnerTeamPointsFinal + "*)."
 		        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** has completed a daily Treasure Hunt! His team **" + winnerTeamName + "** got a **1** point (*points: " + winnerTeamPointsFinal + "*).";
