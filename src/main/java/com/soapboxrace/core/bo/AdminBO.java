@@ -83,6 +83,7 @@ public class AdminBO {
                 break;
             case KICK:
                 sendKick(personaEntity.getUser().getId(), personaEntity.getPersonaId());
+                System.out.println("Player " + personaEntity.getName() + " was kicked, by " + adminPlayer);
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Tactical kick is deployed."), personaId);
                 break;
             case UNBAN:
