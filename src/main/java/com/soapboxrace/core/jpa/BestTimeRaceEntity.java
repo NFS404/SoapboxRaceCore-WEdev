@@ -106,7 +106,7 @@ public class BestTimeRaceEntity {
 	private int hacks_level;
 //	@Column(name="collision")
 	private int collision;
-	private long ended;
+	private Long ended;
 	/**
 	 * Получить имя профиля
 	 */
@@ -166,6 +166,9 @@ public class BestTimeRaceEntity {
 	 * Дата окончания заезда
 	 */
 	public long getdate() {
+		if (ended == null) {
+			return 0;
+		}
 		return ended;
 	}
 }

@@ -150,6 +150,12 @@ public class Personas {
 //			commerceResultTrans.setStatus(basketBO.buyPremiumVanityHack(productId, personaEntity, securityToken));
 		} else if ("SRV-REPAIR".equals(productId)) {
 			commerceResultTrans.setStatus(basketBO.repairCar(productId, personaEntity));
+		} else if ("SRV-CARLOOTBOX".equals(productId)) {
+			OwnedCarTrans ownedCarTrans = new OwnedCarTrans();
+			commerceResultTrans.setPurchasedCars(arrayOfOwnedCarTrans);
+			arrayOfOwnedCarTrans.getOwnedCarTrans().add(ownedCarTrans);
+
+			commerceResultTrans.setStatus(basketBO.buyCarRandom(productId, personaEntity, securityToken));
 		} else { // Car
 			OwnedCarTrans ownedCarTrans = new OwnedCarTrans();
 			commerceResultTrans.setPurchasedCars(arrayOfOwnedCarTrans);

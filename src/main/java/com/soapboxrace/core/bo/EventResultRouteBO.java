@@ -70,6 +70,9 @@ public class EventResultRouteBO {
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket) {
 		Long eventSessionId = eventSessionEntity.getId();
 		eventSessionEntity.setEnded(System.currentTimeMillis());
+		if (eventSessionEntity.getEnded() == null) {
+		    System.out.println("DEBUG some event ended with no ended time, id: " + eventSessionId);
+		}
 
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 

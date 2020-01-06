@@ -208,6 +208,75 @@ public class BasketBO {
 		}
 		return CommerceResultStatus.SUCCESS;
 	}
+	
+	// Gives a random available stock car, 25% chance
+	// FIXME Replace the arrays to normal car-list load
+	public CommerceResultStatus buyCarRandom(String productId, PersonaEntity personaEntity, String securityToken) {
+		if (getPersonaCarCount(personaEntity.getPersonaId()) >= personaEntity.getCarSlots()) {
+			return CommerceResultStatus.FAIL_INSUFFICIENT_CAR_SLOTS;
+		}
+
+		ProductEntity productEntity = productDao.findByProductId(productId);
+		if (productEntity == null || personaEntity.getCash() < productEntity.getPrice()) {
+			return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
+		}
+		Random rand = new Random();
+		boolean isGoodRange = false;
+		String randomProductId = "";
+		String[] productIdGoodArray = { "SRV-CAR24","SRV-CAR370","SRV-CAR125","SRV-CAR307","SRV-CAR104","SRV-CAR111","SRV-CAR94","SRV-CAR3",
+				"SRV-CAR51","SRV-CAR52","SRV-CAR162","SRV-CAR20","SRV-CAR130","SRV-CAR147","SRV-CAR1","SRV-CAR114","SRV-CAR365","SRV-CAR163",
+				"SRV-CAR351","SRV-CAR368","SRV-CAR99","SRV-CAR133","SRV-CAR179","SRV-CAR131","SRV-CAR48","SRV-FCAR5","SRV-CAR34","SRV-CAR152",
+				"SRV-CAR367","SRV-CAR71","SRV-CAR144","SRV-CAR107","SRV-CAR78","SRV-CAR85","SRV-CAR68","SRV-CAR134","SRV-CAR167","SRV-CAR274",
+				"SRV-CAR7","SRV-CAR54","SRV-CAR12","SRV-CAR41","SRV-CAR136","SRV-CAR79","SRV-CAR364","SRV-CAR153","SRV-CAR116","SRV-CAR47",
+				"SRV-CAR355","SRV-CAR105","SRV-CAR73","SRV-CAR160","SRV-CAR62","SRV-CAR83","SRV-CAR45","SRV-CAR14","SRV-CAR22","SRV-CAR28",
+				"SRV-CAR100","SRV-CAR137","SRV-CAR91","SRV-CAR172","SRV-CAR35","SRV-CAR126","SRV-CAR26","SRV-CAR123","SRV-CAR13","SRV-CAR33",
+				"SRV-FCAR4","SRV-CAR170","SRV-CAR59","SRV-CAR5","SRV-CAR135","SRV-CAR86","SRV-CAR57","SRV-FCAR0","SRV-CAR109","SRV-CAR46",
+				"SRV-CAR98","SRV-CAR97","SRV-CAR56","SRV-CAR305","SRV-CAR306","SRV-CAR119","SRV-CAR375","SRV-FCAR6","SRV-FCAR1" };
+		String[] productIdBadArray = { "SRV-CAR40","SRV-CAR151","SRV-CAR165","SRV-CAR143","SRV-CAR154","SRV-CAR173","SRV-CAR141","SRV-CAR142",
+				"SRV-CAR181","SRV-CAR159","SRV-CAR121","SRV-CAR96","SRV-CAR93","SRV-CAR169","SRV-CAR127","SRV-CAR81","SRV-CAR21","SRV-CAR148",
+				"SRV-CAR155","SRV-CAR11","SRV-CAR18","SRV-CAR164","SRV-CAR53","SRV-CAR139","SRV-CAR6","SRV-CAR65","SRV-CAR158","SRV-CAR166",
+				"SRV-CAR76","SRV-CAR74","SRV-CAR176","SRV-CAR149","SRV-CAR178","SRV-CAR182","SRV-CAR69","SRV-CAR115","SRV-CAR108","SRV-CAR171",
+				"SRV-CAR31","SRV-CAR38","SRV-FCAR3","SRV-CAR113","SRV-CAR25","SRV-CAR174","SRV-CAR49","SRV-CAR112","SRV-CAR23","SRV-CAR129",
+				"SRV-CAR16","SRV-CAR95","SRV-CAR156","SRV-CAR101","SRV-CAR117","SRV-CAR75","SRV-CAR17","SRV-CAR58","SRV-CAR180","SRV-CAR168",
+				"SRV-CAR146","SRV-CAR4","SRV-CAR82","SRV-CAR64","SRV-CAR60","SRV-FCAR24","SRV-CAR61","SRV-FCAR2","SRV-CAR92","SRV-FCAR26",
+				"SRV-CAR177","SRV-CAR145","SRV-CAR157","SRV-CAR36","SRV-CAR175","SRV-CAR161" };
+		isGoodRange = rand.nextBoolean();
+		// Cutting down the chance from 50% to 25%
+		if (isGoodRange) {
+			isGoodRange = rand.nextBoolean();
+		}
+		// And we get...
+		if (isGoodRange) {
+			randomProductId = productIdGoodArray[rand.nextInt(productIdGoodArray.length)];
+		}
+		if (!isGoodRange) {
+			randomProductId = productIdBadArray[rand.nextInt(productIdBadArray.length)];
+		}
+		OwnedCarTrans ownedCarTrans = getCar(randomProductId);
+		ownedCarTrans.setId(0L);
+		ownedCarTrans.getCustomCar().setId(0);
+		CarSlotEntity carSlotEntity = new CarSlotEntity();
+		carSlotEntity.setPersona(personaEntity);
+
+		OwnedCarEntity ownedCarEntity = new OwnedCarEntity();
+		ownedCarEntity.setCarSlot(carSlotEntity);
+		CustomCarEntity customCarEntity = new CustomCarEntity();
+		customCarEntity.setOwnedCar(ownedCarEntity);
+		ownedCarEntity.setCustomCar(customCarEntity);
+		carSlotEntity.setOwnedCar(ownedCarEntity);
+		OwnedCarConverter.trans2Entity(ownedCarTrans, ownedCarEntity);
+		OwnedCarConverter.details2NewEntity(ownedCarTrans, ownedCarEntity);
+
+		carSlotDAO.insert(carSlotEntity);
+
+		if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
+			personaEntity.setCash(personaEntity.getCash() - productEntity.getPrice());
+		}
+		personaDao.update(personaEntity);
+		personaBo.changeDefaultCar(personaEntity.getPersonaId(), carSlotEntity.getOwnedCar().getId());
+
+		return CommerceResultStatus.SUCCESS;
+	}
 
 	public int getPersonaCarCount(Long personaId) {
 		return getPersonasCar(personaId).size();
