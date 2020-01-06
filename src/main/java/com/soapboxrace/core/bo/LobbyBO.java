@@ -168,7 +168,7 @@ public class LobbyBO {
 		lobbyDao.insert(lobbyEntity);
 
 		sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity);
-		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Random MP race is created."), personaEntity.getPersonaId());
+		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### New MP race is created."), personaEntity.getPersonaId());
 		new LobbyCountDown(lobbyEntity.getId(), lobbyDao, eventSessionDao, tokenDAO, parameterBO, openFireSoapBoxCli).start();
 	}
 	

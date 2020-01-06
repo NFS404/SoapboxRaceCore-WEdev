@@ -47,8 +47,13 @@ public class LegitRaceBO {
 
 		final long timeDiff = sessionEntity.getEnded() - sessionEntity.getStarted();
 		boolean legit = timeDiff >= minimumTime;
+		boolean finishReasonLegit = true;
+		// 0 - quitted from race, 22 - finished, 518 - escaped from SP pursuit, 266 - busted on SP & MP pursuit
+		if (arbitrationPacket.getFinishReason() != 0 || arbitrationPacket.getFinishReason() != 266) {
+			finishReasonLegit = false;
+		}
 
-		if (!legit) {
+		if (!legit && !finishReasonLegit) {
 			socialBo.sendReport(0L, activePersonaId, 3, String.format(eventType + ", abnormal event time (ms): %d", timeDiff), (int) arbitrationPacket.getCarId(), 0, 0L);
 		}
 		if (!legit && eventType.contentEquals("Pursuit")) {

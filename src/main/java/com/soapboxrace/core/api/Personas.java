@@ -145,7 +145,8 @@ public class Personas {
 		} else if (productId.contains("SRV-POWERUP")) {
 			commerceResultTrans.setStatus(basketBO.buyPowerups(productId, personaEntity));
 	    // Script to get the dark black tint or l.plate by bug
-//		} else if (productId.contains("SRV-DARKTINT") || productId.contains("SRV-REMOVEPLATE")) {
+		// FIXME need to restore
+		} else if (productId.contains("SRV-DARKTINT") || productId.contains("SRV-REMOVEPLATE")) {
 //			commerceResultTrans.setStatus(basketBO.buyPremiumVanityHack(productId, personaEntity, securityToken));
 		} else if ("SRV-REPAIR".equals(productId)) {
 			commerceResultTrans.setStatus(basketBO.repairCar(productId, personaEntity));

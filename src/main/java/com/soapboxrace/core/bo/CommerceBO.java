@@ -170,7 +170,6 @@ public class CommerceBO {
 			int perfHash = performancePartEntity.getPerformancePartAttribHash();
 			if (perfHash == 1158503258) {
 				customCarEntity.setRaceFilter(0);
-				
 			}
 			if (perfHash == 1918528298) {
 				customCarEntity.setRaceFilter(1);
@@ -307,10 +306,10 @@ public class CommerceBO {
 				break;
 			case VISUAL:
                 // FIXME Does not work for now, even not goes to UpdateEconomy
-				if (parameterBO.getIntParam("ITEM_RESALEREWARD") > 0) {
-                	resellTotalValue = Float.sum(resellTotalValue, parameterBO.getIntParam("ITEM_RESALEREWARD"));
-                	System.out.println("DEBUG VISUAL ResellValue: " + resellTotalValue);
-                }
+//				if (parameterBO.getIntParam("ITEM_RESALEREWARD") > 0) {
+//                	resellTotalValue = Float.sum(resellTotalValue, parameterBO.getIntParam("ITEM_RESALEREWARD"));
+//                	System.out.println("DEBUG VISUAL ResellValue: " + resellTotalValue);
+//                }
 				break;
 			default:
 				break;
