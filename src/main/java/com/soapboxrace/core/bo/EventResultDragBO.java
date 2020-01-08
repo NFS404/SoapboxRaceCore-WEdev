@@ -3,10 +3,12 @@ package com.soapboxrace.core.bo;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.jpa.EventDataEntity;
+import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
@@ -42,6 +44,9 @@ public class EventResultDragBO {
 
 	@EJB
 	private PersonaDAO personaDAO;
+	
+	@EJB
+	private EventDAO eventDAO;
 
 	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -72,6 +77,7 @@ public class EventResultDragBO {
 		achievementsBO.applyAirTimeAchievement(dragArbitrationPacket, personaEntity);
 		achievementsBO.applyDragAchievement(eventDataEntity, dragArbitrationPacket, activePersonaId);
 
+		int currentEventId = eventDataEntity.getEvent().getId();
 		eventDataEntity.setAlternateEventDurationInMilliseconds(dragArbitrationPacket.getAlternateEventDurationInMilliseconds());
 		eventDataEntity.setCarId(dragArbitrationPacket.getCarId());
 		eventDataEntity.setEventDurationInMilliseconds(dragArbitrationPacket.getEventDurationInMilliseconds());
@@ -89,6 +95,18 @@ public class EventResultDragBO {
 		eventDataDao.update(eventDataEntity);
 
 		ArrayOfDragEntrantResult arrayOfDragEntrantResult = new ArrayOfDragEntrantResult();
+		// +1 to play count for this track, MP
+		if (eventDataEntity.getRank() == 1) {
+			EventEntity eventEntity = eventDAO.findById(currentEventId);
+			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+			eventDAO.update(eventEntity);
+		}
+		// +1 to play count for this track, SP
+		if (arrayOfDragEntrantResult.getDragEntrantResult().size() < 2) {
+			EventEntity eventEntity = eventDAO.findById(currentEventId);
+			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+			eventDAO.update(eventEntity);
+		}
 		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
 			DragEntrantResult dragEntrantResult = new DragEntrantResult();
 			dragEntrantResult.setEventDurationInMilliseconds(racer.getEventDurationInMilliseconds());
@@ -112,7 +130,7 @@ public class EventResultDragBO {
 		dragEventResult.setAccolades(rewardDragBO.getDragAccolades(activePersonaId, dragArbitrationPacket, eventSessionEntity, arrayOfDragEntrantResult));
 		dragEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, dragArbitrationPacket, dragArbitrationPacket.getNumberOfCollisions()));
 		dragEventResult.setEntrants(arrayOfDragEntrantResult);
-		dragEventResult.setEventId(eventDataEntity.getEvent().getId());
+		dragEventResult.setEventId(currentEventId);
 		dragEventResult.setEventSessionId(eventSessionId);
 		dragEventResult.setExitPath(ExitPath.EXIT_TO_FREEROAM);
 		dragEventResult.setInviteLifetimeInMilliseconds(0);

@@ -4,11 +4,13 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.OwnedCarDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.jpa.EventDataEntity;
+import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
@@ -45,6 +47,9 @@ public class EventResultPursuitBO {
     
     @EJB
 	private DiscordWebhook discordBot;
+    
+    @EJB
+	private EventDAO eventDAO;
 
 	public PursuitEventResult handlePursitEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, PursuitArbitrationPacket pursuitArbitrationPacket,
 			Boolean isBusted) {
@@ -66,6 +71,7 @@ public class EventResultPursuitBO {
 			System.out.println("WARINING - XKAYA's arbitration exploit attempt, driver: " + personaEntity.getName());
 			return null;
 		}
+		int currentEventId = eventDataEntity.getEvent().getId();
 		eventDataEntity.setArbitration(eventDataEntity.getArbitration() ? false : true);
 		eventDataEntity.setAlternateEventDurationInMilliseconds(pursuitArbitrationPacket.getAlternateEventDurationInMilliseconds());
 		eventDataEntity.setCarId(pursuitArbitrationPacket.getCarId());
@@ -85,6 +91,11 @@ public class EventResultPursuitBO {
 		eventDataEntity.setSpikeStripsDodged(pursuitArbitrationPacket.getSpikeStripsDodged());
 		eventDataEntity.setSumOfJumpsDurationInMilliseconds(pursuitArbitrationPacket.getSumOfJumpsDurationInMilliseconds());
 		eventDataEntity.setTopSpeed(pursuitArbitrationPacket.getTopSpeed());
+		
+		// +1 to play count for this track, MP
+		EventEntity eventEntity = eventDAO.findById(currentEventId);
+		eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+		eventDAO.update(eventEntity);
 		
 		eventDataDao.update(eventDataEntity);
 		
@@ -120,7 +131,7 @@ public class EventResultPursuitBO {
 		PursuitEventResult pursuitEventResult = new PursuitEventResult();
 		pursuitEventResult.setAccolades(rewardPursuitBO.getPursuitAccolades(activePersonaId, pursuitArbitrationPacket, eventSessionEntity, isBusted));
 		pursuitEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, pursuitArbitrationPacket, 0));
-		pursuitEventResult.setEventId(eventDataEntity.getEvent().getId());
+		pursuitEventResult.setEventId(currentEventId);
 		pursuitEventResult.setEventSessionId(eventSessionId);
 		pursuitEventResult.setExitPath(ExitPath.EXIT_TO_FREEROAM);
 		pursuitEventResult.setHeat(isBusted ? 1 : pursuitArbitrationPacket.getHeat());

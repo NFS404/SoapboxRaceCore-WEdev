@@ -4,11 +4,13 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.jpa.EventDataEntity;
+import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.TeamsEntity;
@@ -66,6 +68,9 @@ public class EventResultRouteBO {
 	
 	@EJB
 	private DiscordWebhook discordBot;
+	
+	@EJB
+	private EventDAO eventDAO;
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -140,8 +145,9 @@ public class EventResultRouteBO {
 		routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult));
 		routeEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, routeArbitrationPacket, routeArbitrationPacket.getNumberOfCollisions()));
 		routeEventResult.setEntrants(arrayOfRouteEntrantResult);
-		routeEventResult.setEventId(eventDataEntity.getEvent().getId());
-		if (eventDataEntity.getEvent().getId() == parameterBO.getIntParam("TOURNAMENT_EVENTID")) {
+		int currentEventId = eventDataEntity.getEvent().getId();
+		routeEventResult.setEventId(currentEventId);
+		if (currentEventId == parameterBO.getIntParam("TOURNAMENT_EVENTID")) {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Event Session: " + eventSessionId), personaEntity.getPersonaId());
 		}
 		routeEventResult.setEventSessionId(eventSessionId);
@@ -150,6 +156,18 @@ public class EventResultRouteBO {
 		routeEventResult.setLobbyInviteId(0);
 		routeEventResult.setPersonaId(activePersonaId);
 		sendXmppPacket(eventSessionId, activePersonaId, routeArbitrationPacket);
+		// +1 to play count for this track, MP
+		if (eventDataEntity.getRank() == 1) {
+			EventEntity eventEntity = eventDAO.findById(currentEventId);
+			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+			eventDAO.update(eventEntity);
+		}
+		// +1 to play count for this track, SP
+		if (arrayOfRouteEntrantResult.getRouteEntrantResult().size() < 2) {
+			EventEntity eventEntity = eventDAO.findById(currentEventId);
+			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+			eventDAO.update(eventEntity);
+		}
 		// Initiate the final team action check, only if both teams are registered for event
 		if (eventDataEntity.getRank() == 1 && preRegTeams) {
 			new Thread(new Runnable() {

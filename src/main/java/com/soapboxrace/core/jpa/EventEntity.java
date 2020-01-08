@@ -62,6 +62,7 @@ public class EventEntity {
 	private float minTopSpeedTrigger;
 	private long legitTime;
 	private boolean searchAvailable = true;
+	private int finishCount;
 
 	public int getId() {
 		return id;
@@ -389,6 +390,14 @@ public class EventEntity {
 
 	public void setSearchAvailable(boolean searchAvailable) {
 		this.searchAvailable = searchAvailable;
+	}
+	
+	public int getFinishCount() {
+		return finishCount;
+	}
+
+	public void setFinishCount(int finishCount) {
+		this.finishCount = finishCount;
 	}
 
 }

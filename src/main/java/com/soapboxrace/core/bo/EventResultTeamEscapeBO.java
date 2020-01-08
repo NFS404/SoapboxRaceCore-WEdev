@@ -3,10 +3,12 @@ package com.soapboxrace.core.bo;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.jpa.EventDataEntity;
+import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
@@ -42,6 +44,9 @@ public class EventResultTeamEscapeBO {
 
 	@EJB
 	private PersonaDAO personaDAO;
+	
+	@EJB
+	private EventDAO eventDAO;
 
 	public TeamEscapeEventResult handleTeamEscapeEnd(EventSessionEntity eventSessionEntity, Long activePersonaId,
 			TeamEscapeArbitrationPacket teamEscapeArbitrationPacket) {
@@ -67,6 +72,7 @@ public class EventResultTeamEscapeBO {
 			System.out.println("WARINING - XKAYA's arbitration exploit attempt, driver: " + personaEntity.getName());
 			return null;
 		}
+		int currentEventId = eventDataEntity.getEvent().getId();
 		achievementsBO.applyAirTimeAchievement(teamEscapeArbitrationPacket, personaEntity);
 		achievementsBO.applyPursuitCostToState(teamEscapeArbitrationPacket, personaEntity);
 		achievementsBO.applyTeamEscape(teamEscapeArbitrationPacket, personaEntity);
@@ -96,6 +102,18 @@ public class EventResultTeamEscapeBO {
 		eventDataDao.update(eventDataEntity);
 
 		ArrayOfTeamEscapeEntrantResult arrayOfTeamEscapeEntrantResult = new ArrayOfTeamEscapeEntrantResult();
+		// +1 to play count for this track, MP
+		if (eventDataEntity.getRank() == 1) {
+			EventEntity eventEntity = eventDAO.findById(currentEventId);
+			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+			eventDAO.update(eventEntity);
+		}
+		// +1 to play count for this track, SP (No default SP TEs)
+		if (arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() < 2) {
+			EventEntity eventEntity = eventDAO.findById(currentEventId);
+			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+			eventDAO.update(eventEntity);
+		}
 		boolean oneGetAway = false;
 		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
 			TeamEscapeEntrantResult teamEscapeEntrantResult = new TeamEscapeEntrantResult();
@@ -128,13 +146,10 @@ public class EventResultTeamEscapeBO {
 		}
 
 		TeamEscapeEventResult teamEscapeEventResult = new TeamEscapeEventResult();
-		// if (eventDataDao.getRacers(eventSessionId)) > 1) {
-		// 	teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity));
-		// }
 		teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity));
 		teamEscapeEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, teamEscapeArbitrationPacket, teamEscapeArbitrationPacket.getNumberOfCollisions()));
 		teamEscapeEventResult.setEntrants(arrayOfTeamEscapeEntrantResult);
-		teamEscapeEventResult.setEventId(eventDataEntity.getEvent().getId());
+		teamEscapeEventResult.setEventId(currentEventId);
 		teamEscapeEventResult.setEventSessionId(eventSessionId);
 		teamEscapeEventResult.setExitPath(ExitPath.EXIT_TO_FREEROAM);
 		teamEscapeEventResult.setInviteLifetimeInMilliseconds(0);
@@ -142,5 +157,4 @@ public class EventResultTeamEscapeBO {
 		teamEscapeEventResult.setPersonaId(activePersonaId);
 		return teamEscapeEventResult;
 	}
-
 }
