@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 /**
  * Самый популярный заезд
- * @author Vadimka
+ * @author Vadimka, Hypercycle
  */
 @Entity
 @Table(name = "EVENT_DATA")
@@ -18,15 +18,14 @@ import javax.persistence.Table;
 			name = "MostPopularEventEntity.mostPopular",
 			query = "SELECT " + 
 					"	DISTINCT " + 
-					"	COUNT(e.id) cout, " + 
 					"	e.name event_name, " + 
-					"	d.eventmodeid eventModeId, " + 
-					"	e.carclasshash classHash " + 
-					"FROM EVENT_DATA d " + 
-					"INNER JOIN EVENT e ON d.eventid = e.id " + 
-					"WHERE d.eventmodeid = :mode " + 
-					"GROUP BY d.eventmodeid, e.id " + 
-					"ORDER BY cout DESC " + 
+					"	e.eventmodeid eventModeId, " + 
+					"	e.carclasshash classHash, " + 
+					"	e.finishcount finishCount " + 
+					"FROM EVENT e " + 
+					"WHERE e.eventmodeid = :mode " + 
+					"GROUP BY e.eventmodeid, e.id " + 
+					"ORDER BY e.finishcount DESC " + 
 					"LIMIT :count",
 			resultClass = MostPopularEventEntity.class
 		)
