@@ -60,11 +60,16 @@ public class EventResultTeamEscapeBO {
 		teamEscapeEntrantResultResponse.setTeamEscapeEntrantResult(xmppTeamEscapeResult);
 
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
+
+		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
+		// XKAYA's arbitration exploit fix
+		if (eventDataEntity.getArbitration()) {
+			System.out.println("WARINING - XKAYA's arbitration exploit attempt, driver: " + personaEntity.getName());
+			return null;
+		}
 		achievementsBO.applyAirTimeAchievement(teamEscapeArbitrationPacket, personaEntity);
 		achievementsBO.applyPursuitCostToState(teamEscapeArbitrationPacket, personaEntity);
 		achievementsBO.applyTeamEscape(teamEscapeArbitrationPacket, personaEntity);
-
-		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 		eventDataEntity.setAlternateEventDurationInMilliseconds(teamEscapeArbitrationPacket.getAlternateEventDurationInMilliseconds());
 		eventDataEntity.setBustedCount(teamEscapeArbitrationPacket.getBustedCount());
 		eventDataEntity.setCarId(teamEscapeArbitrationPacket.getCarId());

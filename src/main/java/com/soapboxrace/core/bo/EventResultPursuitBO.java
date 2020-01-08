@@ -60,6 +60,13 @@ public class EventResultPursuitBO {
 		eventSessionDao.update(eventSessionEntity);
 
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
+		// XKAYA's arbitration exploit fix
+		if (eventDataEntity.getArbitration()) {
+			PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
+			System.out.println("WARINING - XKAYA's arbitration exploit attempt, driver: " + personaEntity.getName());
+			return null;
+		}
+		eventDataEntity.setArbitration(eventDataEntity.getArbitration() ? false : true);
 		eventDataEntity.setAlternateEventDurationInMilliseconds(pursuitArbitrationPacket.getAlternateEventDurationInMilliseconds());
 		eventDataEntity.setCarId(pursuitArbitrationPacket.getCarId());
 		eventDataEntity.setCopsDeployed(pursuitArbitrationPacket.getCopsDeployed());

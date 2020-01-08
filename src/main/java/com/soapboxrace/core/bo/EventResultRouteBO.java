@@ -77,8 +77,6 @@ public class EventResultRouteBO {
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
-		achievementsBO.applyRaceAchievements(eventDataEntity, routeArbitrationPacket, personaEntity);
-		achievementsBO.applyAirTimeAchievement(routeArbitrationPacket, personaEntity);
 		
 		Long team1id = eventSessionEntity.getTeam1Id();
 		Long team2id = eventSessionEntity.getTeam2Id();
@@ -86,6 +84,14 @@ public class EventResultRouteBO {
 		if (team1id != null && team2id != null) {
 			preRegTeams = true;
 		}
+		// XKAYA's arbitration exploit fix
+		if (eventDataEntity.getArbitration()) {
+			System.out.println("WARINING - XKAYA's arbitration exploit attempt, driver: " + personaEntity.getName());
+			return null;
+		}
+		eventDataEntity.setArbitration(eventDataEntity.getArbitration() ? false : true);
+		achievementsBO.applyRaceAchievements(eventDataEntity, routeArbitrationPacket, personaEntity);
+		achievementsBO.applyAirTimeAchievement(routeArbitrationPacket, personaEntity);
 		updateEventDataEntity(eventDataEntity, routeArbitrationPacket);
 
 		// RouteArbitrationPacket

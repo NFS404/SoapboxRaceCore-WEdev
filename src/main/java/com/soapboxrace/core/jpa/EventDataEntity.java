@@ -70,6 +70,9 @@ public class EventDataEntity {
 	// TeamEscapeArbitrationPacket variables
 	protected int bustedCount;
 	protected float distanceToFinish;
+	
+	// Arbitration packet check
+	protected boolean arbitration;
 
 	public Long getId() {
 		return id;
@@ -299,6 +302,14 @@ public class EventDataEntity {
 
 	public void setDistanceToFinish(float value) {
 		this.distanceToFinish = value;
+	}
+	
+	public boolean getArbitration() {
+		return arbitration;
+	}
+
+	public void setArbitration(boolean value) {
+		this.arbitration = value;
 	}
 
 }

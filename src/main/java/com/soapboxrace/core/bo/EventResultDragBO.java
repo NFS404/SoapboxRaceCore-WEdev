@@ -48,7 +48,7 @@ public class EventResultDragBO {
 		eventSessionEntity.setEnded(System.currentTimeMillis());
 
 		eventSessionDao.update(eventSessionEntity);
-
+		
 		XMPP_DragEntrantResultType xmppDragResult = new XMPP_DragEntrantResultType();
 		xmppDragResult.setEventDurationInMilliseconds(dragArbitrationPacket.getEventDurationInMilliseconds());
 		xmppDragResult.setEventSessionId(eventSessionId);
@@ -60,9 +60,16 @@ public class EventResultDragBO {
 		XMPP_ResponseTypeDragEntrantResult dragEntrantResultResponse = new XMPP_ResponseTypeDragEntrantResult();
 		dragEntrantResultResponse.setDragEntrantResult(xmppDragResult);
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
-		achievementsBO.applyAirTimeAchievement(dragArbitrationPacket, personaEntity);
+		
 
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
+		// XKAYA's arbitration exploit fix
+		if (eventDataEntity.getArbitration()) {
+			System.out.println("WARINING - XKAYA's arbitration exploit attempt, driver: " + personaEntity.getName());
+			return null;
+		}
+		eventDataEntity.setArbitration(eventDataEntity.getArbitration() ? false : true);
+		achievementsBO.applyAirTimeAchievement(dragArbitrationPacket, personaEntity);
 		achievementsBO.applyDragAchievement(eventDataEntity, dragArbitrationPacket, activePersonaId);
 
 		eventDataEntity.setAlternateEventDurationInMilliseconds(dragArbitrationPacket.getAlternateEventDurationInMilliseconds());
