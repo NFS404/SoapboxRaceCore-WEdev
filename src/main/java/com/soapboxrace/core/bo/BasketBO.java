@@ -6,8 +6,10 @@ import java.util.Random;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.OwnedCarConverter;
 import com.soapboxrace.core.dao.BasketDefinitionDAO;
+import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CarSlotDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.InventoryDAO;
@@ -18,6 +20,7 @@ import com.soapboxrace.core.dao.ProductDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.TreasureHuntDAO;
 import com.soapboxrace.core.jpa.BasketDefinitionEntity;
+import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.InventoryEntity;
@@ -71,6 +74,12 @@ public class BasketBO {
 
 	@EJB
 	private InventoryItemDAO inventoryItemDao;
+	
+	@EJB
+	private CarClassesDAO carClassesDAO;
+	
+	@EJB
+	private DiscordWebhook discordBot;
 
 	private OwnedCarTrans getCar(String productId) {
 		BasketDefinitionEntity basketDefinitonEntity = basketDefinitionsDAO.findById(productId);
@@ -261,6 +270,7 @@ public class BasketBO {
 		OwnedCarEntity ownedCarEntity = new OwnedCarEntity();
 		ownedCarEntity.setCarSlot(carSlotEntity);
 		CustomCarEntity customCarEntity = new CustomCarEntity();
+		
 		customCarEntity.setOwnedCar(ownedCarEntity);
 		ownedCarEntity.setCustomCar(customCarEntity);
 		carSlotEntity.setOwnedCar(ownedCarEntity);
@@ -274,6 +284,13 @@ public class BasketBO {
 		}
 		personaDao.update(personaEntity);
 		personaBo.changeDefaultCar(personaEntity.getPersonaId(), carSlotEntity.getOwnedCar().getId());
+		
+		String playerName = personaEntity.getName();
+		CarClassesEntity randomCarEntity = carClassesDAO.findByHash(customCarEntity.getPhysicsProfileHash());
+		String message = ":heavy_minus_sign:"
+        		+ "\n:shopping_cart: **|** Nгрок **" + playerName + "** купил контейнер с автомобилем и получил **" + randomCarEntity.getFullName() + "**!"
+        		+ "\n:shopping_cart: **|** Player **" + playerName + "** has bought the car container and got a **" + randomCarEntity.getFullName() + "**!";
+		discordBot.sendMessage(message);
 
 		return CommerceResultStatus.SUCCESS;
 	}

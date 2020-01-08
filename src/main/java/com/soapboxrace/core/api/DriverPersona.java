@@ -62,21 +62,23 @@ public class DriverPersona {
 	@EJB
 	private ParameterBO parameterBO;
 
+	// Level calc - summary amount of EXP for all levels, consider a DB's level_rep values to sum for every level stage
+	// DB's level exp calc by Metonator's EXP generator
 	@GET
 	@Path("/GetExpLevelPointsMap")
 	@Produces(MediaType.APPLICATION_XML)
 	public ArrayOfInt getExpLevelPointsMap() {
 		ArrayOfInt arrayOfInt = new ArrayOfInt();
-		arrayOfInt.getInt().add(100);
+		arrayOfInt.getInt().add(100); // 1
 		arrayOfInt.getInt().add(975);
 		arrayOfInt.getInt().add(2025);
 		arrayOfInt.getInt().add(3625);
-		arrayOfInt.getInt().add(5875);
+		arrayOfInt.getInt().add(5875); 
 		arrayOfInt.getInt().add(8875);
 		arrayOfInt.getInt().add(12725);
 		arrayOfInt.getInt().add(17525);
 		arrayOfInt.getInt().add(23375);
-		arrayOfInt.getInt().add(30375);
+		arrayOfInt.getInt().add(30375); // 10
 		arrayOfInt.getInt().add(39375);
 		arrayOfInt.getInt().add(50575);
 		arrayOfInt.getInt().add(64175);
@@ -86,7 +88,7 @@ public class DriverPersona {
 		arrayOfInt.getInt().add(146575);
 		arrayOfInt.getInt().add(175175);
 		arrayOfInt.getInt().add(207375);
-		arrayOfInt.getInt().add(243375);
+		arrayOfInt.getInt().add(243375); // 20
 		arrayOfInt.getInt().add(283375);
 		arrayOfInt.getInt().add(327575);
 		arrayOfInt.getInt().add(376175);
@@ -96,7 +98,7 @@ public class DriverPersona {
 		arrayOfInt.getInt().add(618575);
 		arrayOfInt.getInt().add(692175);
 		arrayOfInt.getInt().add(771375);
-		arrayOfInt.getInt().add(856375);
+		arrayOfInt.getInt().add(856375); // 30
 		arrayOfInt.getInt().add(950875);
 		arrayOfInt.getInt().add(1055275);
 		arrayOfInt.getInt().add(1169975);
@@ -106,7 +108,7 @@ public class DriverPersona {
 		arrayOfInt.getInt().add(1739775);
 		arrayOfInt.getInt().add(1911975);
 		arrayOfInt.getInt().add(2096875);
-		arrayOfInt.getInt().add(2294875);
+		arrayOfInt.getInt().add(2294875); // 40
 		arrayOfInt.getInt().add(2506375);
 		arrayOfInt.getInt().add(2731775);
 		arrayOfInt.getInt().add(2971475);
@@ -116,7 +118,7 @@ public class DriverPersona {
 		arrayOfInt.getInt().add(4081275);
 		arrayOfInt.getInt().add(4398475);
 		arrayOfInt.getInt().add(4732375);
-		arrayOfInt.getInt().add(5083375);
+		arrayOfInt.getInt().add(5083375); // 50
 		arrayOfInt.getInt().add(5481355);
 		arrayOfInt.getInt().add(5898805);
 		arrayOfInt.getInt().add(6336165);
@@ -126,7 +128,47 @@ public class DriverPersona {
 		arrayOfInt.getInt().add(8293505);
 		arrayOfInt.getInt().add(8837015);
 		arrayOfInt.getInt().add(9403075);
-		arrayOfInt.getInt().add(9992125);
+		arrayOfInt.getInt().add(9992125); // 60
+		arrayOfInt.getInt().add(10604605);
+		arrayOfInt.getInt().add(11240955);
+		arrayOfInt.getInt().add(11901615);
+		arrayOfInt.getInt().add(12587025);
+		arrayOfInt.getInt().add(13297625);
+		arrayOfInt.getInt().add(14033855);
+		arrayOfInt.getInt().add(14796155);
+		arrayOfInt.getInt().add(15584965);
+		arrayOfInt.getInt().add(16400725);
+		arrayOfInt.getInt().add(17243875); // 70
+		arrayOfInt.getInt().add(18114855);
+		arrayOfInt.getInt().add(19014105);
+		arrayOfInt.getInt().add(19942065);
+		arrayOfInt.getInt().add(20899175);
+		arrayOfInt.getInt().add(21885875);
+		arrayOfInt.getInt().add(22902605);
+		arrayOfInt.getInt().add(23949805);
+		arrayOfInt.getInt().add(25027915);
+		arrayOfInt.getInt().add(26137375);
+		arrayOfInt.getInt().add(27278625); // 80
+		arrayOfInt.getInt().add(28452105);
+		arrayOfInt.getInt().add(29658255);
+		arrayOfInt.getInt().add(30897515);
+		arrayOfInt.getInt().add(32170325);
+		arrayOfInt.getInt().add(33477125);
+		arrayOfInt.getInt().add(34818355);
+		arrayOfInt.getInt().add(36194455);
+		arrayOfInt.getInt().add(37605865);
+		arrayOfInt.getInt().add(39053025);
+		arrayOfInt.getInt().add(40536375); // 90
+		arrayOfInt.getInt().add(42056355);
+		arrayOfInt.getInt().add(43613405);
+		arrayOfInt.getInt().add(45207965);
+		arrayOfInt.getInt().add(46840475);
+		arrayOfInt.getInt().add(48511375);
+		arrayOfInt.getInt().add(50221105);
+		arrayOfInt.getInt().add(51970105);
+		arrayOfInt.getInt().add(53758815);
+		arrayOfInt.getInt().add(55587675);
+		arrayOfInt.getInt().add(57457125); // 100
 		return arrayOfInt;
 	}
 
