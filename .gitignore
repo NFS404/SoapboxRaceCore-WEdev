@@ -1,7 +1,0 @@
-/bin/
-/build/
-/lib/
-/target/
-eclipseIDE_fastsetup.zip
-src/main/webapp/fileschecker
-.gitignore
