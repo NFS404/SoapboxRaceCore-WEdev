@@ -14,6 +14,9 @@ import com.soapboxrace.core.bo.InventoryBO;
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
+import com.soapboxrace.core.dao.EventSessionDAO;
+import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.jaxb.xmpp.XMPP_PowerupActivatedType;
@@ -39,6 +42,12 @@ public class Powerups {
 
 	@EJB
 	private PersonaBO personaBO;
+	
+	@EJB
+	private EventSessionDAO eventSessionDao;
+	
+	@EJB
+	private PersonaDAO personaDAO;
 
 	@POST
 	@Path("/activated/{powerupHash}")
@@ -48,6 +57,15 @@ public class Powerups {
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
 
 		if (parameterBO.getBoolParam("POWERUPS_ENABLED")) {
+			// TeamNOS - if race has been randomly started without NOS, team players wouldn't be able to use it, but others will be able
+			System.out.println("eventSessionId: " + eventSessionId);
+			PersonaEntity personaEntityTeam = personaDAO.findById(activePersonaId);
+			if (personaEntityTeam.getTeam() != null && eventSessionId != 0) {
+				EventSessionEntity eventSessionEntity = eventSessionDao.findById(eventSessionId);
+				if (!eventSessionEntity.getTeamNOS() && powerupHash == -1681514783) {
+					return "";
+				}
+			}
 			XMPP_ResponseTypePowerupActivated powerupActivatedResponse = new XMPP_ResponseTypePowerupActivated();
 			XMPP_PowerupActivatedType powerupActivated = new XMPP_PowerupActivatedType();
 			powerupActivated.setId(Long.valueOf(powerupHash));

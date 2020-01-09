@@ -43,6 +43,9 @@ public class EventSessionEntity {
 	
 	@Column(name = "TEAM2CHECK")
 	private boolean team2Check;
+	
+	@Column(name = "TEAMNOS")
+	private boolean teamNOS;
 
 	public Long getId() {
 		return id;
@@ -114,5 +117,13 @@ public class EventSessionEntity {
 
 	public void setTeam2Check(boolean team2Check) {
 		this.team2Check = team2Check;
+	}
+	
+	public boolean getTeamNOS() {
+		return teamNOS;
+	}
+
+	public void setTeamNOS(boolean teamNOS) {
+		this.teamNOS = teamNOS;
 	}
 }

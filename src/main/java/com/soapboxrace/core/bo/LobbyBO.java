@@ -445,6 +445,10 @@ public class LobbyBO {
 			eventDataEntity.setEvent(lobbyEntity.getEvent());
 			eventDataEntity.setTeam1Id(lobbyEntity.getTeam1Id());
 			eventDataEntity.setTeam2Id(lobbyEntity.getTeam2Id());
+			// TeamNOS - if race has been randomly started without NOS, team players wouldn't be able to use it, but others will be able
+			Random randNOS = new Random();
+			eventDataEntity.setTeamNOS(randNOS.nextBoolean());
+			boolean teamNOStext = eventDataEntity.getTeamNOS();
 			eventSessionDao.insert(eventDataEntity);
 			String udpRaceIp = parameterBO.getStrParam("UDP_RACE_IP");
 			for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
@@ -474,13 +478,15 @@ public class LobbyBO {
 				lobbyEntrantInfoType.setHeat(1);
 				lobbyEntrantInfoType.setGridIndex(i++);
 				lobbyEntrantInfoType.setState(LobbyEntrantState.UNKNOWN);
-
 				if ("127.0.0.1".equals(udpRaceIp)) {
 					TokenSessionEntity tokenEntity = tokenDAO.findByUserId(lobbyEntrantEntity.getPersona().getUser().getId());
 					lobbyEntrantInfoType.setUdpRaceHostIp(tokenEntity.getClientHostIp());
 				}
-
 				lobbyEntrantInfo.add(lobbyEntrantInfoType);
+				PersonaEntity personaEntityTeam = personaDao.findById(personaId);
+				if (personaEntityTeam.getTeam() != null) {
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Team NOS on this race: " + teamNOStext), personaId);
+				}
 			}
 			XMPP_EventSessionType xMPP_EventSessionType = new XMPP_EventSessionType();
 			ChallengeType challengeType = new ChallengeType();
