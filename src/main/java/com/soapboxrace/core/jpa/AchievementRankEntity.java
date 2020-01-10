@@ -50,6 +50,9 @@ public class AchievementRankEntity {
 
 	@Column(name = "thresholdValue")
 	private Long thresholdValue;
+	
+	@Column(name = "sort")
+	private Long sort;
 
 	private String rewardText;
 
@@ -145,6 +148,14 @@ public class AchievementRankEntity {
 
 	public void setThresholdValue(Long thresholdValue) {
 		this.thresholdValue = thresholdValue;
+	}
+	
+	public Long getSort() {
+		return sort;
+	}
+
+	public void setSort(Long sort) {
+		this.sort = sort;
 	}
 
 	public AchievementDefinitionEntity getAchievementDefinition() {

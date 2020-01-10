@@ -38,7 +38,7 @@ public class AchievementRankDAO extends BaseDAO<AchievementRankEntity> {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT obj FROM AchievementRankEntity obj ");
 		sql.append("WHERE obj.achievementDefinition.id = :achievementDefinitionId ");
-		sql.append("ORDER BY obj.id ASC ");
+		sql.append("ORDER BY obj.sort ASC ");
 		TypedQuery<AchievementRankEntity> query = entityManager.createQuery(sql.toString(), AchievementRankEntity.class);
 		query.setParameter("achievementDefinitionId", achievementDefinitionId);
 		return query.getResultList();

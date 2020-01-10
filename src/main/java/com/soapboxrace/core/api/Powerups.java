@@ -58,7 +58,6 @@ public class Powerups {
 
 		if (parameterBO.getBoolParam("POWERUPS_ENABLED")) {
 			// TeamNOS - if race has been randomly started without NOS, team players wouldn't be able to use it, but others will be able
-			System.out.println("eventSessionId: " + eventSessionId);
 			PersonaEntity personaEntityTeam = personaDAO.findById(activePersonaId);
 			if (personaEntityTeam.getTeam() != null && eventSessionId != 0) {
 				EventSessionEntity eventSessionEntity = eventSessionDao.findById(eventSessionId);
@@ -72,6 +71,7 @@ public class Powerups {
 			powerupActivated.setTargetPersonaId(targetId);
 			powerupActivated.setPersonaId(activePersonaId);
 			powerupActivatedResponse.setPowerupActivated(powerupActivated);
+			// achievementsBO.broadcastUITest(personaEntityTeam);
 			openFireSoapBoxCli.send(powerupActivatedResponse, activePersonaId);
 			for (String receiver : receivers.split("-")) {
 				Long receiverPersonaId = Long.valueOf(receiver);

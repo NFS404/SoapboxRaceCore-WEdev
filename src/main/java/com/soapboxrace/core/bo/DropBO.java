@@ -39,6 +39,7 @@ public class DropBO {
 		String[] productTypeArr = { "VISUALPART", "SKILLMODPART", "PERFORMANCEPART" };
 		Random random = new Random();
 		int number = 0;
+		// FIXME Still gives visuals
 		if (eventMode != null && eventMode.equalsIgnoreCase("thunt")) {
 			number = random.nextInt((productTypeArr.length - 1) + 1);
 		}
