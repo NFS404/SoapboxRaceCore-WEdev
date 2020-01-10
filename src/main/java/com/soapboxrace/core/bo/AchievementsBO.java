@@ -376,6 +376,12 @@ public class AchievementsBO {
 			return Integer.valueOf(mpRaces).longValue();
 		case XKR_SPEED_HUNTER:
 			return 0l;
+		case WEV2_EXTRALVL:
+			int extraLVL = achievementPersonaEntity.getExtraLVL();
+			return Integer.valueOf(extraLVL).longValue();
+		case WEV2_TEAMS_WINNERS:
+			int teamsSeasonWinners = achievementPersonaEntity.getTeamsSeasonWinners();
+			return Integer.valueOf(teamsSeasonWinners).longValue();
 		default:
 			break;
 		}
@@ -522,6 +528,13 @@ public class AchievementsBO {
 		if (personaAchievementRank != null) {
 			personaAchievementRank.setAchievementState(AchievementState.COMPLETED);
 			achievementStateDAO.update(personaAchievementRank);
+		}
+		// ExtraLVL achievement resets player's level to 10
+		if (achievementRankId == 505 || achievementRankId == 506 || achievementRankId == 507 || achievementRankId == 508 || achievementRankId == 509) {
+			personaEntity.setLevel(10);
+			personaEntity.setRep(30375);
+			personaEntity.setRepAtCurrentLevel(0);
+			personaDAO.update(personaEntity);
 		}
 
 		String rewardTypeStr = achievementRankEntity.getRewardType();
@@ -746,6 +759,14 @@ public class AchievementsBO {
 	public void applyLevelUpAchievement(PersonaEntity personaEntity) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.LEVEL_UP, Integer.valueOf(personaEntity.getLevel()).longValue());
+	}
+	
+	public void applyExtraLVLAchievement(PersonaEntity personaEntity) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		int extraLVLValue = achievementPersonaEntity.getExtraLVL();
+		extraLVLValue = extraLVLValue + 1;
+		achievementPersonaEntity.setExtraLVL(extraLVLValue);
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_EXTRALVL, Integer.valueOf(extraLVLValue).longValue());
 	}
 
 	public void applyAirTimeAchievement(ArbitrationPacket arbitrationPacket, PersonaEntity personaEntity) {

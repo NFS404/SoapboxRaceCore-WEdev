@@ -128,6 +128,9 @@ public class RewardBO {
 				while (isLeveledUp) {
 					personaEntity.setLevel(personaEntity.getLevel() + 1);
 					achievementsBO.applyLevelUpAchievement(personaEntity);
+					if (personaEntity.getLevel() == 100) {
+						achievementsBO.applyExtraLVLAchievement(personaEntity);
+					}
 					personaEntity.setRepAtCurrentLevel((int) (expMax - expToNextLevel));
 
 					expToNextLevel = levelRepDao.findByLevel((long) personaEntity.getLevel()).getExpPoint();

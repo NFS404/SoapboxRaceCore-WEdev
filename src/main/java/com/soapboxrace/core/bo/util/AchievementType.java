@@ -308,7 +308,15 @@ public enum AchievementType {
 	/**
 	 * own [x] [car-brand](s) in your garage
 	 */
-	VOLKSWAGEN_COLLECTOR(65); //
+	VOLKSWAGEN_COLLECTOR(65), //
+	/**
+	 * got a 100 level for another time
+	 */
+	WEV2_EXTRALVL(100), //
+	/**
+	 * be as a team player of top-3 teams on season
+	 */
+	WEV2_TEAMS_WINNERS(101); //
 
 	private int id;
 

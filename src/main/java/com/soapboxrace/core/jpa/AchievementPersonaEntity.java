@@ -63,6 +63,9 @@ public class AchievementPersonaEntity {
 	private int restrictedClassDWins;
 	private int restrictedClassEWins;
 	private int restrictedClassSWins;
+	
+	private int extraLVL;
+	private int teamsSeasonWinners;
 
 	public int getId() {
 		return id;
@@ -303,5 +306,20 @@ public class AchievementPersonaEntity {
 	public void setSpRaces(int spRaces) {
 		this.spRaces = spRaces;
 	}
+	
+	public int getExtraLVL() {
+		return extraLVL;
+	}
 
+	public void setExtraLVL(int extraLVL) {
+		this.extraLVL = extraLVL;
+	}
+	
+	public int getTeamsSeasonWinners() {
+		return teamsSeasonWinners;
+	}
+
+	public void setTeamsSeasonWinners(int teamsSeasonWinners) {
+		this.teamsSeasonWinners = teamsSeasonWinners;
+	}
 }
