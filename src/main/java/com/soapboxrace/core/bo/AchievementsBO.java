@@ -158,7 +158,8 @@ public class AchievementsBO {
 			ArrayOfAchievementRankPacket arrayOfAchievementRankPacket = new ArrayOfAchievementRankPacket();
 			List<AchievementRankPacket> achievementRankPacketList = arrayOfAchievementRankPacket.getAchievementRankPacket();
 
-			List<AchievementRankEntity> ranks = achievementDefinitionEntity.getRanks();
+			// List<AchievementRankEntity> ranks = achievementDefinitionEntity.getRanks();
+			List<AchievementRankEntity> ranks = achievementRankDAO.findByAchievementDefinitionId(achievementDefinitionEntity.getId());
 			long tmpRankValue = 0;
 			for (AchievementRankEntity achievementRankEntity : ranks) {
 				AchievementRankPacket achievementRankPacket = new AchievementRankPacket();
