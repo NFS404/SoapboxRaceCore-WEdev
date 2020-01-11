@@ -812,7 +812,7 @@ public class AchievementsBO {
 		int teamRacesWonValue = achievementPersonaEntity.getTeamRacesWon();
 		teamRacesWonValue = teamRacesWonValue + 1;
 		achievementPersonaEntity.setTeamRacesWon(teamRacesWonValue);
-		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_EXTRALVL, Integer.valueOf(teamRacesWonValue).longValue());
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_MVP, Integer.valueOf(teamRacesWonValue).longValue());
 	}
 
 	public void applyAirTimeAchievement(ArbitrationPacket arbitrationPacket, PersonaEntity personaEntity) {
