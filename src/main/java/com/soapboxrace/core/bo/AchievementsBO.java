@@ -587,7 +587,7 @@ public class AchievementsBO {
 			for (int i = 0; i < 5; i++) {
 				RewardDropEntity rewardDropEntity = new RewardDropEntity();
 				rewardDropEntity.setAmount(1);
-				rewardDropEntity.setProduct(dropBO.getRandomProductItem(null));
+				rewardDropEntity.setProduct(dropBO.getRandomProductItem(null, 2));
 				rewardDropEntity.setRewardDestiny(RewardDestinyType.INVENTORY);
 				rewardDrops.add(rewardDropEntity);
 			}

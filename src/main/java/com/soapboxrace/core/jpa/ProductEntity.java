@@ -24,7 +24,7 @@ import javax.persistence.Table;
 						+ "obj.enabled = true AND " //
 						+ "obj.level <= :level AND " //
 						+ "obj.categoryName = :categoryName AND " //
-						+ "obj.isDropable = 1 AND " //
+						+ "obj.isDropableMode = :isDropableMode AND " //
 						+ "obj.productType = :productType"), //
 		@NamedQuery(name = "ProductEntity.findByProductId", query = "SELECT obj FROM ProductEntity obj WHERE obj.productId = :productId"), //
 		@NamedQuery(name = "ProductEntity.findByHash", query = "SELECT obj FROM ProductEntity obj WHERE obj.hash = :hash") //

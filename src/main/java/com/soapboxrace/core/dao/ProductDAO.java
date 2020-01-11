@@ -40,6 +40,7 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 		query.setParameter("categoryName", categoryName);
 		query.setParameter("productType", productType);
 		query.setParameter("level", level);
+		query.setParameter("isDropableMode", 1); // Not used
 		return query.getResultList();
 	}
 
@@ -61,8 +62,17 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 
 	public ProductEntity getRandomDrop(String productType, int isDropableMode) {
 		StringBuilder sqlWhere = new StringBuilder();
-		sqlWhere.append(" WHERE obj.isDropableMode=:isDropableMode ");
-		sqlWhere.append(" AND obj.productType=:productType");
+		// 1 - main drop items (1 + 3), 2 - main + rare (1 + 2 + 3), 3 - weak drop items (3)
+		if (isDropableMode == 1) {
+			sqlWhere.append(" WHERE obj.isDropableMode <> 0 AND obj.isDropableMode <> 2 ");
+		}
+		if (isDropableMode == 2) {
+			sqlWhere.append(" WHERE obj.isDropableMode <> 0 ");
+		}
+		if (isDropableMode == 3) {
+			sqlWhere.append(" WHERE obj.isDropableMode <> 0 AND obj.isDropableMode <> 1 AND obj.isDropableMode <> 2 ");
+		}
+		sqlWhere.append(" AND obj.productType= :productType");
 
 		StringBuilder sqlCount = new StringBuilder();
 		sqlCount.append("SELECT COUNT(*) FROM ProductEntity obj ");
