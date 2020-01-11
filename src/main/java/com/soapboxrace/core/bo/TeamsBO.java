@@ -59,6 +59,9 @@ public class TeamsBO {
 	
 	@EJB
 	private EventSessionDAO eventSessionDao;
+	
+	@EJB
+	private AchievementsBO achievementsBO;
 
 	@Resource(mappedName = "java:jboss/mail/Gmail")
 	private Session mailSession;
@@ -171,6 +174,7 @@ public class TeamsBO {
 							winnerTeamPoints = racerTeamEntity.getTeamPoints();
 							teamsDao.update(racerTeamEntity);
 //							System.out.println("TEST teamAccoladesBasic teamFinishProper");
+							achievementsBO.applyTeamRacesWonAchievement(racerEntity);
 							
 							messageDebug = teamAccoladesDebugTimes(eventSessionId);
 							message = ":heavy_minus_sign:"

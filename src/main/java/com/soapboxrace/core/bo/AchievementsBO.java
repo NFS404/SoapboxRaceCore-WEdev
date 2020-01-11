@@ -380,9 +380,9 @@ public class AchievementsBO {
 		case WEV2_EXTRALVL:
 			int extraLVL = achievementPersonaEntity.getExtraLVL();
 			return Integer.valueOf(extraLVL).longValue();
-		case WEV2_TEAMS_WINNERS:
-			int teamsSeasonWinners = achievementPersonaEntity.getTeamsSeasonWinners();
-			return Integer.valueOf(teamsSeasonWinners).longValue();
+		case WEV2_MVP:
+			int teamRacesWon = achievementPersonaEntity.getTeamRacesWon();
+			return Integer.valueOf(teamRacesWon).longValue();
 		default:
 			break;
 		}
@@ -805,6 +805,14 @@ public class AchievementsBO {
 		extraLVLValue = extraLVLValue + 1;
 		achievementPersonaEntity.setExtraLVL(extraLVLValue);
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_EXTRALVL, Integer.valueOf(extraLVLValue).longValue());
+	}
+	
+	public void applyTeamRacesWonAchievement(PersonaEntity personaEntity) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		int teamRacesWonValue = achievementPersonaEntity.getTeamRacesWon();
+		teamRacesWonValue = teamRacesWonValue + 1;
+		achievementPersonaEntity.setTeamRacesWon(teamRacesWonValue);
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_EXTRALVL, Integer.valueOf(teamRacesWonValue).longValue());
 	}
 
 	public void applyAirTimeAchievement(ArbitrationPacket arbitrationPacket, PersonaEntity personaEntity) {

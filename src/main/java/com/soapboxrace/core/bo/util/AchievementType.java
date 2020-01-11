@@ -314,9 +314,9 @@ public enum AchievementType {
 	 */
 	WEV2_EXTRALVL(100), //
 	/**
-	 * be as a team player of top-3 teams on season
+	 * win races for your team
 	 */
-	WEV2_TEAMS_WINNERS(101); //
+	WEV2_MVP(101); //
 
 	private int id;
 
