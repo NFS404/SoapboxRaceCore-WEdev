@@ -142,7 +142,12 @@ public class EventResultRouteBO {
 		}
 
 		RouteEventResult routeEventResult = new RouteEventResult();
-		routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult));
+		int isDropableMode = 1;
+		// Give rare drop if it's a online class-restricted race
+		if (eventDataEntity.getEvent().getCarClassHash() != 607077938 && arrayOfRouteEntrantResult.getRouteEntrantResult().size() >= 2) {
+			isDropableMode = 2;
+		}
+		routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode));
 		routeEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, routeArbitrationPacket, routeArbitrationPacket.getNumberOfCollisions()));
 		routeEventResult.setEntrants(arrayOfRouteEntrantResult);
 		int currentEventId = eventDataEntity.getEvent().getId();

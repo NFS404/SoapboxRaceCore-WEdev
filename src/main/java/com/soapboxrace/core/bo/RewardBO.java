@@ -66,20 +66,20 @@ public class RewardBO {
 		return (long) (personaEntity.getRepAtCurrentLevel() + exp) >= levelRepDao.findByLevel((long) personaEntity.getLevel()).getExpPoint();
 	}
 
-	public LuckyDrawInfo getLuckyDrawInfo(Integer rank, Integer level, PersonaEntity personaEntity) {
+	public LuckyDrawInfo getLuckyDrawInfo(Integer rank, Integer level, PersonaEntity personaEntity, int isDropableMode) {
 		LuckyDrawInfo luckyDrawInfo = new LuckyDrawInfo();
 		if (!parameterBO.getBoolParam("ENABLE_DROP_ITEM")) {
 			return luckyDrawInfo;
 		}
 		ArrayOfLuckyDrawItem arrayOfLuckyDrawItem = new ArrayOfLuckyDrawItem();
-		arrayOfLuckyDrawItem.getLuckyDrawItem().add(getItemFromProduct(personaEntity, null));
+		arrayOfLuckyDrawItem.getLuckyDrawItem().add(getItemFromProduct(personaEntity, null, isDropableMode));
 		luckyDrawInfo.setCardDeck(CardDecks.forRank(rank));
 		luckyDrawInfo.setItems(arrayOfLuckyDrawItem);
 		return luckyDrawInfo;
 	}
 
-	public LuckyDrawItem getItemFromProduct(PersonaEntity personaEntity, String eventMode) {
-		ProductEntity productEntity = dropBO.getRandomProductItem(eventMode);
+	public LuckyDrawItem getItemFromProduct(PersonaEntity personaEntity, String eventMode, int isDropableMode) {
+		ProductEntity productEntity = dropBO.getRandomProductItem(eventMode, isDropableMode);
 		LuckyDrawItem luckyDrawItem = dropBO.copyProduct2LuckyDraw(productEntity);
 		boolean inventoryFull = inventoryBO.isInventoryFull(productEntity, personaEntity);
 		if (inventoryFull) {
@@ -192,11 +192,11 @@ public class RewardBO {
 		rewardVO.add(0, finalCash.intValue(), EnumRewardCategory.SKILL_MOD, EnumRewardType.TOKEN_AMPLIFIER);
 	}
 
-	public Accolades getAccolades(PersonaEntity personaEntity, ArbitrationPacket arbitrationPacket, RewardVO rewardVO) {
+	public Accolades getAccolades(PersonaEntity personaEntity, ArbitrationPacket arbitrationPacket, RewardVO rewardVO, int isDropableMode) {
 		Accolades accolades = new Accolades();
 		accolades.setFinalRewards(getFinalReward(rewardVO.getRep(), rewardVO.getCash()));
 		accolades.setHasLeveledUp(isLeveledUp(personaEntity, rewardVO.getRep()));
-		accolades.setLuckyDrawInfo(getLuckyDrawInfo(arbitrationPacket.getRank(), personaEntity.getLevel(), personaEntity));
+		accolades.setLuckyDrawInfo(getLuckyDrawInfo(arbitrationPacket.getRank(), personaEntity.getLevel(), personaEntity, isDropableMode));
 		accolades.setOriginalRewards(getFinalReward(rewardVO.getRep(), rewardVO.getCash()));
 		accolades.setRewardInfo(rewardVO.getArrayOfRewardPart());
 		return accolades;

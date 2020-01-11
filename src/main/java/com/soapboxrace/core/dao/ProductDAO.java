@@ -59,9 +59,9 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 		return !resultList.isEmpty() ? resultList.get(0) : null;
 	}
 
-	public ProductEntity getRandomDrop(String productType) {
+	public ProductEntity getRandomDrop(String productType, int isDropableMode) {
 		StringBuilder sqlWhere = new StringBuilder();
-		sqlWhere.append(" WHERE obj.isDropable=true ");
+		sqlWhere.append(" WHERE obj.isDropableMode=:isDropableMode ");
 		sqlWhere.append(" AND obj.productType=:productType");
 
 		StringBuilder sqlCount = new StringBuilder();

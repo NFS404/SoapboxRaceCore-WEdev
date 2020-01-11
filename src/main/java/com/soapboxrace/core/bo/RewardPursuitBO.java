@@ -25,7 +25,7 @@ public class RewardPursuitBO extends RewardBO {
 	private LegitRaceBO legitRaceBO;
 
 	public Accolades getPursuitAccolades(Long activePersonaId, PursuitArbitrationPacket pursuitArbitrationPacket, EventSessionEntity eventSessionEntity,
-			Boolean isBusted) {
+			Boolean isBusted, int isDropableMode) {
 		if (!legitRaceBO.isLegit(activePersonaId, pursuitArbitrationPacket, eventSessionEntity) || isBusted) {
 			return new Accolades();
 		}
@@ -38,7 +38,7 @@ public class RewardPursuitBO extends RewardBO {
 		Random random = new Random();
 		pursuitArbitrationPacket.setRank(random.nextInt(4));
 		applyRaceReward(rewardVO.getRep(), rewardVO.getCash(), personaEntity);
-		return getAccolades(personaEntity, pursuitArbitrationPacket, rewardVO);
+		return getAccolades(personaEntity, pursuitArbitrationPacket, rewardVO, isDropableMode);
 	}
 
 	public void setPursuitRewards(PersonaEntity personaEntity, EventEntity eventEntity, PursuitArbitrationPacket pursuitArbitrationPacket, RewardVO rewardVO) {

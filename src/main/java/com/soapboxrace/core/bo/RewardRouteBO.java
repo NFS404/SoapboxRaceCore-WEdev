@@ -27,7 +27,7 @@ public class RewardRouteBO extends RewardBO {
 	@EJB
 	private PersonaBO personaBO;
 
-	public Accolades getRouteAccolades(Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, EventSessionEntity eventSessionEntity, ArrayOfRouteEntrantResult arrayOfRouteEntrantResult) {
+	public Accolades getRouteAccolades(Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, EventSessionEntity eventSessionEntity, ArrayOfRouteEntrantResult arrayOfRouteEntrantResult, int isDropableMode) {
 		if (!legitRaceBO.isLegit(activePersonaId, routeArbitrationPacket, eventSessionEntity)) {
 			return new Accolades();
 		}
@@ -45,7 +45,7 @@ public class RewardRouteBO extends RewardBO {
 		setMultiplierReward(eventEntity, rewardVO);
 
 		applyRaceReward(rewardVO.getRep(), rewardVO.getCash(), personaEntity);
-		return getAccolades(personaEntity, routeArbitrationPacket, rewardVO);
+		return getAccolades(personaEntity, routeArbitrationPacket, rewardVO, isDropableMode);
 	}
 
 }

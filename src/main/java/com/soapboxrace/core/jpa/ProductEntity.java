@@ -24,7 +24,7 @@ import javax.persistence.Table;
 						+ "obj.enabled = true AND " //
 						+ "obj.level <= :level AND " //
 						+ "obj.categoryName = :categoryName AND " //
-						+ "obj.isDropable = true AND " //
+						+ "obj.isDropable = 1 AND " //
 						+ "obj.productType = :productType"), //
 		@NamedQuery(name = "ProductEntity.findByProductId", query = "SELECT obj FROM ProductEntity obj WHERE obj.productId = :productId"), //
 		@NamedQuery(name = "ProductEntity.findByHash", query = "SELECT obj FROM ProductEntity obj WHERE obj.hash = :hash") //
@@ -59,7 +59,7 @@ public class ProductEntity {
 	private boolean enabled;
 	private int minLevel;
 	private boolean premium = false;
-	private boolean isDropable;
+	private int isDropableMode;
 	private Integer topSpeed = 0;
 	private Integer accel = 0;
 	private Integer handling = 0;
@@ -259,12 +259,12 @@ public class ProductEntity {
 		this.premium = premium;
 	}
 
-	public boolean isDropable() {
-		return isDropable;
+	public int isDropableMode() {
+		return isDropableMode;
 	}
 
-	public void setDropable(boolean isDropable) {
-		this.isDropable = isDropable;
+	public void setDropableMode(int isDropableMode) {
+		this.isDropableMode = isDropableMode;
 	}
 
 	public float getResalePrice() {

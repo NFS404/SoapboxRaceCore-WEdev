@@ -545,7 +545,7 @@ public class AchievementsBO {
 		achievementAwarded.setClipLengthInSeconds(20);
 		achievementAwarded.setDescription("LOL");
 		achievementAwarded.setIcon("BADGE18");
-		achievementAwarded.setName("Отключение через 10 минут!");
+		achievementAwarded.setName("ТЕХ.РАБОТЫ ЧЕРЕЗ 10 МИН.");
 		achievementAwarded.setPoints(0);
 		achievementAwarded.setRare(false);
 		achievementAwarded.setRarity(0);

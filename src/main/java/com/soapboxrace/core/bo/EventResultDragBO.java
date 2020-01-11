@@ -127,7 +127,12 @@ public class EventResultDragBO {
 		}
 
 		DragEventResult dragEventResult = new DragEventResult();
-		dragEventResult.setAccolades(rewardDragBO.getDragAccolades(activePersonaId, dragArbitrationPacket, eventSessionEntity, arrayOfDragEntrantResult));
+		int isDropableMode = 1;
+		// Give weak drop if it's a single-player drag
+		if (arrayOfDragEntrantResult.getDragEntrantResult().size() < 2) {
+			isDropableMode = 3;
+		}
+		dragEventResult.setAccolades(rewardDragBO.getDragAccolades(activePersonaId, dragArbitrationPacket, eventSessionEntity, arrayOfDragEntrantResult, isDropableMode));
 		dragEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, dragArbitrationPacket, dragArbitrationPacket.getNumberOfCollisions()));
 		dragEventResult.setEntrants(arrayOfDragEntrantResult);
 		dragEventResult.setEventId(currentEventId);

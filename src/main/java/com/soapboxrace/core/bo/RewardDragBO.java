@@ -27,7 +27,7 @@ public class RewardDragBO extends RewardBO {
 	@EJB
 	private PersonaBO personaBO;
 
-	public Accolades getDragAccolades(Long activePersonaId, DragArbitrationPacket dragArbitrationPacket, EventSessionEntity eventSessionEntity, ArrayOfDragEntrantResult arrayOfDragEntrantResult) {
+	public Accolades getDragAccolades(Long activePersonaId, DragArbitrationPacket dragArbitrationPacket, EventSessionEntity eventSessionEntity, ArrayOfDragEntrantResult arrayOfDragEntrantResult, int isDropableMode) {
 		if (!legitRaceBO.isLegit(activePersonaId, dragArbitrationPacket, eventSessionEntity)) {
 			return new Accolades();
 		}
@@ -45,6 +45,6 @@ public class RewardDragBO extends RewardBO {
 		setMultiplierReward(eventEntity, rewardVO);
 
 		applyRaceReward(rewardVO.getRep(), rewardVO.getCash(), personaEntity);
-		return getAccolades(personaEntity, dragArbitrationPacket, rewardVO);
+		return getAccolades(personaEntity, dragArbitrationPacket, rewardVO, isDropableMode);
 	}
 }
