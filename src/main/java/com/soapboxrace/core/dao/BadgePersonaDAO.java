@@ -8,6 +8,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
+import com.soapboxrace.core.jpa.AchievementRankEntity;
 import com.soapboxrace.core.jpa.BadgePersonaEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 
@@ -29,6 +30,13 @@ public class BadgePersonaDAO extends BaseDAO<BadgePersonaEntity> {
 	public void deleteByPersona(PersonaEntity persona) {
 		Query query = entityManager.createNamedQuery("BadgePersonaEntity.deleteByPersona");
 		query.setParameter("persona", persona);
+		query.executeUpdate();
+	}
+	
+	public void deleteByPersonaButExcludeRank(PersonaEntity persona, AchievementRankEntity achievementRankEntity) {
+		Query query = entityManager.createNamedQuery("BadgePersonaEntity.deleteByPersonaButExcludeRank");
+		query.setParameter("persona", persona);
+		query.setParameter("achievementRank", achievementRankEntity);
 		query.executeUpdate();
 	}
 }

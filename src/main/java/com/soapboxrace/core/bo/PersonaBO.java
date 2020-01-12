@@ -14,6 +14,7 @@ import com.soapboxrace.core.dao.CarSlotDAO;
 import com.soapboxrace.core.dao.LevelRepDAO;
 import com.soapboxrace.core.dao.OwnedCarDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.jpa.AchievementPersonaEntity;
 import com.soapboxrace.core.jpa.AchievementRankEntity;
 import com.soapboxrace.core.jpa.AchievementStateEntity;
 import com.soapboxrace.core.jpa.BadgePersonaEntity;
@@ -124,18 +125,40 @@ public class PersonaBO {
 		PersonaEntity persona = personaDAO.findById(activePersonaId);
 		List<BadgePersonaEntity> listOfBadges = new ArrayList<>();
 		List<BadgeInput> badgeInputs = badgeBundle.getBadgeInputs();
+//		boolean slot0IsLocked = false;
+//		AchievementRankEntity achievementRankEntityCheck = new AchievementRankEntity();
+//		// Extra-Level achiv. must be not removeable
+//		List<BadgePersonaEntity> listToCheck = persona.getListOfBadges();
+//		for (BadgePersonaEntity badgeEntry : listToCheck) { // Checking existing player's badge list
+//			Long idToCheck = badgeEntry.getAchievementRank().getAchievementDefinition().getId();
+//			if (idToCheck == 100) { // 100 - DefinitionId of ExtraLVL achiv.
+//				slot0IsLocked = true;
+//				achievementRankEntityCheck = badgeEntry.getAchievementRank();
+//				break;
+//			}
+//		}
 		for (BadgeInput badgeInput : badgeInputs) {
-
-			AchievementStateEntity achievementStateEntity = achievementStateDAO.findByPersonaBadge(persona, (long) badgeInput.getBadgeDefinitionId());
+			int idCheck = badgeInput.getBadgeDefinitionId();
+			AchievementStateEntity achievementStateEntity = achievementStateDAO.findByPersonaBadge(persona, (long) idCheck);
+			
 			AchievementRankEntity achievementRank = achievementStateEntity.getAchievementRank();
-
 			BadgePersonaEntity badgePersonaEntity = new BadgePersonaEntity();
-			badgePersonaEntity.setAchievementRank(achievementRank);
+//			if (badgeInput.getSlotId() == 0 && slot0IsLocked) { // Skip the Slot 0 operations, allowing other slots to be replaced
+//				continue;
+//			}
+//			else {
+				badgePersonaEntity.setSlot(badgeInput.getSlotId());
+//			}
 			badgePersonaEntity.setPersona(persona);
-			badgePersonaEntity.setSlot(badgeInput.getSlotId());
+			badgePersonaEntity.setAchievementRank(achievementRank);
 			listOfBadges.add(badgePersonaEntity);
 		}
-		badgePersonaDAO.deleteByPersona(persona);
+//		if (slot0IsLocked) {
+//			badgePersonaDAO.deleteByPersonaButExcludeRank(persona, achievementRankEntityCheck);
+//		}
+//		else {
+			badgePersonaDAO.deleteByPersona(persona);
+//		}
 		persona.setListOfBadges(listOfBadges);
 		personaDAO.update(persona);
 	}

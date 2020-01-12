@@ -64,6 +64,7 @@ public class DriverPersona {
 
 	// Level calc - summary amount of EXP for all levels, consider a DB's level_rep values to sum for every level stage
 	// DB's level exp calc by Metonator's EXP generator
+	// Any level above 100 will cause THunts to disappear from map, game issue
 	@GET
 	@Path("/GetExpLevelPointsMap")
 	@Produces(MediaType.APPLICATION_XML)

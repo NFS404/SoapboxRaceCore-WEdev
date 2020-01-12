@@ -16,9 +16,11 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "BADGE_PERSONA")
 @NamedQueries({ @NamedQuery(name = "BadgePersonaEntity.findByPersonaId", //
-		query = "SELECT obj FROM BadgePersonaEntity obj WHERE obj.persona = :persona"), //
+		        query = "SELECT obj FROM BadgePersonaEntity obj WHERE obj.persona = :persona"), //
 		@NamedQuery(name = "BadgePersonaEntity.deleteByPersona", //
-				query = "DELETE FROM BadgePersonaEntity obj WHERE obj.persona = :persona") //
+				query = "DELETE FROM BadgePersonaEntity obj WHERE obj.persona = :persona"), //
+		@NamedQuery(name = "BadgePersonaEntity.deleteByPersonaButExcludeRank", //
+		        query = "DELETE FROM BadgePersonaEntity obj WHERE obj.persona = :persona AND obj.achievementRank <> :achievementRank ") //
 })
 public class BadgePersonaEntity {
 
