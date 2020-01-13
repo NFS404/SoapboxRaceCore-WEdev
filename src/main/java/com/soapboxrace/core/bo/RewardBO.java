@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.AchievementType;
 import com.soapboxrace.core.bo.util.RewardVO;
 import com.soapboxrace.core.dao.LevelRepDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
@@ -80,6 +81,9 @@ public class RewardBO {
 
 	public LuckyDrawItem getItemFromProduct(PersonaEntity personaEntity, String eventMode, int isDropableMode) {
 		ProductEntity productEntity = dropBO.getRandomProductItem(eventMode, isDropableMode);
+		if (productEntity.getStars() == 4) {
+			achievementsBO.applyDropAchievements(personaEntity, AchievementType.WEV2_EARNSKILL);
+		}
 		LuckyDrawItem luckyDrawItem = dropBO.copyProduct2LuckyDraw(productEntity);
 		boolean inventoryFull = inventoryBO.isInventoryFull(productEntity, personaEntity);
 		if (inventoryFull) {

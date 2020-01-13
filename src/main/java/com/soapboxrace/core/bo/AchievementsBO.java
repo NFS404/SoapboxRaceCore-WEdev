@@ -377,12 +377,15 @@ public class AchievementsBO {
 			return Integer.valueOf(mpRaces).longValue();
 		case XKR_SPEED_HUNTER:
 			return 0l;
-		case WEV2_EXTRALVL:
-			int extraLVL = achievementPersonaEntity.getExtraLVL();
-			return Integer.valueOf(extraLVL).longValue();
+//		case WEV2_EXTRALVL:
+//			int extraLVL = achievementPersonaEntity.getExtraLVL();
+//			return Integer.valueOf(extraLVL).longValue();
 		case WEV2_MVP:
 			int teamRacesWon = achievementPersonaEntity.getTeamRacesWon();
 			return Integer.valueOf(teamRacesWon).longValue();
+		case WEV2_EARNSKILL:
+			int Skills4Earned = achievementPersonaEntity.getSkills4Earned();
+			return Integer.valueOf(Skills4Earned).longValue();
 		default:
 			break;
 		}
@@ -391,11 +394,23 @@ public class AchievementsBO {
 	}
 
 	public void applyCommerceAchievement(PersonaEntity personaEntity) {
-		//
+		// 
 	}
 
 	public void applyEventAchievement(PersonaEntity personaEntity) {
 		//
+	}
+	
+	public void applyDropAchievements(PersonaEntity personaEntity, AchievementType achievementType) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		switch (achievementType) {
+		case WEV2_EARNSKILL:
+			int skills4EarnedValue = achievementPersonaEntity.getTeamRacesWon();
+			skills4EarnedValue = skills4EarnedValue + 1;
+			achievementPersonaEntity.setSkills4Earned(skills4EarnedValue);
+			processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_EARNSKILL, Integer.valueOf(skills4EarnedValue).longValue());
+			break;
+		} // More to come
 	}
 
 	public void applyPowerupAchievement(PersonaEntity personaEntity) {
@@ -799,13 +814,13 @@ public class AchievementsBO {
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.LEVEL_UP, Integer.valueOf(personaEntity.getLevel()).longValue());
 	}
 	
-	public void applyExtraLVLAchievement(PersonaEntity personaEntity) {
-		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
-		int extraLVLValue = achievementPersonaEntity.getExtraLVL();
-		extraLVLValue = extraLVLValue + 1;
-		achievementPersonaEntity.setExtraLVL(extraLVLValue);
-		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_EXTRALVL, Integer.valueOf(extraLVLValue).longValue());
-	}
+//	public void applyExtraLVLAchievement(PersonaEntity personaEntity) {
+//		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+//		int extraLVLValue = achievementPersonaEntity.getExtraLVL();
+//		extraLVLValue = extraLVLValue + 1;
+//		achievementPersonaEntity.setExtraLVL(extraLVLValue);
+//		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_EXTRALVL, Integer.valueOf(extraLVLValue).longValue());
+//	}
 	
 	public void applyTeamRacesWonAchievement(PersonaEntity personaEntity) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);

@@ -66,6 +66,7 @@ public class AchievementPersonaEntity {
 	
 	private int extraLVL;
 	private int teamRacesWon;
+	private int skills4Earned;
 
 	public int getId() {
 		return id;
@@ -321,5 +322,13 @@ public class AchievementPersonaEntity {
 
 	public void setTeamRacesWon(int teamRacesWon) {
 		this.teamRacesWon = teamRacesWon;
+	}
+	
+	public int getSkills4Earned() {
+		return skills4Earned;
+	}
+
+	public void setSkills4Earned(int skills4Earned) {
+		this.skills4Earned = skills4Earned;
 	}
 }

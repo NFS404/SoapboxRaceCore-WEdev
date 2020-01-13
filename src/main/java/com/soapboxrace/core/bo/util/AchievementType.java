@@ -310,13 +310,17 @@ public enum AchievementType {
 	 */
 	VOLKSWAGEN_COLLECTOR(65), //
 	/**
-	 * got a 100 level for another time
+	 * got a 100 level for another time -- unactive
 	 */
 	WEV2_EXTRALVL(100), //
 	/**
 	 * win races for your team
 	 */
-	WEV2_MVP(101); //
+	WEV2_MVP(101), //
+	/**
+	 * got a 4-star skills on class-restricted races or treasure hunt
+	 */
+	WEV2_EARNSKILL(102); //
 
 	private int id;
 
