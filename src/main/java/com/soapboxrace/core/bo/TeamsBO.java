@@ -12,6 +12,7 @@ import javax.mail.Session;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.bo.util.TeamsRankType;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
@@ -62,6 +63,9 @@ public class TeamsBO {
 	
 	@EJB
 	private AchievementsBO achievementsBO;
+	
+	@EJB
+	private TeamsRankType teamsRankType;
 
 	@Resource(mappedName = "java:jboss/mail/Gmail")
 	private Session mailSession;
@@ -143,7 +147,7 @@ public class TeamsBO {
 		String messageDebug = "";
 //		System.out.println("TEST teamAccoladesBasic sleep, count " + count + ", team1check: " + eventSessionEntity.getTeam1Check() + ", team2check: " + eventSessionEntity.getTeam2Check());
 		
-		if (eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check()) {
+		if (eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check() && parameterBO.getIntParam("TEAM_CURRENTSEASON") > 0) {
 			int targetCarClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
 			Long teamWinner = eventSessionEntity.getTeamWinner();
 			Long team1 = eventSessionEntity.getTeam1Id();
@@ -253,15 +257,36 @@ public class TeamsBO {
 	// Output teams leaderboard every hour into Discord
 	@Schedule(hour = "*/1", persistent = false)
 	public void teamStatsDiscord() {
-		if (parameterBO.getBoolParam("DISCORD_ONLINECOUNT")) {
+		if (parameterBO.getBoolParam("DISCORD_ONLINECOUNT") && parameterBO.getIntParam("TEAM_CURRENTSEASON") > 0) { // Season 0 deactivates team actions
 			List<TeamsEntity> teamsList = teamsDao.findAllTeams();
+			String seasonText = parameterBO.getStrParam("TEAM_SEASONTEXT");
 			String messageAppend = "";
+			String teamRank = "";
+			String teamInitialRank = "";
 			for (TeamsEntity team : teamsList) {
-				messageAppend = messageAppend.concat("\n:busts_in_silhouette: **" + team.getTeamName() + "** - **" +
-			team.getPlayersCount() + "P** - " + team.getTeamPoints() + ":small_orange_diamond:");
+				teamInitialRank = team.getCurrentRank();
+				switch (teamInitialRank) {
+				case "none":
+					teamRank = ":busts_in_silhouette:";
+					break;
+				case "bronze":
+					teamRank = ":third_place:";
+					break;
+				case "silver":
+					teamRank = ":second_place:";
+					break;
+				case "gold":
+					teamRank = ":first_place:";
+					break;
+				case "elite":
+					teamRank = ":medal:";
+					break;
+				}	
+				messageAppend = messageAppend.concat("\n" + teamRank + " **" + team.getTeamName() + "** - **" +
+			team.getPlayersCount() + "P** - " + team.getTeamPoints() + ":small_orange_diamond: - **" + team.getMedals() + "**:trident:");
 			}
 			String message = ":heavy_minus_sign:"
-	        		+ "\n:city_sunset: **|** Season 1 (*19.12.2019 : 19.01.2020*)"
+	        		+ "\n:city_sunset: **|** " + seasonText
 	        		+ "\n:military_medal: **|** Текущая статистика команд / Current team stats:\n"
 	        		+ messageAppend;
 			

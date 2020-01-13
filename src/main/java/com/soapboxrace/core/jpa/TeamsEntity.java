@@ -34,6 +34,8 @@ public class TeamsEntity {
 	private int teamPoints;
 	private boolean active;
 	private int playersCount;
+	private String currentRank;
+	private int medals;
 
 	@ManyToOne
 	@JoinColumn(name = "LEADERID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "TEAMS_PERSONA_FK"))
@@ -111,6 +113,22 @@ public class TeamsEntity {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+	
+	public String getCurrentRank() {
+		return currentRank;
+	}
+
+	public void setCurrentRank(String currentRank) {
+		this.currentRank = currentRank;
+	}
+	
+	public int getMedals() {
+		return medals;
+	}
+
+	public void setMedals(int medals) {
+		this.medals = medals;
 	}
 
 }
