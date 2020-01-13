@@ -12,7 +12,6 @@ import javax.mail.Session;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
-import com.soapboxrace.core.bo.util.TeamsRankType;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
@@ -20,7 +19,6 @@ import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
-import com.soapboxrace.core.jpa.FriendListEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.jpa.UserEntity;
@@ -63,9 +61,6 @@ public class TeamsBO {
 	
 	@EJB
 	private AchievementsBO achievementsBO;
-	
-	@EJB
-	private TeamsRankType teamsRankType;
 
 	@Resource(mappedName = "java:jboss/mail/Gmail")
 	private Session mailSession;
