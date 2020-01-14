@@ -278,7 +278,7 @@ public class TeamsBO {
 					break;
 				}	
 				messageAppend = messageAppend.concat("\n" + teamRank + " **" + team.getTeamName() + "** - **" +
-			team.getPlayersCount() + "P** - " + team.getTeamPoints() + ":small_orange_diamond: - **" + team.getMedals() + "**:trident:");
+			team.getPlayersCount() + "P** - " + team.getTeamPoints() + ":small_orange_diamond: - **" + team.getMedals() + "** :trident:");
 			}
 			String message = ":heavy_minus_sign:"
 	        		+ "\n:city_sunset: **|** " + seasonText
