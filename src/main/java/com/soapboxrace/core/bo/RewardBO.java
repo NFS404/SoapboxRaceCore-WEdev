@@ -259,8 +259,13 @@ public class RewardBO {
 	public void setBaseReward(PersonaEntity personaEntity, EventEntity eventEntity, ArbitrationPacket arbitrationPacket, RewardVO rewardVO) {
 		Float baseRep = (float) eventEntity.getBaseRepReward();
 		Float baseCash = (float) eventEntity.getBaseCashReward();
-		Float playerLevelRepConst = getPlayerLevelConst(personaEntity.getLevel(), eventEntity.getLevelRepRewardMultiplier());
-		Float playerLevelCashConst = getPlayerLevelConst(personaEntity.getLevel(), eventEntity.getLevelCashRewardMultiplier());
+		int levelCheck = personaEntity.getLevel();
+		int levelLock = parameterBO.getIntParam("REWARD_LEVELLOCK");
+		if (levelLock < levelCheck) {
+			levelCheck = levelLock;
+		}
+		Float playerLevelRepConst = getPlayerLevelConst(levelCheck, eventEntity.getLevelRepRewardMultiplier());
+		Float playerLevelCashConst = getPlayerLevelConst(levelCheck, eventEntity.getLevelCashRewardMultiplier());
 		Float timeConst = getTimeConst(eventEntity.getLegitTime(), arbitrationPacket.getEventDurationInMilliseconds());
 		rewardVO.setBaseRep(getBaseReward(baseRep, playerLevelRepConst, timeConst));
 		rewardVO.setBaseCash(getBaseReward(baseCash, playerLevelCashConst, timeConst));
@@ -278,9 +283,13 @@ public class RewardBO {
 			baseRep = (float) eventEntity.getBaseRepReward();
 			baseCash = (float) eventEntity.getBaseCashReward();
 		}
-		
-		Float playerLevelRepConst = getPlayerLevelConst(personaEntity.getLevel(), eventEntity.getLevelRepRewardMultiplier());
-		Float playerLevelCashConst = getPlayerLevelConst(personaEntity.getLevel(), eventEntity.getLevelCashRewardMultiplier());
+		int levelCheck = personaEntity.getLevel();
+		int levelLock = parameterBO.getIntParam("REWARD_LEVELLOCK");
+		if (levelLock < levelCheck) {
+			levelCheck = levelLock;
+		}
+		Float playerLevelRepConst = getPlayerLevelConst(levelCheck, eventEntity.getLevelRepRewardMultiplier());
+		Float playerLevelCashConst = getPlayerLevelConst(levelCheck, eventEntity.getLevelCashRewardMultiplier());
 		Float timeConst = getTimeConst(eventEntity.getLegitTime(), arbitrationPacket.getEventDurationInMilliseconds());
 		rewardVO.setBaseRep(getBaseReward(baseRep, playerLevelRepConst, timeConst));
 		rewardVO.setBaseCash(getBaseReward(baseCash, playerLevelCashConst, timeConst));
@@ -299,8 +308,13 @@ public class RewardBO {
 			baseCash = (float) eventEntity.getBaseCashReward();
 		}
 		
-		Float playerLevelRepConst = getPlayerLevelConst(personaEntity.getLevel(), eventEntity.getLevelRepRewardMultiplier());
-		Float playerLevelCashConst = getPlayerLevelConst(personaEntity.getLevel(), eventEntity.getLevelCashRewardMultiplier());
+		int levelCheck = personaEntity.getLevel();
+		int levelLock = parameterBO.getIntParam("REWARD_LEVELLOCK");
+		if (levelLock < levelCheck) {
+			levelCheck = levelLock;
+		}
+		Float playerLevelRepConst = getPlayerLevelConst(levelCheck, eventEntity.getLevelRepRewardMultiplier());
+		Float playerLevelCashConst = getPlayerLevelConst(levelCheck, eventEntity.getLevelCashRewardMultiplier());
 		Float timeConst = getTimeConst(eventEntity.getLegitTime(), arbitrationPacket.getEventDurationInMilliseconds());
 		rewardVO.setBaseRep(getBaseReward(baseRep, playerLevelRepConst, timeConst));
 		rewardVO.setBaseCash(getBaseReward(baseCash, playerLevelCashConst, timeConst));
