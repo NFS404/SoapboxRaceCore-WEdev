@@ -582,13 +582,13 @@ public class AchievementsBO {
 			personaAchievementRank.setAchievementState(AchievementState.COMPLETED);
 			achievementStateDAO.update(personaAchievementRank);
 		}
-		// ExtraLVL achievement resets player's level to 10
-		if (achievementRankId == 505 || achievementRankId == 506 || achievementRankId == 507 || achievementRankId == 508 || achievementRankId == 509) {
-			personaEntity.setLevel(10);
-			personaEntity.setRep(30375);
-			personaEntity.setRepAtCurrentLevel(0);
-			personaDAO.update(personaEntity);
-		}
+//		// ExtraLVL achievement resets player's level to 10
+//		if (achievementRankId == 505 || achievementRankId == 506 || achievementRankId == 507 || achievementRankId == 508 || achievementRankId == 509) {
+//			personaEntity.setLevel(10);
+//			personaEntity.setRep(30375);
+//			personaEntity.setRepAtCurrentLevel(0);
+//			personaDAO.update(personaEntity);
+//		}
 
 		String rewardTypeStr = achievementRankEntity.getRewardType();
 		RewardType rewardType = RewardType.valueOf(rewardTypeStr);
@@ -894,5 +894,20 @@ public class AchievementsBO {
 		achievementPersonaEntity.setTeamScapeWins(teamScapeWins);
 		long teamScapeWinsLong = Integer.valueOf(teamScapeWins).longValue();
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.GETAWAY_DRIVER, teamScapeWinsLong);
+	}
+	
+	// Used if player got a lvl 100 but achiv. itself was unactive earlier
+	public void debugAchievementApply (int rankId, PersonaEntity personaEntity) {
+		AchievementRankEntity achievementRankEntity = achievementRankDAO.findById((long) rankId);
+		if (achievementStateDAO.findByPersonaAchievementRank(personaEntity, achievementRankEntity) == null) {
+			AchievementStateEntity achievementStateEntity = new AchievementStateEntity();
+			achievementStateEntity.setAchievedOn(LocalDateTime.now());
+			achievementStateEntity.setAchievementRank(achievementRankEntity);
+			achievementStateEntity.setAchievementState(AchievementState.COMPLETED);
+			achievementStateEntity.setPersona(personaEntity);
+			achievementStateDAO.insert(achievementStateEntity);
+			personaEntity.setScore(personaEntity.getScore() + achievementRankEntity.getPoints());
+			personaDAO.update(personaEntity);
+		}
 	}
 }

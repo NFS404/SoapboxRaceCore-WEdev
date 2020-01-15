@@ -1,5 +1,6 @@
 package com.soapboxrace.core.bo;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -7,9 +8,13 @@ import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.AchievementType;
 import com.soapboxrace.core.bo.util.RewardVO;
+import com.soapboxrace.core.dao.AchievementRankDAO;
+import com.soapboxrace.core.dao.AchievementStateDAO;
 import com.soapboxrace.core.dao.LevelRepDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.ProductDAO;
+import com.soapboxrace.core.jpa.AchievementRankEntity;
+import com.soapboxrace.core.jpa.AchievementStateEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.CardDecks;
 import com.soapboxrace.core.jpa.EventEntity;
@@ -18,6 +23,7 @@ import com.soapboxrace.core.jpa.ProductEntity;
 import com.soapboxrace.core.jpa.SkillModPartEntity;
 import com.soapboxrace.core.jpa.SkillModRewardType;
 import com.soapboxrace.jaxb.http.Accolades;
+import com.soapboxrace.jaxb.http.AchievementState;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
 import com.soapboxrace.jaxb.http.ArrayOfDragEntrantResult;
 import com.soapboxrace.jaxb.http.ArrayOfLuckyDrawItem;
@@ -55,6 +61,12 @@ public class RewardBO {
 
 	@EJB
 	private AchievementsBO achievementsBO;
+	
+	@EJB
+	private AchievementStateDAO achievementStateDao;
+	
+	@EJB
+	private AchievementRankDAO achievementRankDao;
 
 	public Reward getFinalReward(Integer rep, Integer cash) {
 		Reward finalReward = new Reward();
@@ -135,6 +147,12 @@ public class RewardBO {
 //					if (personaEntity.getLevel() == 100) {
 //						achievementsBO.applyExtraLVLAchievement(personaEntity);
 //					}
+					if (personaEntity.getLevel() == 100 && achievementRankDao.findById((long) 111) == null) { // If player don't have a previous achiv. stages
+						achievementsBO.debugAchievementApply(111, personaEntity);
+						achievementsBO.debugAchievementApply(112, personaEntity);
+						achievementsBO.debugAchievementApply(113, personaEntity);
+						achievementsBO.debugAchievementApply(114, personaEntity);
+					}
 					personaEntity.setRepAtCurrentLevel((int) (expMax - expToNextLevel));
 
 					expToNextLevel = levelRepDao.findByLevel((long) personaEntity.getLevel()).getExpPoint();
