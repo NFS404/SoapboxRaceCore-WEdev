@@ -194,8 +194,8 @@ public class PromoCodeBO {
 	    			userEntity.setExtraMoney(userEntity.getExtraMoney() + extraMoneyTransit);
 	    		}
 	    		personaEntity.setCash(finalValue);
-	    		if (playerInitialLevel < 60) {
-	    			personaEntity.setLevel(60);
+	    		if (playerInitialLevel < 75) {
+	    			personaEntity.setLevel(75);
 	    		}
 		    	personaDao.update(personaEntity);
 		    	
