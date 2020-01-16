@@ -58,13 +58,13 @@ public class Powerups {
 
 		if (parameterBO.getBoolParam("POWERUPS_ENABLED")) {
 			// TeamNOS - if race has been randomly started without NOS, team players wouldn't be able to use it, but others will be able
-			PersonaEntity personaEntityTeam = personaDAO.findById(activePersonaId);
-			if (personaEntityTeam.getTeam() != null && eventSessionId != 0) {
-				EventSessionEntity eventSessionEntity = eventSessionDao.findById(eventSessionId);
-				if (!eventSessionEntity.getTeamNOS() && powerupHash == -1681514783) {
-					return "";
-				}
-			}
+//			PersonaEntity personaEntityTeam = personaDAO.findById(activePersonaId);
+//			if (personaEntityTeam.getTeam() != null && eventSessionId != 0) {
+//				EventSessionEntity eventSessionEntity = eventSessionDao.findById(eventSessionId);
+//				if (!eventSessionEntity.getTeamNOS() && powerupHash == -1681514783) {
+//					return "";
+//				}
+//			}
 			XMPP_ResponseTypePowerupActivated powerupActivatedResponse = new XMPP_ResponseTypePowerupActivated();
 			XMPP_PowerupActivatedType powerupActivated = new XMPP_PowerupActivatedType();
 			powerupActivated.setId(Long.valueOf(powerupHash));
