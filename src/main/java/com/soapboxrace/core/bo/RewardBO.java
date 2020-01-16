@@ -93,7 +93,7 @@ public class RewardBO {
 
 	public LuckyDrawItem getItemFromProduct(PersonaEntity personaEntity, String eventMode, int isDropableMode) {
 		ProductEntity productEntity = dropBO.getRandomProductItem(eventMode, isDropableMode);
-		if (productEntity.getStars() != null && productEntity.getStars() == 4) {
+		if (productEntity.getStars() != null && productEntity.getStars() == 4 && productEntity.getProductType() == "SKILLMODPART") {
 			achievementsBO.applyDropAchievements(personaEntity, AchievementType.WEV2_EARNSKILL);
 		}
 		LuckyDrawItem luckyDrawItem = dropBO.copyProduct2LuckyDraw(productEntity);

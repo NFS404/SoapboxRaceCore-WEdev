@@ -122,6 +122,7 @@ public class BasketBO {
         TreasureHuntEntity treasureHuntEntity = treasureHuntDAO.findById(personaId);
         treasureHuntEntity.setIsStreakBroken(false);
         treasureHuntDAO.update(treasureHuntEntity);
+        personaDao.update(personaEntity);
 
         return CommerceResultStatus.SUCCESS;
     }
