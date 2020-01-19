@@ -405,7 +405,7 @@ public class AchievementsBO {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		switch (achievementType) {
 		case WEV2_EARNSKILL:
-			int skills4EarnedValue = achievementPersonaEntity.getTeamRacesWon();
+			int skills4EarnedValue = achievementPersonaEntity.getSkills4Earned();
 			skills4EarnedValue = skills4EarnedValue + 1;
 			achievementPersonaEntity.setSkills4Earned(skills4EarnedValue);
 			processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_EARNSKILL, Integer.valueOf(skills4EarnedValue).longValue());

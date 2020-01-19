@@ -132,70 +132,72 @@ public class TeamsBO {
 	// The fastest racer of his team will bring a win on this race, depending on opponent's teams position - Hypercycle
 	// carClass 0 = open races for all classes
 	public void teamAccoladesBasic(Long eventSessionId) {
-		try {
-			Thread.sleep(60000);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		EventSessionEntity eventSessionEntity = eventSessionDAO.findById(eventSessionId);
-		String message = "";
-		String messageDebug = "";
-//		System.out.println("TEST teamAccoladesBasic sleep, count " + count + ", team1check: " + eventSessionEntity.getTeam1Check() + ", team2check: " + eventSessionEntity.getTeam2Check());
-		
-		if (eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check() && parameterBO.getIntParam("TEAM_CURRENTSEASON") > 0) {
-			int targetCarClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
-			Long teamWinner = eventSessionEntity.getTeamWinner();
-			Long team1 = eventSessionEntity.getTeam1Id();
-			Long team2 = eventSessionEntity.getTeam2Id();
-			// Placeholder
-			String winnerPlayerName = "!pls fix!";
-			String winnerTeamName = "!pls fix!";
-			int winnerTeamPoints = 0;
-//			System.out.println("TEST teamAccoladesBasic teamCheck");
-			for (EventDataEntity racer : eventDataDao.getRacersRanked(eventSessionId)) {
-				PersonaEntity racerEntity = personaDao.findById(racer.getPersonaId());
-				TeamsEntity racerTeamEntity = racerEntity.getTeam();
-//				System.out.println("TEST teamAccoladesBasic racers");
-				if (racerTeamEntity != null && teamWinner == null) {
-					Long racerTeamId = racerTeamEntity.getTeamId();
-//					System.out.println("TEST teamAccoladesBasic teamEntityAndWinner");
-					if ((racerTeamId == team1 || racerTeamId == team2)) {
-						OwnedCarTrans defaultCar = personaBO.getDefaultCar(racer.getPersonaId());
-//						System.out.println("TEST teamAccoladesBasic defaultCar");
-						if (defaultCar.getCustomCar().getCarClassHash() == targetCarClass || targetCarClass == 0) {
-							teamWinner = racerTeamId;
-							eventSessionEntity.setTeamWinner(racerTeamId);
-							eventSessionDao.update(eventSessionEntity);
-							
-							winnerPlayerName = racerEntity.getName();
-							winnerTeamName = racerTeamEntity.getTeamName();
-							racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
-							winnerTeamPoints = racerTeamEntity.getTeamPoints();
-							teamsDao.update(racerTeamEntity);
-//							System.out.println("TEST teamAccoladesBasic teamFinishProper");
-							achievementsBO.applyTeamRacesWonAchievement(racerEntity);
-							
-							messageDebug = teamAccoladesDebugTimes(eventSessionId);
-							message = ":heavy_minus_sign:"
-					        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде (*итого очков: " + winnerTeamPoints + ", сессия " + eventSessionId + "*)."
-					        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race (*points: " + winnerTeamPoints + ", session " + eventSessionId + "*)."
-					        		+ "\n" + messageDebug;
-							discordBot.sendMessage(message, true);
+		if (parameterBO.getIntParam("TEAM_CURRENTSEASON") > 0) {
+			try {
+				Thread.sleep(60000);
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+			EventSessionEntity eventSessionEntity = eventSessionDAO.findById(eventSessionId);
+			String message = "";
+			String messageDebug = "";
+//			System.out.println("TEST teamAccoladesBasic sleep, count " + count + ", team1check: " + eventSessionEntity.getTeam1Check() + ", team2check: " + eventSessionEntity.getTeam2Check());
+			
+			if (eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check()) {
+				int targetCarClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
+				Long teamWinner = eventSessionEntity.getTeamWinner();
+				Long team1 = eventSessionEntity.getTeam1Id();
+				Long team2 = eventSessionEntity.getTeam2Id();
+				// Placeholder
+				String winnerPlayerName = "!pls fix!";
+				String winnerTeamName = "!pls fix!";
+				int winnerTeamPoints = 0;
+//				System.out.println("TEST teamAccoladesBasic teamCheck");
+				for (EventDataEntity racer : eventDataDao.getRacersRanked(eventSessionId)) {
+					PersonaEntity racerEntity = personaDao.findById(racer.getPersonaId());
+					TeamsEntity racerTeamEntity = racerEntity.getTeam();
+//					System.out.println("TEST teamAccoladesBasic racers");
+					if (racerTeamEntity != null && teamWinner == null) {
+						Long racerTeamId = racerTeamEntity.getTeamId();
+//						System.out.println("TEST teamAccoladesBasic teamEntityAndWinner");
+						if ((racerTeamId == team1 || racerTeamId == team2)) {
+							OwnedCarTrans defaultCar = personaBO.getDefaultCar(racer.getPersonaId());
+//							System.out.println("TEST teamAccoladesBasic defaultCar");
+							if (defaultCar.getCustomCar().getCarClassHash() == targetCarClass || targetCarClass == 0) {
+								teamWinner = racerTeamId;
+								eventSessionEntity.setTeamWinner(racerTeamId);
+								eventSessionDao.update(eventSessionEntity);
+								
+								winnerPlayerName = racerEntity.getName();
+								winnerTeamName = racerTeamEntity.getTeamName();
+								racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
+								winnerTeamPoints = racerTeamEntity.getTeamPoints();
+								teamsDao.update(racerTeamEntity);
+//								System.out.println("TEST teamAccoladesBasic teamFinishProper");
+								achievementsBO.applyTeamRacesWonAchievement(racerEntity);
+								
+								messageDebug = teamAccoladesDebugTimes(eventSessionId);
+								message = ":heavy_minus_sign:"
+						        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде (*итого очков: " + winnerTeamPoints + ", сессия " + eventSessionId + "*)."
+						        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race (*points: " + winnerTeamPoints + ", session " + eventSessionId + "*)."
+						        		+ "\n" + messageDebug;
+								discordBot.sendMessage(message, true);
+							}
 						}
 					}
+					if (teamWinner != null) {
+//						System.out.println("TEST teamAccoladesBasic teamLoser");
+						openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeamName + " has won the event! +1P, total: " + winnerTeamPoints + ", session " + eventSessionId), racer.getPersonaId());
+				    }
 				}
-				if (teamWinner != null) {
-//					System.out.println("TEST teamAccoladesBasic teamLoser");
-					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeamName + " has won the event! +1P, total: " + winnerTeamPoints + ", session " + eventSessionId), racer.getPersonaId());
+				if (teamWinner == null) {
+//					System.out.println("TeamAccolades forfeit end for session " + eventSessionId);
+					message = ":heavy_minus_sign:"
+			        		+ "\n:thinking: **|** Никто из игроков команд не финишировал за минуту после одиночного гонщика (*сессия " + eventSessionId + "*)."
+			        		+ "\n:thinking: **|** Nobody from both teams is finished after lone player on 1 minute (*session " + eventSessionId + "*).";
+					discordBot.sendMessage(message, true);
 			    }
 			}
-			if (teamWinner == null) {
-//				System.out.println("TeamAccolades forfeit end for session " + eventSessionId);
-				message = ":heavy_minus_sign:"
-		        		+ "\n:thinking: **|** Никто из игроков команд не финишировал за минуту после одиночного гонщика (*сессия " + eventSessionId + "*)."
-		        		+ "\n:thinking: **|** Nobody from both teams is finished after lone player on 1 minute (*session " + eventSessionId + "*).";
-				discordBot.sendMessage(message, true);
-		    }
 		}
 	}
 	
@@ -240,6 +242,8 @@ public class TeamsBO {
 		teamsEntityNew.setActive(true);
 		teamsEntityNew.setCreated(LocalDateTime.now());
 		personaEntityLeader.setTeam(teamsEntityNew);
+		teamsEntityNew.setCurrentRank("none");
+		teamsEntityNew.setMedals(0);
 		personaDao.update(personaEntityLeader);
 		teamsDao.insert(teamsEntityNew);
 		String message = ":heavy_minus_sign:"
