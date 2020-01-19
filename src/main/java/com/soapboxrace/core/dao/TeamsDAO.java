@@ -28,6 +28,11 @@ public class TeamsDAO extends BaseDAO<TeamsEntity> {
 		return query.getResultList();
 	}
 	
+	public List<TeamsEntity> findAllTeamsTOP15() {
+		TypedQuery<TeamsEntity> query = entityManager.createNamedQuery("TeamsEntity.findAllTeamsTOP15", TeamsEntity.class);
+		return query.getResultList();
+	}
+	
 	public TeamsEntity findByName(String teamName) {
 		teamName = teamName.toUpperCase();
 		TypedQuery<TeamsEntity> query = entityManager.createNamedQuery("TeamsEntity.findByName", TeamsEntity.class);

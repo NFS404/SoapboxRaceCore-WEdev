@@ -1,5 +1,6 @@
 package com.soapboxrace.core.bo;
 
+import java.sql.Time;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -257,7 +258,7 @@ public class TeamsBO {
 	@Schedule(hour = "*/1", persistent = false)
 	public void teamStatsDiscord() {
 		if (parameterBO.getBoolParam("DISCORD_ONLINECOUNT") && parameterBO.getIntParam("TEAM_CURRENTSEASON") > 0) { // Season 0 deactivates team actions
-			List<TeamsEntity> teamsList = teamsDao.findAllTeams();
+			List<TeamsEntity> teamsList = teamsDao.findAllTeamsTOP15(); // entire TOP message must fit on Discord's 2,000 symbols limitation
 			String seasonText = parameterBO.getStrParam("TEAM_SEASONTEXT");
 			String messageAppend = "";
 			String teamRank = "";
@@ -286,7 +287,7 @@ public class TeamsBO {
 			}
 			String message = ":heavy_minus_sign:"
 	        		+ "\n:city_sunset: **|** " + seasonText
-	        		+ "\n:military_medal: **|** Текущая статистика команд / Current team stats:\n"
+	        		+ "\n:military_medal: **|** ТОП-15 команд / TOP-15 team stats:\n"
 	        		+ messageAppend;
 			
 			discordBot.sendMessage(message, true);
