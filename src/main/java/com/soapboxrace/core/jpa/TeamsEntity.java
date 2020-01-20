@@ -21,8 +21,7 @@ import javax.persistence.Table;
 @Table(name = "TEAMS")
 @NamedQueries({ //
 		@NamedQuery(name = "TeamsEntity.findByName", query = "SELECT obj FROM TeamsEntity obj WHERE obj.teamName = :teamName"),
-		@NamedQuery(name = "TeamsEntity.findAllTeams", query = "SELECT obj FROM TeamsEntity obj WHERE obj.active = true ORDER BY obj.teamPoints DESC"), //
-		@NamedQuery(name = "TeamsEntity.findAllTeamsTOP15", query = "SELECT obj FROM TeamsEntity obj WHERE obj.active = true ORDER BY obj.teamPoints DESC LIMIT 15") //
+		@NamedQuery(name = "TeamsEntity.findAllTeams", query = "SELECT obj FROM TeamsEntity obj WHERE obj.active = true ORDER BY obj.teamPoints DESC") //
 })
 public class TeamsEntity {
 
