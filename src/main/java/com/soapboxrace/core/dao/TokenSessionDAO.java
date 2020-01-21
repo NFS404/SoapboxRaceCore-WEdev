@@ -68,7 +68,7 @@ public class TokenSessionDAO extends BaseDAO<TokenSessionEntity> {
 		StringBuilder queryStr = new StringBuilder();
 		queryStr.append("SELECT obj FROM TokenSessionEntity obj ");
 		queryStr.append(" WHERE obj.activePersonaId <> 0 ");
-		queryStr.append(" AND obj.personaPresence <> 0 ");
+//		queryStr.append(" AND obj.personaPresence <> 0 ");
 		queryStr.append(" AND obj.expirationDate > current_time()");
 		TypedQuery<TokenSessionEntity> query = entityManager.createQuery(queryStr.toString(), TokenSessionEntity.class);
 		return query.getResultList();

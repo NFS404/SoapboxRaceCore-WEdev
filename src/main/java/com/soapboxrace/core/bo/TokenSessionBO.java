@@ -14,8 +14,10 @@ import javax.ws.rs.NotAuthorizedException;
 
 import com.soapboxrace.core.api.util.GeoIp2;
 import com.soapboxrace.core.api.util.UUIDGen;
+import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.UserDAO;
+import com.soapboxrace.core.jpa.PersonaPresenceEntity;
 import com.soapboxrace.core.jpa.TokenSessionEntity;
 import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.jaxb.login.LoginStatusVO;
@@ -36,6 +38,9 @@ public class TokenSessionBO {
 
 	@EJB
 	private OnlineUsersBO onlineUsersBO;
+	
+	@EJB
+	private PersonaPresenceDAO personaPresenceDAO;
 
 	private static Map<String, TokenSessionEntity> activePersonas = new HashMap<>(300);
 
@@ -85,6 +90,25 @@ public class TokenSessionBO {
 			tokenDAO.update(tokenSessionEntity);
 		}
 		return randomUUID;
+	}
+	
+	public void createPresenceEntry(Long userId) {
+		PersonaPresenceEntity personaPresenceEntity = null;
+		try {
+			personaPresenceEntity = personaPresenceDAO.findByUserId(userId);
+		} catch (Exception e) {
+			// not found
+		}
+		if (personaPresenceEntity == null) {
+			personaPresenceEntity = new PersonaPresenceEntity();
+			personaPresenceEntity.setUserId(userId);
+			personaPresenceEntity.setPersonaPresence(0);
+			personaPresenceDAO.insert(personaPresenceEntity);
+		} else {
+			personaPresenceEntity.setUserId(userId);
+			personaPresenceEntity.setPersonaPresence(0);
+			personaPresenceDAO.update(personaPresenceEntity);
+		}
 	}
 
 	public boolean verifyPersona(String securityToken, Long personaId) {
@@ -186,13 +210,14 @@ public class TokenSessionBO {
 				    	userEntity.setUA(httpRequest.getHeader("X-UserAgent"));
 				    }
 				    if (httpRequest.getHeader("User-Agent") == null && httpRequest.getHeader("X-UserAgent") == null) {
-				    	userEntity.setUA(httpRequest.getHeader("Undefined NULLs"));
+				    	userEntity.setUA("Undefined NULLs");
 				    }
 
 					userEntity.setLastLogin(LocalDateTime.now());
 					userDAO.update(userEntity);
 					Long userId = userEntity.getId();
 					String randomUUID = createToken(userId, null);
+					createPresenceEntry(userId);
 					loginStatusVO = new LoginStatusVO(userId, randomUUID, true);
 					loginStatusVO.setDescription("");
 
@@ -214,18 +239,21 @@ public class TokenSessionBO {
 
 	public void setActivePersonaId(String securityToken, Long personaId, Boolean isLogout) {
 		TokenSessionEntity tokenSessionEntity = tokenDAO.findBySecurityToken(securityToken);
+		Long userId = tokenSessionEntity.getUserId();
+		PersonaPresenceEntity personaPresenceEntity = personaPresenceDAO.findByUserId(userId);
 
 		if (!isLogout) {
-			if (!userDAO.findById(tokenSessionEntity.getUserId()).ownsPersona(personaId)) {
+			if (!userDAO.findById(userId).ownsPersona(personaId)) {
 				throw new NotAuthorizedException("Persona not owned by user");
 			}
 		}
 
 		tokenSessionEntity.setActivePersonaId(personaId);
 		tokenSessionEntity.setIsLoggedIn(!isLogout);
-		tokenDAO.updatePersonaPresence(personaId, 1);
+		personaPresenceDAO.updatePersonaPresence(personaId, 1);
 		// activePersonas.put(securityToken, tokenSessionEntity);
 		tokenDAO.update(tokenSessionEntity);
+		personaPresenceDAO.update(personaPresenceEntity);
 	}
 
 	public String getActiveRelayCryptoTicket(String securityToken) {
@@ -258,6 +286,6 @@ public class TokenSessionBO {
 	}
 
 	public void updatePersonaPresence(Long personaId, Integer personaPresence) {
-		tokenDAO.updatePersonaPresence(personaId, personaPresence);
+		personaPresenceDAO.updatePersonaPresence(personaId, personaPresence);
 	}
 }

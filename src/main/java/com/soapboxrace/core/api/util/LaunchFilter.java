@@ -127,7 +127,8 @@ public class LaunchFilter implements ContainerRequestFilter {
 			return false;
 		// FIXME Awful version check, should use maven's versioning maybe
 		// 9.9.9.9 - SBRW Profile Exporter
-		if ((xUserAgent.equalsIgnoreCase("GameLauncherReborn " + parameterBO.getStrParam("LAUNCHER_SBRW_VERSION") + " WinForms (+https://github.com/worldunitedgg/GameLauncher_NFSW)")) || (xUserAgent.equalsIgnoreCase("GameLauncherReborn 9.9.9.9 WinForms (+https://github.com/worldunitedgg/GameLauncher_NFSW)")))
+		if (xUserAgent != null && ((xUserAgent.equalsIgnoreCase("GameLauncherReborn " + parameterBO.getStrParam("LAUNCHER_SBRW_VERSION") + " WinForms (+https://github.com/worldunitedgg/GameLauncher_NFSW)")) ||
+				(xUserAgent.equalsIgnoreCase("GameLauncherReborn 9.9.9.9 WinForms (+https://github.com/worldunitedgg/GameLauncher_NFSW)"))))
 			return true;
 		//String xUserAgent = requestContext.getHeaderString("X-UserAgent");
 		// TODO Сделать проверку xUserAgent

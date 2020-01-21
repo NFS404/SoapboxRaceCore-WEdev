@@ -66,6 +66,7 @@ public class User {
 	public Response getPermanentSession(@HeaderParam("securityToken") String securityToken, @HeaderParam("userId") Long userId) {
 		URI myUri = uri.getBaseUri();
 		String randomUUID = tokenBO.createToken(userId, myUri.getHost());
+		tokenBO.createPresenceEntry(userId);
 		UserInfo userInfo = userBO.getUserById(userId);
 		userInfo.getUser().setSecurityToken(randomUUID);
 		userBO.createXmppUser(userInfo);

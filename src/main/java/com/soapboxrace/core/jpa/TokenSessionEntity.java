@@ -23,10 +23,7 @@ import javax.persistence.Table;
 		@NamedQuery(name = "TokenSessionEntity.updateLobbyId", //
 				query = "UPDATE TokenSessionEntity obj " 
 						+ "SET obj.activeLobbyId = :activeLobbyId WHERE obj.activePersonaId = :personaId"), //
-		@NamedQuery(name = "TokenSessionEntity.getUsersOnlineCount", query = "SELECT Count(obj) FROM TokenSessionEntity obj WHERE obj.expirationDate >= NOW() AND obj.isLoggedIn = true"),
-		@NamedQuery(name = "TokenSessionEntity.updatePersonaPresence", //
-				query = "UPDATE TokenSessionEntity obj " // 
-						+ "SET obj.personaPresence = :personaPresence WHERE obj.activePersonaId = :personaId") //
+		@NamedQuery(name = "TokenSessionEntity.getUsersOnlineCount", query = "SELECT Count(obj) FROM TokenSessionEntity obj WHERE obj.expirationDate >= NOW() AND obj.isLoggedIn = true")
 })
 public class TokenSessionEntity {
 
@@ -54,8 +51,6 @@ public class TokenSessionEntity {
 	private String clientHostIp;
 	
 	private boolean isLoggedIn;
-
-	private int personaPresence;
 
 	public String getSecurityToken() {
 		return securityToken;
@@ -119,14 +114,6 @@ public class TokenSessionEntity {
 
 	public void setClientHostIp(String clientHostIp) {
 		this.clientHostIp = clientHostIp;
-	}
-
-	public int getPersonaPresence() {
-		return personaPresence;
-	}
-
-	public void setPersonaPresence(int personaPresence) {
-		this.personaPresence = personaPresence;
 	}
 
 	public Long getId() {

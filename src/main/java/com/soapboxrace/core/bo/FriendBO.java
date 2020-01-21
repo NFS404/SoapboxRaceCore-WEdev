@@ -8,6 +8,7 @@ import javax.ejb.Stateless;
 
 import com.soapboxrace.core.dao.FriendListDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.dao.ReportDAO;
 import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
@@ -63,6 +64,9 @@ public class FriendBO {
 	
 	@EJB
 	private ReportDAO reportDAO;
+	
+	@EJB
+	private PersonaPresenceDAO personaPresenceDAO;
 
 	public PersonaFriendsList getFriendListFromUserId(Long userId) {
 		ArrayOfFriendPersona arrayOfFriendPersona = new ArrayOfFriendPersona();
@@ -422,7 +426,7 @@ public class FriendBO {
 			if (!openFireRestApiCli.isOnline(activePersonaId)) {
 				PersonaEntity personaEntity = personaBO.getPersonaById(activePersonaId);
 				sendXmppPresenceToAllFriends(personaEntity, 0);
-				tokenSessionDAO.updatePersonaPresence(activePersonaId, 0);
+				personaPresenceDAO.updatePersonaPresence(activePersonaId, 0);
 			}
 		}
 	}
