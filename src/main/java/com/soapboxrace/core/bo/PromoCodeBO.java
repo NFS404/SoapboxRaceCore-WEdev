@@ -131,7 +131,7 @@ public class PromoCodeBO {
 		    		promoCodeEntity.setIsUsed(true);
 					promoCodeEntity.setUser(userEntity);
 					promoCodeDao.update(promoCodeEntity);
-					System.out.println("Player " + nickname + "got the Promo Code.");
+					System.out.println("Player " + nickname + " got the Promo Code.");
 					return "Power-Up is activated (restart the game), thank you! ;)";
 		    	}
 		    	return "ERROR: this account is already got a higher Premium";
@@ -148,7 +148,7 @@ public class PromoCodeBO {
 				promoCodeEntity.setIsUsed(true);
 				promoCodeEntity.setUser(userEntity);
 				promoCodeDao.update(promoCodeEntity);
-				System.out.println("Player " + nickname + "got the Promo Code.");
+				System.out.println("Player " + nickname + " got the Promo Code.");
 				return "Premium Base is activated (restart the game), thank you! ;)";
 		    case "plus":
 		    	premiumAchievementApply(126, personaEntity);
@@ -177,7 +177,7 @@ public class PromoCodeBO {
 		    	promoCodeEntity.setIsUsed(true);
 				promoCodeEntity.setUser(userEntity);
 				promoCodeDao.update(promoCodeEntity);
-				System.out.println("Player " + nickname + "got the Promo Code.");
+				System.out.println("Player " + nickname + " got the Promo Code.");
 				return "Premium+ is activated (restart the game), thank you! ;)";
 		    case "full":
 		    	premiumAchievementApply(126, personaEntity);
@@ -207,7 +207,7 @@ public class PromoCodeBO {
 		    	promoCodeEntity.setIsUsed(true);
 				promoCodeEntity.setUser(userEntity);
 				promoCodeDao.update(promoCodeEntity);
-				System.out.println("Player " + nickname + "got the Promo Code.");
+				System.out.println("Player " + nickname + " got the Promo Code.");
 				return "Premium Full is activated (restart the game), thank you! ;)";
 		    case "moneydrop":
 		    	if (userEntity.isPremium()) {
@@ -224,7 +224,7 @@ public class PromoCodeBO {
 		    	    promoCodeEntity.setIsUsed(true);
 				    promoCodeEntity.setUser(userEntity);
 				    promoCodeDao.update(promoCodeEntity);
-				    System.out.println("Player " + nickname + "got the Promo Code.");
+				    System.out.println("Player " + nickname + " got the Promo Code.");
 				    return "Money Drop is activated (restart the game), thank you! ;)";
 		    	}
 		    	return "ERROR: you need to got the any Premium first, to use Money Drops";
@@ -234,7 +234,7 @@ public class PromoCodeBO {
 		    	promoCodeEntity.setIsUsed(true);
 				promoCodeEntity.setUser(userEntity);
 				promoCodeDao.update(promoCodeEntity);
-				System.out.println("Player " + nickname + "got the Promo Code.");
+				System.out.println("Player " + nickname + " got the Promo Code.");
 				return "Garage50+ is activated (restart the game), thank you! ;)";
 		    case "garage150":
 		    	premiumCarSlots(350, userEntity);
@@ -242,7 +242,7 @@ public class PromoCodeBO {
 		    	promoCodeEntity.setIsUsed(true);
 				promoCodeEntity.setUser(userEntity);
 				promoCodeDao.update(promoCodeEntity);
-				System.out.println("Player " + nickname + "got the Promo Code.");
+				System.out.println("Player " + nickname + " got the Promo Code.");
 				return "Garage150+ is activated (restart the game), thank you! ;)";
             default:
             	return "ERROR: invaild Premium code, please contact to server support";

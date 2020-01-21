@@ -195,6 +195,7 @@ public class DriverPersonaBO {
 
 		personaEntity.setUser(userEntityTemp);
 		personaEntity.setName(personaEntity.getName() + "_TD");
+		personaEntity.setCreated(LocalDateTime.now()); // can check when driver got deleted
 		personaDao.insert(personaEntity);
 	}
 

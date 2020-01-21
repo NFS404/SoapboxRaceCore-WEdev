@@ -238,13 +238,15 @@ public class DriverPersona {
 	public String deletePersona(@QueryParam("personaId") Long personaId, @HeaderParam("securityToken") String securityToken) {
 		tokenSessionBo.verifyPersona(securityToken, personaId);
 		tokenSessionBo.setActivePersonaId(securityToken, 0L, true);
+		String deletedName = personaDAO.findById(personaId).getName();
 		if (parameterBO.getBoolParam("PERSONADELETE_TEMPMODE")) {
+			System.out.println("### User with mail " + tokenSessionBo.getUser(securityToken).getEmail() + " has deleted one of his driver persona (Temp mode): " + deletedName);
 			bo.deletePersonaTemp(personaId);
-			System.out.println("### User with mail " + tokenSessionBo.getUser(securityToken).getEmail() + " has deleted one of his driver persona (Temp mode).");
+			
 		}
 		else {
+			System.out.println("### User with mail " + tokenSessionBo.getUser(securityToken).getEmail() + " has deleted one of his driver persona: " + deletedName);
 			bo.deletePersona(personaId);
-			System.out.println("### User with mail " + tokenSessionBo.getUser(securityToken).getEmail() + " has deleted one of his driver persona.");
 		}
 		
 		return "<long>0</long>";

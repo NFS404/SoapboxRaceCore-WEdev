@@ -104,7 +104,7 @@ public class User {
 	@Produces(MediaType.APPLICATION_XML)
 	public String secureLogout(@HeaderParam("securityToken") String securityToken) {
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
-		System.out.println("### User logged out (SecureLogout)");
+		System.out.println("### User logged out (SecureLogout), ID: " + tokenBO.getUser(securityToken).getId());
 		if (activePersonaId == null || activePersonaId.equals(0l)) {
 			return "";
 		}
