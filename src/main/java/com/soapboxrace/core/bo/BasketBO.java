@@ -241,7 +241,7 @@ public class BasketBO {
 				"SRV-CAR355","SRV-CAR105","SRV-CAR73","SRV-CAR160","SRV-CAR62","SRV-CAR83","SRV-CAR45","SRV-CAR14","SRV-CAR22","SRV-CAR28",
 				"SRV-CAR100","SRV-CAR137","SRV-CAR91","SRV-CAR172","SRV-CAR35","SRV-CAR126","SRV-CAR26","SRV-CAR123","SRV-CAR13","SRV-CAR33",
 				"SRV-FCAR4","SRV-CAR170","SRV-CAR59","SRV-CAR5","SRV-CAR135","SRV-CAR86","SRV-CAR57","SRV-FCAR0","SRV-CAR109","SRV-CAR46",
-				"SRV-CAR98","SRV-CAR97","SRV-CAR56","SRV-CAR305","SRV-CAR306","SRV-CAR119","SRV-CAR375","SRV-FCAR6","SRV-FCAR1" }; // "SRV-FCAR11" - MW05 cop
+				"SRV-CAR98","SRV-CAR97","SRV-CAR56","SRV-CAR305","SRV-CAR306","SRV-CAR119","SRV-CAR375","SRV-FCAR6","SRV-FCAR1", "SRV-BRERA1" }; // "SRV-FCAR11" - MW05 cop
 		String[] productIdBadArray = { "SRV-CAR40","SRV-CAR151","SRV-CAR165","SRV-CAR143","SRV-CAR154","SRV-CAR173","SRV-CAR141","SRV-CAR142",
 				"SRV-CAR181","SRV-CAR159","SRV-CAR121","SRV-CAR96","SRV-CAR93","SRV-CAR169","SRV-CAR127","SRV-CAR81","SRV-CAR21","SRV-CAR148",
 				"SRV-CAR155","SRV-CAR11","SRV-CAR18","SRV-CAR164","SRV-CAR53","SRV-CAR139","SRV-CAR6","SRV-CAR65","SRV-CAR158","SRV-CAR166",
@@ -261,6 +261,9 @@ public class BasketBO {
 		}
 		if (!isGoodRange) {
 			randomProductId = productIdBadArray[rand.nextInt(productIdBadArray.length)];
+		}
+		if (randomProductId.contentEquals("SRV-BRERA1") && !parameterBO.getBoolParam("ITEM_LOOTBOX_BRERA")) { // Alfa Romeo Brera is supposed to be a rare car
+			return CommerceResultStatus.FAIL_INVALID_BASKET;
 		}
 		OwnedCarTrans ownedCarTrans = getCar(randomProductId);
 		ownedCarTrans.setId(0L);
