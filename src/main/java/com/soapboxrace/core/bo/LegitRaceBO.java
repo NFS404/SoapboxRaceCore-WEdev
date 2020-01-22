@@ -59,7 +59,7 @@ public class LegitRaceBO {
 		if (!legit && eventType.contentEquals("Pursuit")) {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### To get the reward, you need to stay on Pursuit longer."), activePersonaId);
 		}
-		if (arbitrationPacket.getHacksDetected() > 0) {
+		if (arbitrationPacket.getHacksDetected() > 0 && sessionEntity.getEvent().getId() != 1000) { // 1000 - Cheat-legal freeroam event
 			socialBo.sendReport(0L, activePersonaId, 3, ("Cheat report, during a " + eventType), (int) arbitrationPacket.getCarId(), 0,
 					arbitrationPacket.getHacksDetected());
 		}
