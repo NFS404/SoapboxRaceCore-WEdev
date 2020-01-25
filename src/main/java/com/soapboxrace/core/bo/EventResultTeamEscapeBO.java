@@ -13,6 +13,7 @@ import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppEvent;
+import com.soapboxrace.jaxb.http.Accolades;
 import com.soapboxrace.jaxb.http.ArrayOfTeamEscapeEntrantResult;
 import com.soapboxrace.jaxb.http.ExitPath;
 import com.soapboxrace.jaxb.http.TeamEscapeArbitrationPacket;
@@ -146,7 +147,12 @@ public class EventResultTeamEscapeBO {
 		}
 
 		TeamEscapeEventResult teamEscapeEventResult = new TeamEscapeEventResult();
-		teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity));
+		if (arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() < 2) {
+			// For now, you can't get the rewards on SP team escapes ;)
+		}
+		else {
+			teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity));
+		}
 		teamEscapeEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, teamEscapeArbitrationPacket, teamEscapeArbitrationPacket.getNumberOfCollisions()));
 		teamEscapeEventResult.setEntrants(arrayOfTeamEscapeEntrantResult);
 		teamEscapeEventResult.setEventId(currentEventId);
