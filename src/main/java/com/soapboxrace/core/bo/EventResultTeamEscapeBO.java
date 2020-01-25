@@ -149,6 +149,7 @@ public class EventResultTeamEscapeBO {
 		TeamEscapeEventResult teamEscapeEventResult = new TeamEscapeEventResult();
 		if (arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() < 2) {
 			// For now, you can't get the rewards on SP team escapes ;)
+			System.out.println("Player " + personaEntity.getName() + " has tried to finish Team Escape on SP mode.");
 		}
 		else {
 			teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity));
