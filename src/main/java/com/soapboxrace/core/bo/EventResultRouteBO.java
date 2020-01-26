@@ -172,6 +172,9 @@ public class EventResultRouteBO {
 			EventEntity eventEntity = eventDAO.findById(currentEventId);
 			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
 			eventDAO.update(eventEntity);
+			EventDataEntity eventDataEntitySP = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
+			eventDataEntitySP.setIsSingle(true);
+			eventDataDao.update(eventDataEntitySP);
 		}
 		// Initiate the final team action check, only if both teams are registered for event
 		if (eventDataEntity.getRank() == 1 && preRegTeams) {

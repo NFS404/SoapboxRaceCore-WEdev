@@ -73,6 +73,7 @@ public class EventDataEntity {
 	
 	// Arbitration packet check
 	protected boolean arbitration;
+	protected boolean isSingle;
 
 	public Long getId() {
 		return id;
@@ -310,6 +311,14 @@ public class EventDataEntity {
 
 	public void setArbitration(boolean value) {
 		this.arbitration = value;
+	}
+	
+	public boolean getIsSingle() {
+		return isSingle;
+	}
+
+	public void setIsSingle(boolean value) {
+		this.isSingle = value;
 	}
 
 }

@@ -66,7 +66,6 @@ public class EventResultDragBO {
 		dragEntrantResultResponse.setDragEntrantResult(xmppDragResult);
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 		
-
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 		// XKAYA's arbitration exploit fix
 		if (eventDataEntity.getArbitration()) {
@@ -106,6 +105,9 @@ public class EventResultDragBO {
 			EventEntity eventEntity = eventDAO.findById(currentEventId);
 			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
 			eventDAO.update(eventEntity);
+			EventDataEntity eventDataEntitySP = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
+			eventDataEntitySP.setIsSingle(true);
+			eventDataDao.update(eventDataEntitySP);
 		}
 		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
 			DragEntrantResult dragEntrantResult = new DragEntrantResult();

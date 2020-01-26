@@ -114,6 +114,9 @@ public class EventResultTeamEscapeBO {
 			EventEntity eventEntity = eventDAO.findById(currentEventId);
 			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
 			eventDAO.update(eventEntity);
+			EventDataEntity eventDataEntitySP = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
+			eventDataEntitySP.setIsSingle(true);
+			eventDataDao.update(eventDataEntitySP);
 		}
 		boolean oneGetAway = false;
 		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {

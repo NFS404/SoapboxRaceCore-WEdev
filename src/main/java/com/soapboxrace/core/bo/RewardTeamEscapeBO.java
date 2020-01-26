@@ -35,7 +35,7 @@ public class RewardTeamEscapeBO extends RewardBO {
 	public Accolades getTeamEscapeAccolades(Long activePersonaId, TeamEscapeArbitrationPacket teamEscapeArbitrationPacket,
 			EventSessionEntity eventSessionEntity) {
 		int finishReason = teamEscapeArbitrationPacket.getFinishReason();
-		if (!legitRaceBO.isLegit(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity) || finishReason != 22) {
+		if (!legitRaceBO.isLegit(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity, false) || finishReason != 22) {
 			return new Accolades();
 		}
 

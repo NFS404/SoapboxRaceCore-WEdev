@@ -26,7 +26,7 @@ public class RewardPursuitBO extends RewardBO {
 
 	public Accolades getPursuitAccolades(Long activePersonaId, PursuitArbitrationPacket pursuitArbitrationPacket, EventSessionEntity eventSessionEntity,
 			Boolean isBusted, int isDropableMode) {
-		if (!legitRaceBO.isLegit(activePersonaId, pursuitArbitrationPacket, eventSessionEntity) || isBusted) {
+		if (!legitRaceBO.isLegit(activePersonaId, pursuitArbitrationPacket, eventSessionEntity, true) || isBusted) {
 			return new Accolades();
 		}
 		EventEntity eventEntity = eventSessionEntity.getEvent();

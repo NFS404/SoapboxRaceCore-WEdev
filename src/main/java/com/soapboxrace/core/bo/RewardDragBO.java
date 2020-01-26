@@ -28,7 +28,11 @@ public class RewardDragBO extends RewardBO {
 	private PersonaBO personaBO;
 
 	public Accolades getDragAccolades(Long activePersonaId, DragArbitrationPacket dragArbitrationPacket, EventSessionEntity eventSessionEntity, ArrayOfDragEntrantResult arrayOfDragEntrantResult, int isDropableMode) {
-		if (!legitRaceBO.isLegit(activePersonaId, dragArbitrationPacket, eventSessionEntity)) {
+		boolean isSingle = false;
+		if (arrayOfDragEntrantResult.getDragEntrantResult().size() < 2) {
+			isSingle = true;
+		}
+		if (!legitRaceBO.isLegit(activePersonaId, dragArbitrationPacket, eventSessionEntity, isSingle)) {
 			return new Accolades();
 		}
 		EventEntity eventEntity = eventSessionEntity.getEvent();

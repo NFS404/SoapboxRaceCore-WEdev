@@ -91,8 +91,9 @@ public class EventResultPursuitBO {
 		eventDataEntity.setSpikeStripsDodged(pursuitArbitrationPacket.getSpikeStripsDodged());
 		eventDataEntity.setSumOfJumpsDurationInMilliseconds(pursuitArbitrationPacket.getSumOfJumpsDurationInMilliseconds());
 		eventDataEntity.setTopSpeed(pursuitArbitrationPacket.getTopSpeed());
+		eventDataEntity.setIsSingle(true);
 		
-		// +1 to play count for this track, MP
+		// +1 to play count for this track, SP
 		EventEntity eventEntity = eventDAO.findById(currentEventId);
 		eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
 		eventDAO.update(eventEntity);

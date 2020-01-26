@@ -28,7 +28,11 @@ public class RewardRouteBO extends RewardBO {
 	private PersonaBO personaBO;
 
 	public Accolades getRouteAccolades(Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, EventSessionEntity eventSessionEntity, ArrayOfRouteEntrantResult arrayOfRouteEntrantResult, int isDropableMode) {
-		if (!legitRaceBO.isLegit(activePersonaId, routeArbitrationPacket, eventSessionEntity)) {
+		boolean isSingle = false;
+		if (arrayOfRouteEntrantResult.getRouteEntrantResult().size() < 2) {
+			isSingle = true;
+		}
+		if (!legitRaceBO.isLegit(activePersonaId, routeArbitrationPacket, eventSessionEntity, isSingle)) {
 			return new Accolades();
 		}
 		EventEntity eventEntity = eventSessionEntity.getEvent();
