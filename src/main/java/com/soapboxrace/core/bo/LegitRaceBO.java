@@ -45,16 +45,20 @@ public class LegitRaceBO {
 		    eventType = "Drag";
 		}
 
+		// FIXME SessionEnded is NULL sometimes, eventDuration time would be more efficient
 		final long timeDiff = sessionEntity.getEnded() - sessionEntity.getStarted();
 		boolean legit = timeDiff >= minimumTime;
 		boolean finishReasonLegit = true;
+		long eventDuration = arbitrationPacket.getEventDurationInMilliseconds();
 		// 0 - quitted from race, 22 - finished, 518 - escaped from SP pursuit, 266 - busted on SP & MP pursuit
 		if (arbitrationPacket.getFinishReason() != 0 || arbitrationPacket.getFinishReason() != 266) {
 			finishReasonLegit = false;
 		}
-
 		if (!legit && !finishReasonLegit) {
 			socialBo.sendReport(0L, activePersonaId, 3, String.format(eventType + ", abnormal event time (ms): %d", timeDiff), (int) arbitrationPacket.getCarId(), 0, 0L);
+		}
+		if (eventDuration > 10000000) { // 4294967295 is not a vaild race time...
+			socialBo.sendReport(0L, activePersonaId, 3, String.format(eventType + ", error/auto-finish (rank: " + arbitrationPacket.getRank() + ")  event time (ms): %d", eventDuration), (int) arbitrationPacket.getCarId(), 0, 0L);
 		}
 		if (!legit && eventType.contentEquals("Pursuit")) {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### To get the reward, you need to stay on Pursuit longer."), activePersonaId);
