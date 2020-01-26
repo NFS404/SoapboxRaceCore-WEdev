@@ -51,11 +51,11 @@ public class LegitRaceBO {
 		boolean finishReasonLegit = true;
 		long eventDuration = arbitrationPacket.getEventDurationInMilliseconds();
 		// 0 - quitted from race, 22 - finished, 518 - escaped from SP pursuit, 266 - busted on SP & MP pursuit
-		if (arbitrationPacket.getFinishReason() != 0 || arbitrationPacket.getFinishReason() != 266) {
+		if (arbitrationPacket.getFinishReason() != 0 && arbitrationPacket.getFinishReason() != 266) {
 			finishReasonLegit = false;
 		}
 		if (!legit && !finishReasonLegit) {
-			socialBo.sendReport(0L, activePersonaId, 3, String.format(eventType + ", abnormal event time (ms): %d", timeDiff), (int) arbitrationPacket.getCarId(), 0, 0L);
+			socialBo.sendReport(0L, activePersonaId, 3, String.format(eventType + ", abnormal event time (ms, session: " + sessionEntity.getId() + "): %d", timeDiff), (int) arbitrationPacket.getCarId(), 0, 0L);
 		}
 		if (eventDuration > 10000000) { // 4294967295 is not a vaild race time...
 			socialBo.sendReport(0L, activePersonaId, 3, String.format(eventType + ", error/auto-finish (rank: " + arbitrationPacket.getRank() + ")  event time (ms): %d", eventDuration), (int) arbitrationPacket.getCarId(), 0, 0L);
