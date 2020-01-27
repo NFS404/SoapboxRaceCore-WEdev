@@ -63,6 +63,7 @@ public class EventEntity {
 	private long legitTime;
 	private boolean searchAvailable = true;
 	private int finishCount;
+	private String carModel;
 
 	public int getId() {
 		return id;
@@ -398,6 +399,14 @@ public class EventEntity {
 
 	public void setFinishCount(int finishCount) {
 		this.finishCount = finishCount;
+	}
+	
+	public String getCarModel() {
+		return carModel;
+	}
+
+	public void setCarModel(String carModel) {
+		this.carModel = carModel;
 	}
 
 }

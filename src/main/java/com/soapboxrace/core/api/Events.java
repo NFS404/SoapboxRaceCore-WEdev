@@ -55,10 +55,9 @@ public class Events {
 		ArrayOfEventDefinition arrayOfEventDefinition = new ArrayOfEventDefinition();
 		List<EventEntity> availableAtLevel = eventBO.availableAtLevel(activePersonaId);
 		for (EventEntity eventEntity : availableAtLevel) {
-			if (eventEntity.getCarClassHash() != 607077938 && carClassHash != eventEntity.getCarClassHash()) {
-				eventEntity.setLocked(true);
-			}
-			if (eventEntity.getId() == 1001 && !defaultCar.getCustomCar().getName().equalsIgnoreCase("991s")) { // Test challenge car restriction
+			String carModel = eventEntity.getCarModel();
+			// Event car model restriction (if present)
+			if ((eventEntity.getCarClassHash() != 607077938 && carClassHash != eventEntity.getCarClassHash()) || (carModel != null && !defaultCar.getCustomCar().getName().equalsIgnoreCase(carModel))) {
 				eventEntity.setLocked(true);
 			}
 			arrayOfEventDefinition.getEventDefinition().add(getEventDefinitionWithId(eventEntity));
