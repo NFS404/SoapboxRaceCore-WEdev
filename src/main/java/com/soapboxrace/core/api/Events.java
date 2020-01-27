@@ -58,6 +58,9 @@ public class Events {
 			if (eventEntity.getCarClassHash() != 607077938 && carClassHash != eventEntity.getCarClassHash()) {
 				eventEntity.setLocked(true);
 			}
+			if (eventEntity.getId() == 1001 && !defaultCar.getCustomCar().getName().equalsIgnoreCase("991s")) { // Test challenge car restriction
+				eventEntity.setLocked(true);
+			}
 			arrayOfEventDefinition.getEventDefinition().add(getEventDefinitionWithId(eventEntity));
 		}
 		eventsPacket.setEvents(arrayOfEventDefinition);

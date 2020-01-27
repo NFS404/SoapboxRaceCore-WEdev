@@ -537,10 +537,10 @@ public class AchievementsBO {
 	}
 	
 	// Test attempt in custom server HUD alerts
-	public void broadcastUITest(PersonaEntity personaEntity) {
+	public void broadcastUICustom(Long personaId, String text) {
 		AchievementsAwarded achievementsAwarded = new AchievementsAwarded();
-		achievementsAwarded.setPersonaId(personaEntity.getPersonaId());
-		achievementsAwarded.setScore(personaEntity.getScore());
+		achievementsAwarded.setPersonaId(personaId);
+		achievementsAwarded.setScore(1337);
 		AchievementAwarded achievementAwarded = new AchievementAwarded();
 
 		String achievedOnStr = "0001-01-01T00:00:00";
@@ -554,13 +554,13 @@ public class AchievementsBO {
 			System.err.println("xml calendar str error");
 		}
 		achievementAwarded.setAchievedOn(achievedOnStr);
-		achievementAwarded.setAchievementDefinitionId((long) 11);
-		achievementAwarded.setAchievementRankId((long) 55);
+		achievementAwarded.setAchievementDefinitionId((long) 104);
+//		achievementAwarded.setAchievementRankId((long) 55);
 		achievementAwarded.setClip("AchievementFlasherBase");
-		achievementAwarded.setClipLengthInSeconds(20);
+		achievementAwarded.setClipLengthInSeconds(5);
 		achievementAwarded.setDescription("LOL");
 		achievementAwarded.setIcon("BADGE18");
-		achievementAwarded.setName("ТЕХ.РАБОТЫ ЧЕРЕЗ 10 МИН.");
+		achievementAwarded.setName(text);
 		achievementAwarded.setPoints(0);
 		achievementAwarded.setRare(false);
 		achievementAwarded.setRarity(0);
@@ -569,8 +569,7 @@ public class AchievementsBO {
 		achievements.add(achievementAwarded);
 
 		achievementsAwarded.setAchievements(achievements);
-		achievementsAwarded.setScore(personaEntity.getScore());
-		openFireSoapBoxCli.send(achievementsAwarded, personaEntity.getPersonaId());
+		openFireSoapBoxCli.send(achievementsAwarded, personaId);
 	}
 
 	public AchievementRewards redeemReward(Long personaId, Long achievementRankId) {

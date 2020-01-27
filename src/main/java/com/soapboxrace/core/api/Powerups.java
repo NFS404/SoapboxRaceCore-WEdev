@@ -71,7 +71,6 @@ public class Powerups {
 			powerupActivated.setTargetPersonaId(targetId);
 			powerupActivated.setPersonaId(activePersonaId);
 			powerupActivatedResponse.setPowerupActivated(powerupActivated);
-			// achievementsBO.broadcastUITest(personaEntityTeam);
 			openFireSoapBoxCli.send(powerupActivatedResponse, activePersonaId);
 			for (String receiver : receivers.split("-")) {
 				Long receiverPersonaId = Long.valueOf(receiver);
