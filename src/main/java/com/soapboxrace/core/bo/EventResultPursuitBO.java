@@ -50,11 +50,14 @@ public class EventResultPursuitBO {
     
     @EJB
 	private EventDAO eventDAO;
+    
+    @EJB
+	private EventResultBO eventResultBO;
 
 	public PursuitEventResult handlePursitEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, PursuitArbitrationPacket pursuitArbitrationPacket,
 			Boolean isBusted) {
+		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 		if (!isBusted) {
-			PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 			achievementsBO.applyOutlawAchievement(personaEntity);
 			achievementsBO.applyPursuitCostToState(pursuitArbitrationPacket, personaEntity);
 			achievementsBO.applyAirTimeAchievement(pursuitArbitrationPacket, personaEntity);
@@ -67,7 +70,6 @@ public class EventResultPursuitBO {
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 		// XKAYA's arbitration exploit fix
 		if (eventDataEntity.getArbitration()) {
-			PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 			System.out.println("WARINING - XKAYA's arbitration exploit attempt, driver: " + personaEntity.getName());
 			return null;
 		}
@@ -92,6 +94,8 @@ public class EventResultPursuitBO {
 		eventDataEntity.setSumOfJumpsDurationInMilliseconds(pursuitArbitrationPacket.getSumOfJumpsDurationInMilliseconds());
 		eventDataEntity.setTopSpeed(pursuitArbitrationPacket.getTopSpeed());
 		eventDataEntity.setIsSingle(true);
+		boolean speedBugChance = eventResultBO.speedBugChance(personaEntity.getUser().getLastLogin());
+		eventDataEntity.setSpeedBugChance(speedBugChance);
 		
 		// +1 to play count for this track, SP
 		EventEntity eventEntity = eventDAO.findById(currentEventId);
@@ -105,7 +109,6 @@ public class EventResultPursuitBO {
 		int reportDisabled = pursuitArbitrationPacket.getCopsDisabled();
 		int reportRammed = pursuitArbitrationPacket.getCopsRammed();
 		if ((reportHacks != 0 && reportHacks != 32) || (reportDisabled >= 15 && reportRammed <= 5)) {
-			PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 			float reportSpeed = pursuitArbitrationPacket.getTopSpeed();
 			float reportHeat = pursuitArbitrationPacket.getHeat();
 			int reportCOS = pursuitArbitrationPacket.getCostToState();

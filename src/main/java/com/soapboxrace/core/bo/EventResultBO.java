@@ -1,5 +1,7 @@
 package com.soapboxrace.core.bo;
 
+import java.time.LocalDateTime;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
@@ -44,6 +46,16 @@ public class EventResultBO {
 	public TeamEscapeEventResult handleTeamEscapeEnd(EventSessionEntity eventSessionEntity, Long activePersonaId,
 			TeamEscapeArbitrationPacket teamEscapeArbitrationPacket) {
 		return eventResultTeamEscapeBO.handleTeamEscapeEnd(eventSessionEntity, activePersonaId, teamEscapeArbitrationPacket);
+	}
+	
+	// after 2 hours of playing, NFSW's time system can glitch sometimes, giving a possible player advantage
+	// so server will save this value is player was logged for 2 hours and more
+	public boolean speedBugChance (LocalDateTime lastLogin) {
+		boolean speedBugChance = false;
+		if (lastLogin.plusHours(2).isBefore(LocalDateTime.now()) ) {
+			speedBugChance = true;
+		}
+		return speedBugChance;
 	}
 
 }

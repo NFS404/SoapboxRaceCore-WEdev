@@ -48,6 +48,9 @@ public class EventResultTeamEscapeBO {
 	
 	@EJB
 	private EventDAO eventDAO;
+	
+	@EJB
+	private EventResultBO eventResultBO;
 
 	public TeamEscapeEventResult handleTeamEscapeEnd(EventSessionEntity eventSessionEntity, Long activePersonaId,
 			TeamEscapeArbitrationPacket teamEscapeArbitrationPacket) {
@@ -100,6 +103,8 @@ public class EventResultTeamEscapeBO {
 		eventDataEntity.setSpikeStripsDodged(teamEscapeArbitrationPacket.getSpikeStripsDodged());
 		eventDataEntity.setSumOfJumpsDurationInMilliseconds(teamEscapeArbitrationPacket.getSumOfJumpsDurationInMilliseconds());
 		eventDataEntity.setTopSpeed(teamEscapeArbitrationPacket.getTopSpeed());
+		boolean speedBugChance = eventResultBO.speedBugChance(personaEntity.getUser().getLastLogin());
+		eventDataEntity.setSpeedBugChance(speedBugChance);
 		eventDataDao.update(eventDataEntity);
 
 		ArrayOfTeamEscapeEntrantResult arrayOfTeamEscapeEntrantResult = new ArrayOfTeamEscapeEntrantResult();

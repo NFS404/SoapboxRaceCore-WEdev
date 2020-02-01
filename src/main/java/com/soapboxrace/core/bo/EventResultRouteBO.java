@@ -71,6 +71,9 @@ public class EventResultRouteBO {
 	
 	@EJB
 	private EventDAO eventDAO;
+	
+	@EJB
+	private EventResultBO eventResultBO;
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -110,6 +113,8 @@ public class EventResultRouteBO {
 
 		eventDataEntity.setEventModeId(eventDataEntity.getEvent().getEventModeId());
 		eventDataEntity.setPersonaId(activePersonaId);
+		boolean speedBugChance = eventResultBO.speedBugChance(personaEntity.getUser().getLastLogin());
+		eventDataEntity.setSpeedBugChance(speedBugChance);
 		eventDataDao.update(eventDataEntity);
 
 		ArrayOfRouteEntrantResult arrayOfRouteEntrantResult = new ArrayOfRouteEntrantResult();
@@ -152,8 +157,12 @@ public class EventResultRouteBO {
 		routeEventResult.setEntrants(arrayOfRouteEntrantResult);
 		int currentEventId = eventDataEntity.getEvent().getId();
 		routeEventResult.setEventId(currentEventId);
-		if (currentEventId == parameterBO.getIntParam("TOURNAMENT_EVENTID")) {
+		int tournamentEventId = parameterBO.getIntParam("TOURNAMENT_EVENTID");
+		if (currentEventId == tournamentEventId && !speedBugChance) {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Event Session: " + eventSessionId), personaEntity.getPersonaId());
+		}
+		if (currentEventId == tournamentEventId && speedBugChance) {
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This event can be affected by SpeedBug, restart the game."), personaEntity.getPersonaId());
 		}
 		routeEventResult.setEventSessionId(eventSessionId);
 		routeEventResult.setExitPath(ExitPath.EXIT_TO_FREEROAM);

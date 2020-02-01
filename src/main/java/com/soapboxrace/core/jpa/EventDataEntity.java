@@ -74,6 +74,8 @@ public class EventDataEntity {
 	// Arbitration packet check
 	protected boolean arbitration;
 	protected boolean isSingle;
+	protected boolean speedBugChance; // after 2 hours of playing, NFSW's time system can glitch sometimes, giving a possible player advantage
+	// so server will save this value is player was logged for 2 hours and more
 
 	public Long getId() {
 		return id;
@@ -319,6 +321,14 @@ public class EventDataEntity {
 
 	public void setIsSingle(boolean value) {
 		this.isSingle = value;
+	}
+	
+	public boolean getSpeedBugChance() {
+		return speedBugChance;
+	}
+
+	public void setSpeedBugChance(boolean value) {
+		this.speedBugChance = value;
 	}
 
 }

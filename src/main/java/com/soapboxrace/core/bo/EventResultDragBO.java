@@ -47,6 +47,9 @@ public class EventResultDragBO {
 	
 	@EJB
 	private EventDAO eventDAO;
+	
+	@EJB
+	private EventResultBO eventResultBO;
 
 	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -91,6 +94,8 @@ public class EventResultDragBO {
 		eventDataEntity.setRank(dragArbitrationPacket.getRank());
 		eventDataEntity.setSumOfJumpsDurationInMilliseconds(dragArbitrationPacket.getSumOfJumpsDurationInMilliseconds());
 		eventDataEntity.setTopSpeed(dragArbitrationPacket.getTopSpeed());
+		boolean speedBugChance = eventResultBO.speedBugChance(personaEntity.getUser().getLastLogin());
+		eventDataEntity.setSpeedBugChance(speedBugChance);
 		eventDataDao.update(eventDataEntity);
 
 		ArrayOfDragEntrantResult arrayOfDragEntrantResult = new ArrayOfDragEntrantResult();
