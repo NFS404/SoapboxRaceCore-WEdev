@@ -53,15 +53,14 @@ public class EventResultPursuitBO {
     
     @EJB
 	private EventResultBO eventResultBO;
+    
+    @EJB
+	private ParameterBO parameterBO;
 
 	public PursuitEventResult handlePursitEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, PursuitArbitrationPacket pursuitArbitrationPacket,
 			Boolean isBusted) {
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
-		if (!isBusted) {
-			achievementsBO.applyOutlawAchievement(personaEntity);
-			achievementsBO.applyPursuitCostToState(pursuitArbitrationPacket, personaEntity);
-			achievementsBO.applyAirTimeAchievement(pursuitArbitrationPacket, personaEntity);
-		}
+		
 		Long eventSessionId = eventSessionEntity.getId();
 		eventSessionEntity.setEnded(System.currentTimeMillis());
 
@@ -81,7 +80,8 @@ public class EventResultPursuitBO {
 		eventDataEntity.setCopsDisabled(pursuitArbitrationPacket.getCopsDisabled());
 		eventDataEntity.setCopsRammed(pursuitArbitrationPacket.getCopsRammed());
 		eventDataEntity.setCostToState(pursuitArbitrationPacket.getCostToState());
-		eventDataEntity.setEventDurationInMilliseconds(pursuitArbitrationPacket.getEventDurationInMilliseconds());
+		long eventTimeCheck = pursuitArbitrationPacket.getEventDurationInMilliseconds();
+		eventDataEntity.setEventDurationInMilliseconds(eventTimeCheck);
 		eventDataEntity.setEventModeId(eventDataEntity.getEvent().getEventModeId());
 		eventDataEntity.setFinishReason(pursuitArbitrationPacket.getFinishReason());
 		eventDataEntity.setHacksDetected(pursuitArbitrationPacket.getHacksDetected());
@@ -103,6 +103,12 @@ public class EventResultPursuitBO {
 		eventDAO.update(eventEntity);
 		
 		eventDataDao.update(eventDataEntity);
+		
+		if (!isBusted && (eventTimeCheck > parameterBO.getIntParam("PURSUIT_MINIMUM_TIME"))) {
+			achievementsBO.applyOutlawAchievement(personaEntity);
+			achievementsBO.applyPursuitCostToState(pursuitArbitrationPacket, personaEntity);
+			achievementsBO.applyAirTimeAchievement(pursuitArbitrationPacket, personaEntity);
+		}
 		
 		// Discord detailed report - Hypercycle
 		long reportHacks = pursuitArbitrationPacket.getHacksDetected();
