@@ -17,6 +17,7 @@ import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.jpa.EventEntity;
+import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.jaxb.http.ArrayOfEventDefinition;
 import com.soapboxrace.jaxb.http.ArrayOfInt;
 import com.soapboxrace.jaxb.http.EventDefinition;
@@ -48,6 +49,7 @@ public class Events {
 	@Produces(MediaType.APPLICATION_XML)
 	public EventsPacket availableAtLevel(@HeaderParam("securityToken") String securityToken) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
+		UserEntity user = tokenSessionBO.getUser(securityToken);
 		OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);
 		int carClassHash = defaultCar.getCustomCar().getCarClassHash();
 
@@ -59,6 +61,12 @@ public class Events {
 			// Event car model restriction (if present)
 			if ((eventEntity.getCarClassHash() != 607077938 && carClassHash != eventEntity.getCarClassHash()) || (carModel != null && !defaultCar.getCustomCar().getName().equalsIgnoreCase(carModel))) {
 				eventEntity.setLocked(true);
+			}
+			if (eventEntity.getId() == 1003 && !user.isAdmin()) { // Test
+				eventEntity.setEnabled(false);
+			}
+            if (eventEntity.getId() == 1004 && !user.isAdmin()) { // Test
+            	eventEntity.setEnabled(false);
 			}
 			arrayOfEventDefinition.getEventDefinition().add(getEventDefinitionWithId(eventEntity));
 		}

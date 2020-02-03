@@ -11,6 +11,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.soapboxrace.core.api.util.Secured;
+import com.soapboxrace.core.bo.AchievementsBO;
 import com.soapboxrace.core.bo.EventBO;
 import com.soapboxrace.core.bo.LobbyBO;
 import com.soapboxrace.core.bo.PersonaBO;
@@ -43,6 +44,9 @@ public class MatchMaking {
 	
 	@EJB
     private LobbyDAO lobbyDAO;
+	
+	@EJB
+	private AchievementsBO achievementsBO;
 
 	@PUT
 	@Secured
@@ -104,6 +108,15 @@ public class MatchMaking {
 		EventSessionEntity createEventSession = eventBO.createEventSession(eventId);
 		sessionInfo.setSessionId(createEventSession.getId());
 		tokenSessionBO.setActiveLobbyId(securityToken, 0L);
+		
+		if (eventId == 1003) {
+			Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
+			achievementsBO.broadcastUICustom(activePersonaId, "Beat the time: 3:06.00");
+		}
+		if (eventId == 1004) {
+			Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
+			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st");
+		}
 		return sessionInfo;
 	}
 
