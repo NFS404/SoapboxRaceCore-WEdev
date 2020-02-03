@@ -69,13 +69,23 @@ public class Event {
 		EventEntity event = eventSessionEntity.getEvent();
 		EventMode eventMode = EventMode.fromId(event.getEventModeId());
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
-		RouteArbitrationPacket routeArbitrationPacketTest = new RouteArbitrationPacket();
 
 		switch (eventMode) {
 		case CIRCUIT:
 		case SPRINT:
 			RouteArbitrationPacket routeArbitrationPacket = UnmarshalXML.unMarshal(arbitrationXml, RouteArbitrationPacket.class);
-			routeArbitrationPacketTest = routeArbitrationPacket;
+			if (event.getId() == 1003 && routeArbitrationPacket.getEventDurationInMilliseconds() < 186000) { // Test
+				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
+			}
+			if (event.getId() == 1003 && routeArbitrationPacket.getEventDurationInMilliseconds() > 186000) { // Test
+				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
+			}
+			if (event.getId() == 1004 && routeArbitrationPacket.getRank() == 1) { // Test
+				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
+			}
+			if (event.getId() == 1004 && routeArbitrationPacket.getRank() > 1) { // Test
+				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
+			}
 			return eventResultBO.handleRaceEnd(eventSessionEntity, activePersonaId, routeArbitrationPacket);
 		case DRAG:
 			DragArbitrationPacket dragArbitrationPacket = UnmarshalXML.unMarshal(arbitrationXml, DragArbitrationPacket.class);
@@ -90,18 +100,6 @@ public class Event {
 			return eventResultBO.handlePursitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, false);
 		default:
 			break;
-		}
-		if (event.getId() == 1003 && routeArbitrationPacketTest.getEventDurationInMilliseconds() < 306000) { // Test
-			achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
-		}
-		if (event.getId() == 1003 && routeArbitrationPacketTest.getEventDurationInMilliseconds() > 306000) { // Test
-			achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
-		}
-		if (event.getId() == 1004 && routeArbitrationPacketTest.getRank() == 1) { // Test
-			achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
-		}
-		if (event.getId() == 1004 && routeArbitrationPacketTest.getRank() > 1) { // Test
-			achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
 		}
 		return "";
 	}

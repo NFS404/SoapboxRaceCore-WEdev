@@ -49,7 +49,6 @@ public class Events {
 	@Produces(MediaType.APPLICATION_XML)
 	public EventsPacket availableAtLevel(@HeaderParam("securityToken") String securityToken) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
-		UserEntity user = tokenSessionBO.getUser(securityToken);
 		OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);
 		int carClassHash = defaultCar.getCustomCar().getCarClassHash();
 
@@ -61,12 +60,6 @@ public class Events {
 			// Event car model restriction (if present)
 			if ((eventEntity.getCarClassHash() != 607077938 && carClassHash != eventEntity.getCarClassHash()) || (carModel != null && !defaultCar.getCustomCar().getName().equalsIgnoreCase(carModel))) {
 				eventEntity.setLocked(true);
-			}
-			if (eventEntity.getId() == 1003 && !user.isAdmin()) { // Test
-				eventEntity.setEnabled(false);
-			}
-            if (eventEntity.getId() == 1004 && !user.isAdmin()) { // Test
-            	eventEntity.setEnabled(false);
 			}
 			arrayOfEventDefinition.getEventDefinition().add(getEventDefinitionWithId(eventEntity));
 		}
