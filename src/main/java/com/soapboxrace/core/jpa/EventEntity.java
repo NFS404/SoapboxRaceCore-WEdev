@@ -64,6 +64,7 @@ public class EventEntity {
 	private boolean searchAvailable = true;
 	private int finishCount;
 	private String carModel;
+	private long minTime;
 
 	public int getId() {
 		return id;
@@ -409,4 +410,11 @@ public class EventEntity {
 		this.carModel = carModel;
 	}
 
+	public long getMinTime() {
+		return minTime;
+	}
+
+	public void setMinTime(long minTime) {
+		this.minTime = minTime;
+	}
 }
