@@ -320,7 +320,11 @@ public enum AchievementType {
 	/**
 	 * got a 4-star skills on class-restricted races or treasure hunt
 	 */
-	WEV2_EARNSKILL(102); //
+	WEV2_EARNSKILL(102), //
+	/**
+	 * unlock access to multiplayer racing
+	 */
+	WEV2_BEGINNERSGUIDE(103); //
 
 	private int id;
 

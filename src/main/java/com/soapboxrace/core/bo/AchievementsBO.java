@@ -386,6 +386,9 @@ public class AchievementsBO {
 		case WEV2_EARNSKILL:
 			int Skills4Earned = achievementPersonaEntity.getSkills4Earned();
 			return Integer.valueOf(Skills4Earned).longValue();
+		case WEV2_BEGINNERSGUIDE:
+			int levelBG = achievementPersonaEntity.getPersona().getLevel();
+			return Integer.valueOf(levelBG).longValue();
 		default:
 			break;
 		}
@@ -811,6 +814,11 @@ public class AchievementsBO {
 	public void applyLevelUpAchievement(PersonaEntity personaEntity) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.LEVEL_UP, Integer.valueOf(personaEntity.getLevel()).longValue());
+	}
+	
+	public void applyBeginnersGuideAchievement(PersonaEntity personaEntity) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_BEGINNERSGUIDE, Integer.valueOf(personaEntity.getLevel()).longValue());
 	}
 	
 //	public void applyExtraLVLAchievement(PersonaEntity personaEntity) {

@@ -39,7 +39,7 @@ public class GetUserSettings {
 		userSettings.setCarCacheAgeLimit(600);
 		userSettings.setIsRaceNowEnabled(true);
 		userSettings.setMaxCarCacheSize(250);
-		userSettings.setMinRaceNowLevel(2);
+		userSettings.setMinRaceNowLevel(5);
 		userSettings.setVoipAvailable(false);
 		ArrayOfString arrayOfString = new ArrayOfString();
 		arrayOfString.getString().addAll(
@@ -57,7 +57,7 @@ public class GetUserSettings {
 						.collect(Collectors.toList()));
 		userSettings.setDisactivatedHolidaySceneryGroups(arrayOfString2);
 		userSettings.setFirstTimeLogin(false);
-		userSettings.setMaxLevel(60);
+		userSettings.setMaxLevel(100);
 		userSettings.setStarterPackApplied(false);
 		userSettings.setUserId(userId);
 		return userSettings;
