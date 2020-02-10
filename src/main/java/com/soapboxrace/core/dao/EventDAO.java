@@ -3,18 +3,23 @@ package com.soapboxrace.core.dao;
 import java.math.BigInteger;
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.dao.util.BaseDAO;
 import com.soapboxrace.core.jpa.EventEntity;
 
 @Stateless
 public class EventDAO extends BaseDAO<EventEntity> {
 
+	@EJB
+	private ParameterBO parameterBO;
+	
 	@PersistenceContext
 	protected void setEntityManager(EntityManager entityManager) {
 		this.entityManager = entityManager;
@@ -68,6 +73,13 @@ public class EventDAO extends BaseDAO<EventEntity> {
 	public List<EventEntity> findByLevel(int level) {
 		TypedQuery<EventEntity> query = entityManager.createNamedQuery("EventEntity.findByLevel", EventEntity.class);
 		query.setParameter("level", level);
+		return query.getResultList();
+	}
+	
+	public List<EventEntity> findByRotation(int level) {
+		TypedQuery<EventEntity> query = entityManager.createNamedQuery("EventEntity.findByRotation", EventEntity.class);
+		query.setParameter("level", level);
+		query.setParameter("rotation", parameterBO.getIntParam("ROTATIONID"));
 		return query.getResultList();
 	}
 

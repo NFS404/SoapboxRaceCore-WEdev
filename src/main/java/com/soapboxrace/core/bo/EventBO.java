@@ -31,7 +31,7 @@ public class EventBO {
 
 	public List<EventEntity> availableAtLevel(Long personaId) {
 		PersonaEntity personaEntity = personaDao.findById(personaId);
-		return eventDao.findByLevel(personaEntity.getLevel());
+		return eventDao.findByRotation(personaEntity.getLevel());
 	}
 
 	public void createEventDataSession(Long personaId, Long eventSessionId) {

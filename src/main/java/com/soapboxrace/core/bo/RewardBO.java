@@ -151,7 +151,6 @@ public class RewardBO {
 						AchievementRankEntity achievementRankEntity6 = achievementRankDao.findById((long) 516);
 						if (achievementStateDao.findByPersonaAchievementRank(personaEntity, achievementRankEntity6) == null) {
 							achievementsBO.applyBeginnersGuideAchievement(personaEntity);
-							System.out.println("levelBG TEST");
 						}
 					}
 					

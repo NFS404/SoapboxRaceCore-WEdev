@@ -14,7 +14,8 @@ import javax.persistence.Table;
 @NamedQueries({ //
 		@NamedQuery(name = "EventEntity.findAll", query = "SELECT obj FROM EventEntity obj"), //
 		@NamedQuery(name = "EventEntity.findAllEnabled", query = "SELECT obj FROM EventEntity obj WHERE isEnabled = true"), //
-		@NamedQuery(name = "EventEntity.findByLevel", query = "SELECT obj FROM EventEntity obj WHERE :level >= obj.minLevel AND isEnabled = true") //
+		@NamedQuery(name = "EventEntity.findByLevel", query = "SELECT obj FROM EventEntity obj WHERE :level >= obj.minLevel AND :level <= obj.maxLevel AND isEnabled = true"), //
+		@NamedQuery(name = "EventEntity.findByRotation", query = "SELECT obj FROM EventEntity obj WHERE :level >= obj.minLevel AND :level <= obj.maxLevel AND isEnabled = true AND rotation IN ('0', :rotation)") //
 })
 public class EventEntity {
 
@@ -65,6 +66,7 @@ public class EventEntity {
 	private int finishCount;
 	private String carModel;
 	private long minTime;
+	private int rotation;
 
 	public int getId() {
 		return id;
@@ -416,5 +418,13 @@ public class EventEntity {
 
 	public void setMinTime(long minTime) {
 		this.minTime = minTime;
+	}
+	
+	public int getRotation() {
+		return rotation;
+	}
+
+	public void setRotation(int rotation) {
+		this.rotation = rotation;
 	}
 }

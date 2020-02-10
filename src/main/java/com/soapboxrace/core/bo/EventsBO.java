@@ -1,6 +1,8 @@
 package com.soapboxrace.core.bo;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Random;
 
@@ -17,7 +19,6 @@ import com.soapboxrace.core.jpa.SkillModRewardType;
 import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.jpa.TreasureHuntEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
-import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.Accolades;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
 import com.soapboxrace.jaxb.http.ArrayOfLuckyDrawBox;
@@ -219,4 +220,10 @@ public class EventsBO {
 		return luckyDrawInfo;
 	}
 
+//	private void trackRotationCycle() { // Track rotation lists is changing every Monday on 00:00 local server time
+//		int curRotation = parameterBO.getIntParam("ROTATIONID");
+//		if (LocalDateTime.now().equals(DayOfWeek.MONDAY)) {
+//			//
+//		}
+//	}
 }
