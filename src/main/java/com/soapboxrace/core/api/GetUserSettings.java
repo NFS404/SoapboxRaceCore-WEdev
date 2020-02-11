@@ -39,7 +39,7 @@ public class GetUserSettings {
 		userSettings.setCarCacheAgeLimit(600);
 		userSettings.setIsRaceNowEnabled(true);
 		userSettings.setMaxCarCacheSize(250);
-		userSettings.setMinRaceNowLevel(5);
+		userSettings.setMinRaceNowLevel(6);
 		userSettings.setVoipAvailable(false);
 		ArrayOfString arrayOfString = new ArrayOfString();
 		arrayOfString.getString().addAll(
