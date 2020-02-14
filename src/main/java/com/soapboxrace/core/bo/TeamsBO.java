@@ -153,41 +153,36 @@ public class TeamsBO {
 				String winnerPlayerName = "!pls fix!";
 				String winnerTeamName = "!pls fix!";
 				int winnerTeamPoints = 0;
-//				System.out.println("TEST teamAccoladesBasic teamCheck");
 				for (EventDataEntity racer : eventDataDao.getRacersRanked(eventSessionId)) {
 					PersonaEntity racerEntity = personaDao.findById(racer.getPersonaId());
 					TeamsEntity racerTeamEntity = racerEntity.getTeam();
-//					System.out.println("TEST teamAccoladesBasic racers");
 					if (racerTeamEntity != null && teamWinner == null) {
 						Long racerTeamId = racerTeamEntity.getTeamId();
-//						System.out.println("TEST teamAccoladesBasic teamEntityAndWinner");
 						if ((racerTeamId == team1 || racerTeamId == team2)) {
 							OwnedCarTrans defaultCar = personaBO.getDefaultCar(racer.getPersonaId());
-//							System.out.println("TEST teamAccoladesBasic defaultCar");
 							if (defaultCar.getCustomCar().getCarClassHash() == targetCarClass || targetCarClass == 0) {
 								teamWinner = racerTeamId;
 								eventSessionEntity.setTeamWinner(racerTeamId);
 								eventSessionDao.update(eventSessionEntity);
 								
 								winnerPlayerName = racerEntity.getName();
+								String loserTeamName = teamsDao.findById(team2).getTeamName();
 								winnerTeamName = racerTeamEntity.getTeamName();
 								racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
 								winnerTeamPoints = racerTeamEntity.getTeamPoints();
 								teamsDao.update(racerTeamEntity);
-//								System.out.println("TEST teamAccoladesBasic teamFinishProper");
 								achievementsBO.applyTeamRacesWonAchievement(racerEntity);
 								
 								messageDebug = teamAccoladesDebugTimes(eventSessionId);
 								message = ":heavy_minus_sign:"
-						        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде (*итого очков: " + winnerTeamPoints + ", сессия " + eventSessionId + "*)."
-						        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race (*points: " + winnerTeamPoints + ", session " + eventSessionId + "*)."
+						        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде против **" + loserTeamName + "** (*итого очков: " + winnerTeamPoints + ", сессия " + eventSessionId + "*)."
+						        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race against **" + loserTeamName + "** (*points: " + winnerTeamPoints + ", session " + eventSessionId + "*)."
 						        		+ "\n" + messageDebug;
 								discordBot.sendMessage(message, true);
 							}
 						}
 					}
 					if (teamWinner != null) {
-//						System.out.println("TEST teamAccoladesBasic teamLoser");
 						openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + winnerTeamName + " has won the event! +1P, total: " + winnerTeamPoints + ", session " + eventSessionId), racer.getPersonaId());
 				    }
 				}
