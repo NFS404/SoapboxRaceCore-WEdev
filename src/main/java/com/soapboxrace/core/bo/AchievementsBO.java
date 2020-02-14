@@ -816,9 +816,9 @@ public class AchievementsBO {
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.LEVEL_UP, Integer.valueOf(personaEntity.getLevel()).longValue());
 	}
 	
-	public void applyBeginnersGuideAchievement(PersonaEntity personaEntity) {
+	public void applyBeginnersGuideAchievement(PersonaEntity personaEntity) { // Needs level 6 to activate
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
-		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_BEGINNERSGUIDE, Integer.valueOf(personaEntity.getLevel()).longValue());
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_BEGINNERSGUIDE, Integer.valueOf(6).longValue());
 	}
 	
 //	public void applyExtraLVLAchievement(PersonaEntity personaEntity) {
@@ -910,7 +910,7 @@ public class AchievementsBO {
 			AchievementStateEntity achievementStateEntity = new AchievementStateEntity();
 			achievementStateEntity.setAchievedOn(LocalDateTime.now());
 			achievementStateEntity.setAchievementRank(achievementRankEntity);
-			achievementStateEntity.setAchievementState(AchievementState.COMPLETED);
+			achievementStateEntity.setAchievementState(AchievementState.REWARD_WAITING);
 			achievementStateEntity.setPersona(personaEntity);
 			achievementStateDAO.insert(achievementStateEntity);
 			personaEntity.setScore(personaEntity.getScore() + achievementRankEntity.getPoints());
