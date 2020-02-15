@@ -100,16 +100,20 @@ public class EventResultDragBO {
 
 		ArrayOfDragEntrantResult arrayOfDragEntrantResult = new ArrayOfDragEntrantResult();
 		// +1 to play count for this track, MP
-		if (eventDataEntity.getRank() == 1) {
+		if (eventDataEntity.getRank() == 1 && arrayOfDragEntrantResult.getDragEntrantResult().size() > 1) {
 			EventEntity eventEntity = eventDAO.findById(currentEventId);
 			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+			personaEntity.setRacesCount(personaEntity.getRacesCount() + 1);
 			eventDAO.update(eventEntity);
+			personaDAO.update(personaEntity);
 		}
 		// +1 to play count for this track, SP
 		if (arrayOfDragEntrantResult.getDragEntrantResult().size() < 2) {
 			EventEntity eventEntity = eventDAO.findById(currentEventId);
 			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+			personaEntity.setRacesCount(personaEntity.getRacesCount() + 1);
 			eventDAO.update(eventEntity);
+			personaDAO.update(personaEntity);
 			EventDataEntity eventDataEntitySP = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 			eventDataEntitySP.setIsSingle(true);
 			eventDataDao.update(eventDataEntitySP);

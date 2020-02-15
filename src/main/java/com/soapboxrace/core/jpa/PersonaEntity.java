@@ -43,6 +43,7 @@ public class PersonaEntity {
 	private int score;
 	private int curCarIndex = 0;
 	private int carSlots = 6;
+	private int racesCount;
 
 	@ManyToOne
 	@JoinColumn(name = "USERID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "FK_PERSONA_USER"))
@@ -200,6 +201,14 @@ public class PersonaEntity {
 
 	public void setListOfBadges(List<BadgePersonaEntity> listOfBadges) {
 		this.listOfBadges = listOfBadges;
+	}
+	
+	public int getRacesCount() {
+		return racesCount;
+	}
+
+	public void setRacesCount(int racesCount) {
+		this.racesCount = racesCount;
 	}
 
 }

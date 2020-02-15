@@ -109,16 +109,20 @@ public class EventResultTeamEscapeBO {
 
 		ArrayOfTeamEscapeEntrantResult arrayOfTeamEscapeEntrantResult = new ArrayOfTeamEscapeEntrantResult();
 		// +1 to play count for this track, MP
-		if (eventDataEntity.getRank() == 1) {
+		if (eventDataEntity.getRank() == 1 && arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() > 1) {
 			EventEntity eventEntity = eventDAO.findById(currentEventId);
 			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+			personaEntity.setRacesCount(personaEntity.getRacesCount() + 1);
 			eventDAO.update(eventEntity);
+			personaDAO.update(personaEntity);
 		}
 		// +1 to play count for this track, SP (No default SP TEs)
 		if (arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() < 2) {
 			EventEntity eventEntity = eventDAO.findById(currentEventId);
 			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+			personaEntity.setRacesCount(personaEntity.getRacesCount() + 1);
 			eventDAO.update(eventEntity);
+			personaDAO.update(personaEntity);
 			EventDataEntity eventDataEntitySP = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 			eventDataEntitySP.setIsSingle(true);
 			eventDataDao.update(eventDataEntitySP);

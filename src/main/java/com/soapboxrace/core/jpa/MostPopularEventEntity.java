@@ -18,7 +18,6 @@ import javax.persistence.Table;
 			name = "MostPopularEventEntity.mostPopular",
 			query = "SELECT " + 
 					"	DISTINCT " + 
-					"	e.count count, " + 
 					"	e.name event_name, " + 
 					"	e.eventmodeid eventModeId, " + 
 					"	e.carclasshash classHash, " + 
@@ -37,8 +36,8 @@ public class MostPopularEventEntity {
 	@Column(name="eventModeId", nullable = false)
 	private int eventModeId;
 	
-	@Column(name="count")
-	private int count;
+	@Column(name="finishCount")
+	private int finishCount;
 	
 	@Column(name="event_name")
 	private String event_name;
@@ -54,8 +53,8 @@ public class MostPopularEventEntity {
 		return eventModeId;
 	}
 
-	public int getCount() {
-		return count;
+	public int getFinishCount() {
+		return finishCount;
 	}
 
 	public int getClassHash() {

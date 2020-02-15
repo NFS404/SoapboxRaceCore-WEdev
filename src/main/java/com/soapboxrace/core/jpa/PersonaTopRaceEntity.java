@@ -18,12 +18,11 @@ import javax.persistence.Table;
 			+ "p.id id,"
 			+ "p.name persona_name, "
 			+ "p.iconindex iconindex, "
-			+ "Count(*) AS countEventData "
+			+ "p.racesCount racescount "
 		+ "FROM "
 			+ "persona p "
-		+ "INNER JOIN event_data e ON p.id=e.personaid "
 		+ "GROUP BY p.id"
-		+ ") s ORDER BY countEventData DESC",
+		+ ") s ORDER BY racescount DESC",
 	resultClass = PersonaTopRaceEntity.class
 	)
 public class PersonaTopRaceEntity {
@@ -36,8 +35,8 @@ public class PersonaTopRaceEntity {
 	private String name;
 	@Column(name = "iconindex", nullable = true)
 	private int iconIndex;
-	@Column(name = "countEventData", nullable = true)
-	private int countEventData;
+	@Column(name = "racescount", nullable = true)
+	private int racescount;
 	
 	public String getName() {
 		return name;
@@ -45,7 +44,7 @@ public class PersonaTopRaceEntity {
 	public int getIcon() {
 		return iconIndex;
 	}
-	public int getEventData() {
-		return countEventData;
+	public int getRacesCount() {
+		return racescount;
 	}
 }

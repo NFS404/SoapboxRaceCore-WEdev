@@ -119,7 +119,7 @@ public class RestApiBO {
 		return arrayOfProfileData;
 	}
 	/**
-	 * Получает то профилей по количеству трас, в которых участвовал профиль
+	 * Получает топ профилей по количеству трасс, в которых участвовал профиль
 	 * @param onPage - Из скольки профилей будет состоять топ
 	 * @return TopProfileRaces
 	 */
@@ -128,7 +128,7 @@ public class RestApiBO {
 		TopProfileRaces arrayOfProfileData = new TopProfileRaces();
 		List<PersonaTopRaceEntity> profiles = personaDAO.getTopRacers(onPage);
 		for (PersonaTopRaceEntity profile : profiles) {
-			arrayOfProfileData.add(new ProfileDataRaces(profile.getName(), profile.getIcon(), profile.getEventData()));
+			arrayOfProfileData.add(new ProfileDataRaces(profile.getName(), profile.getIcon(), profile.getRacesCount()));
 		}
 		return arrayOfProfileData;
 	}
@@ -161,23 +161,23 @@ public class RestApiBO {
 			switch(race.getEventModeId()) {
 			// Круг
 			case 4:
-				arrayOfRaces.setCircuit(new Race(race.getName(), race.getClassHash(), race.getCount()));
+				arrayOfRaces.setCircuit(new Race(race.getName(), race.getClassHash(), race.getFinishCount()));
 				break;
 			// Спринт
 			case 9:
-				arrayOfRaces.setSprint(new Race(race.getName(), race.getClassHash(), race.getCount()));
+				arrayOfRaces.setSprint(new Race(race.getName(), race.getClassHash(), race.getFinishCount()));
 				break;
 			// Драг
 			case 19:
-				arrayOfRaces.setDrag(new Race(race.getName(), race.getClassHash(), race.getCount()));
+				arrayOfRaces.setDrag(new Race(race.getName(), race.getClassHash(), race.getFinishCount()));
 				break;
 			// Погоня
 			case 12:
-				arrayOfRaces.setPursuit(new Race(race.getName(), race.getClassHash(), race.getCount()));
+				arrayOfRaces.setPursuit(new Race(race.getName(), race.getClassHash(), race.getFinishCount()));
 				break;
 			// Спасение командой
 			case 24:
-				arrayOfRaces.setTeamEscape(new Race(race.getName(), race.getClassHash(), race.getCount()));
+				arrayOfRaces.setTeamEscape(new Race(race.getName(), race.getClassHash(), race.getFinishCount()));
 				break;
 			}
 		}

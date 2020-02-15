@@ -100,7 +100,9 @@ public class EventResultPursuitBO {
 		// +1 to play count for this track, SP
 		EventEntity eventEntity = eventDAO.findById(currentEventId);
 		eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+		personaEntity.setRacesCount(personaEntity.getRacesCount() + 1);
 		eventDAO.update(eventEntity);
+		personaDAO.update(personaEntity);
 		
 		eventDataDao.update(eventDataEntity);
 		
