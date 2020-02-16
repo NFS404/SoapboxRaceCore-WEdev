@@ -152,6 +152,7 @@ public class TeamsBO {
 				// Placeholder
 				String winnerPlayerName = "!pls fix!";
 				String winnerTeamName = "!pls fix!";
+				String loserTeamName = "!pls fix!";
 				int winnerTeamPoints = 0;
 				for (EventDataEntity racer : eventDataDao.getRacersRanked(eventSessionId)) {
 					PersonaEntity racerEntity = personaDao.findById(racer.getPersonaId());
@@ -164,9 +165,13 @@ public class TeamsBO {
 								teamWinner = racerTeamId;
 								eventSessionEntity.setTeamWinner(racerTeamId);
 								eventSessionDao.update(eventSessionEntity);
-								
 								winnerPlayerName = racerEntity.getName();
-								String loserTeamName = teamsDao.findById(team2).getTeamName();
+								if (racerTeamEntity.getTeamId() == team1) {
+									loserTeamName = teamsDao.findById(team2).getTeamName();
+								}
+								if (racerTeamEntity.getTeamId() == team2) {
+									loserTeamName = teamsDao.findById(team1).getTeamName();
+								}	
 								winnerTeamName = racerTeamEntity.getTeamName();
 								racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
 								winnerTeamPoints = racerTeamEntity.getTeamPoints();
