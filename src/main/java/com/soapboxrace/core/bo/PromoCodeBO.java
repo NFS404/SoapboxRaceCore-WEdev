@@ -104,6 +104,7 @@ public class PromoCodeBO {
 		double premiumMoneyValue = 0;
 		double playerInitialCash = personaEntity.getCash();
 		double finalValue = 0;
+		double cashPreValue = 0;
 		double extraMoneyTransit = 0;
 		int playerInitialLevel = personaEntity.getLevel();
 		// Predefined World Evolved premium types - Hypercycle
@@ -113,6 +114,7 @@ public class PromoCodeBO {
 		    	if (!userEntity.isPremium()) {
 		    		premiumAchievementApply(126, personaEntity);
 		    	
+		    		cashPreValue = personaEntity.getCash();
 		    		premiumMoneyValue = 5000000;
 		    		finalValue = playerInitialCash + premiumMoneyValue;
 		    		if (finalValue > maxCashFreeAcc) {
@@ -131,7 +133,7 @@ public class PromoCodeBO {
 		    		promoCodeEntity.setIsUsed(true);
 					promoCodeEntity.setUser(userEntity);
 					promoCodeDao.update(promoCodeEntity);
-					System.out.println("Player " + nickname + " got the Promo Code.");
+					System.out.println("Player " + nickname + " got the Promo Code (Money amount BEFORE: " + cashPreValue + ")");
 					return "Power-Up is activated (restart the game), thank you! ;)";
 		    	}
 		    	return "ERROR: this account is already got a higher Premium";
@@ -156,6 +158,7 @@ public class PromoCodeBO {
 		    	premiumAchievementApply(502, personaEntity);
 		    	premiumCarSlots(200, userEntity);
 		    	
+		    	cashPreValue = personaEntity.getCash();
 		    	premiumMoneyValue = 10000000;
 	    		finalValue = playerInitialCash + premiumMoneyValue;
 	    		if (finalValue > maxCashPremiumAcc) {
@@ -177,7 +180,7 @@ public class PromoCodeBO {
 		    	promoCodeEntity.setIsUsed(true);
 				promoCodeEntity.setUser(userEntity);
 				promoCodeDao.update(promoCodeEntity);
-				System.out.println("Player " + nickname + " got the Promo Code.");
+				System.out.println("Player " + nickname + " got the Promo Code (Money amount BEFORE: " + cashPreValue + ")");
 				return "Premium+ is activated (restart the game), thank you! ;)";
 		    case "full":
 		    	premiumAchievementApply(126, personaEntity);
@@ -186,6 +189,7 @@ public class PromoCodeBO {
 		    	premiumAchievementApply(503, personaEntity);
 		    	premiumCarSlots(200, userEntity);
 		    	
+		    	cashPreValue = personaEntity.getCash();
 		    	premiumMoneyValue = 30000000;
 	    		finalValue = playerInitialCash + premiumMoneyValue;
 	    		if (finalValue > maxCashPremiumAcc) {
@@ -207,10 +211,11 @@ public class PromoCodeBO {
 		    	promoCodeEntity.setIsUsed(true);
 				promoCodeEntity.setUser(userEntity);
 				promoCodeDao.update(promoCodeEntity);
-				System.out.println("Player " + nickname + " got the Promo Code.");
+				System.out.println("Player " + nickname + " got the Promo Code (Money amount BEFORE: " + cashPreValue + ")");
 				return "Premium Full is activated (restart the game), thank you! ;)";
 		    case "moneydrop":
 		    	if (userEntity.isPremium()) {
+		    		cashPreValue = personaEntity.getCash();
 		    		premiumMoneyValue = 10000000;
 		    		finalValue = playerInitialCash + premiumMoneyValue;
 		    		if (finalValue > maxCashPremiumAcc) {
@@ -224,7 +229,7 @@ public class PromoCodeBO {
 		    	    promoCodeEntity.setIsUsed(true);
 				    promoCodeEntity.setUser(userEntity);
 				    promoCodeDao.update(promoCodeEntity);
-				    System.out.println("Player " + nickname + " got the Promo Code.");
+				    System.out.println("Player " + nickname + " got the Promo Code (Money amount BEFORE: " + cashPreValue + ")");
 				    return "Money Drop is activated (restart the game), thank you! ;)";
 		    	}
 		    	return "ERROR: you need to got the any Premium first, to use Money Drops";
