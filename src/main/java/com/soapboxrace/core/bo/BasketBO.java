@@ -19,6 +19,7 @@ import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.ProductDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.TreasureHuntDAO;
+import com.soapboxrace.core.dao.VisualPartDAO;
 import com.soapboxrace.core.jpa.BasketDefinitionEntity;
 import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
@@ -80,6 +81,9 @@ public class BasketBO {
 	
 	@EJB
 	private DiscordWebhook discordBot;
+	
+	@EJB
+	private VisualPartDAO visualPartDAO;
 
 	private OwnedCarTrans getCar(String productId) {
 		BasketDefinitionEntity basketDefinitonEntity = basketDefinitionsDAO.findById(productId);

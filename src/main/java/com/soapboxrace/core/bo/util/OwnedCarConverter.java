@@ -240,7 +240,7 @@ public class OwnedCarConverter {
 			visualPartEntity.setSlotHash(visualPartTransTmp.getSlotHash());
 			// Hidden items placement system. Dirty, but it works!
 			// Dark black tint
-            if (visualPartEntity.getPartHash() == -43129156) {
+            if (visualPartEntity.getPartHash() == -340654404) {
             	visualPartEntity.setPartHash(-340654404);
             	visualPartEntity.setSlotHash(453545749);
 			   }
