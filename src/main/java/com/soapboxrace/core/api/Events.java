@@ -57,8 +57,13 @@ public class Events {
 		List<EventEntity> availableAtLevel = eventBO.availableAtLevel(activePersonaId);
 		for (EventEntity eventEntity : availableAtLevel) {
 			String carModel = eventEntity.getCarModel();
+			int eventClassHash = eventEntity.getCarClassHash();
 			// Event car model restriction (if present)
-			if ((eventEntity.getCarClassHash() != 607077938 && carClassHash != eventEntity.getCarClassHash()) || (carModel != null && !defaultCar.getCustomCar().getName().equalsIgnoreCase(carModel))) {
+			if ((eventClassHash != 607077938 && carClassHash != eventClassHash) || (carModel != null && !defaultCar.getCustomCar().getName().equalsIgnoreCase(carModel))) {
+				eventEntity.setLocked(true);
+			}
+			// If player drives a AI or Drift-Spec car, he will be unable to play Drag events
+			if (eventEntity.getEventModeId() == 19 && (carClassHash == 0 || carClassHash == 1337)) {
 				eventEntity.setLocked(true);
 			}
 			arrayOfEventDefinition.getEventDefinition().add(getEventDefinitionWithId(eventEntity));

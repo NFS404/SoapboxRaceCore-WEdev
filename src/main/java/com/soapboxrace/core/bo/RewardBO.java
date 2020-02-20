@@ -1,6 +1,5 @@
 package com.soapboxrace.core.bo;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -14,7 +13,6 @@ import com.soapboxrace.core.dao.LevelRepDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.ProductDAO;
 import com.soapboxrace.core.jpa.AchievementRankEntity;
-import com.soapboxrace.core.jpa.AchievementStateEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.CardDecks;
 import com.soapboxrace.core.jpa.EventEntity;
@@ -23,7 +21,6 @@ import com.soapboxrace.core.jpa.ProductEntity;
 import com.soapboxrace.core.jpa.SkillModPartEntity;
 import com.soapboxrace.core.jpa.SkillModRewardType;
 import com.soapboxrace.jaxb.http.Accolades;
-import com.soapboxrace.jaxb.http.AchievementState;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
 import com.soapboxrace.jaxb.http.ArrayOfDragEntrantResult;
 import com.soapboxrace.jaxb.http.ArrayOfLuckyDrawItem;
@@ -150,7 +147,6 @@ public class RewardBO {
 					if (personaEntity.getLevel() >= 6) {
 						AchievementRankEntity achievementRankEntity6 = achievementRankDao.findById((long) 516);
 						if (achievementStateDao.findByPersonaAchievementRank(personaEntity, achievementRankEntity6) == null) {
-							System.out.println("Entity6 TEST");
 							achievementsBO.applyBeginnersGuideAchievement(personaEntity);
 						}
 					}
