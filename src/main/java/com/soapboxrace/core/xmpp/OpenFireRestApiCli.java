@@ -29,6 +29,7 @@ import org.igniterealtime.restclient.entity.UserEntity;
 
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
+import com.soapboxrace.core.jpa.TokenSessionEntity;
 
 @Startup
 @Singleton
@@ -148,6 +149,11 @@ public class OpenFireRestApiCli {
 	@AccessTimeout(value=20000)
     public int getTotalOnlineUsers() {
 		return tokenDAO.getUsersOnlineCount();
+	}
+	
+	@AccessTimeout(value=20000)
+    public List<TokenSessionEntity> getTotalOnlineList() {
+		return tokenDAO.getUsersOnlineList();
 	}
 	
 	@AccessTimeout(value=20000)

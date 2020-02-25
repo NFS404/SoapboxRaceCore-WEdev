@@ -23,7 +23,8 @@ import javax.persistence.Table;
 		@NamedQuery(name = "TokenSessionEntity.updateLobbyId", //
 				query = "UPDATE TokenSessionEntity obj " 
 						+ "SET obj.activeLobbyId = :activeLobbyId WHERE obj.activePersonaId = :personaId"), //
-		@NamedQuery(name = "TokenSessionEntity.getUsersOnlineCount", query = "SELECT Count(obj) FROM TokenSessionEntity obj WHERE obj.expirationDate >= NOW() AND obj.isLoggedIn = true")
+		@NamedQuery(name = "TokenSessionEntity.getUsersOnlineCount", query = "SELECT Count(obj) FROM TokenSessionEntity obj WHERE obj.expirationDate >= NOW() AND obj.isLoggedIn = true"), //
+		@NamedQuery(name = "TokenSessionEntity.getUsersOnlineList", query = "SELECT obj FROM TokenSessionEntity obj WHERE obj.expirationDate >= NOW() AND obj.isLoggedIn = true") //
 })
 public class TokenSessionEntity {
 

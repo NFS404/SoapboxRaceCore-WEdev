@@ -86,6 +86,18 @@ public class Event {
 			if (event.getId() == 1004 && routeArbitrationPacket.getRank() > 1) { // Test
 				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
 			}
+			if (event.getId() == 1018 && routeArbitrationPacket.getRank() == 1 && routeArbitrationPacket.getEventDurationInMilliseconds() > 255000) { // Test
+				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
+			}
+			if (event.getId() == 1018 && (routeArbitrationPacket.getEventDurationInMilliseconds() <= 255000 || routeArbitrationPacket.getRank() > 1)) { // Test
+				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
+			}
+			if (event.getId() == 1005 && routeArbitrationPacket.getRank() == 1) { // Test
+				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
+			}
+			if (event.getId() == 1005 && routeArbitrationPacket.getRank() > 1) { // Test
+				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
+			}
 			return eventResultBO.handleRaceEnd(eventSessionEntity, activePersonaId, routeArbitrationPacket);
 		case DRAG:
 			DragArbitrationPacket dragArbitrationPacket = UnmarshalXML.unMarshal(arbitrationXml, DragArbitrationPacket.class);

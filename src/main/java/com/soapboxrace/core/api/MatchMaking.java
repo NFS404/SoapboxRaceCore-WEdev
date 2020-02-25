@@ -117,6 +117,14 @@ public class MatchMaking {
 			Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st");
 		}
+		if (eventId == 1018) {
+			Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
+			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st after 4:15.00");
+		}
+		if (eventId == 1005) {
+			Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
+			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st");
+		}
 		return sessionInfo;
 	}
 
