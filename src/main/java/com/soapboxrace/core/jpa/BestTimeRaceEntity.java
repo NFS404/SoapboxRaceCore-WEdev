@@ -10,7 +10,7 @@ import javax.persistence.NamedNativeQuery;
 import javax.persistence.Table;
 
 /**
- * Заезды с наилудшим временем
+ * Заезды с наилучшим временем
  * @author Vadimka
  */
 @Entity
@@ -48,7 +48,7 @@ import javax.persistence.Table;
 					"	d.topspeed max_speed, " + 
 					"	d.hacksdetected hacks_level, " + 
 					"	d.numberofcollisions collision, " + 
-					"	e.ended ended " +
+					"	e.started started " +
 					"FROM " + 
 					"	event_data d, " + 
 					"	customcar cc, " + 
@@ -72,7 +72,7 @@ import javax.persistence.Table;
 					"	d.topspeed max_speed, " + 
 					"	d.hacksdetected hacks_level, " + 
 					"	d.numberofcollisions collision, " + 
-					"	e.ended ended " +
+					"	e.started started " +
 					"FROM " + 
 					"	event_data d, " + 
 					"	customcar cc, " + 
@@ -106,7 +106,7 @@ public class BestTimeRaceEntity {
 	private int hacks_level;
 //	@Column(name="collision")
 	private int collision;
-	private Long ended;
+	private Long started;
 	/**
 	 * Получить имя профиля
 	 */
@@ -166,9 +166,9 @@ public class BestTimeRaceEntity {
 	 * Дата окончания заезда
 	 */
 	public long getdate() {
-		if (ended == null) {
+		if (started == null) {
 			return 0;
 		}
-		return ended;
+		return started;
 	}
 }
