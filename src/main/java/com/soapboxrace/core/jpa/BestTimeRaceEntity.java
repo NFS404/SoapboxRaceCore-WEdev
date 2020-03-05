@@ -50,12 +50,12 @@ import javax.persistence.Table;
 					"	d.numberofcollisions collision, " + 
 					"	e.started started " +
 					"FROM " + 
+					"	event_session e, " + 
 					"	event_data d, " + 
 					"	customcar cc, " + 
-					"	persona p, " + 
-					"	event_session e " +
+					"	persona p " +
 					"WHERE " + 
-					"	d.carid = cc.id AND p.id = d.personaid AND d.eventsessionid = e.id AND d.eventid = :eventid " + 
+					"	d.eventid = :eventid AND d.carid = cc.id AND p.id = d.personaid AND e.id = d.eventsessionid " + 
 					"ORDER BY d.eventdurationinmilliseconds",
 			resultClass = BestTimeRaceEntity.class
 		),
@@ -79,7 +79,7 @@ import javax.persistence.Table;
 					"	persona p, " + 
 					"	event_session e " +
 					"WHERE " + 
-					"	d.carid = cc.id AND p.id = d.personaid AND d.eventsessionid = e.id AND d.eventid = :eventid AND p.name LIKE :pname " + 
+					"	d.carid = cc.id AND p.id = d.personaid AND d.eventsessionid = e.id AND d.eventid = :eventid AND p.id = :id " + 
 					"ORDER BY d.eventdurationinmilliseconds",
 			resultClass = BestTimeRaceEntity.class
 		)
