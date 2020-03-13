@@ -57,4 +57,14 @@ public class PromoCode {
 		}
 		return bo.useDebug(premiumType, extraMoney, nickname, timeYear, timeMonth, timeDay);
 	}
+	
+	@POST
+	@Path("/saleGen")
+	@Produces(MediaType.TEXT_HTML)
+	public String saleGen(@FormParam("saleManagerToken") String saleManagerToken, @FormParam("saleTime") String saleTime, @FormParam("saleCar1") String saleCar1, @FormParam("saleCar2") String saleCar2, @FormParam("saleCar3") String saleCar3, @FormParam("saleCar4") String saleCar4, @FormParam("saleName") String saleName) {
+		if (saleManagerToken != null && !parameterBO.getStrParam("SALE_MANAGERTOKEN").equals(saleManagerToken)) {
+			return "ERROR: invalid token";
+		}
+		return bo.saleGen(saleTime, saleName, saleCar1, saleCar2, saleCar3, saleCar4);
+	}
 }

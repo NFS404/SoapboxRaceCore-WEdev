@@ -403,7 +403,13 @@ public class FriendBO {
 		xmppPersonaBase.setScore(personaEntity.getScore());
 		xmppPersonaBase.setUserId(personaEntity.getUser().getId());
 		personaPacket.setPersonaBase(xmppPersonaBase);
-		openFireSoapBoxCli.send(personaPacket, to);
+		// Experimental access timeout fix
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				openFireSoapBoxCli.send(personaPacket, to);
+			}
+		}).start();
 	}
 
 	public void sendXmppPresenceToAllFriends(PersonaEntity personaEntity, int presence) {

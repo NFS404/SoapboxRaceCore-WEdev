@@ -71,7 +71,13 @@ public class Powerups {
 			powerupActivated.setTargetPersonaId(targetId);
 			powerupActivated.setPersonaId(activePersonaId);
 			powerupActivatedResponse.setPowerupActivated(powerupActivated);
-			openFireSoapBoxCli.send(powerupActivatedResponse, activePersonaId);
+			// Experimental access timeout fix
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					openFireSoapBoxCli.send(powerupActivatedResponse, activePersonaId);
+				}
+			}).start();
 			for (String receiver : receivers.split("-")) {
 				Long receiverPersonaId = Long.valueOf(receiver);
 				if (receiverPersonaId > 10 && !activePersonaId.equals(receiverPersonaId)) {

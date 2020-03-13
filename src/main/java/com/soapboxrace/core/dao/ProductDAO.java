@@ -51,6 +51,14 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 		List<ProductEntity> resultList = query.getResultList();
 		return !resultList.isEmpty() ? resultList.get(0) : null;
 	}
+	
+	public ProductEntity findByLongDesc(String name) {
+		TypedQuery<ProductEntity> query = entityManager.createNamedQuery("ProductEntity.findByLongDesc", ProductEntity.class);
+		query.setParameter("longDescription", name);
+
+		List<ProductEntity> resultList = query.getResultList();
+		return !resultList.isEmpty() ? resultList.get(0) : null;
+	}
 
 	public ProductEntity findByHash(Integer hash) {
 		TypedQuery<ProductEntity> query = entityManager.createNamedQuery("ProductEntity.findByHash", ProductEntity.class);
