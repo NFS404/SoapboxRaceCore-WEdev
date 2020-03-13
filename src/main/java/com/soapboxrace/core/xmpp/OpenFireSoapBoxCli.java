@@ -30,7 +30,7 @@ public class OpenFireSoapBoxCli {
 			restart();
 		}
 		xmppTalk.send(msg, to, parameterBO);
-		System.out.println("DEBUG OpenFire SendMsg1 attempt");
+		// System.out.println("DEBUG OpenFire SendMsg1 attempt");
 	}
 
 	public void send(String msg, Long to) {
@@ -38,7 +38,7 @@ public class OpenFireSoapBoxCli {
 			restart();
 		}
 		xmppTalk.send(msg, to, parameterBO);
-		System.out.println("DEBUG OpenFire SendMsg2 attempt");
+		// System.out.println("DEBUG OpenFire SendMsg2 attempt");
 	}
 
 	public void send(Object object, Long to) {
@@ -47,7 +47,7 @@ public class OpenFireSoapBoxCli {
 		}
 		String responseXmlStr = MarshalXML.marshal(object);
 		this.send(responseXmlStr, to);
-		System.out.println("DEBUG OpenFire SendObject attempt");
+		// System.out.println("DEBUG OpenFire SendObject attempt");
 	}
 
 	public void setXmppTalk(IOpenFireTalk xmppTalk) {
