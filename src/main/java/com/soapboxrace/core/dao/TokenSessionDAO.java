@@ -48,6 +48,12 @@ public class TokenSessionDAO extends BaseDAO<TokenSessionEntity> {
 		return query.getResultList();
 	}
 	
+	public boolean isUserNotOnline(Long userId) {
+		TypedQuery<TokenSessionEntity> query = entityManager.createNamedQuery("TokenSessionEntity.isUserNotOnline", TokenSessionEntity.class);
+		query.setParameter("userId", userId);
+		return query.getResultList().isEmpty();
+	}
+	
 	public void updateRelayCrytoTicketByPersonaId(Long personaId, String relayCryptoTicket) {
 		Query query = entityManager.createNamedQuery("TokenSessionEntity.updateRelayCrytoTicket");
 		query.setParameter("personaId", personaId);

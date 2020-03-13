@@ -30,13 +30,7 @@ public class XmppLobby {
 		responseType.setLobbyInvite(xMPP_LobbyInviteType);
 		try {
 			Thread.sleep(1000);
-			// Experimental access timeout fix
-			new Thread(new Runnable() {
-			@Override
-			public void run() {
-				openFireSoapBoxCli.send(responseType, personaId);
-			}
-		}).start();
+			openFireSoapBoxCli.send(responseType, personaId);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -47,13 +41,7 @@ public class XmppLobby {
 		responseType.setLobbyInvite(lobbyInfo);
 		try {
 			Thread.sleep(1000);
-			// Experimental access timeout fix
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					openFireSoapBoxCli.send(responseType, personaId);
-				}
-			}).start();
+			openFireSoapBoxCli.send(responseType, personaId);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -62,13 +50,7 @@ public class XmppLobby {
 	public void sendExitMsg(LobbyEntrantRemoved lobbyInfo) {
 		XMPP_ResponseTypeEntrantRemoved responseType = new XMPP_ResponseTypeEntrantRemoved();
 		responseType.setLobbyExit(lobbyInfo);
-		// Experimental access timeout fix
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				openFireSoapBoxCli.send(responseType, personaId);
-			}
-		}).start();
+		openFireSoapBoxCli.send(responseType, personaId);
 	}
 
 	public void sendRelay(XMPP_LobbyLaunchedType lobbyLaunched, XMPP_CryptoTicketsType xMPP_CryptoTicketsType) {
@@ -89,24 +71,12 @@ public class XmppLobby {
 			lobbyLaunched.setCryptoTickets(cryptoTicketsTypeTmp);
 			XMPP_ResponseTypeLobbyLaunched responseType = new XMPP_ResponseTypeLobbyLaunched();
 			responseType.setLobbyInvite(lobbyLaunched);
-			// Experimental access timeout fix
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					openFireSoapBoxCli.send(responseType, personaId);
-				}
-			}).start();
+			openFireSoapBoxCli.send(responseType, personaId);
 		}
 	}
 
 	public void sendLobbyInvite(XMPP_LobbyInviteType lobbyInviteType) {
-		// Experimental access timeout fix
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				openFireSoapBoxCli.send(lobbyInviteType, personaId);
-			}
-		}).start();
+			openFireSoapBoxCli.send(lobbyInviteType, personaId);
 	}
 
 }

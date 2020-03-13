@@ -500,13 +500,7 @@ public class AchievementsBO {
 		List<AchievementProgress> progressedList = new ArrayList<>();
 		progressedList.add(achievementProgress);
 		achievementsAwarded.setProgressed(progressedList);
-		// Experimental access timeout fix
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				openFireSoapBoxCli.send(achievementsAwarded, personaEntity.getPersonaId());
-			}
-		}).start();
+		openFireSoapBoxCli.send(achievementsAwarded, personaEntity.getPersonaId());
 	}
 
 	public void broadcastAchievement(PersonaEntity personaEntity, AchievementRankEntity achievementRankEntity) {

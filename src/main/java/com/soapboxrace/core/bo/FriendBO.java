@@ -403,13 +403,7 @@ public class FriendBO {
 		xmppPersonaBase.setScore(personaEntity.getScore());
 		xmppPersonaBase.setUserId(personaEntity.getUser().getId());
 		personaPacket.setPersonaBase(xmppPersonaBase);
-		// Experimental access timeout fix
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				openFireSoapBoxCli.send(personaPacket, to);
-			}
-		}).start();
+		openFireSoapBoxCli.send(personaPacket, to);
 	}
 
 	public void sendXmppPresenceToAllFriends(PersonaEntity personaEntity, int presence) {
@@ -419,7 +413,9 @@ public class FriendBO {
 		List<FriendListEntity> friends = friendListDAO.findByOwnerId(personaEntity.getUser().getId());
 		if (friends != null) {
 			for (FriendListEntity friend : friends) {
-				sendXmppPresence(personaEntity, presence, friend.getPersonaId());
+				if (friend.getIsAccepted() && !tokenSessionDAO.isUserNotOnline(friend.getUserId())) {
+					sendXmppPresence(personaEntity, presence, friend.getPersonaId());
+				}
 			}
 		}
 	}

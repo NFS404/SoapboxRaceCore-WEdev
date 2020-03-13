@@ -24,6 +24,7 @@ import javax.persistence.Table;
 				query = "UPDATE TokenSessionEntity obj " 
 						+ "SET obj.activeLobbyId = :activeLobbyId WHERE obj.activePersonaId = :personaId"), //
 		@NamedQuery(name = "TokenSessionEntity.getUsersOnlineCount", query = "SELECT Count(obj) FROM TokenSessionEntity obj WHERE obj.expirationDate >= NOW() AND obj.isLoggedIn = true"), //
+		@NamedQuery(name = "TokenSessionEntity.isUserNotOnline", query = "SELECT obj FROM TokenSessionEntity obj WHERE obj.userId = :userId AND obj.expirationDate >= NOW() AND obj.isLoggedIn = true"), //
 		@NamedQuery(name = "TokenSessionEntity.getUsersOnlineList", query = "SELECT obj FROM TokenSessionEntity obj WHERE obj.expirationDate >= NOW() AND obj.isLoggedIn = true") //
 })
 public class TokenSessionEntity {
