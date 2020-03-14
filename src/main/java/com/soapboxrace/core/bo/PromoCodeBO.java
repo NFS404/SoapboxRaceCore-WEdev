@@ -78,7 +78,11 @@ public class PromoCodeBO {
 		}
 		if (saleCar2.contentEquals("")) {
 			saleCar2 = null;
+		}
+		if (saleCar3.contentEquals("")) {
 			saleCar3 = null;
+		}
+		if (saleCar4.contentEquals("")) {
 			saleCar4 = null;
 		}
 		ProductEntity saleCar1Prod = productDAO.findByLongDesc(saleCar1);
@@ -91,7 +95,7 @@ public class PromoCodeBO {
 		salesEntity.setCar3(null);
 		salesEntity.setCar4(null);
 		
-		if (saleCar2 != null && saleCar2 != "") {
+		if (saleCar2 != null) {
 			System.out.println("saleCar2");
 			ProductEntity saleCar2Prod = productDAO.findByLongDesc(saleCar2);
 			saleCar2Prod.setPrice(saleCar2Prod.getPrice() / 2); // 50% off, equal to resell prices
@@ -101,7 +105,7 @@ public class PromoCodeBO {
 			salesEntity.setCar2(saleCar2);
 		}
 		
-        if (saleCar3 != null && saleCar3 != "") {
+        if (saleCar3 != null) {
         	System.out.println("saleCar3");
         	ProductEntity saleCar3Prod = productDAO.findByLongDesc(saleCar3);
       		saleCar3Prod.setPrice(saleCar3Prod.getPrice() / 2); // 50% off, equal to resell prices
@@ -111,7 +115,7 @@ public class PromoCodeBO {
 			salesEntity.setCar3(saleCar3);
 		}
         
-        if (saleCar4 != null && saleCar4 != "") {
+        if (saleCar4 != null) {
         	System.out.println("saleCar4");
         	ProductEntity saleCar4Prod = productDAO.findByLongDesc(saleCar4);
        		saleCar4Prod.setPrice(saleCar4Prod.getPrice() / 2); // 50% off, equal to resell prices
