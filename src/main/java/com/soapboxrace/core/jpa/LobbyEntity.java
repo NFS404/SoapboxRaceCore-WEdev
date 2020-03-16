@@ -38,56 +38,56 @@ import javax.persistence.Transient;
 		query = "SELECT obj FROM LobbyEntity obj " //
 				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
 				+ "AND obj.isPrivate = false "
-				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash "),
+				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash ORDER BY obj.lobbyDateTimeStart ASC"),
 		@NamedQuery(name = "LobbyEntity.findAllMPLobbiesOpen", // All Races (Open)
 		query = "SELECT obj FROM LobbyEntity obj " //
 				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
 				+ "AND obj.isPrivate = false "
-				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 "),
+				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 ORDER BY obj.lobbyDateTimeStart ASC"),
 		
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesP2PClasses", // Circuits and Sprints (Classes)
 		query = "SELECT obj FROM LobbyEntity obj " //
 				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
 				+ "AND obj.isPrivate = false "
-				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9)"),
+				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9) ORDER BY obj.lobbyDateTimeStart ASC"),
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesP2POpen", // Circuits and Sprints (Open)
 		query = "SELECT obj FROM LobbyEntity obj " //
 				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
 				+ "AND obj.isPrivate = false "
-				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9)"),
+				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9) ORDER BY obj.lobbyDateTimeStart ASC"),
 		
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesDragClasses", // Drags (Classes)
 		query = "SELECT obj FROM LobbyEntity obj " //
 				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
 				+ "AND obj.isPrivate = false "
-				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND obj.event.eventModeId = 19"),
+				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND obj.event.eventModeId = 19 ORDER BY obj.lobbyDateTimeStart ASC"),
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesDragOpen", // Drags (Open)
 		query = "SELECT obj FROM LobbyEntity obj " //
 				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
 				+ "AND obj.isPrivate = false "
-				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND obj.event.eventModeId = 19"),
+				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND obj.event.eventModeId = 19 ORDER BY obj.lobbyDateTimeStart ASC"),
 		
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesRaceClasses", // Circuits, Sprints, Drags (Classes)
 		query = "SELECT obj FROM LobbyEntity obj " //
 				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
 				+ "AND obj.isPrivate = false "
-				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9 or obj.event.eventModeId = 19)"),
+				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9 or obj.event.eventModeId = 19) ORDER BY obj.lobbyDateTimeStart ASC"),
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesRaceOpen", // Circuits, Sprints, Drags (Open)
 		query = "SELECT obj FROM LobbyEntity obj " //
 				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
 				+ "AND obj.isPrivate = false "
-				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9 or obj.event.eventModeId = 19)"),
+				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9 or obj.event.eventModeId = 19) ORDER BY obj.lobbyDateTimeStart ASC"),
 		
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesPursuitClasses", // Team Escapes (Classes)
 		query = "SELECT obj FROM LobbyEntity obj " //
 				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
 				+ "AND obj.isPrivate = false "
-				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND obj.event.eventModeId = 24"),
+				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND obj.event.eventModeId = 24 ORDER BY obj.lobbyDateTimeStart ASC"),
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesPursuitOpen", // Team Escapes (Open)
 		query = "SELECT obj FROM LobbyEntity obj " //
 				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
 				+ "AND obj.isPrivate = false "
-				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND obj.event.eventModeId = 24"),
+				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND obj.event.eventModeId = 24 ORDER BY obj.lobbyDateTimeStart ASC"),
 		
 		@NamedQuery(name = "LobbyEntity.findByEventStarted", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2 AND obj.isPrivate = false"), //
 		@NamedQuery(name = "LobbyEntity.findByEventAndPersona", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2 AND obj.isPrivate = true AND obj.personaId = :personaId") //
