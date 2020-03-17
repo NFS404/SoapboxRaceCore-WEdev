@@ -429,7 +429,7 @@ public class LobbyBO {
 			}
 			LobbyEntity lobbyEntity = lobbyDao.findById(lobbyId);
 			List<LobbyEntrantEntity> entrants = lobbyEntity.getEntrants();
-			if (entrants.size() < 2) {
+			if (entrants.size() < 2 || entrants.size() > 8) {
 				return;
 			}
 			Collections.sort(entrants);
