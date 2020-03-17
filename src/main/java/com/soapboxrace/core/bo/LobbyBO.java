@@ -96,6 +96,7 @@ public class LobbyBO {
 		
 	public void joinFastLobby(String securityToken, Long personaId, int carClassHash, int raceFilter) {
 		// List<LobbyEntity> lobbys = lobbyDao.findAllOpen(carClassHash);
+//		System.out.println("MM START Time: " + System.currentTimeMillis());
 		List<LobbyEntity> lobbys = lobbyDao.findAllMPLobbies(carClassHash, raceFilter);
 		if (lobbys.isEmpty() && parameterBO.getBoolParam("RACENOW_RANDOMRACES")) {
 			PersonaEntity personaEntity = personaDao.findById(personaId);
@@ -167,6 +168,7 @@ public class LobbyBO {
 		lobbyEntity.setPersonaId(personaEntity.getPersonaId());
 		lobbyDao.insert(lobbyEntity);
 
+//		System.out.println("MM RANDOM END Time: " + System.currentTimeMillis());
 		sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity);
 		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### New MP race is created."), personaEntity.getPersonaId());
 		new LobbyCountDown(lobbyEntity.getId(), lobbyDao, eventSessionDao, tokenDAO, parameterBO, openFireSoapBoxCli).start();
@@ -220,25 +222,37 @@ public class LobbyBO {
 		    return randomId;
 	}
 
+	// FIXME I'm not sure how the server will react on lobby-list, where all lobbies is full...
 	private void joinLobby(PersonaEntity personaEntity, List<LobbyEntity> lobbys) {
 		LobbyEntity lobbyEntity = null;
+		LobbyEntity lobbyEntityEmpty = null;
 		for (LobbyEntity lobbyEntityTmp : lobbys) {
 			int maxEntrants = lobbyEntityTmp.getEvent().getMaxPlayers();
 			List<LobbyEntrantEntity> lobbyEntrants = lobbyEntityTmp.getEntrants();
 			int entrantsSize = lobbyEntrants.size();
 			if (entrantsSize < maxEntrants) {
-				lobbyEntity = lobbyEntityTmp;
-				if (!isPersonaInside(personaEntity.getPersonaId(), lobbyEntrants)) {
-					LobbyEntrantEntity lobbyEntrantEntity = new LobbyEntrantEntity();
-					lobbyEntrantEntity.setPersona(personaEntity);
-					lobbyEntrantEntity.setLobby(lobbyEntity);
-					lobbyEntrants.add(lobbyEntrantEntity);
+				if (lobbyEntityEmpty == null) { // In case of empty lobby-list, player will got the first empty lobby
+					lobbyEntityEmpty = lobbyEntityTmp;
 				}
-				break;
+				if (entrantsSize > 0) {
+					lobbyEntity = lobbyEntityTmp;
+					if (!isPersonaInside(personaEntity.getPersonaId(), lobbyEntrants)) {
+						LobbyEntrantEntity lobbyEntrantEntity = new LobbyEntrantEntity();
+						lobbyEntrantEntity.setPersona(personaEntity);
+						lobbyEntrantEntity.setLobby(lobbyEntity);
+						lobbyEntrants.add(lobbyEntrantEntity);
+					}
+					break;
+				}
 			}
 		}
 		if (lobbyEntity != null) {
+//			System.out.println("MM END Time: " + System.currentTimeMillis());
 			sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity);
+		}
+		if (lobbyEntity == null && lobbyEntityEmpty != null) { // If all lobbies on the search is empty, player will got the first created empty lobby
+//			System.out.println("MM END Time: " + System.currentTimeMillis());
+			sendJoinEvent(personaEntity.getPersonaId(), lobbyEntityEmpty);
 		}
 	}
 
@@ -430,6 +444,9 @@ public class LobbyBO {
 			LobbyEntity lobbyEntity = lobbyDao.findById(lobbyId);
 			List<LobbyEntrantEntity> entrants = lobbyEntity.getEntrants();
 			if (entrants.size() < 2 || entrants.size() > 8) {
+				for (LobbyEntrantEntity poorPlayer : entrants) {
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Too low or too many players on this lobby - cancelled."), poorPlayer.getPersona().getPersonaId());
+				}
 				return;
 			}
 			Collections.sort(entrants);
