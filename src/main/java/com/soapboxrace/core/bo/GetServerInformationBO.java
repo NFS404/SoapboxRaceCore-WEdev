@@ -20,7 +20,7 @@ public class GetServerInformationBO {
 
 	public ServerInfoEntity getServerInformation() {
 		ServerInfoEntity serverInfoEntity = serverInfoDAO.findInfo();
-		serverInfoEntity.setOnlineNumber(onlineUsersBO.getNumberOfUsersOnlineNow());
+		serverInfoEntity.setOnlineNumber(onlineUsersBO.updateOnlineUsers());
 		String ticketToken = parameterBO.getStrParam("TICKET_TOKEN");
 		if (ticketToken != null && !ticketToken.equals("null")) {
 			serverInfoEntity.setRequireTicket(true);

@@ -18,7 +18,7 @@ public class OnlineUsers {
 	@Path("/getOnline")
 	@Produces(MediaType.APPLICATION_JSON)
 	public int onlineUsers() {
-		return onlineUsersBO.getNumberOfUsersOnlineNow();
+		return onlineUsersBO.updateOnlineUsers();
 	}
 
 }

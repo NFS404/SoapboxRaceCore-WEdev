@@ -34,8 +34,6 @@ public class OnlineUsersBO {
 	@EJB
 	private TokenSessionDAO tokenDAO;
 	
-	private int onlineUsers;
-	
 	@EJB
 	private ParameterBO parameterBO;
 	
@@ -47,16 +45,12 @@ public class OnlineUsersBO {
 	
 	@EJB
 	private PersonaDAO personaDAO;
-	
-	// FIXME Weird mess with online count triggers
-	public int getNumberOfUsersOnlineNow() {
-		return onlineUsers;
-	}
     
+	// FIXME 1-minute online counter with DB entry, where only one process will rewrite this entry, other ones - request DB data
 	@Schedule(minute = "*", hour = "*", persistent = false)
 	@Lock(LockType.READ)
-	public void updateOnlineUsers() {
-		onlineUsers = openFireRestApiCli.getTotalOnlineUsers();
+	public int updateOnlineUsers() {
+		return openFireRestApiCli.getTotalOnlineUsers();
 	}
 	
 	@Schedule(minute = "*/10", hour = "*", persistent = false)
@@ -70,27 +64,27 @@ public class OnlineUsersBO {
 	}
 	
 	// Give a money to random player online, every hour (can be unoptimized!)
-	@Schedule(hour = "*/1", persistent = false)
-	public void ScheduleGiveaway() {
-		if (parameterBO.getBoolParam("DISCORD_1HCASHGIVEAWAY")) {
-//			int moneyAmount = parameterBO.getIntParam("DISCORD_1HCASHGIVEAWAY_VALUE");
-			int moneyAmount = 1000000;
-			List<TokenSessionEntity> onlinePlayersList = openFireRestApiCli.getTotalOnlineList();
-			Random rand = new Random();
-			int randNumber = rand.nextInt(onlinePlayersList.size());
-			TokenSessionEntity playerWinnerToken = onlinePlayersList.get(randNumber);
-//			PersonaPresenceEntity playerWinnerPresence = personaPresenceDAO.findByUserId(playerWinnerToken.getUserId());
-			PersonaEntity personaEntity = personaDAO.findById(playerWinnerToken.getActivePersonaId());
-			personaEntity.setCash(personaEntity.getCash() + (double) moneyAmount);
-			String winnerName = personaEntity.getName();
-			personaDAO.update(personaEntity);
+//	@Schedule(hour = "*/1", persistent = false)
+//	public void ScheduleGiveaway() {
+//		if (parameterBO.getBoolParam("DISCORD_1HCASHGIVEAWAY")) {
+
+//			int moneyAmount = 1000000;
+//			List<TokenSessionEntity> onlinePlayersList = openFireRestApiCli.getTotalOnlineList();
+//			Random rand = new Random();
+//			int randNumber = rand.nextInt(onlinePlayersList.size());
+//			TokenSessionEntity playerWinnerToken = onlinePlayersList.get(randNumber);
+
+//			PersonaEntity personaEntity = personaDAO.findById(playerWinnerToken.getActivePersonaId());
+//			personaEntity.setCash(personaEntity.getCash() + (double) moneyAmount);
+//			String winnerName = personaEntity.getName();
+//			personaDAO.update(personaEntity);
 			
-			String message = ":heavy_minus_sign:"
-	        		+ "\n:moneybag: **|** Nгрок **" + winnerName + "** получил *1,000,000 $* в ходе раздачи!"
-	        		+ "\n:moneybag: **|** Player **" + winnerName + "** has won *1,000,000 $* during giveaway!";
-			discordBot.sendMessage(message);
-		}
-	}
+//			String message = ":heavy_minus_sign:"
+//	        		+ "\n:moneybag: **|** Nгрок **" + winnerName + "** получил *1,000,000 $* в ходе раздачи!"
+//	        		+ "\n:moneybag: **|** Player **" + winnerName + "** has won *1,000,000 $* during giveaway!";
+//			discordBot.sendMessage(message);
+//		}
+//	}
 //	@Schedule(minute = "*/60", hour = "*", persistent = false)
 //	public void serverVersionDiscord() {
 //		com.soapboxrace.jaxb.http.SystemInfo systemInfo = new com.soapboxrace.jaxb.http.SystemInfo();

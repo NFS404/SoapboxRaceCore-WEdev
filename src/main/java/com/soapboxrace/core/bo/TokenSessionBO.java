@@ -158,7 +158,7 @@ public class TokenSessionBO {
 		if (email != null && !email.isEmpty() && password != null && !password.isEmpty()) {
 			UserEntity userEntity = userDAO.findByEmail(email);
 			if (userEntity != null) {
-				int numberOfUsersOnlineNow = onlineUsersBO.getNumberOfUsersOnlineNow();
+				int numberOfUsersOnlineNow = onlineUsersBO.updateOnlineUsers();
 				int maxOlinePayers = parameterBO.getIntParam("MAX_ONLINE_PLAYERS");
 				Boolean serverMaintenance = parameterBO.getBoolParam("SERVERMAINTENANCE");
 				
