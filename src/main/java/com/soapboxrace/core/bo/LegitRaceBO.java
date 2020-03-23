@@ -59,8 +59,8 @@ public class LegitRaceBO {
 			isSingleText = "SP";
 		}
 		
-		// 0 - quitted from race, 22 - finished, 518 - escaped from SP pursuit, 266 - busted on SP & MP pursuit
-		if (arbitrationPacket.getFinishReason() != 0 && arbitrationPacket.getFinishReason() != 266) {
+		// 0 - quitted from race, 22 - finished, 518 - escaped from SP pursuit, 266 - busted on SP & MP pursuit, 8202 - aborted on TE
+		if (arbitrationPacket.getFinishReason() != 0 && arbitrationPacket.getFinishReason() != 266 && arbitrationPacket.getFinishReason() != 8202) {
 			finishReasonLegit = false;
 		}
 		if (!legit && !finishReasonLegit) {
