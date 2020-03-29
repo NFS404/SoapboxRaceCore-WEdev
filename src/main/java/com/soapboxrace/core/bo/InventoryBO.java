@@ -48,6 +48,9 @@ public class InventoryBO {
 
 	@EJB
 	private ProductDAO productDAO;
+	
+	@EJB
+	private AchievementsBO achievementsBO;
 
 	public InventoryTrans getInventory(Long personaId) {
 		InventoryTrans inventoryTrans = new InventoryTrans();
@@ -164,7 +167,7 @@ public class InventoryBO {
 		return ProductType.valueOf(productEntity.getProductType());
 	}
 
-	private void decreaseInventory(InventoryEntity inventoryEntity, Integer hash) {
+	private void decreaseInventory(InventoryEntity inventoryEntity, Integer hash, Long personaId) {
 		ProductType productType = detectProductType(hash);
 		switch (productType) {
 		case PERFORMANCEPART:
@@ -175,6 +178,7 @@ public class InventoryBO {
 			break;
 		case VISUALPART:
 			inventoryEntity.setVisualPartsUsedSlotCount(inventoryEntity.getVisualPartsUsedSlotCount() - 1);
+			achievementsBO.applyAftermarketSold(personaDAO.findById(personaId));
 			break;
 		case POWERUP:
 			break;
@@ -188,7 +192,7 @@ public class InventoryBO {
 		InventoryItemEntity inventoryItemEntity = inventoryItemDAO.findByEntitlementTagAndPersona(personaId, entitlementId);
 		if (inventoryItemEntity != null) {
 			InventoryEntity inventoryEntity = inventoryDAO.findByPersonaId(personaId);
-			decreaseInventory(inventoryEntity, inventoryItemEntity.getHash());
+			decreaseInventory(inventoryEntity, inventoryItemEntity.getHash(), personaId);
 			inventoryItemDAO.delete(inventoryItemEntity);
 		} else {
 			System.err.println("INVALID entitlementId: [" + entitlementId + "]");
@@ -199,7 +203,7 @@ public class InventoryBO {
 		InventoryItemEntity inventoryItemEntity = inventoryItemDAO.findByHashAndPersona(personaId, hash);
 		if (inventoryItemEntity != null) {
 			InventoryEntity inventoryEntity = inventoryDAO.findByPersonaId(personaId);
-			decreaseInventory(inventoryEntity, inventoryItemEntity.getHash());
+			decreaseInventory(inventoryEntity, inventoryItemEntity.getHash(), personaId);
 			inventoryItemDAO.delete(inventoryItemEntity);
 		} else {
 			System.err.println("INVALID hash: [" + hash + "]");

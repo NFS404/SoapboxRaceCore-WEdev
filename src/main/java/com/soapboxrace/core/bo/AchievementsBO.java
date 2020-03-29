@@ -389,6 +389,9 @@ public class AchievementsBO {
 		case WEV2_BEGINNERSGUIDE:
 			int levelBG = achievementPersonaEntity.getPersona().getLevel();
 			return Integer.valueOf(levelBG).longValue();
+		case WEV2_SELL_AFTERMARKET:
+			int AftermarketSold = achievementPersonaEntity.getAftermarketSold();
+			return Integer.valueOf(AftermarketSold).longValue();
 		default:
 			break;
 		}
@@ -901,6 +904,14 @@ public class AchievementsBO {
 		achievementPersonaEntity.setTeamScapeWins(teamScapeWins);
 		long teamScapeWinsLong = Integer.valueOf(teamScapeWins).longValue();
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.GETAWAY_DRIVER, teamScapeWinsLong);
+	}
+	
+	public void applyAftermarketSold(PersonaEntity personaEntity) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		int aftermarketSoldValue = achievementPersonaEntity.getAftermarketSold();
+		aftermarketSoldValue = aftermarketSoldValue + 1;
+		achievementPersonaEntity.setAftermarketSold(aftermarketSoldValue);
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_SELL_AFTERMARKET, Integer.valueOf(aftermarketSoldValue).longValue());
 	}
 	
 	// Used if player got a lvl 100 but achiv. itself was unactive earlier

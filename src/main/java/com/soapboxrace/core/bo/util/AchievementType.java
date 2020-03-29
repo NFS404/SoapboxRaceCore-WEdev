@@ -324,7 +324,11 @@ public enum AchievementType {
 	/**
 	 * unlock access to multiplayer racing
 	 */
-	WEV2_BEGINNERSGUIDE(103); //
+	WEV2_BEGINNERSGUIDE(103), //
+	/**
+	 * sell X amount of aftermarket parts
+	 */
+	WEV2_SELL_AFTERMARKET(104); //
 
 	private int id;
 
