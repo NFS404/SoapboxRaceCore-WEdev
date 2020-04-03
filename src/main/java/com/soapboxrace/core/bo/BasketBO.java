@@ -292,14 +292,22 @@ public class BasketBO {
 		Collections.shuffle(productDrops);
 		for (ProductEntity productDropEntity : productDrops) {
 			CommerceItemTrans item = new CommerceItemTrans();
-
-			String productTitle = productDropEntity.getProductTitle();
-			String title = productTitle.replace(" x15", "");
-			item.setHash(productDropEntity.getHash());
-			item.setTitle(title);
-
-			productDropEntity.setUseCount(1);
-			inventoryBO.addDroppedItem(productDropEntity, personaEntity);
+//			if (productDropEntity.getProductType().contentEquals("CASH")) { // Not used
+//				float cashDrop = productDropEntity.getPrice();
+//				personaEntity.setCash(personaEntity.getCash() + cashDrop);
+//				personaDao.update(personaEntity);
+//				item.setHash(-429893590);
+//				String moneyFormat = NumberFormat.getNumberInstance(Locale.US).format(cashDrop);
+//				item.setTitle("$" + moneyFormat);
+//			}
+//			else {
+				String productTitle = productDropEntity.getProductTitle();
+				String title = productTitle.replace(" x15", "");
+				item.setHash(productDropEntity.getHash());
+				item.setTitle(title);
+				productDropEntity.setUseCount(1);
+				inventoryBO.addDroppedItem(productDropEntity, personaEntity);
+//			}
 			commerceItems.add(item);
 		}
 		arrayOfCommerceItemTrans.getCommerceItemTrans().addAll(commerceItems);
