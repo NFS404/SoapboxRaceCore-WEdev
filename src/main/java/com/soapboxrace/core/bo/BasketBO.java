@@ -1,6 +1,10 @@
 package com.soapboxrace.core.bo;
 
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import javax.ejb.EJB;
@@ -8,6 +12,9 @@ import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.OwnedCarConverter;
+import com.soapboxrace.core.bo.util.RewardDestinyType;
+import com.soapboxrace.core.bo.util.RewardType;
+import com.soapboxrace.core.dao.AchievementRankDAO;
 import com.soapboxrace.core.dao.BasketDefinitionDAO;
 import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CarSlotDAO;
@@ -17,9 +24,12 @@ import com.soapboxrace.core.dao.InventoryItemDAO;
 import com.soapboxrace.core.dao.OwnedCarDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.ProductDAO;
+import com.soapboxrace.core.dao.RewardDropDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.TreasureHuntDAO;
 import com.soapboxrace.core.dao.VisualPartDAO;
+import com.soapboxrace.core.jpa.AchievementRankEntity;
+import com.soapboxrace.core.jpa.AchievementStateEntity;
 import com.soapboxrace.core.jpa.BasketDefinitionEntity;
 import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
@@ -29,9 +39,21 @@ import com.soapboxrace.core.jpa.InventoryItemEntity;
 import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ProductEntity;
+import com.soapboxrace.core.jpa.ProductType;
+import com.soapboxrace.core.jpa.RewardDropEntity;
 import com.soapboxrace.core.jpa.TreasureHuntEntity;
+import com.soapboxrace.jaxb.http.AchievementRewards;
+import com.soapboxrace.jaxb.http.AchievementState;
+import com.soapboxrace.jaxb.http.ArrayOfCommerceItemTrans;
+import com.soapboxrace.jaxb.http.ArrayOfInventoryItemTrans;
+import com.soapboxrace.jaxb.http.ArrayOfOwnedCarTrans;
+import com.soapboxrace.jaxb.http.ArrayOfWalletTrans;
+import com.soapboxrace.jaxb.http.CommerceItemTrans;
 import com.soapboxrace.jaxb.http.CommerceResultStatus;
+import com.soapboxrace.jaxb.http.CommerceResultTrans;
+import com.soapboxrace.jaxb.http.InvalidBasketTrans;
 import com.soapboxrace.jaxb.http.OwnedCarTrans;
+import com.soapboxrace.jaxb.http.WalletTrans;
 import com.soapboxrace.jaxb.util.UnmarshalXML;
 
 @Stateless
@@ -84,6 +106,18 @@ public class BasketBO {
 	
 	@EJB
 	private VisualPartDAO visualPartDAO;
+	
+	@EJB
+	private RewardDropDAO rewardDropDAO;
+
+	@EJB
+	private DropBO dropBO;
+	
+	@EJB
+	private InventoryBO inventoryBO;
+	
+	@EJB
+	private AchievementRankDAO achievementRankDAO;
 
 	private OwnedCarTrans getCar(String productId) {
 		BasketDefinitionEntity basketDefinitonEntity = basketDefinitionsDAO.findById(productId);
@@ -222,6 +256,56 @@ public class BasketBO {
 		}
 		return CommerceResultStatus.SUCCESS;
 	}
+	
+	// Re-used code from achievements reward drops
+	// FIXME Add the cash & cars drop ability
+	public CommerceResultStatus buyCardPack(String productId, PersonaEntity personaEntity, CommerceResultTrans commerceResultTrans) {
+        ProductEntity bundleProduct = productDao.findByProductId(productId);
+        if (bundleProduct == null) {
+            return CommerceResultStatus.FAIL_INVALID_BASKET;
+        }
+        if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
+        	float bundlePrice = bundleProduct.getPrice();
+        	if (personaEntity.getCash() < bundlePrice) {
+	        	return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
+			}
+			personaEntity.setCash(personaEntity.getCash() - bundlePrice);
+		}
+		personaDao.update(personaEntity);
+       
+        ArrayOfCommerceItemTrans arrayOfCommerceItemTrans = new ArrayOfCommerceItemTrans();
+        commerceResultTrans.setCommerceItems(arrayOfCommerceItemTrans);
+		List<CommerceItemTrans> commerceItems = new ArrayList<>();
+		String cardPackType = "";
+		switch (productId) {
+		case "SRV-CARDPACK1":
+			cardPackType = "VISUALPART";
+			break;
+		case "SRV-CARDPACK2":
+			cardPackType = "PERFORMANCEPART";
+			break;
+		case "SRV-CARDPACK3":
+			cardPackType = "SKILLMODPART";
+			break;
+		}
+		List<ProductEntity> productDrops = rewardDropDAO.getBundleDrops(cardPackType);
+		Collections.shuffle(productDrops);
+		for (ProductEntity productDropEntity : productDrops) {
+			CommerceItemTrans item = new CommerceItemTrans();
+
+			String productTitle = productDropEntity.getProductTitle();
+			String title = productTitle.replace(" x15", "");
+			item.setHash(productDropEntity.getHash());
+			item.setTitle(title);
+
+			productDropEntity.setUseCount(1);
+			inventoryBO.addDroppedItem(productDropEntity, personaEntity);
+			commerceItems.add(item);
+		}
+		arrayOfCommerceItemTrans.getCommerceItemTrans().addAll(commerceItems);
+		commerceResultTrans.setCommerceItems(arrayOfCommerceItemTrans);
+		return CommerceResultStatus.SUCCESS;
+    }
 	
 	// Gives a random available stock car, 25% chance
 	// FIXME Replace the arrays to normal car-list load

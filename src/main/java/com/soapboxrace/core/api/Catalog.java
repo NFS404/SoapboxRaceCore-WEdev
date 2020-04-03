@@ -39,11 +39,14 @@ public class Catalog {
 		List<ProductEntity> productsInCategory = productBO.productsInCategory(categoryName, clientProductType, activePersonaId);
 		for (ProductEntity productEntity : productsInCategory) {
 			ProductTrans productTrans = new ProductTrans();
+			productTrans.setBundleItems(new ArrayOfProductTrans());
 			productTrans.setCurrency(productEntity.getCurrency());
 			productTrans.setDurationMinute(productEntity.getDurationMinute());
+			productTrans.setDescription(productEntity.getDescription());
 			productTrans.setHash(productEntity.getHash().intValue());
 			productTrans.setIcon(productEntity.getIcon());
 			productTrans.setSecondaryIcon(productEntity.getSecondaryIcon());
+			productTrans.setLongDescription(productEntity.getLongDescription());
 			productTrans.setLevel(productEntity.getLevel());
 			productTrans.setPrice(productEntity.getPrice());
 			productTrans.setPriority(productEntity.getPriority());
@@ -51,6 +54,9 @@ public class Catalog {
 			productTrans.setProductTitle(productEntity.getProductTitle());
 			productTrans.setProductType(productEntity.getProductType());
 			productTrans.setUseCount(productEntity.getUseCount());
+			productTrans.setVisualStyle(productEntity.getVisualStyle());
+	        productTrans.setWebIcon(productEntity.getWebIcon());
+	        productTrans.setWebLocation(productEntity.getWebLocation());
 			arrayOfProductTrans.getProductTrans().add(productTrans);
 		}
 		return arrayOfProductTrans;
