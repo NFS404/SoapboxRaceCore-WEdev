@@ -90,7 +90,10 @@ public class RewardDropDAO extends BaseDAO<RewardDropEntity> {
 		Random random = new Random();
 		productQuery.setMaxResults(1);
 		
-		int max = Math.max(1, 5);
+		boolean isPackReduced = random.nextBoolean();
+		int cardAmount = (isPackReduced ? 5 : 3);
+		
+		int max = Math.max(1, cardAmount);
 		for (int i = 0; i < max; i++) {
 			number = random.nextInt(count.intValue());
 			productQuery.setFirstResult(number);

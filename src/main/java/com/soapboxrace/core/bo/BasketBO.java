@@ -290,6 +290,10 @@ public class BasketBO {
 		}
 		List<ProductEntity> productDrops = rewardDropDAO.getBundleDrops(cardPackType);
 		Collections.shuffle(productDrops);
+		boolean inventoryFull = inventoryBO.isInventoryFull(cardPackType, personaEntity);
+		if (inventoryFull) {
+			return CommerceResultStatus.FAIL_MAX_STACK_OR_RENTAL_LIMIT;
+		}
 		for (ProductEntity productDropEntity : productDrops) {
 			CommerceItemTrans item = new CommerceItemTrans();
 //			if (productDropEntity.getProductType().contentEquals("CASH")) { // Not used

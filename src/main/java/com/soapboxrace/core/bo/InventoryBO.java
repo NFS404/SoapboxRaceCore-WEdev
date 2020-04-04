@@ -381,4 +381,33 @@ public class InventoryBO {
 		}
 		return true;
 	}
+	
+	public boolean isInventoryFull(String productType, PersonaEntity personaEntity) {
+		InventoryEntity inventoryEntity = inventoryDAO.findByPersonaId(personaEntity.getPersonaId());
+		String cardPackType = productType;
+		int capacity = 0;
+		int usedSlotCount = 0;
+		switch (cardPackType) {
+		case "PERFORMANCEPART":
+			capacity = inventoryEntity.getPerformancePartsCapacity();
+			usedSlotCount = inventoryEntity.getPerformancePartsUsedSlotCount();
+			break;
+		case "SKILLMODPART":
+			capacity = inventoryEntity.getSkillModPartsCapacity();
+			usedSlotCount = inventoryEntity.getSkillModPartsUsedSlotCount();
+			break;
+		case "VISUALPART":
+			capacity = inventoryEntity.getVisualPartsCapacity();
+			usedSlotCount = inventoryEntity.getVisualPartsUsedSlotCount();
+			break;
+		case "POWERUP":
+			return false;
+		default:
+			break;
+		}
+		if (usedSlotCount < capacity) {
+			return false;
+		}
+		return true;
+	}
 }
