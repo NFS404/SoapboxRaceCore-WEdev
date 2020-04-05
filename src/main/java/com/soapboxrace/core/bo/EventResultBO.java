@@ -5,9 +5,16 @@ import java.time.LocalDateTime;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.OwnedCarConverter;
+import com.soapboxrace.core.dao.CarClassesDAO;
+import com.soapboxrace.core.jpa.CarClassesEntity;
+import com.soapboxrace.core.jpa.CarSlotEntity;
+import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
+import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.jaxb.http.DragArbitrationPacket;
 import com.soapboxrace.jaxb.http.DragEventResult;
+import com.soapboxrace.jaxb.http.OwnedCarTrans;
 import com.soapboxrace.jaxb.http.PursuitArbitrationPacket;
 import com.soapboxrace.jaxb.http.PursuitEventResult;
 import com.soapboxrace.jaxb.http.RouteArbitrationPacket;
@@ -29,6 +36,12 @@ public class EventResultBO {
 
 	@EJB
 	private EventResultPursuitBO eventResultPursuitBO;
+	
+	@EJB
+	private PersonaBO personaBO;
+	
+	@EJB
+	private CarClassesDAO carClassesDAO;
 
 	public PursuitEventResult handlePursitEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, PursuitArbitrationPacket pursuitArbitrationPacket,
 			Boolean isBusted) {
@@ -56,6 +69,15 @@ public class EventResultBO {
 			speedBugChance = true;
 		}
 		return speedBugChance;
+	}
+	
+	public int carVersionCheck(Long personaId) {
+		CarSlotEntity carSlotEntity = personaBO.getDefaultCarEntity(personaId);
+		OwnedCarEntity ownedCarEntity = carSlotEntity.getOwnedCar();
+		CustomCarEntity customCarEntityVer = ownedCarEntity.getCustomCar();
+		
+		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCarEntityVer.getPhysicsProfileHash());
+		return carClassesEntity.getCarVersion();
 	}
 
 }

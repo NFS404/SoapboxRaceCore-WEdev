@@ -32,6 +32,8 @@ public class OwnedCarEntity {
 
 	@OneToOne(mappedBy = "ownedCar", targetEntity = CustomCarEntity.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private CustomCarEntity customCar;
+	
+	private int carVersion;
 
 	public Long getId() {
 		return id;
@@ -87,6 +89,14 @@ public class OwnedCarEntity {
 
 	public void setCustomCar(CustomCarEntity customCar) {
 		this.customCar = customCar;
+	}
+	
+	public int getCarVersion() {
+		return carVersion;
+	}
+
+	public void setCarVersion(int carVersion) {
+		this.carVersion = carVersion;
 	}
 
 }

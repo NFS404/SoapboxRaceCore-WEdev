@@ -76,7 +76,8 @@ public class EventDataEntity {
 	protected boolean isSingle;
 	protected boolean speedBugChance; // after 2 hours of playing, NFSW's time system can glitch sometimes, giving a possible player advantage
 	// so server will save this value is player was logged for 2 hours and more
-
+	protected int carVersion;
+	
 	public Long getId() {
 		return id;
 	}
@@ -329,6 +330,14 @@ public class EventDataEntity {
 
 	public void setSpeedBugChance(boolean value) {
 		this.speedBugChance = value;
+	}
+	
+	public int getCarVersion() {
+		return carVersion;
+	}
+
+	public void setCarVersion(int carVersion) {
+		this.carVersion = carVersion;
 	}
 
 }

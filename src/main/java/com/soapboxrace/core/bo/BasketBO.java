@@ -241,6 +241,14 @@ public class BasketBO {
 		carSlotEntity.setOwnedCar(ownedCarEntity);
 		OwnedCarConverter.trans2Entity(ownedCarTrans, ownedCarEntity);
 		OwnedCarConverter.details2NewEntity(ownedCarTrans, ownedCarEntity);
+		
+		// Getting the current car version for a new car
+		CustomCarEntity customCarEntityVer = ownedCarEntity.getCustomCar();
+		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCarEntityVer.getPhysicsProfileHash());
+		if (carClassesEntity == null) {
+			return CommerceResultStatus.FAIL_INVALID_BASKET;
+		}
+		ownedCarEntity.setCarVersion(carClassesEntity.getCarVersion());
 
 		carSlotDAO.insert(carSlotEntity);
 

@@ -24,6 +24,7 @@ import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.InventoryItemEntity;
+import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.core.jpa.PerformancePartEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ProductEntity;
@@ -127,7 +128,8 @@ public class CommerceBO {
 
 	public void updateCar(CommerceOp commerceOp, CommerceSessionTrans commerceSessionTrans, CarSlotEntity defaultCarEntity) {
 		CustomCarTrans customCarTrans = commerceSessionTrans.getUpdatedCar().getCustomCar();
-		CustomCarEntity customCarEntity = defaultCarEntity.getOwnedCar().getCustomCar();
+		OwnedCarEntity ownedCarEntity = defaultCarEntity.getOwnedCar();
+		CustomCarEntity customCarEntity = ownedCarEntity.getCustomCar();
 		switch (commerceOp) {
 		case PAINTS:
 			paintDAO.deleteByCustomCar(customCarEntity);
@@ -136,6 +138,10 @@ public class CommerceBO {
 		case PERFORMANCE:
 			performancePartDAO.deleteByCustomCar(customCarEntity);
 			OwnedCarConverter.performanceParts2NewEntity(customCarTrans, customCarEntity);
+			CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCarEntity.getPhysicsProfileHash());
+			if (ownedCarEntity.getCarVersion() != carClassesEntity.getCarVersion()) {
+				ownedCarEntity.setCarVersion(carClassesEntity.getCarVersion());
+			}
 			calcNewCarClass(customCarEntity);
 			break;
 		case SKILL:
@@ -156,7 +162,7 @@ public class CommerceBO {
 		carSlotDAO.update(defaultCarEntity);
 	}
 
-	private void calcNewCarClass(CustomCarEntity customCarEntity) {
+	public void calcNewCarClass(CustomCarEntity customCarEntity) {
 		int physicsProfileHash = customCarEntity.getPhysicsProfileHash();
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(physicsProfileHash);
 		if(carClassesEntity == null) {

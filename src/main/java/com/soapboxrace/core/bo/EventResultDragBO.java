@@ -96,6 +96,8 @@ public class EventResultDragBO {
 		eventDataEntity.setTopSpeed(dragArbitrationPacket.getTopSpeed());
 		boolean speedBugChance = eventResultBO.speedBugChance(personaEntity.getUser().getLastLogin());
 		eventDataEntity.setSpeedBugChance(speedBugChance);
+		int carVersion = eventResultBO.carVersionCheck(activePersonaId);
+		eventDataEntity.setCarVersion(carVersion);
 		eventDataDao.update(eventDataEntity);
 
 		ArrayOfDragEntrantResult arrayOfDragEntrantResult = new ArrayOfDragEntrantResult();

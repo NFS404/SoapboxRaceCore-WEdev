@@ -115,6 +115,8 @@ public class EventResultRouteBO {
 		eventDataEntity.setPersonaId(activePersonaId);
 		boolean speedBugChance = eventResultBO.speedBugChance(personaEntity.getUser().getLastLogin());
 		eventDataEntity.setSpeedBugChance(speedBugChance);
+		int carVersion = eventResultBO.carVersionCheck(activePersonaId);
+		eventDataEntity.setCarVersion(carVersion);
 		eventDataDao.update(eventDataEntity);
 
 		ArrayOfRouteEntrantResult arrayOfRouteEntrantResult = new ArrayOfRouteEntrantResult();

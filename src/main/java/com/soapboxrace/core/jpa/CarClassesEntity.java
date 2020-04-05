@@ -49,6 +49,8 @@ public class CarClassesEntity implements Serializable {
 	private Integer haVar2;
 	@Column(name = "ha_var3")
 	private Integer haVar3;
+	@Column(name = "carversion")
+	private Integer carVersion;
 
 	public void setStoreName(String storeName) {
 		this.storeName = storeName;
@@ -192,6 +194,14 @@ public class CarClassesEntity implements Serializable {
 
 	public void setProductId(String productId) {
 		this.productId = productId;
+	}
+	
+	public int getCarVersion() {
+		return carVersion;
+	}
+
+	public void setCarVersion(int carVersion) {
+		this.carVersion = carVersion;
 	}
 
 }

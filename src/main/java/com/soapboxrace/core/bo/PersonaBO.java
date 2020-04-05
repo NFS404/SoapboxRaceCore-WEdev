@@ -10,6 +10,7 @@ import com.soapboxrace.core.bo.util.OwnedCarConverter;
 import com.soapboxrace.core.dao.AchievementStateDAO;
 import com.soapboxrace.core.dao.BadgeDefinitionDAO;
 import com.soapboxrace.core.dao.BadgePersonaDAO;
+import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CarSlotDAO;
 import com.soapboxrace.core.dao.LevelRepDAO;
 import com.soapboxrace.core.dao.OwnedCarDAO;
@@ -18,6 +19,7 @@ import com.soapboxrace.core.jpa.AchievementPersonaEntity;
 import com.soapboxrace.core.jpa.AchievementRankEntity;
 import com.soapboxrace.core.jpa.AchievementStateEntity;
 import com.soapboxrace.core.jpa.BadgePersonaEntity;
+import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.LevelRepEntity;
@@ -25,6 +27,7 @@ import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.jaxb.http.BadgeBundle;
 import com.soapboxrace.jaxb.http.BadgeInput;
+import com.soapboxrace.jaxb.http.CommerceResultStatus;
 import com.soapboxrace.jaxb.http.OwnedCarTrans;
 
 @Stateless
@@ -50,6 +53,12 @@ public class PersonaBO {
 
 	@EJB
 	private AchievementStateDAO achievementStateDAO;
+	
+	@EJB
+	private CarClassesDAO carClassesDAO;
+	
+	@EJB
+	private CommerceBO commerceBO;
 
 	public void changeDefaultCar(Long personaId, Long defaultCarId) {
 		PersonaEntity personaEntity = personaDAO.findById(personaId);
@@ -99,7 +108,16 @@ public class PersonaBO {
 		if (carSlotEntity == null) {
 			return new OwnedCarTrans();
 		}
-		return OwnedCarConverter.entity2Trans(carSlotEntity.getOwnedCar());
+		OwnedCarEntity ownedCarEntity = carSlotEntity.getOwnedCar();
+		CustomCarEntity customCarEntityVer = ownedCarEntity.getCustomCar();
+		
+		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCarEntityVer.getPhysicsProfileHash());
+		if (ownedCarEntity.getCarVersion() != carClassesEntity.getCarVersion()) {
+			ownedCarEntity.setCarVersion(carClassesEntity.getCarVersion());
+			commerceBO.calcNewCarClass(customCarEntityVer);
+		}
+		OwnedCarTrans ownedCarTrans = OwnedCarConverter.entity2Trans(ownedCarEntity);
+		return ownedCarTrans;
 	}
 
 	public List<CarSlotEntity> getPersonasCar(Long personaId) {

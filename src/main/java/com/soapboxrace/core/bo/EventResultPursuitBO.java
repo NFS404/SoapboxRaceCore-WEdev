@@ -96,6 +96,8 @@ public class EventResultPursuitBO {
 		eventDataEntity.setIsSingle(true);
 		boolean speedBugChance = eventResultBO.speedBugChance(personaEntity.getUser().getLastLogin());
 		eventDataEntity.setSpeedBugChance(speedBugChance);
+		int carVersion = eventResultBO.carVersionCheck(activePersonaId);
+		eventDataEntity.setCarVersion(carVersion);
 		
 		// +1 to play count for this track, SP
 		EventEntity eventEntity = eventDAO.findById(currentEventId);
