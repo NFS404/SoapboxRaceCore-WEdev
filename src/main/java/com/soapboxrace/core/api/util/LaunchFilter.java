@@ -71,7 +71,7 @@ public class LaunchFilter implements ContainerRequestFilter {
 		
 		else if (isSBRWSystem(xUserAgent)) {
 			system_found = true;
-			if (!checkVersionSBRW(requestContext)) {
+			if (!checkVersionSBRW()) {
 				loginStatusVO.setDescription(msg_OldVersionlauncher);
 				requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).entity(loginStatusVO).build());
 			}
@@ -125,20 +125,35 @@ public class LaunchFilter implements ContainerRequestFilter {
 	private boolean isSBRWSystem(String xUserAgent) {
 		if (!parameterBO.getBoolParam("ENABLE_METONATOR_LAUNCHER_PROTECTION"))
 			return false;
+		
+		UserAgentData = xUserAgent.split(" ", 3);
+		if (
+				UserAgentData.length < 3
+				||
+				!UserAgentData[0].equalsIgnoreCase("GameLauncherReborn")
+				||
+				!UserAgentData[2].equalsIgnoreCase("WinForms (+https://github.com/worldunitedgg/GameLauncher_NFSW)")
+			) {
+			return false;
+		}
+		return true;
+		
 		// FIXME Awful version check, should use maven's versioning maybe
 		// 9.9.9.9 - SBRW Profile Exporter
-		if (xUserAgent != null && ((xUserAgent.equalsIgnoreCase("GameLauncherReborn " + parameterBO.getStrParam("LAUNCHER_SBRW_VERSION") + " WinForms (+https://github.com/worldunitedgg/GameLauncher_NFSW)")) ||
-				(xUserAgent.equalsIgnoreCase("GameLauncherReborn 9.9.9.9 WinForms (+https://github.com/worldunitedgg/GameLauncher_NFSW)"))))
-			return true;
+		//if (xUserAgent != null && ((xUserAgent.equalsIgnoreCase("GameLauncherReborn " + parameterBO.getStrParam("LAUNCHER_SBRW_VERSION") + " WinForms (+https://github.com/worldunitedgg/GameLauncher_NFSW)")) ||
+		//		(xUserAgent.equalsIgnoreCase("GameLauncherReborn 9.9.9.9 WinForms (+https://github.com/worldunitedgg/GameLauncher_NFSW)"))))
+		//	return true;
 		//String xUserAgent = requestContext.getHeaderString("X-UserAgent");
 		// TODO Сделать проверку xUserAgent
-		return false;
+		//return false;
 	}
 	/**
 	 * Проверка версии лаунчера, через систему SBRW
 	 * @param requestContext
 	 */
-	private boolean checkVersionSBRW(ContainerRequestContext requestContext) {
+	private boolean checkVersionSBRW() {
+		if (RWACUserAgent.lowerRWVersion(UserAgentData[1], parameterBO.getStrParam("LAUNCHER_SBRW_VERSION")))
+			return false;
 		return true;
 	}
 	/**
