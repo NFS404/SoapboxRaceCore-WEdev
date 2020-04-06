@@ -258,13 +258,11 @@ public class RestApiBO {
 			}
 			final boolean isCarVersionVaild;
 			int serverCarVersionValue = eventResultBO.carVersionCheckWeb(race.getCarName());
-			switch (serverCarVersionValue) {
-				case serverCarVersionValue = race.getCarVersion():
-					isCarVersionVaild = true;
-					break;
-				default:
-					isCarVersionVaild = false;
-					break;
+			if (serverCarVersionValue == race.getCarVersion()) {
+				isCarVersionVaild = true;
+			}
+			else {
+				isCarVersionVaild = false;
 			}
 			list.add(
 					race.getUserName(), 
@@ -312,13 +310,11 @@ public class RestApiBO {
 			}
 			final boolean isCarVersionVaild;
 			int serverCarVersionValue = eventResultBO.carVersionCheckWeb(race.getCarName());
-			switch (serverCarVersionValue) {
-				case serverCarVersionValue = race.getCarVersion():
-					isCarVersionVaild = true;
-					break;
-				default:
-					isCarVersionVaild = false;
-					break;
+			if (serverCarVersionValue == race.getCarVersion()) {
+				isCarVersionVaild = true;
+			}
+			else {
+				isCarVersionVaild = false;
 			}
 			list.add(
 					race.getUserName(), 
