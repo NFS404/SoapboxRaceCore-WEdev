@@ -67,9 +67,10 @@ public class ArrayOfRaceWithTime {
 			boolean perfectStart,
 			boolean useHacks,
 			int collisions,
-			String date
+			String date,
+			boolean isCarVersionVaild
 		) {
-		races.add(new Race(username, iconid, carname, carclasshash, racetime, maxspeed, perfectStart, useHacks, collisions, date));
+		races.add(new Race(username, iconid, carname, carclasshash, racetime, maxspeed, perfectStart, useHacks, collisions, date, isCarVersionVaild));
 	}
 	
 	@XmlAccessorType(XmlAccessType.FIELD)
@@ -83,7 +84,8 @@ public class ArrayOfRaceWithTime {
 		"perfectStart",
 		"useHacks",
 		"collisions",
-		"date"
+		"date",
+		"isCarVersionVaild"
 	})
 	public static class Race {
 		@XmlElement(name = "UserName")
@@ -106,6 +108,8 @@ public class ArrayOfRaceWithTime {
 		private int collisions;
 		@XmlElement(name = "Date")
 		private String date;
+		@XmlElement(name = "IsCarVersionVaild")
+		private boolean isCarVersionVaild;
 		
 		protected Race(
 				String username,
@@ -117,7 +121,8 @@ public class ArrayOfRaceWithTime {
 				boolean perfectStart,
 				boolean useHacks,
 				int collisions,
-				String date
+				String date,
+				boolean isCarVersionVaild
 			) {
 			userName = username;
 			userIconId = iconid;
@@ -128,6 +133,7 @@ public class ArrayOfRaceWithTime {
 			this.useHacks = useHacks;
 			this.date = date;
 			this.collisions = collisions;
+			this.isCarVersionVaild = isCarVersionVaild;
 			switch(carclasshash) {
 			case 872416321:
 				carClass = "E";

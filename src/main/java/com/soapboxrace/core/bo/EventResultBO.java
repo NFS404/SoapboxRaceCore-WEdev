@@ -79,5 +79,10 @@ public class EventResultBO {
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCarEntityVer.getPhysicsProfileHash());
 		return carClassesEntity.getCarVersion();
 	}
+	
+	public int carVersionCheckWeb(String customCarName) {
+		CarClassesEntity carClassesEntity = carClassesDAO.findByStoreName(customCarName);
+		return carClassesEntity.getCarVersion();
+	}
 
 }

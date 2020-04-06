@@ -58,45 +58,51 @@ public class RestApiBO {
 	// ============== Утилиты выборки ================
 	
 	/**
-	 * Объект заросов в базу по тематике машин
+	 * Объект запросов в базу по тематике машин
 	 */
 	@EJB
 	private CustomCarDAO carDAO;
 	/**
-	 * Объект заросов в базу по тематике заездов
+	 * Объект запросов в базу по тематике заездов
 	 */
 	@EJB
 	private EventDAO eventDAO;
 	/**
-	 * Объект заросов в базу по тематике заездов
+	 * Объект запросов в базу по тематике заездов
 	 */
 	@EJB
 	private EventDataDAO eventDataDAO;
 	/**
-	 * Объект заросов в базу по тематике профиля
+	 * Объект запросов в базу по тематике профиля
 	 */
 	@EJB
 	private PersonaDAO personaDAO;
 	/**
-	 * Объект заросов в базу по тематике банов профиля
+	 * Объект запросов в базу по тематике банов профиля
 	 */
 	@EJB
 	private BanDAO banDAO;
 	/**
-	 * Объект заросов в базу по тематике репорта
+	 * Объект запросов в базу по тематике репорта
 	 */
 	@EJB
 	private ReportDAO reportDAO;
 	/**
-	 * Объект заросов в базу по тематике поиска кристаликов
+	 * Объект запросов в базу по тематике поиска кристаликов
 	 */
 	@EJB
 	private TreasureHuntDAO diamondDAO;
 	/**
-	 * Объект заросов в базу по тематике аккаунта
+	 * Объект запросов в базу по тематике аккаунта
 	 */
 	@EJB
 	private UserDAO userDAO;
+	/**
+	 * Объект запросов в базу для метода определения версии машины
+	 */
+	@EJB
+	private EventResultBO eventResultBO;
+	
 	
 	// ================= Функции выборки ================
 	
@@ -250,6 +256,16 @@ public class RestApiBO {
 					isHacks = false;
 					break;
 			}
+			final boolean isCarVersionVaild;
+			int serverCarVersionValue = eventResultBO.carVersionCheckWeb(race.getCarName());
+			switch (serverCarVersionValue) {
+				case serverCarVersionValue = race.getCarVersion():
+					isCarVersionVaild = true;
+					break;
+				default:
+					isCarVersionVaild = false;
+					break;
+			}
 			list.add(
 					race.getUserName(), 
 					race.getUserIconId(), 
@@ -260,7 +276,8 @@ public class RestApiBO {
 					race.isPerfectStart(),
 					isHacks,
 					race.getCollisions(),
-					sf.format(new Date(race.getdate()))
+					sf.format(new Date(race.getdate())),
+					isCarVersionVaild
 				);
 		}
 		return list;
@@ -293,6 +310,16 @@ public class RestApiBO {
 					isHacks = false;
 					break;
 			}
+			final boolean isCarVersionVaild;
+			int serverCarVersionValue = eventResultBO.carVersionCheckWeb(race.getCarName());
+			switch (serverCarVersionValue) {
+				case serverCarVersionValue = race.getCarVersion():
+					isCarVersionVaild = true;
+					break;
+				default:
+					isCarVersionVaild = false;
+					break;
+			}
 			list.add(
 					race.getUserName(), 
 					race.getUserIconId(), 
@@ -303,7 +330,8 @@ public class RestApiBO {
 					race.isPerfectStart(),
 					isHacks,
 					race.getCollisions(),
-					""
+					"",
+					isCarVersionVaild
 				);
 		}
 		return list;

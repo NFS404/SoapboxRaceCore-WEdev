@@ -48,7 +48,8 @@ import javax.persistence.Table;
 					"	d.topspeed max_speed, " + 
 					"	d.hacksdetected hacks_level, " + 
 					"	d.numberofcollisions collision, " + 
-					"	e.started started " +
+					"	e.started started, " +
+					"	d.carversion carversion " +
 					"FROM " + 
 					"	event_session e, " + 
 					"	event_data d, " + 
@@ -72,7 +73,8 @@ import javax.persistence.Table;
 					"	d.topspeed max_speed, " + 
 					"	d.hacksdetected hacks_level, " + 
 					"	d.numberofcollisions collision, " + 
-					"	e.started started " +
+					"	e.started started, " +
+					"	d.carversion carversion " +
 					"FROM " + 
 					"	event_data d, " + 
 					"	customcar cc, " + 
@@ -107,6 +109,7 @@ public class BestTimeRaceEntity {
 //	@Column(name="collision")
 	private int collision;
 	private Long started;
+	private int carversion;
 	/**
 	 * Получить имя профиля
 	 */
@@ -170,5 +173,11 @@ public class BestTimeRaceEntity {
 			return 0;
 		}
 		return started;
+	}
+	/**
+	 * Получить версию машины игрока от данного рекорда
+	 */
+	public int getCarVersion() {
+		return carversion;
 	}
 }
