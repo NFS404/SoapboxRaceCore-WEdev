@@ -307,7 +307,7 @@ public class AchievementsBO {
 		case LEXUS_COLLECTOR:
 			return 0l;
 		case LONG_HAUL:
-			return 0l;
+			return achievementPersonaEntity.getEventMeters();
 		case LOTUS_COLLECTOR:
 			return 0l;
 		case MARUSSIA_COLLECTOR:
@@ -405,6 +405,13 @@ public class AchievementsBO {
 
 	public void applyEventAchievement(PersonaEntity personaEntity) {
 		//
+	}
+	
+	public void applyEventKmsAchievement(PersonaEntity personaEntity, Long eventLength) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		Integer metersDriven = (int) (achievementPersonaEntity.getEventMeters() + (eventLength * 1000));
+		achievementPersonaEntity.setEventMeters(metersDriven);
+		processAchievementByThresholdRange(achievementPersonaEntity, AchievementType.LONG_HAUL, metersDriven.longValue());
 	}
 	
 	public void applyDropAchievements(PersonaEntity personaEntity, AchievementType achievementType) {

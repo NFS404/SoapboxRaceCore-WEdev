@@ -80,6 +80,7 @@ public class EventResultTeamEscapeBO {
 		achievementsBO.applyAirTimeAchievement(teamEscapeArbitrationPacket, personaEntity);
 		achievementsBO.applyPursuitCostToState(teamEscapeArbitrationPacket, personaEntity);
 		achievementsBO.applyTeamEscape(teamEscapeArbitrationPacket, personaEntity);
+		achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventDataEntity.getEvent().getTrackLength());
 		eventDataEntity.setAlternateEventDurationInMilliseconds(teamEscapeArbitrationPacket.getAlternateEventDurationInMilliseconds());
 		eventDataEntity.setBustedCount(teamEscapeArbitrationPacket.getBustedCount());
 		eventDataEntity.setCarId(teamEscapeArbitrationPacket.getCarId());

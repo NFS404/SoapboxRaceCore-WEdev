@@ -78,6 +78,7 @@ public class EventResultDragBO {
 		eventDataEntity.setArbitration(eventDataEntity.getArbitration() ? false : true);
 		achievementsBO.applyAirTimeAchievement(dragArbitrationPacket, personaEntity);
 		achievementsBO.applyDragAchievement(eventDataEntity, dragArbitrationPacket, activePersonaId);
+		achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventDataEntity.getEvent().getTrackLength());
 
 		int currentEventId = eventDataEntity.getEvent().getId();
 		eventDataEntity.setAlternateEventDurationInMilliseconds(dragArbitrationPacket.getAlternateEventDurationInMilliseconds());

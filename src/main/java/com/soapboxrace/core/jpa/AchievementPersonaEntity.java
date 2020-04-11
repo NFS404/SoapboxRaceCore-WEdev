@@ -34,7 +34,7 @@ public class AchievementPersonaEntity {
 	private int commerceExplorerSkills;
 	private int commercePursuitSkills;
 
-	private long eventKms;
+	private long eventMeters;
 	private long eventAerialTime;
 
 	private long pursuitCostToState;
@@ -133,12 +133,12 @@ public class AchievementPersonaEntity {
 		this.commercePursuitSkills = commercePursuitSkills;
 	}
 
-	public long getEventKms() {
-		return eventKms;
+	public long getEventMeters() {
+		return eventMeters;
 	}
 
-	public void setEventKms(long eventKms) {
-		this.eventKms = eventKms;
+	public void setEventMeters(long eventMeters) {
+		this.eventMeters = eventMeters;
 	}
 
 	public long getEventAerialTime() {

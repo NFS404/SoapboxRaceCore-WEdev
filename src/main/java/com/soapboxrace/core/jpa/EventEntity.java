@@ -67,6 +67,7 @@ public class EventEntity {
 	private String carModel;
 	private long minTime;
 	private int rotation;
+	private float trackLength;
 
 	public int getId() {
 		return id;
@@ -426,5 +427,13 @@ public class EventEntity {
 
 	public void setRotation(int rotation) {
 		this.rotation = rotation;
+	}
+	
+	public float getTrackLength() {
+		return trackLength;
+	}
+
+	public void setTrackLength(float trackLength) {
+		this.trackLength = trackLength;
 	}
 }

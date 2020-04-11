@@ -100,6 +100,7 @@ public class EventResultRouteBO {
 		eventDataEntity.setArbitration(eventDataEntity.getArbitration() ? false : true);
 		achievementsBO.applyRaceAchievements(eventDataEntity, routeArbitrationPacket, personaEntity);
 		achievementsBO.applyAirTimeAchievement(routeArbitrationPacket, personaEntity);
+		achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventDataEntity.getEvent().getTrackLength());
 		updateEventDataEntity(eventDataEntity, routeArbitrationPacket);
 
 		// RouteArbitrationPacket
