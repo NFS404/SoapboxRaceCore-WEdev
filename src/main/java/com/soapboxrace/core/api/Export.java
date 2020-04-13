@@ -31,7 +31,7 @@ public class Export {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getPlayerDefaultCar(@FormParam("adminToken") String adminToken, @FormParam("playerName") String playerName) {
 		if (parameterBO.getStrParam("ADMIN_TOKEN").equals(adminToken)) {
-			PersonaEntity personaEntity = personaDAO.findByName(playerName);
+			PersonaEntity personaEntity = personaDAO.findByNameIgnoreCase(playerName);
 			OwnedCarTrans ownedCarTrans = personaBO.getDefaultCar(personaEntity.getPersonaId());
 			return MarshalXML.marshal(ownedCarTrans);
 		}

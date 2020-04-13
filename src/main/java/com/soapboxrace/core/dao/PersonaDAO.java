@@ -34,6 +34,14 @@ public class PersonaDAO extends BaseDAO<PersonaEntity> {
 		List<PersonaEntity> resultList = query.getResultList();
 		return !resultList.isEmpty() ? resultList.get(0) : null;
 	}
+	
+	public PersonaEntity findByNameIgnoreCase(String name) {
+		TypedQuery<PersonaEntity> query = entityManager.createNamedQuery("PersonaEntity.findByName", PersonaEntity.class);
+		query.setParameter("name", name);
+
+		List<PersonaEntity> resultList = query.getResultList();
+		return !resultList.isEmpty() ? resultList.get(0) : null;
+	}
 
 	public List<PersonaEntity> getAllPaged(int offset, int max) {
 		TypedQuery<PersonaEntity> query = entityManager.createQuery("SELECT obj FROM PersonaEntity obj ", PersonaEntity.class);
