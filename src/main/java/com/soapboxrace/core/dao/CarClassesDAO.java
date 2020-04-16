@@ -32,8 +32,8 @@ public class CarClassesDAO extends BaseDAO<CarClassesEntity> {
 	}
 	
 	public CarClassesEntity findByStoreName(String customCarName) {
-		TypedQuery<CarClassesEntity> query = entityManager.createQuery("SELECT obj FROM CarClassesEntity obj WHERE obj.store_name = :store_name", CarClassesEntity.class);
-		query.setParameter("store_name", customCarName);
+		TypedQuery<CarClassesEntity> query = entityManager.createQuery("SELECT obj FROM CarClassesEntity obj WHERE obj.storeName = :storeName", CarClassesEntity.class);
+		query.setParameter("storeName", customCarName);
 		try {
 			return query.getSingleResult();
 		} catch (Exception e) {

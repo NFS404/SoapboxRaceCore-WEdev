@@ -37,27 +37,51 @@ import javax.persistence.Table;
 //					"	d.carid=cs.id AND d.carid = cc.id AND p.id = cs.personaid AND d.eventid = :eventid " + 
 //					"ORDER BY d.eventdurationinmilliseconds",
 
-			query = "SELECT " + 
-					"	d.id id, " + 
-					"	cc.name car_name, " + 
-					"	p.name user_name, " + 
-					"	p.iconindex user_iconid, " + 
-					"	cc.carclasshash car_class, " + 
-					"	d.eventdurationinmilliseconds race_time, " + 
-					"	d.perfectstart perfect_start, " + 
-					"	d.topspeed max_speed, " + 
-					"	d.hacksdetected hacks_level, " + 
-					"	d.numberofcollisions collision, " + 
-					"	e.started started, " +
-					"	d.carversion carversion " +
-					"FROM " + 
-					"	event_session e, " + 
-					"	event_data d, " + 
-					"	customcar cc, " + 
-					"	persona p " +
-					"WHERE " + 
-					"	d.eventid = :eventid AND d.carid = cc.id AND p.id = d.personaid AND e.id = d.eventsessionid " + 
-					"ORDER BY d.eventdurationinmilliseconds",
+//			query = "SELECT " + 
+//					"	d.id id, " + 
+//					"	cc.name car_name, " + 
+//					"	p.name user_name, " + 
+//					"	p.iconindex user_iconid, " + 
+//					"	cc.carclasshash car_class, " + 
+//					"	d.eventdurationinmilliseconds race_time, " + 
+//					"	d.perfectstart perfect_start, " + 
+//					"	d.topspeed max_speed, " + 
+//					"	d.hacksdetected hacks_level, " + 
+//					"	d.numberofcollisions collision, " + 
+//					"	e.started started, " +
+//					"	d.carversion carversion " +
+//					"FROM " + 
+//					"	event_session e, " + 
+//					"	event_data d, " + 
+//					"	customcar cc, " + 
+//					"	persona p " +
+//					"WHERE " + 
+//					"	d.eventid = :eventid AND d.carid = cc.id AND p.id = d.personaid AND e.id = d.eventsessionid " + 
+//					"ORDER BY d.eventdurationinmilliseconds",
+			
+			query = "SELECT * from (" +
+						    "SELECT rank() OVER (PARTITION BY personaId ORDER BY eventDurationInMilliseconds) AS rank, " +
+							"d.id id, " +
+							"cc.name car_name, " +
+							"p.name user_name, " +
+							"p.iconindex user_iconid, " +
+							"cc.carclasshash car_class, " +
+							"d.eventdurationinmilliseconds race_time, " +
+							"d.perfectstart perfect_start, " +
+							"d.topspeed max_speed, " +
+							"d.hacksdetected hacks_level, " +
+							"d.numberofcollisions collision, " +
+							"e.started started," +
+							"d.finishreason finishreason, " +
+							"d.carversion carversion " +
+						"FROM " +
+							"event_session e, " +
+							"event_data d, " +
+							"customcar cc, " +
+							"persona p " +
+						"WHERE " +
+							"d.eventid = :eventid AND d.carid = cc.id AND p.id = d.personaid AND e.id = d.eventsessionid and d.finishreason <> 0 " +
+						"ORDER BY d.eventdurationinmilliseconds) t1 where t1.rank = 1 ",
 			resultClass = BestTimeRaceEntity.class
 		),
 	@NamedNativeQuery(

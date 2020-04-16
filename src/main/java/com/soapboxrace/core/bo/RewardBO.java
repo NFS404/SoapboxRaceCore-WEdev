@@ -236,8 +236,8 @@ public class RewardBO {
 		float cash = rewardVO.getCash();
 		float finalRepRewardMultiplier = eventEntity.getFinalRepRewardMultiplier();
 		float finalCashRewardMultiplier = eventEntity.getFinalCashRewardMultiplier();
-		Float finalRep = ((rep * finalRepRewardMultiplier) * parameterBO.getIntParam("REWARD_REP_MULTIPLIER")); // Overall rewards multipliers
-		Float finalCash = ((cash * finalCashRewardMultiplier) * parameterBO.getIntParam("REWARD_CASH_MULTIPLIER"));
+		Float finalRep = ((rep * finalRepRewardMultiplier) * parameterBO.getFloatParam("REWARD_REP_MULTIPLIER")); // Overall rewards multipliers
+		Float finalCash = ((cash * finalCashRewardMultiplier) * parameterBO.getFloatParam("REWARD_CASH_MULTIPLIER"));
 		rewardVO.add(finalRep.intValue(), 0, EnumRewardCategory.AMPLIFIER, EnumRewardType.REP_AMPLIFIER);
 		rewardVO.add(0, finalCash.intValue(), EnumRewardCategory.AMPLIFIER, EnumRewardType.TOKEN_AMPLIFIER);
 	}
