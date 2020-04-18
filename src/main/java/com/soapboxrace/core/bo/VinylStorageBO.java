@@ -1,5 +1,6 @@
 package com.soapboxrace.core.bo;
 
+import java.security.SecureRandom;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -99,6 +100,8 @@ public class VinylStorageBO {
 				CustomCarTrans customCarTrans = OwnedVinylTrans.getCustomCar();
 					
 				commerceBO.updateCarVinyl(customCarTrans, defaultCarEntity);
+				vinylStorageEntity.setAppliedCount(vinylStorageEntity.getAppliedCount() + 1);
+				vinylStorageDAO.update(vinylStorageEntity);
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Vinyl is successfully applied to your current car. Go to the garage to check out the livery."), personaId);
 			}
 		}
@@ -112,6 +115,7 @@ public class VinylStorageBO {
 		CustomCarTrans customCarTrans = ownedCarTrans.getCustomCar();
 		
 		vinylStorageEntity.setPersonaId(personaId);
+		vinylStorageEntity.setAppliedCount(0);
 		vinylStorageEntity.setCarHash(defaultCarEntity.getPhysicsProfileHash());
 		
 		String paintTrans = MarshalXML.marshal(customCarTrans.getPaints());
@@ -124,7 +128,7 @@ public class VinylStorageBO {
 		vinylStorageEntity.setVinylTrans(vinylTrans);
 		
 		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789";
-		String str = new Random().ints(9, 0, chars.length()).mapToObj(i -> "" + chars.charAt(i)).collect(Collectors.joining());
+		String str = new SecureRandom().ints(9, 0, chars.length()).mapToObj(i -> "" + chars.charAt(i)).collect(Collectors.joining());
 		vinylStorageEntity.setCode(str);
 		
 		vinylStorageDAO.insert(vinylStorageEntity);
