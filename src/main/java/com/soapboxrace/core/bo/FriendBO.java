@@ -3,7 +3,6 @@ package com.soapboxrace.core.bo;
 import java.util.List;
 
 import javax.ejb.EJB;
-import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.dao.FriendListDAO;
@@ -12,6 +11,7 @@ import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.dao.ReportDAO;
 import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
+import com.soapboxrace.core.dao.VinylStorageDAO;
 import com.soapboxrace.core.jpa.FriendListEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ReportEntity;
@@ -67,6 +67,15 @@ public class FriendBO {
 	
 	@EJB
 	private PersonaPresenceDAO personaPresenceDAO;
+	
+	@EJB
+	private CommerceBO commerceBO;
+	
+	@EJB
+	private VinylStorageDAO vinylStorageDAO;
+	
+	@EJB
+	private VinylStorageBO vinylStorageBO;
 
 	public PersonaFriendsList getFriendListFromUserId(Long userId) {
 		ArrayOfFriendPersona arrayOfFriendPersona = new ArrayOfFriendPersona();
@@ -255,6 +264,17 @@ public class FriendBO {
 				return null;
 			}
 			return null;
+		}
+		
+		// Applies the vinyl from DB, uses OwnedCarTrans as a blank for already existed scripts (Not the ideal way...)
+		if (displayName.contains("/VINYL ")) {
+			vinylStorageBO.vinylStorageApply(personaId, displayName);
+		}
+		if (displayName.contentEquals("/VINYLUPLOAD")) {
+			vinylStorageBO.vinylStorageUpload(personaId);
+		}
+		if (displayName.contains("/VINYLREMOVE ")) {
+			vinylStorageBO.vinylStorageRemove(personaId, displayName);
 		}
 		// default add-a-friend interaction
 		if (!teamsActionInit) {

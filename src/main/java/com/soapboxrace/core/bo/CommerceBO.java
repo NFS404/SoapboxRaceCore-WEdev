@@ -161,6 +161,16 @@ public class CommerceBO {
 		}
 		carSlotDAO.update(defaultCarEntity);
 	}
+	
+	public void updateCarVinyl(CustomCarTrans customVinylTrans, CarSlotEntity defaultCarEntity) {
+		CustomCarTrans customCarTrans = customVinylTrans;
+		OwnedCarEntity ownedCarEntity = defaultCarEntity.getOwnedCar();
+		CustomCarEntity customCarEntity = ownedCarEntity.getCustomCar();
+			paintDAO.deleteByCustomCar(customCarEntity);
+			vinylDAO.deleteByCustomCar(customCarEntity);
+			OwnedCarConverter.paints2NewEntity(customCarTrans, customCarEntity);
+			OwnedCarConverter.vinyls2NewEntity(customCarTrans, customCarEntity);
+	}
 
 	public void calcNewCarClass(CustomCarEntity customCarEntity) {
 		int physicsProfileHash = customCarEntity.getPhysicsProfileHash();
