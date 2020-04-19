@@ -70,6 +70,9 @@ public class UserEntity {
 	@Column(name = "userAgent", length = 255)
 	private String ua;
 
+	@Column(name = "vinylSlotsUsed")
+	private int vinylSlotsUsed;
+	
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -188,6 +191,14 @@ public class UserEntity {
 	
 	public void setExtraMoney(double extramoney) {
 		this.extramoney = extramoney;
+	}
+	
+	public int getVinylSlotsUsed() {
+		return vinylSlotsUsed;
+	}
+	
+	public void setVinylSlotsUsed(int vinylSlotsUsed) {
+		this.vinylSlotsUsed = vinylSlotsUsed;
 	}
 
 }

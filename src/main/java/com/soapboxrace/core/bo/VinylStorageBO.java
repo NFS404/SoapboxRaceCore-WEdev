@@ -14,10 +14,13 @@ import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.dao.ReportDAO;
 import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
+import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.dao.VinylStorageDAO;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.OwnedCarEntity;
+import com.soapboxrace.core.jpa.PersonaEntity;
+import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.core.jpa.VinylStorageEntity;
 import com.soapboxrace.core.xmpp.OpenFireRestApiCli;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
@@ -68,6 +71,12 @@ public class VinylStorageBO {
 	
 	@EJB
 	private VinylStorageDAO vinylStorageDAO;
+	
+	@EJB
+	private UserDAO userDAO;
+	
+	@EJB
+	private ParameterBO parameterBO;
 
 	// Applies the vinyls from DB, uses OwnedCarTrans as a blank for already existed scripts (Not the ideal way...)
 	public void vinylStorageApply(Long personaId, String displayName) {
@@ -108,31 +117,50 @@ public class VinylStorageBO {
 	}
 	
 	public void vinylStorageUpload(Long personaId) {
-		VinylStorageEntity vinylStorageEntity = new VinylStorageEntity();
-		OwnedCarEntity ownedCarEntity = personaBO.getDefaultCarEntity(personaId).getOwnedCar();
-		CustomCarEntity defaultCarEntity = ownedCarEntity.getCustomCar();
-		OwnedCarTrans ownedCarTrans = OwnedCarConverter.entity2Trans(personaBO.getDefaultCarEntity(personaId).getOwnedCar());
-		CustomCarTrans customCarTrans = ownedCarTrans.getCustomCar();
-		
-		vinylStorageEntity.setPersonaId(personaId);
-		vinylStorageEntity.setAppliedCount(0);
-		vinylStorageEntity.setCarHash(defaultCarEntity.getPhysicsProfileHash());
-		
-		String paintTrans = MarshalXML.marshal(customCarTrans.getPaints());
-		paintTrans = paintTrans.replace("<ArrayOfCustomPaintTrans>", "<Paints>");
-		paintTrans = paintTrans.replace("</ArrayOfCustomPaintTrans>", "</Paints>");
-		String vinylTrans = MarshalXML.marshal(customCarTrans.getVinyls());
-		vinylTrans = vinylTrans.replace("<ArrayOfCustomVinylTrans>", "<Vinyls>");
-		vinylTrans = vinylTrans.replace("</ArrayOfCustomVinylTrans>", "</Vinyls>");
-		vinylStorageEntity.setPaintTrans(paintTrans);
-		vinylStorageEntity.setVinylTrans(vinylTrans);
-		
-		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789";
-		String str = new SecureRandom().ints(9, 0, chars.length()).mapToObj(i -> "" + chars.charAt(i)).collect(Collectors.joining());
-		vinylStorageEntity.setCode(str);
-		
-		vinylStorageDAO.insert(vinylStorageEntity);
-		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Vinyl is successfully uploaded. Vinyl Storage code: " + str), personaId);
+		int vinylSlotsLimit = parameterBO.getIntParam("VINYLSTORAGE_SLOTS");
+		UserEntity userEntity = personaDAO.findById(personaId).getUser();
+		boolean isPremium = userEntity.isPremium();
+		int vinylSlotsUsed = userEntity.getVinylSlotsUsed();
+		if (!isPremium && vinylSlotsUsed >= vinylSlotsLimit) {
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You are is reached the maximum of Vinyl Storage slots. Remove some of them or got the Premium to increase the slots."), personaId);
+		}
+		else {
+			if (!isPremium) {
+				userEntity.setVinylSlotsUsed(vinylSlotsUsed + 1);
+				userDAO.update(userEntity);
+			}
+			VinylStorageEntity vinylStorageEntity = new VinylStorageEntity();
+			OwnedCarEntity ownedCarEntity = personaBO.getDefaultCarEntity(personaId).getOwnedCar();
+			CustomCarEntity defaultCarEntity = ownedCarEntity.getCustomCar();
+			OwnedCarTrans ownedCarTrans = OwnedCarConverter.entity2Trans(personaBO.getDefaultCarEntity(personaId).getOwnedCar());
+			CustomCarTrans customCarTrans = ownedCarTrans.getCustomCar();
+			
+			vinylStorageEntity.setPersonaId(personaId);
+			vinylStorageEntity.setAppliedCount(0);
+			vinylStorageEntity.setCarHash(defaultCarEntity.getPhysicsProfileHash());
+			
+			String paintTrans = MarshalXML.marshal(customCarTrans.getPaints());
+			paintTrans = paintTrans.replace("<ArrayOfCustomPaintTrans>", "<Paints>");
+			paintTrans = paintTrans.replace("</ArrayOfCustomPaintTrans>", "</Paints>");
+			String vinylTrans = MarshalXML.marshal(customCarTrans.getVinyls());
+			vinylTrans = vinylTrans.replace("<ArrayOfCustomVinylTrans>", "<Vinyls>");
+			vinylTrans = vinylTrans.replace("</ArrayOfCustomVinylTrans>", "</Vinyls>");
+			vinylStorageEntity.setPaintTrans(paintTrans);
+			vinylStorageEntity.setVinylTrans(vinylTrans);
+			
+			String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789";
+			String str = new SecureRandom().ints(9, 0, chars.length()).mapToObj(i -> "" + chars.charAt(i)).collect(Collectors.joining());
+			vinylStorageEntity.setCode(str);
+			
+			vinylStorageDAO.insert(vinylStorageEntity);
+			if (isPremium) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Vinyl is successfully uploaded. Vinyl Storage code: " + str), personaId);
+			}
+			else {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Vinyl is successfully uploaded (" + 
+						userEntity.getVinylSlotsUsed() + "/" + vinylSlotsLimit + " used). Vinyl Storage code: " + str), personaId);
+			}
+		}
 	}
 	
 	public void vinylStorageRemove(Long personaId, String displayName) {
