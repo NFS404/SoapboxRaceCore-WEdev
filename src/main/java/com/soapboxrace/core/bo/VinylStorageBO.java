@@ -177,6 +177,8 @@ public class VinylStorageBO {
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Unable to remove - you are not the vinyl author."), personaId);
 			}
 			if (isCompatible) {
+				userEntity.setVinylSlotsUsed(userEntity.getVinylSlotsUsed() - 1);
+				userDAO.update(userEntity);
 				vinylStorageDAO.delete(vinylStorageEntity);
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Vinyl is successfully deleted from the Storage."), personaId);
 			}
