@@ -5,7 +5,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.jaxb.http.RegionInfo;
 
 @Path("/getregioninfo")
@@ -20,9 +19,6 @@ public class GetRegionInfo {
 		regionInfo.setEventLoadTimeoutInMilliseconds(30000);
 		regionInfo.setHeartbeatIntervalInMilliseconds(1000);
 		regionInfo.setUdpRelayBandwidthInBps(9600);
-		ParameterBO parameterBO = new ParameterBO();
-		// FIXME - crashes on actual server somehow
-		// regionInfo.setUdpRelayTimeoutInMilliseconds(parameterBO.getIntParam("PEER_TIMEOUT_TIME"));
 		regionInfo.setUdpRelayTimeoutInMilliseconds(35000);
 		return regionInfo;
 

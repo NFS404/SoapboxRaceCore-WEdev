@@ -24,7 +24,7 @@ public class VinylStorageEntity {
 	private String paintTrans;
 	private int carHash;
 	private int appliedCount;
-	private Long personaId;
+	private Long userId;
 	
 	public Long getId() {
 		return id;
@@ -74,11 +74,11 @@ public class VinylStorageEntity {
 		this.appliedCount = appliedCount;
 	}
 	
-	public Long getPersonaId() {
-		return personaId;
+	public Long getUserId() {
+		return userId;
 	}
 
-	public void setPersonaId(Long personaId) {
-		this.personaId = personaId;
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 }

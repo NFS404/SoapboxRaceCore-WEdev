@@ -135,7 +135,7 @@ public class VinylStorageBO {
 			OwnedCarTrans ownedCarTrans = OwnedCarConverter.entity2Trans(personaBO.getDefaultCarEntity(personaId).getOwnedCar());
 			CustomCarTrans customCarTrans = ownedCarTrans.getCustomCar();
 			
-			vinylStorageEntity.setPersonaId(personaId);
+			vinylStorageEntity.setUserId(userEntity.getId());
 			vinylStorageEntity.setAppliedCount(0);
 			vinylStorageEntity.setCarHash(defaultCarEntity.getPhysicsProfileHash());
 			
@@ -164,6 +164,7 @@ public class VinylStorageBO {
 	}
 	
 	public void vinylStorageRemove(Long personaId, String displayName) {
+		UserEntity userEntity = personaDAO.findById(personaId).getUser();
 		String entryValue = displayName.replaceFirst("/VINYLREMOVE ", "");
 		VinylStorageEntity vinylStorageEntity = vinylStorageDAO.findByCode(entryValue);
 		if (vinylStorageEntity == null) {
@@ -171,7 +172,7 @@ public class VinylStorageBO {
 		}
 		else {
 			boolean isCompatible = true;
-			if (!vinylStorageEntity.getPersonaId().equals(personaId)) {
+			if (!vinylStorageEntity.getUserId().equals(userEntity.getId())) {
 				isCompatible = false;
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Unable to remove - you are not the vinyl author."), personaId);
 			}
