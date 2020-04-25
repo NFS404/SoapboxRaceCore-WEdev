@@ -242,7 +242,7 @@ public class CommerceBO {
 		int finalClassInt = finalClass.intValue();
 
 		// move to new method
-		int carclassHash = 1337; // NPC cars, Drift-Spec
+		int carclassHash = 0; // NPC cars, Drift-Spec
 		if (finalClassInt >= 40 && finalClassInt < 250) {
 			carclassHash = 872416321;
 		} else if (finalClassInt >= 250 && finalClassInt < 400) {

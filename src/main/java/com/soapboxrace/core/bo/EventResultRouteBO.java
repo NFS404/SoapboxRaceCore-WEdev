@@ -74,6 +74,9 @@ public class EventResultRouteBO {
 	
 	@EJB
 	private EventResultBO eventResultBO;
+	
+	@EJB
+	private RecordsBO recordsBO;
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -83,6 +86,7 @@ public class EventResultRouteBO {
 		}
 
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
+		EventEntity eventEntity = eventDataEntity.getEvent();
 
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 		
@@ -100,7 +104,7 @@ public class EventResultRouteBO {
 		eventDataEntity.setArbitration(eventDataEntity.getArbitration() ? false : true);
 		achievementsBO.applyRaceAchievements(eventDataEntity, routeArbitrationPacket, personaEntity);
 		achievementsBO.applyAirTimeAchievement(routeArbitrationPacket, personaEntity);
-		achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventDataEntity.getEvent().getTrackLength());
+		achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventEntity.getTrackLength());
 		updateEventDataEntity(eventDataEntity, routeArbitrationPacket);
 
 		// RouteArbitrationPacket
@@ -112,7 +116,7 @@ public class EventResultRouteBO {
 		eventDataEntity.setSumOfJumpsDurationInMilliseconds(routeArbitrationPacket.getSumOfJumpsDurationInMilliseconds());
 		eventDataEntity.setTopSpeed(routeArbitrationPacket.getTopSpeed());
 
-		eventDataEntity.setEventModeId(eventDataEntity.getEvent().getEventModeId());
+		eventDataEntity.setEventModeId(eventEntity.getEventModeId());
 		eventDataEntity.setPersonaId(activePersonaId);
 		boolean speedBugChance = eventResultBO.speedBugChance(personaEntity.getUser().getLastLogin());
 		eventDataEntity.setSpeedBugChance(speedBugChance);
@@ -152,13 +156,13 @@ public class EventResultRouteBO {
 		RouteEventResult routeEventResult = new RouteEventResult();
 		int isDropableMode = 1;
 		// Give rare drop if it's a online class-restricted race
-		if (eventDataEntity.getEvent().getCarClassHash() != 607077938 && arrayOfRouteEntrantResult.getRouteEntrantResult().size() >= 2) {
+		if (eventEntity.getCarClassHash() != 607077938 && arrayOfRouteEntrantResult.getRouteEntrantResult().size() >= 2) {
 			isDropableMode = 2;
 		}
 		routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode));
 		routeEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, routeArbitrationPacket, routeArbitrationPacket.getNumberOfCollisions()));
 		routeEventResult.setEntrants(arrayOfRouteEntrantResult);
-		int currentEventId = eventDataEntity.getEvent().getId();
+		int currentEventId = eventEntity.getId();
 		routeEventResult.setEventId(currentEventId);
 		int tournamentEventId = parameterBO.getIntParam("TOURNAMENT_EVENTID");
 		if (currentEventId == tournamentEventId && !speedBugChance) {
@@ -173,20 +177,19 @@ public class EventResultRouteBO {
 		routeEventResult.setLobbyInviteId(0);
 		routeEventResult.setPersonaId(activePersonaId);
 		sendXmppPacket(eventSessionId, activePersonaId, routeArbitrationPacket);
+		EventEntity eventEntity2 = eventDAO.findById(currentEventId);
 		// +1 to play count for this track, MP
 		if (eventDataEntity.getRank() == 1 && arrayOfRouteEntrantResult.getRouteEntrantResult().size() > 1) {
-			EventEntity eventEntity = eventDAO.findById(currentEventId);
-			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+			eventEntity2.setFinishCount(eventEntity2.getFinishCount() + 1);
 			personaEntity.setRacesCount(personaEntity.getRacesCount() + 1);
-			eventDAO.update(eventEntity);
+			eventDAO.update(eventEntity2);
 			personaDAO.update(personaEntity);
 		}
 		// +1 to play count for this track, SP
 		if (arrayOfRouteEntrantResult.getRouteEntrantResult().size() < 2) {
-			EventEntity eventEntity = eventDAO.findById(currentEventId);
-			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
+			eventEntity2.setFinishCount(eventEntity2.getFinishCount() + 1);
 			personaEntity.setRacesCount(personaEntity.getRacesCount() + 1);
-			eventDAO.update(eventEntity);
+			eventDAO.update(eventEntity2);
 			personaDAO.update(personaEntity);
 			EventDataEntity eventDataEntitySP = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 			eventDataEntitySP.setIsSingle(true);
@@ -200,6 +203,10 @@ public class EventResultRouteBO {
 					teamsBo.teamAccoladesBasic(eventSessionId);
 				}
 			}).start();
+		}
+		// Separate race stats (Test)
+		if (eventEntity.getCarClassHash() != 607077938) {
+			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity);
 		}
 		
 		return routeEventResult;

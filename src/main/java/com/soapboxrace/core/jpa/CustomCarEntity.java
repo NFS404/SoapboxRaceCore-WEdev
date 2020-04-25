@@ -10,12 +10,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "CUSTOMCAR")
+@NamedQueries({ //
+@NamedQuery(name = "CustomCarEntity.findById", //
+		query = "SELECT obj FROM CustomCarEntity obj WHERE obj.id = :id "),//
+})
 public class CustomCarEntity {
 
 	@Id

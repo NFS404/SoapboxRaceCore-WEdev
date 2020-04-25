@@ -10,6 +10,7 @@ import javax.persistence.TypedQuery;
 import com.soapboxrace.core.dao.util.BaseDAO;
 import com.soapboxrace.core.jpa.ClassCountEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
+import com.soapboxrace.core.jpa.RecordsEntity;
 import com.soapboxrace.core.jpa.CarNameEntity;
 
 @Stateless
@@ -39,5 +40,13 @@ public class CustomCarDAO extends BaseDAO<CustomCarEntity> {
 		TypedQuery<CarNameEntity> query = entityManager.createNamedQuery("CarNameEntity.mostPopular", CarNameEntity.class);
 		query.setMaxResults(onPage);
 		return query.getResultList();
+	}
+	
+	public CustomCarEntity findById(Long id) {
+		TypedQuery<CustomCarEntity> query = entityManager.createNamedQuery("CustomCarEntity.findById", CustomCarEntity.class);
+		query.setParameter("id", id);
+
+		List<CustomCarEntity> resultList = query.getResultList();
+		return !resultList.isEmpty() ? resultList.get(0) : null;
 	}
 }

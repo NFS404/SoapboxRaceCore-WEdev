@@ -13,8 +13,15 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "RECORDS")
 @NamedQueries({ //
-@NamedQuery(name = "RecordsEntity.placeholder", //
-		query = "SELECT obj FROM RecordsEntity obj "),//
+@NamedQuery(name = "RecordsEntity.findCurrentRace", //
+		query = "SELECT obj FROM RecordsEntity obj WHERE obj.eventId = :eventId AND obj.userId = :userId AND obj.powerUps = :powerUps AND obj.carClassHash = :carClassHash "),//
+@NamedQuery(name = "RecordsEntity.calcRecordPlace", //
+        query = "SELECT obj FROM RecordsEntity obj "
+        		+ "WHERE obj.eventId = :eventId "
+        		+ "AND obj.powerUps = :powerUps "
+        		+ "AND obj.carClassHash = :carClassHash "
+        		+ "AND obj.carVersion = :carVersion "
+                + "ORDER BY obj.timeMS "),//
 })
 public class RecordsEntity {
 
@@ -34,11 +41,13 @@ public class RecordsEntity {
 	
 	private int carClassHash;
 	private int carPhysicsHash;
+	private int carVersion;
 	private LocalDateTime date;
 	private String playerName;
+	private String carName;
 	
 	private Long eventSessionId;
-	private Long eventId;
+	private int eventId;
 	private Long personaId;
 	private Long userId;
 	
@@ -130,6 +139,14 @@ public class RecordsEntity {
 		this.carPhysicsHash = carPhysicsHash;
 	}
 	
+	public int getCarVersion() {
+		return carVersion;
+	}
+
+	public void setCarVersion(int carVersion) {
+		this.carVersion = carVersion;
+	}
+	
 	public LocalDateTime getDate() {
 		return date;
 	}
@@ -146,6 +163,14 @@ public class RecordsEntity {
 		this.playerName = playerName;
 	}
 	
+	public String getCarName() {
+		return carName;
+	}
+
+	public void setCarName(String carName) {
+		this.carName = carName;
+	}
+	
 	public Long getEventSessionId() {
 		return eventSessionId;
 	}
@@ -154,11 +179,11 @@ public class RecordsEntity {
 		this.eventSessionId = eventSessionId;
 	}
 	
-	public Long getEventId() {
+	public int getEventId() {
 		return eventId;
 	}
 
-	public void setEventId(Long eventId) {
+	public void setEventId(int eventId) {
 		this.eventId = eventId;
 	}
 	

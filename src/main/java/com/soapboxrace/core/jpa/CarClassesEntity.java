@@ -25,6 +25,8 @@ public class CarClassesEntity implements Serializable {
 	private String manufactor;
 	@Column(name = "model")
 	private String model;
+	@Column(name = "modelSmall")
+	private String modelSmall;
 	@Column(name = "ts_stock")
 	private Integer tsStock;
 	@Column(name = "ts_var1")
@@ -82,6 +84,14 @@ public class CarClassesEntity implements Serializable {
 
 	public String getModel() {
 		return this.model;
+	}
+	
+	public void setModelSmall(String modelSmall) {
+		this.modelSmall = modelSmall;
+	}
+
+	public String getModelSmall() {
+		return this.modelSmall;
 	}
 
 	public void setTsStock(Integer tsStock) {
