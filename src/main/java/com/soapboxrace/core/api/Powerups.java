@@ -16,6 +16,7 @@ import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
@@ -48,6 +49,9 @@ public class Powerups {
 	
 	@EJB
 	private PersonaDAO personaDAO;
+	
+	@EJB
+	private PersonaPresenceDAO personaPresenceDAO;
 
 	@POST
 	@Path("/activated/{powerupHash}")
@@ -84,6 +88,7 @@ public class Powerups {
 					openFireSoapBoxCli.send(powerupActivatedResponse, receiverPersonaId);
 				}
 		    }
+			personaPresenceDAO.updatePowerUpsInRace(activePersonaId, true);
 		}
 
 		if (!inventoryBO.hasItem(activePersonaId, powerupHash)) {

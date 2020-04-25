@@ -252,6 +252,7 @@ public class TokenSessionBO {
 		tokenSessionEntity.setIsLoggedIn(!isLogout);
 //		personaPresenceDAO.updatePersonaPresence(personaId, 1);
 		personaPresenceEntity.setPersonaPresence(1);
+		personaPresenceEntity.setActivePersonaId(personaId);
 		// activePersonas.put(securityToken, tokenSessionEntity);
 		tokenDAO.update(tokenSessionEntity);
 		personaPresenceDAO.update(personaPresenceEntity);

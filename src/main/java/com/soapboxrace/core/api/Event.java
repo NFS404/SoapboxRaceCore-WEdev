@@ -16,6 +16,7 @@ import com.soapboxrace.core.bo.AchievementsBO;
 import com.soapboxrace.core.bo.EventBO;
 import com.soapboxrace.core.bo.EventResultBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
+import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventMode;
 import com.soapboxrace.core.jpa.EventSessionEntity;
@@ -40,6 +41,9 @@ public class Event {
 	
 	@EJB
 	private AchievementsBO achievementsBO;
+	
+	@EJB
+	private PersonaPresenceDAO personaPresenceDAO;
 
 	@POST
 	@Secured
@@ -56,6 +60,7 @@ public class Event {
 	public String launched(@HeaderParam("securityToken") String securityToken, @QueryParam("eventSessionId") Long eventSessionId) {
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
 		eventBO.createEventDataSession(activePersonaId, eventSessionId);
+		personaPresenceDAO.updatePowerUpsInRace(activePersonaId, false);
 		return "";
 	}
 
@@ -113,6 +118,7 @@ public class Event {
 		default:
 			break;
 		}
+		personaPresenceDAO.updatePowerUpsInRace(activePersonaId, false);
 		return "";
 	}
 
@@ -126,6 +132,7 @@ public class Event {
 		PursuitEventResult pursuitEventResult = new PursuitEventResult();
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
 		pursuitEventResult = eventResultBO.handlePursitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, true);
+		personaPresenceDAO.updatePowerUpsInRace(activePersonaId, false);
 		return pursuitEventResult;
 	}
 }

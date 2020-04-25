@@ -15,7 +15,10 @@ import javax.persistence.Table;
 		@NamedQuery(name = "PersonaPresenceEntity.findByUserId", query = "SELECT obj FROM PersonaPresenceEntity obj WHERE obj.userId = :userId"), //
 		@NamedQuery(name = "PersonaPresenceEntity.updatePersonaPresence", //
 				query = "UPDATE PersonaPresenceEntity obj " // 
-						+ "SET obj.personaPresence = :personaPresence WHERE obj.activePersonaId = :personaId") //
+						+ "SET obj.personaPresence = :personaPresence WHERE obj.activePersonaId = :personaId"), //
+		@NamedQuery(name = "PersonaPresenceEntity.updatePowerUpsInRace", //
+		query = "UPDATE PersonaPresenceEntity obj " // 
+				+ "SET obj.powerUpsInRace = :powerUpsInRace WHERE obj.activePersonaId = :personaId") //
 })
 public class PersonaPresenceEntity {
 
@@ -25,10 +28,9 @@ public class PersonaPresenceEntity {
 	private Long id;
 
 	private Long userId;
-
 	private Long activePersonaId;
-
 	private int personaPresence;
+	private boolean powerUpsInRace;
 
 	public Long getUserId() {
 		return userId;
@@ -60,6 +62,14 @@ public class PersonaPresenceEntity {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+	
+	public boolean getPowerUpsInRace() {
+		return powerUpsInRace;
+	}
+
+	public void setPowerUpsInRace(boolean powerUpsInRace) {
+		this.powerUpsInRace = powerUpsInRace;
 	}
 
 }
