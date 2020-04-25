@@ -20,6 +20,7 @@ import javax.persistence.Table;
         		+ "WHERE obj.eventId = :eventId "
         		+ "AND obj.powerUps = :powerUps "
         		+ "AND obj.carClassHash = :carClassHash "
+        		+ "AND obj.timeMS <= :timeMS "
         		+ "AND obj.carVersion = :carVersion "
                 + "ORDER BY obj.timeMS "),//
 })

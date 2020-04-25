@@ -52,7 +52,10 @@ public class RecordsBO {
 		Long personaId = personaEntity.getPersonaId();
 		int eventId = eventEntity.getId();
 		Long userId = personaEntity.getUser().getId();
+		String playerName = personaEntity.getName();
 		int carClassHash = eventEntity.getCarClassHash();
+//		String eventName = eventEntity.getName();
+		Long eventDuration = eventDataEntity.getEventDurationInMilliseconds();
 		
 		int playerPhysicsHash = customCarDAO.findById(eventDataEntity.getCarId()).getPhysicsProfileHash();
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
@@ -63,12 +66,12 @@ public class RecordsBO {
 		if (powerUpsInRace) {powerUpsMode = "P"; }
 		else {powerUpsMode = "N"; }
 		
-		RecordsEntity recordsEntity = recordsDAO.findCurrentRace(eventId, userId, false, carClassHash);
+		RecordsEntity recordsEntity = recordsDAO.findCurrentRace(eventId, userId, powerUpsInRace, carClassHash);
 		if (recordsEntity == null) {
 			// Making the new record entry
 			RecordsEntity recordsEntityNew = new RecordsEntity();
 			
-			recordsEntityNew.setTimeMS(eventDataEntity.getEventDurationInMilliseconds());
+			recordsEntityNew.setTimeMS(eventDuration);
 			recordsEntityNew.setTimeMSAlt(eventDataEntity.getAlternateEventDurationInMilliseconds());
 			recordsEntityNew.setTimeMSOld((long) 0); // There is no previous results yet
 			recordsEntityNew.setBestLapTimeMS(eventDataEntity.getBestLapDurationInMilliseconds());
@@ -83,7 +86,7 @@ public class RecordsBO {
 			recordsEntityNew.setCarPhysicsHash(playerPhysicsHash);
 			recordsEntityNew.setCarVersion(carVersion);
 			recordsEntityNew.setDate(LocalDateTime.now());
-			recordsEntityNew.setPlayerName(personaEntity.getName()); // If the player want to delete his profile, the nickname will be saved for record
+			recordsEntityNew.setPlayerName(playerName); // If the player want to delete his profile, the nickname will be saved for record
 			recordsEntityNew.setCarName(carName); // Small car model name for output
 				
 			recordsEntityNew.setEventSessionId(eventDataEntity.getEventSessionId());
@@ -93,15 +96,19 @@ public class RecordsBO {
 				
 			recordCaptureFinished = true;
 			recordsDAO.insert(recordsEntityNew);
-			int recordPlace = recordsDAO.calcRecordPlace(eventId, userId, powerUpsInRace, carClassHash, carVersion);
-			String eventTime = timeReadConverter.convertRecord(eventDataEntity.getEventDurationInMilliseconds());
+			int recordPlace = recordsDAO.calcRecordPlace(eventId, userId, powerUpsInRace, carClassHash, carVersion, eventDuration);
+			String eventTime = timeReadConverter.convertRecord(eventDuration);
 			
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + powerUpsMode + ": " + eventTime + " (#" + recordPlace + ") / " + carName), personaId);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + powerUpsMode + ": " + eventTime + " (#" + recordPlace + ")"), personaId);
+			
+//			String carFullName = carClassesEntity.getFullName();
+//			String message = ":camera_with_flash: **|** *" + playerName + "* **:** *" + carFullName + "* **: " + eventName + " (" + eventTime + ") :** *" + powerUpsMode + "*";
+//			discordBot.sendMessage(message, true);
 		}
-		if (recordsEntity != null && recordsEntity.getTimeMS() > eventDataEntity.getEventDurationInMilliseconds() && !recordCaptureFinished) {
+		if (recordsEntity != null && recordsEntity.getTimeMS() > eventDuration && !recordCaptureFinished) {
 			// Update the existing record entry	
 			recordsEntity.setTimeMSOld(recordsEntity.getTimeMS());
-			recordsEntity.setTimeMS(eventDataEntity.getEventDurationInMilliseconds());
+			recordsEntity.setTimeMS(eventDuration);
 			recordsEntity.setTimeMSAlt(eventDataEntity.getAlternateEventDurationInMilliseconds());
 			recordsEntity.setBestLapTimeMS(eventDataEntity.getBestLapDurationInMilliseconds());
 				
@@ -115,7 +122,7 @@ public class RecordsBO {
 			recordsEntity.setCarPhysicsHash(playerPhysicsHash);
 			recordsEntity.setCarVersion(carVersion);
 			recordsEntity.setDate(LocalDateTime.now());
-			recordsEntity.setPlayerName(personaEntity.getName()); // If the player want to delete his profile, the nickname will be saved for record
+			recordsEntity.setPlayerName(playerName); // If the player want to delete his profile, the nickname will be saved for record
 			recordsEntity.setCarName(carName); // Small car model name for output
 				
 			recordsEntity.setEventSessionId(eventDataEntity.getEventSessionId());
@@ -125,17 +132,20 @@ public class RecordsBO {
 				
 			recordCaptureFinished = true;
 			recordsDAO.update(recordsEntity);
-			int recordPlace = recordsDAO.calcRecordPlace(eventId, userId, powerUpsInRace, carClassHash, carVersion);
+			int recordPlace = recordsDAO.calcRecordPlace(eventId, userId, powerUpsInRace, carClassHash, carVersion, eventDuration);
 			String eventTime = timeReadConverter.convertRecord(eventDataEntity.getEventDurationInMilliseconds());
 			String eventTimeOld = timeReadConverter.convertRecord(recordsEntity.getTimeMSOld());
 			
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + powerUpsMode + ": " + eventTime + " (#" + recordPlace + ") / " + carName), personaId);
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Previous Best Time | " + powerUpsMode + ": " + eventTimeOld + " (#" + recordPlace + ") / " + carName), personaId);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + powerUpsMode + ": " + eventTime + " (#" + recordPlace + ")"), personaId);
+
+//			String carFullName = carClassesEntity.getFullName();
+//			String message = ":camera_with_flash: **|** *" + playerName + "* **:** *" + carFullName + "* **: " + eventName + " (" + eventTime + ") :** *" + powerUpsMode + "*";
+//			discordBot.sendMessage(message, true);
 		}
 		// Player's best is not changed
-		if (recordsEntity != null && recordsEntity.getTimeMS() < eventDataEntity.getEventDurationInMilliseconds() && !recordCaptureFinished) {
+		if (recordsEntity != null && recordsEntity.getTimeMS() < eventDuration && !recordCaptureFinished) {
 			recordCaptureFinished = true;
-			int recordPlace = recordsDAO.calcRecordPlace(eventId, userId, powerUpsInRace, carClassHash, carVersion);
+			int recordPlace = recordsDAO.calcRecordPlace(eventId, userId, powerUpsInRace, carClassHash, carVersion, eventDuration);
 			String eventTime = timeReadConverter.convertRecord(eventDataEntity.getEventDurationInMilliseconds());
 			
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your Current Record | " + powerUpsMode + ": " + eventTime + " (#" + recordPlace + ") / " + recordsEntity.getCarName()), personaId);

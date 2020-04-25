@@ -29,15 +29,15 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		return !resultList.isEmpty() ? resultList.get(0) : null;
 	}
 
-	public int calcRecordPlace(int eventId, Long userId, boolean powerUps, int carClassHash, int carVersion) {
+	public int calcRecordPlace(int eventId, Long userId, boolean powerUps, int carClassHash, int carVersion, Long timeMS) {
 		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.calcRecordPlace", RecordsEntity.class);
 		query.setParameter("eventId", eventId);
 		query.setParameter("powerUps", powerUps);
 		query.setParameter("carClassHash", carClassHash);
 		query.setParameter("carVersion", carVersion);
+		query.setParameter("timeMS", timeMS);
 
 		List<RecordsEntity> resultList = query.getResultList();
-		int recordPlace = resultList.indexOf(userId);
-		return recordPlace;
+		return resultList.size();
 	}
 }
