@@ -48,6 +48,7 @@ public class RecordsBO {
 	private PersonaPresenceDAO personaPresenceDAO;
 
 	public void submitRecord(EventEntity eventEntity, PersonaEntity personaEntity, EventDataEntity eventDataEntity) {
+//		System.out.println("RecordEntry start");
 		boolean recordCaptureFinished = false;
 		Long personaId = personaEntity.getPersonaId();
 		int eventId = eventEntity.getId();
@@ -105,7 +106,7 @@ public class RecordsBO {
 //			String message = ":camera_with_flash: **|** *" + playerName + "* **:** *" + carFullName + "* **: " + eventName + " (" + eventTime + ") :** *" + powerUpsMode + "*";
 //			discordBot.sendMessage(message, true);
 		}
-		if (recordsEntity != null && recordsEntity.getTimeMS() > eventDuration && !recordCaptureFinished) {
+		if ((recordsEntity != null && recordsEntity.getTimeMS() > eventDuration) || (recordsEntity != null && recordsEntity.getCarVersion() != carVersion) && !recordCaptureFinished) {
 			// Update the existing record entry	
 			recordsEntity.setTimeMSOld(recordsEntity.getTimeMS());
 			recordsEntity.setTimeMS(eventDuration);
@@ -136,19 +137,22 @@ public class RecordsBO {
 			String eventTime = timeReadConverter.convertRecord(eventDataEntity.getEventDurationInMilliseconds());
 			String eventTimeOld = timeReadConverter.convertRecord(recordsEntity.getTimeMSOld());
 			
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + powerUpsMode + ": " + eventTime + " (#" + recordPlace + ")"), personaId);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + powerUpsMode + ": " + eventTime + " (#" + recordPlace + ")\n"
+					+ "## Previous Time | " + powerUpsMode + ": " + eventTimeOld + " / " + recordsEntity.getCarName()), personaId);
 
 //			String carFullName = carClassesEntity.getFullName();
 //			String message = ":camera_with_flash: **|** *" + playerName + "* **:** *" + carFullName + "* **: " + eventName + " (" + eventTime + ") :** *" + powerUpsMode + "*";
 //			discordBot.sendMessage(message, true);
 		}
 		// Player's best is not changed
+		Long eventExistedTime = recordsEntity.getTimeMS();
 		if (recordsEntity != null && recordsEntity.getTimeMS() < eventDuration && !recordCaptureFinished) {
 			recordCaptureFinished = true;
 			int recordPlace = recordsDAO.calcRecordPlace(eventId, userId, powerUpsInRace, carClassHash, carVersion, eventDuration);
-			String eventTime = timeReadConverter.convertRecord(eventDataEntity.getEventDurationInMilliseconds());
+			String eventTime = timeReadConverter.convertRecord(eventExistedTime);
 			
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your Current Record | " + powerUpsMode + ": " + eventTime + " (#" + recordPlace + ") / " + recordsEntity.getCarName()), personaId);
 		}
+//		System.out.println("RecordEntry end");
 	}
 }

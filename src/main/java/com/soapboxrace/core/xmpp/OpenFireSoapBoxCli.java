@@ -1,7 +1,10 @@
 package com.soapboxrace.core.xmpp;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 
@@ -25,6 +28,7 @@ public class OpenFireSoapBoxCli {
 		this.xmppTalk = handshake.getXmppTalk();
 	}
 
+    @Lock(LockType.READ)
 	public void send(String msg, String to) {
 		if (xmppTalk.getSocket().isClosed()) {
 			restart();
@@ -33,6 +37,7 @@ public class OpenFireSoapBoxCli {
 		// System.out.println("DEBUG OpenFire SendMsg1 attempt");
 	}
 
+    @Lock(LockType.READ)
 	public void send(String msg, Long to) {
 		if (xmppTalk.getSocket().isClosed()) {
 			restart();
@@ -41,6 +46,7 @@ public class OpenFireSoapBoxCli {
 		// System.out.println("DEBUG OpenFire SendMsg2 attempt");
 	}
 
+    @Lock(LockType.READ)
 	public void send(Object object, Long to) {
 		if (xmppTalk.getSocket().isClosed()) {
 			restart();

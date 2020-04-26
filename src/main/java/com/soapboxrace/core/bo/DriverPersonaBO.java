@@ -82,6 +82,10 @@ public class DriverPersonaBO {
 		if (userEntity.getListOfProfile().size() >= 3) {
 			return null;
 		}
+		// Don't let the HEX cheaters get the player-exclusive avatars
+		if (personaEntity.getIconIndex() < 0 || personaEntity.getIconIndex() > parameterBO.getIntParam("MAX_PLAYERICON_INDEX")) {
+			return null;
+        }
 
 		personaEntity.setUser(userEntity);
 		personaEntity.setCash(parameterBO.getIntParam("STARTING_CASH_AMOUNT"));

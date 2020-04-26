@@ -16,6 +16,13 @@ public class TimeReadConverter {
 		long msO = TimeUnit.MILLISECONDS.toMillis(ms)
 		  - TimeUnit.SECONDS.toMillis(TimeUnit.MILLISECONDS.toSeconds(ms));
 		  
-		return String.format("%d:%d.%d", minutesO, secondsO, msO);
+		String finalStr = "";
+		if (secondsO < 10) {
+			finalStr = String.format("%d:0%d.%d", minutesO, secondsO, msO);
+		}
+		else {
+			finalStr = String.format("%d:%d.%d", minutesO, secondsO, msO);
+		}
+		return finalStr;
 	}
 }

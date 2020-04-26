@@ -97,11 +97,12 @@ public class EventResultRouteBO {
 			preRegTeams = true;
 		}
 		// XKAYA's arbitration exploit fix
-		if (eventDataEntity.getArbitration()) {
+		boolean arbitStatus = eventDataEntity.getArbitration();
+		if (arbitStatus) {
 			System.out.println("WARINING - XKAYA's arbitration exploit attempt, driver: " + personaEntity.getName());
 			return null;
 		}
-		eventDataEntity.setArbitration(eventDataEntity.getArbitration() ? false : true);
+		eventDataEntity.setArbitration(arbitStatus ? false : true);
 		achievementsBO.applyRaceAchievements(eventDataEntity, routeArbitrationPacket, personaEntity);
 		achievementsBO.applyAirTimeAchievement(routeArbitrationPacket, personaEntity);
 		achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventEntity.getTrackLength());
@@ -165,11 +166,12 @@ public class EventResultRouteBO {
 		int currentEventId = eventEntity.getId();
 		routeEventResult.setEventId(currentEventId);
 		int tournamentEventId = parameterBO.getIntParam("TOURNAMENT_EVENTID");
+		Long personaId = personaEntity.getPersonaId();
 		if (currentEventId == tournamentEventId && !speedBugChance) {
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Event Session: " + eventSessionId), personaEntity.getPersonaId());
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Event Session: " + eventSessionId), personaId);
 		}
 		if (currentEventId == tournamentEventId && speedBugChance) {
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This event can be affected by SpeedBug, restart the game."), personaEntity.getPersonaId());
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This event can be affected by SpeedBug, restart the game."), personaId);
 		}
 		routeEventResult.setEventSessionId(eventSessionId);
 		routeEventResult.setExitPath(ExitPath.EXIT_TO_FREEROAM);
@@ -204,8 +206,14 @@ public class EventResultRouteBO {
 				}
 			}).start();
 		}
-		// Separate race stats (Test)
-		if (eventEntity.getCarClassHash() != 607077938) {
+		// Separate race stats
+		boolean raceIssues = false;
+		Long raceHacks = routeArbitrationPacket.getHacksDetected();
+		if (speedBugChance || routeArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) || eventEntity.getMinTime() >= eventDataEntity.getEventDurationInMilliseconds()) {
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
+		}
+		if (eventEntity.getCarClassHash() != 607077938 && !raceIssues) {
 			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity);
 		}
 		
