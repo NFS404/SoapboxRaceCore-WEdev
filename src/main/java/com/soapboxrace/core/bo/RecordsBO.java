@@ -145,11 +145,10 @@ public class RecordsBO {
 //			discordBot.sendMessage(message, true);
 		}
 		// Player's best is not changed
-		Long eventExistedTime = recordsEntity.getTimeMS();
 		if (recordsEntity != null && recordsEntity.getTimeMS() < eventDuration && !recordCaptureFinished) {
 			recordCaptureFinished = true;
 			int recordPlace = recordsDAO.calcRecordPlace(eventId, userId, powerUpsInRace, carClassHash, carVersion, eventDuration);
-			String eventTime = timeReadConverter.convertRecord(eventExistedTime);
+			String eventTime = timeReadConverter.convertRecord(recordsEntity.getTimeMS());
 			
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your Current Record | " + powerUpsMode + ": " + eventTime + " (#" + recordPlace + ") / " + recordsEntity.getCarName()), personaId);
 		}

@@ -48,6 +48,7 @@ public class ChatAnnouncementsBO {
 						if (announceType.contentEquals("chat")) {
 							openFireSoapBoxCli.send(message, member);
 						}
+						// FIXME Kinda broken - rewrites the temp value of player's score after announcement
 						if (announceType.contentEquals("achievement")) {
 							String messageAchievement = announcementEntity.getMessage();
 							achievementsBO.broadcastUICustom(member, messageAchievement);
