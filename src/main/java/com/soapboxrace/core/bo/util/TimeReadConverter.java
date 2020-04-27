@@ -7,7 +7,6 @@ import javax.ejb.Stateless;
 @Stateless
 public class TimeReadConverter {
 	
-	// Taken from https://www.skptricks.com/2018/09/convert-milliseconds-into-days-hours-minutes-seconds-in-java.html
 	public String convertRecord(Long ms) {
 		long minutesO = TimeUnit.MILLISECONDS.toMinutes(ms)
 		  - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(ms));
@@ -16,13 +15,25 @@ public class TimeReadConverter {
 		long msO = TimeUnit.MILLISECONDS.toMillis(ms)
 		  - TimeUnit.SECONDS.toMillis(TimeUnit.MILLISECONDS.toSeconds(ms));
 		  
-		String finalStr = "";
+		String finalStrSec = "";
+		String finalStrMS = "";
+		
+		// Seconds
 		if (secondsO < 10) {
-			finalStr = String.format("%d:0%d.%d", minutesO, secondsO, msO);
+			finalStrSec = String.format("%d:0%d", minutesO, secondsO);
 		}
 		else {
-			finalStr = String.format("%d:%d.%d", minutesO, secondsO, msO);
+			finalStrSec = String.format("%d:%d", minutesO, secondsO);
 		}
+		
+		// Milliseconds
+		if (msO < 100 && msO > 9) {
+			finalStrMS = String.format(".0%d", msO);
+		}
+		if (msO < 10) {
+			finalStrMS = String.format(".00%d", msO);
+		}
+		String finalStr = finalStrSec + finalStrMS;
 		return finalStr;
 	}
 }
