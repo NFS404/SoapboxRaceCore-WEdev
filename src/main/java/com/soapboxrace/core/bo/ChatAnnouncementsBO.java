@@ -26,6 +26,9 @@ public class ChatAnnouncementsBO {
 
 	@EJB
 	private OpenFireSoapBoxCli openFireSoapBoxCli;
+	
+	@EJB
+	private AchievementsBO achievementsBO;
 
 	@AccessTimeout(value=20000)
 	@Schedule(minute = "*", hour = "*", persistent = false)
@@ -34,6 +37,7 @@ public class ChatAnnouncementsBO {
 		int minute = now.getMinute();
 		for (ChatAnnouncementEntity announcementEntity : chatAnnouncementDAO.findAll()) {
 			int announceMinute = announcementEntity.getMinute();
+			String announceType = announcementEntity.getMessageType();
 			if (minute % announceMinute == 0) {
 				List<SessionEntity> allSessions = restApiCli.getAllSessions();
 				String message = XmppChat.createSystemMessage(announcementEntity.getMessage());
@@ -41,7 +45,13 @@ public class ChatAnnouncementsBO {
 					String username = sessionEntity.getUsername();
 					if (!username.contains("engine")) {
 						Long member = Long.valueOf(username.replace("sbrw.", ""));
-						openFireSoapBoxCli.send(message, member);
+						if (announceType.contentEquals("chat")) {
+							openFireSoapBoxCli.send(message, member);
+						}
+						if (announceType.contentEquals("achievement")) {
+							String messageAchievement = announcementEntity.getMessage();
+							achievementsBO.broadcastUICustom(member, messageAchievement);
+						}
 					}
 				}
 			}

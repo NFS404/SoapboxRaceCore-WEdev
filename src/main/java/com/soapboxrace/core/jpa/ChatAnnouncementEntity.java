@@ -19,6 +19,9 @@ public class ChatAnnouncementEntity {
 
 	@Column(name = "MESSAGE")
 	private String message;
+	
+	@Column(name = "MESSAGETYPE")
+	private String messageType;
 
 	public int getId() {
 		return id;
@@ -42,6 +45,14 @@ public class ChatAnnouncementEntity {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	
+	public String getMessageType() {
+		return messageType;
+	}
+
+	public void setMessageType(String messageType) {
+		this.messageType = messageType;
 	}
 
 }

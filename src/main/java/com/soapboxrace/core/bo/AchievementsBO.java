@@ -568,13 +568,12 @@ public class AchievementsBO {
 		}
 		achievementAwarded.setAchievedOn(achievedOnStr);
 		achievementAwarded.setAchievementDefinitionId((long) 104);
-//		achievementAwarded.setAchievementRankId((long) 55);
 		achievementAwarded.setClip("AchievementFlasherBase");
-		achievementAwarded.setClipLengthInSeconds(5);
+		achievementAwarded.setClipLengthInSeconds(10);
 		achievementAwarded.setDescription("LOL");
 		achievementAwarded.setIcon("BADGE18");
 		achievementAwarded.setName(text);
-		achievementAwarded.setPoints(0);
+		achievementAwarded.setPoints(404);
 		achievementAwarded.setRare(false);
 		achievementAwarded.setRarity(0);
 
