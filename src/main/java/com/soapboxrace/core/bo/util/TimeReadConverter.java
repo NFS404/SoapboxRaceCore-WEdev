@@ -28,12 +28,15 @@ public class TimeReadConverter {
 		
 		// Milliseconds
 		if (msO < 100 && msO > 9) {
-			finalStrMS = String.format(".0%d", msO);
+			finalStrMS = ".0" + msO;
 		}
 		if (msO < 10) {
-			finalStrMS = String.format(".00%d", msO);
+			finalStrMS = ".00" + msO;
 		}
-		String finalStr = finalStrSec + finalStrMS;
+		else {
+			finalStrMS = "." + msO;
+		}
+		String finalStr = finalStrSec.concat(finalStrMS);
 		return finalStr;
 	}
 }

@@ -16,9 +16,9 @@ import javax.persistence.Table;
 		@NamedQuery(name = "PersonaPresenceEntity.updatePersonaPresence", //
 				query = "UPDATE PersonaPresenceEntity obj " // 
 						+ "SET obj.personaPresence = :personaPresence WHERE obj.activePersonaId = :personaId"), //
-		@NamedQuery(name = "PersonaPresenceEntity.updatePowerUpsInRace", //
+		@NamedQuery(name = "PersonaPresenceEntity.updateEventDataId", //
 		query = "UPDATE PersonaPresenceEntity obj " // 
-				+ "SET obj.powerUpsInRace = :powerUpsInRace WHERE obj.activePersonaId = :personaId") //
+				+ "SET obj.currentEventDataId = :currentEventDataId WHERE obj.activePersonaId = :personaId") //
 })
 public class PersonaPresenceEntity {
 
@@ -30,7 +30,7 @@ public class PersonaPresenceEntity {
 	private Long userId;
 	private Long activePersonaId;
 	private int personaPresence;
-	private boolean powerUpsInRace;
+	private Long currentEventDataId;
 
 	public Long getUserId() {
 		return userId;
@@ -64,12 +64,12 @@ public class PersonaPresenceEntity {
 		this.id = id;
 	}
 	
-	public boolean getPowerUpsInRace() {
-		return powerUpsInRace;
+	public Long getCurrentEventDataId() {
+		return currentEventDataId;
 	}
 
-	public void setPowerUpsInRace(boolean powerUpsInRace) {
-		this.powerUpsInRace = powerUpsInRace;
+	public void setCurrentEventDataId(Long currentEventDataId) {
+		this.currentEventDataId = currentEventDataId;
 	}
 
 }

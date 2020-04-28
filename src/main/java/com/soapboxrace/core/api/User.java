@@ -25,6 +25,7 @@ import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.bo.UserBO;
+import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.jaxb.http.UserInfo;
 import com.soapboxrace.jaxb.login.LoginStatusVO;
@@ -58,6 +59,9 @@ public class User {
 	
 	@EJB
 	private ParameterBO parameterBO;
+	
+	@EJB
+	private PersonaPresenceDAO personaPresenceDAO;
 
 	@POST
 	@Secured
@@ -96,6 +100,7 @@ public class User {
 		friendBO.sendXmppPresenceToAllFriends(personaEntity, 0);
 		tokenBO.setActivePersonaId(securityToken, 0L, true);
 		tokenBO.updatePersonaPresence(personaEntity.getPersonaId(), 0);
+		personaPresenceDAO.updateEventDataId(personaId, null);
 		return "";
 	}
 
@@ -113,6 +118,7 @@ public class User {
 		friendBO.sendXmppPresenceToAllFriends(personaEntity, 0);
 		tokenBO.setActivePersonaId(securityToken, 0L, true);
 		tokenBO.updatePersonaPresence(personaEntity.getPersonaId(), 0);
+		personaPresenceDAO.updateEventDataId(activePersonaId, null);
 		return "";
 	}
 

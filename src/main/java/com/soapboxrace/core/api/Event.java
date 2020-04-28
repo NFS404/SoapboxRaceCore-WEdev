@@ -17,6 +17,7 @@ import com.soapboxrace.core.bo.EventBO;
 import com.soapboxrace.core.bo.EventResultBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
+import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventMode;
 import com.soapboxrace.core.jpa.EventSessionEntity;
@@ -59,8 +60,9 @@ public class Event {
 	@Produces(MediaType.APPLICATION_XML)
 	public String launched(@HeaderParam("securityToken") String securityToken, @QueryParam("eventSessionId") Long eventSessionId) {
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
-		eventBO.createEventDataSession(activePersonaId, eventSessionId);
-		personaPresenceDAO.updatePowerUpsInRace(activePersonaId, false);
+		Long eventDataId = eventBO.createEventDataSession(activePersonaId, eventSessionId);
+		eventBO.createEventPowerupsSession(activePersonaId, eventDataId);
+		personaPresenceDAO.updateEventDataId(activePersonaId, eventDataId);
 		return "";
 	}
 
@@ -118,7 +120,7 @@ public class Event {
 		default:
 			break;
 		}
-		personaPresenceDAO.updatePowerUpsInRace(activePersonaId, false);
+		personaPresenceDAO.updateEventDataId(activePersonaId, null);
 		return "";
 	}
 
@@ -132,7 +134,7 @@ public class Event {
 		PursuitEventResult pursuitEventResult = new PursuitEventResult();
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
 		pursuitEventResult = eventResultBO.handlePursitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, true);
-		personaPresenceDAO.updatePowerUpsInRace(activePersonaId, false);
+		personaPresenceDAO.updateEventDataId(activePersonaId, null);
 		return pursuitEventResult;
 	}
 }

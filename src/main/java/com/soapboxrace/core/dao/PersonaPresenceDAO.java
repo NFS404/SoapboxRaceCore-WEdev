@@ -36,10 +36,10 @@ public class PersonaPresenceDAO extends BaseDAO<PersonaPresenceEntity> {
 		query.executeUpdate();
 	}
 	
-	public void updatePowerUpsInRace(Long personaId, boolean powerUpsInRace) {
-		Query query = entityManager.createNamedQuery("PersonaPresenceEntity.updatePowerUpsInRace");
+	public void updateEventDataId(Long personaId, Long eventDataId) {
+		Query query = entityManager.createNamedQuery("PersonaPresenceEntity.updateEventDataId");
 		query.setParameter("personaId", personaId);
-		query.setParameter("powerUpsInRace", powerUpsInRace);
+		query.setParameter("currentEventDataId", eventDataId);
 		query.executeUpdate();
 	}
 

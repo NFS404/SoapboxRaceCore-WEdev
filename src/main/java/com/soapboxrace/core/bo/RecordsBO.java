@@ -9,12 +9,14 @@ import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.TimeReadConverter;
 import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
+import com.soapboxrace.core.dao.EventPowerupsDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.dao.RecordsDAO;
 import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
+import com.soapboxrace.core.jpa.EventPowerupsEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.RecordsEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
@@ -46,6 +48,12 @@ public class RecordsBO {
 	
 	@EJB
 	private PersonaPresenceDAO personaPresenceDAO;
+	
+	@EJB
+	private EventPowerupsBO eventPowerupsBO;
+	
+	@EJB
+	private EventPowerupsDAO eventPowerupsDAO;
 
 	public void submitRecord(EventEntity eventEntity, PersonaEntity personaEntity, EventDataEntity eventDataEntity) {
 //		System.out.println("RecordEntry start");
@@ -62,7 +70,9 @@ public class RecordsBO {
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
 		String carName = carClassesEntity.getModelSmall();
 		int carVersion = carClassesEntity.getCarVersion();
-		boolean powerUpsInRace = personaPresenceDAO.findByUserId(userId).getPowerUpsInRace();
+		
+		EventPowerupsEntity eventPowerupsEntity = eventPowerupsDAO.findByEventDataId(eventDataEntity.getId());
+		boolean powerUpsInRace = eventPowerupsBO.isPowerupsUsed(eventPowerupsEntity);
 		String powerUpsMode = "";
 		if (powerUpsInRace) {powerUpsMode = "P"; }
 		else {powerUpsMode = "N"; }
@@ -91,6 +101,7 @@ public class RecordsBO {
 			recordsEntityNew.setCarName(carName); // Small car model name for output
 				
 			recordsEntityNew.setEventSessionId(eventDataEntity.getEventSessionId());
+			recordsEntityNew.setEventPowerupsId(eventPowerupsEntity.getId());
 			recordsEntityNew.setEventId(eventEntity.getId());
 			recordsEntityNew.setPersonaId(personaId);
 			recordsEntityNew.setUserId(personaEntity.getUser().getId());
@@ -127,6 +138,7 @@ public class RecordsBO {
 			recordsEntity.setCarName(carName); // Small car model name for output
 				
 			recordsEntity.setEventSessionId(eventDataEntity.getEventSessionId());
+			recordsEntity.setEventPowerupsId(eventPowerupsEntity.getId());
 //			recordsEntity.setEventId(eventEntity.getId());
 			recordsEntity.setPersonaId(personaId);
 //			recordsEntity.setUserId(personaEntity.getUser().getId());

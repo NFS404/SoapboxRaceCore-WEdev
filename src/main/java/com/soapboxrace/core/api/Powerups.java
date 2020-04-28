@@ -10,6 +10,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.soapboxrace.core.bo.AchievementsBO;
+import com.soapboxrace.core.bo.EventPowerupsBO;
 import com.soapboxrace.core.bo.InventoryBO;
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
@@ -51,7 +52,7 @@ public class Powerups {
 	private PersonaDAO personaDAO;
 	
 	@EJB
-	private PersonaPresenceDAO personaPresenceDAO;
+	private EventPowerupsBO eventPowerupsBO;
 
 	@POST
 	@Path("/activated/{powerupHash}")
@@ -88,7 +89,10 @@ public class Powerups {
 					openFireSoapBoxCli.send(powerupActivatedResponse, receiverPersonaId);
 				}
 		    }
-			personaPresenceDAO.updatePowerUpsInRace(activePersonaId, true);
+			if (eventSessionId != 0) { // If player has played on any of events, game will never set the Session to 0 again until the restart
+				Long userId = tokenBO.getUser(securityToken).getId();
+				eventPowerupsBO.recordPowerups(powerupHash, userId);
+			}
 		}
 
 		if (!inventoryBO.hasItem(activePersonaId, powerupHash)) {

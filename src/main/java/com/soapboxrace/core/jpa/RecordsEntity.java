@@ -48,6 +48,7 @@ public class RecordsEntity {
 	private String carName;
 	
 	private Long eventSessionId;
+	private Long eventPowerupsId;
 	private int eventId;
 	private Long personaId;
 	private Long userId;
@@ -178,6 +179,14 @@ public class RecordsEntity {
 
 	public void setEventSessionId(Long eventSessionId) {
 		this.eventSessionId = eventSessionId;
+	}
+	
+	public Long getEventPowerupsId() {
+		return eventPowerupsId;
+	}
+
+	public void setEventPowerupsId(Long eventPowerupsId) {
+		this.eventPowerupsId = eventPowerupsId;
 	}
 	
 	public int getEventId() {

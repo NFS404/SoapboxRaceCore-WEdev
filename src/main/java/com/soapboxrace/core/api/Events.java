@@ -16,6 +16,7 @@ import com.soapboxrace.core.bo.EventsBO;
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
+import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.jaxb.http.ArrayOfEventDefinition;
@@ -43,12 +44,16 @@ public class Events {
 
 	@EJB
 	private PersonaBO personaBO;
+	
+	@EJB
+	private PersonaPresenceDAO personaPresenceDAO;
 
 	@GET
 	@Path("/availableatlevel")
 	@Produces(MediaType.APPLICATION_XML)
 	public EventsPacket availableAtLevel(@HeaderParam("securityToken") String securityToken) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
+		personaPresenceDAO.updateEventDataId(activePersonaId, null);
 		OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);
 		int carClassHash = defaultCar.getCustomCar().getCarClassHash();
 
