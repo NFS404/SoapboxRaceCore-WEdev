@@ -21,7 +21,6 @@ import javax.persistence.Table;
         		+ "AND obj.powerUps = :powerUps "
         		+ "AND obj.carClassHash = :carClassHash "
         		+ "AND obj.timeMS <= :timeMS "
-        		+ "AND obj.carVersion = :carVersion "
                 + "ORDER BY obj.timeMS "),//
 })
 public class RecordsEntity {
@@ -39,6 +38,7 @@ public class RecordsEntity {
 	private boolean perfectStart;
 	private boolean isSingle;
 	private float topSpeed;
+	private long airTimeMS;
 	
 	private int carClassHash;
 	private int carPhysicsHash;
@@ -48,8 +48,10 @@ public class RecordsEntity {
 	private String carName;
 	
 	private Long eventSessionId;
+	private Long eventDataId;
 	private Long eventPowerupsId;
 	private int eventId;
+	private int eventModeId;
 	private Long personaId;
 	private Long userId;
 	
@@ -125,6 +127,14 @@ public class RecordsEntity {
 		this.topSpeed = topSpeed;
 	}
 	
+	public Long getAirTimeMS() {
+		return airTimeMS;
+	}
+
+	public void setAirTimeMS(Long airTimeMS) {
+		this.airTimeMS = airTimeMS;
+	}
+	
 	public int getCarClassHash() {
 		return carClassHash;
 	}
@@ -181,6 +191,14 @@ public class RecordsEntity {
 		this.eventSessionId = eventSessionId;
 	}
 	
+	public Long getEventDataId() {
+		return eventDataId;
+	}
+
+	public void setEventDataId(Long eventDataId) {
+		this.eventDataId = eventDataId;
+	}
+	
 	public Long getEventPowerupsId() {
 		return eventPowerupsId;
 	}
@@ -195,6 +213,14 @@ public class RecordsEntity {
 
 	public void setEventId(int eventId) {
 		this.eventId = eventId;
+	}
+	
+	public int getEventModeId() {
+		return eventModeId;
+	}
+
+	public void setEventModeId(int eventModeId) {
+		this.eventModeId = eventModeId;
 	}
 	
 	public Long getPersonaId() {
