@@ -188,7 +188,7 @@ public class RecordsBO {
 			String eventTime = timeReadConverter.convertRecord(currentTimeMS);
 			
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your Current Record | " + powerUpsMode + ": " + eventTime + " (#" + recordRank + ") / " + recordsEntity.getCarName()
-			+ "\n### WR | " + powerUpsMode + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
+			+ "\n## WR | " + powerUpsMode + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
 		}
 //		System.out.println("RecordEntry end");
 	}
