@@ -1,7 +1,7 @@
 package com.soapboxrace.core.bo;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -114,15 +114,15 @@ public class RecordsBO {
 			recordCaptureFinished = true;
 			recordsDAO.insert(recordsEntityNew);
 			
-			List<RecordsEntity> recordsList = recordsDAO.getRecordPlace(eventId, userId, powerUpsInRace, carClassHash, eventDuration);
-			int recordPlace = recordsList.size();
-			RecordsEntity wrEntity = recordsList.get(0);
+			BigInteger recordRank = recordsDAO.countRecordPlace(eventId, userId, powerUpsInRace, carClassHash, eventDuration);
+			RecordsEntity wrEntity = recordsDAO.getWRRecord(eventId, userId, powerUpsInRace, carClassHash, eventDuration);
 			String wrPlayerName = wrEntity.getPlayerName();
 			String wrCarName = wrEntity.getCarName();
+			String wrEventTime = timeReadConverter.convertRecord(wrEntity.getTimeMS());
 			String eventTime = timeReadConverter.convertRecord(eventDuration);
 			
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + powerUpsMode + ": " + eventTime + " (#" + recordPlace + ")\n"
-					+ "## WR | " + powerUpsMode + ": " + wrPlayerName + " with " + eventTime + " / " + wrCarName), personaId);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + powerUpsMode + ": " + eventTime + " (#" + recordRank + ")\n"
+					+ "## WR | " + powerUpsMode + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
 			
 //			String carFullName = carClassesEntity.getFullName();
 //			String message = ":camera_with_flash: **|** *" + playerName + "* **:** *" + carFullName + "* **: " + eventName + " (" + eventTime + ") :** *" + powerUpsMode + "*";
@@ -160,17 +160,17 @@ public class RecordsBO {
 			recordCaptureFinished = true;
 			recordsDAO.update(recordsEntity);
 			
-			List<RecordsEntity> recordsList = recordsDAO.getRecordPlace(eventId, userId, powerUpsInRace, carClassHash, eventDuration);
-			int recordPlace = recordsList.size();
-			RecordsEntity wrEntity = recordsList.get(0);
+			BigInteger recordRank = recordsDAO.countRecordPlace(eventId, userId, powerUpsInRace, carClassHash, eventDuration);
+			RecordsEntity wrEntity = recordsDAO.getWRRecord(eventId, userId, powerUpsInRace, carClassHash, eventDuration);
 			String wrPlayerName = wrEntity.getPlayerName();
 			String wrCarName = wrEntity.getCarName();
+			String wrEventTime = timeReadConverter.convertRecord(wrEntity.getTimeMS());
 			String eventTime = timeReadConverter.convertRecord(eventDataEntity.getEventDurationInMilliseconds());
 			String eventTimeOld = timeReadConverter.convertRecord(recordsEntity.getTimeMSOld());
 			
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + powerUpsMode + ": " + eventTime + " (#" + recordPlace + ")\n"
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + powerUpsMode + ": " + eventTime + " (#" + recordRank + ")\n"
 					+ "## Previous Time | " + powerUpsMode + ": " + eventTimeOld + " / " + recordsEntity.getCarName()
-					+ "\n## WR | " + powerUpsMode + ": " + wrPlayerName + " with " + eventTime + " / " + wrCarName), personaId);
+					+ "\n## WR | " + powerUpsMode + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
 
 //			String carFullName = carClassesEntity.getFullName();
 //			String message = ":camera_with_flash: **|** *" + playerName + "* **:** *" + carFullName + "* **: " + eventName + " (" + eventTime + ") :** *" + powerUpsMode + "*";
@@ -179,15 +179,16 @@ public class RecordsBO {
 		// Player's best is not changed
 		if (recordsEntity != null && recordsEntity.getTimeMS() < eventDuration && !recordCaptureFinished) {
 			recordCaptureFinished = true;
-			List<RecordsEntity> recordsList = recordsDAO.getRecordPlace(eventId, userId, powerUpsInRace, carClassHash, eventDuration);
-			int recordPlace = recordsList.size();
-			RecordsEntity wrEntity = recordsList.get(0);
+			Long currentTimeMS = recordsEntity.getTimeMS();
+			BigInteger recordRank = recordsDAO.countRecordPlace(eventId, userId, powerUpsInRace, carClassHash, currentTimeMS);
+			RecordsEntity wrEntity = recordsDAO.getWRRecord(eventId, userId, powerUpsInRace, carClassHash, currentTimeMS);
 			String wrPlayerName = wrEntity.getPlayerName();
 			String wrCarName = wrEntity.getCarName();
-			String eventTime = timeReadConverter.convertRecord(recordsEntity.getTimeMS());
+			String wrEventTime = timeReadConverter.convertRecord(wrEntity.getTimeMS());
+			String eventTime = timeReadConverter.convertRecord(currentTimeMS);
 			
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your Current Record | " + powerUpsMode + ": " + eventTime + " (#" + recordPlace + ") / " + recordsEntity.getCarName()
-			+ "\n### WR | " + powerUpsMode + ": " + wrPlayerName + " with " + eventTime + " / " + wrCarName), personaId);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your Current Record | " + powerUpsMode + ": " + eventTime + " (#" + recordRank + ") / " + recordsEntity.getCarName()
+			+ "\n### WR | " + powerUpsMode + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
 		}
 //		System.out.println("RecordEntry end");
 	}
