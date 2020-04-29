@@ -33,7 +33,7 @@ public class TimeReadConverter {
 		if (msO < 10) {
 			finalStrMS = ".00" + msO;
 		}
-		else {
+		if (msO > 99) {
 			finalStrMS = "." + msO;
 		}
 		String finalStr = finalStrSec.concat(finalStrMS);

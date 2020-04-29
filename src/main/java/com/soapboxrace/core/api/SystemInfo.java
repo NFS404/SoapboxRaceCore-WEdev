@@ -28,7 +28,8 @@ public class SystemInfo {
 		systemInfo.setNucleusNamespace("sbrw-live");
 		systemInfo.setNucleusNamespaceWeb("sbr_web");
 		systemInfo.setPersonaCacheTimeout(900);
-		systemInfo.setPortalDomain("soapboxrace.world");
+//		systemInfo.setPortalDomain("soapboxrace.world");
+		systemInfo.setPortalDomain("world-evolved.ru/rwac/");
 		systemInfo.setPortalStoreFailurePage("soapboxrace.world/fail");
 		systemInfo.setPortalTimeOut("6000");
 		systemInfo.setShardName("CORE");

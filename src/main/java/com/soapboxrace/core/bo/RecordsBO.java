@@ -147,6 +147,7 @@ public class RecordsBO {
 			recordsEntity.setCarVersion(carVersion);
 			recordsEntity.setDate(LocalDateTime.now());
 			recordsEntity.setPlayerName(playerName); // If the player want to delete his profile, the nickname will be saved for record
+			String oldCar = recordsEntity.getCarName();
 			recordsEntity.setCarName(carName); // Small car model name for output
 				
 			recordsEntity.setEventSessionId(eventDataEntity.getEventSessionId());
@@ -169,7 +170,7 @@ public class RecordsBO {
 			String eventTimeOld = timeReadConverter.convertRecord(recordsEntity.getTimeMSOld());
 			
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + powerUpsMode + ": " + eventTime + " (#" + recordRank + ")\n"
-					+ "## Previous Time | " + powerUpsMode + ": " + eventTimeOld + " / " + recordsEntity.getCarName()
+					+ "## Previous Time | " + powerUpsMode + ": " + eventTimeOld + " / " + oldCar
 					+ "\n## WR | " + powerUpsMode + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
 
 //			String carFullName = carClassesEntity.getFullName();
