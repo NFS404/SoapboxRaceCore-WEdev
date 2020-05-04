@@ -21,6 +21,7 @@ import javax.persistence.Table;
         		+ "AND obj.powerUps = :powerUps "
         		+ "AND obj.carClassHash = :carClassHash "
         		+ "AND obj.timeMS <= :timeMS "
+        		+ "AND obj.userBan = false "
                 + "ORDER BY obj.timeMS "),//
 })
 public class RecordsEntity {
@@ -54,6 +55,7 @@ public class RecordsEntity {
 	private int eventModeId;
 	private Long personaId;
 	private Long userId;
+	private boolean userBan;
 	
 	public Long getId() {
 		return id;
@@ -237,6 +239,14 @@ public class RecordsEntity {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+	
+	public boolean getUserBan() {
+		return userBan;
+	}
+
+	public void setUserBan(boolean userBan) {
+		this.userBan = userBan;
 	}
 	
 }

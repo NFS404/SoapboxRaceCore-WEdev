@@ -128,7 +128,9 @@ public class RecordsBO {
 //			String message = ":camera_with_flash: **|** *" + playerName + "* **:** *" + carFullName + "* **: " + eventName + " (" + eventTime + ") :** *" + powerUpsMode + "*";
 //			discordBot.sendMessage(message, true);
 		}
-		if ((recordsEntity != null && recordsEntity.getTimeMS() > eventDuration) || (recordsEntity != null && recordsEntity.getCarVersion() != carVersion) && !recordCaptureFinished) {
+		if ((recordsEntity != null && recordsEntity.getTimeMS() > eventDuration) || 
+				(recordsEntity != null && (playerPhysicsHash == recordsEntity.getCarPhysicsHash() && recordsEntity.getCarVersion() != carVersion)) 
+				&& !recordCaptureFinished) {
 			// Update the existing record entry	
 			recordsEntity.setTimeMSOld(recordsEntity.getTimeMS());
 			recordsEntity.setTimeMS(eventDuration);

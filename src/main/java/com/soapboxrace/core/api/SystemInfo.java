@@ -28,7 +28,6 @@ public class SystemInfo {
 		systemInfo.setNucleusNamespace("sbrw-live");
 		systemInfo.setNucleusNamespaceWeb("sbr_web");
 		systemInfo.setPersonaCacheTimeout(900);
-//		systemInfo.setPortalDomain("soapboxrace.world");
 		systemInfo.setPortalDomain("world-evolved.ru/rwac/");
 		systemInfo.setPortalStoreFailurePage("soapboxrace.world/fail");
 		systemInfo.setPortalTimeOut("6000");
@@ -40,7 +39,7 @@ public class SystemInfo {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		systemInfo.setVersion("sbrw_wev2_28042020f1");
+		systemInfo.setVersion("sbrw_wev2_28042020f2");
 		return systemInfo;
 	}
 }

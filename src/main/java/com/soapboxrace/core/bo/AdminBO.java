@@ -4,6 +4,7 @@ import com.soapboxrace.core.api.util.MiscUtils;
 import com.soapboxrace.core.dao.BanDAO;
 import com.soapboxrace.core.dao.HardwareInfoDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.RecordsDAO;
 import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.BanEntity;
 import com.soapboxrace.core.jpa.HardwareInfoEntity;
@@ -40,6 +41,9 @@ public class AdminBO {
     
     @EJB
 	private DiscordWebhook discordBot;
+    
+    @EJB
+    private RecordsDAO recordsDAO;
 
     public void sendCommand(Long personaId, Long abuserPersonaId, String command) {
         CommandInfo commandInfo = CommandInfo.parse(command);
@@ -48,17 +52,18 @@ public class AdminBO {
         
         String bannedPlayer = personaEntity.getName();
         String adminPlayer = personaEntityAdmin.getName();
+        UserEntity userEntity = personaEntity.getUser();
 
         if (personaEntity == null)
             return;
 
         switch (commandInfo.action) {
             case BAN:
-                if (banDAO.findByUser(personaEntity.getUser()) != null) {
+                if (banDAO.findByUser(userEntity) != null) {
                     openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is already banned."), personaId);
                     break;
                 }
-
+                recordsDAO.banRecords(userEntity.getId());
                 sendBan(personaEntity, commandInfo.timeEnd, commandInfo.reason);
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is banned."), personaId);
                 String message = ":heavy_minus_sign:"
@@ -68,11 +73,11 @@ public class AdminBO {
         		
                 break;
             case BAN_F:
-                if (banDAO.findByUser(personaEntity.getUser()) != null) {
+                if (banDAO.findByUser(userEntity) != null) {
                     openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is already banned."), personaId);
                     break;
                 }
-
+                recordsDAO.banRecords(userEntity.getId());
                 sendBan(personaEntity, commandInfo.timeEnd, commandInfo.reason);
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is banned forever."), personaId);
                 String messageF = ":heavy_minus_sign:"
@@ -87,7 +92,8 @@ public class AdminBO {
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Tactical kick is deployed."), personaId);
                 break;
             case UNBAN:
-            	banDAO.unbanUser(personaEntity.getUser());
+            	banDAO.unbanUser(userEntity);
+            	recordsDAO.unbanRecords(userEntity.getId());
 				HardwareInfoEntity hardwareInfoEntity = hardwareInfoDAO.findByUserId(personaEntity.getUser().getId());
 				// FIXME Sometimes appears with proper unban sequence
 				// FIXME Error 500 when user got a new account

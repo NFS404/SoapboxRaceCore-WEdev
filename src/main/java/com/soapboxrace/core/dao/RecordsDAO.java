@@ -11,6 +11,7 @@ import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
 import com.soapboxrace.core.jpa.RecordsEntity;
+import com.soapboxrace.core.jpa.UserEntity;
 
 @Stateless
 public class RecordsDAO extends BaseDAO<RecordsEntity> {
@@ -57,5 +58,17 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		  count = BigInteger.valueOf(1);
 		}
 		return count; // 0 means 1st place
+	}
+	
+	public void banRecords(Long userId) {
+		Query createQuery = entityManager.createQuery("UPDATE RecordsEntity obj SET obj.userBan = true WHERE obj.userId = :userId");
+		createQuery.setParameter("userId", userId);
+		createQuery.executeUpdate();
+	}
+	
+	public void unbanRecords(Long userId) {
+		Query createQuery = entityManager.createQuery("UPDATE RecordsEntity obj SET obj.userBan = false WHERE obj.userId = :userId");
+		createQuery.setParameter("userId", userId);
+		createQuery.executeUpdate();
 	}
 }
