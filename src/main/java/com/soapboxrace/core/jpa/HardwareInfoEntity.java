@@ -28,6 +28,8 @@ public class HardwareInfoEntity {
 	private String hardwareHash;
 
 	private Long userId;
+	
+	private Long userIdOld;
 
 	private boolean banned;
 
@@ -61,6 +63,14 @@ public class HardwareInfoEntity {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+	
+	public Long getUserIdOld() {
+		return userIdOld;
+	}
+
+	public void setUserIdOld(Long userIdOld) {
+		this.userIdOld = userIdOld;
 	}
 
 	public boolean isBanned() {
