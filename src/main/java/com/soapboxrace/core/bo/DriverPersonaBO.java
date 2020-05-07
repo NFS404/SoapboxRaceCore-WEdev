@@ -175,6 +175,35 @@ public class DriverPersonaBO {
 		}
 		return arrayOfPersonaBase;
 	}
+	
+	public PersonaBase getPersonaBase(PersonaEntity personaEntity) {
+        PersonaBase personaBase = new PersonaBase();
+        List<BadgePersonaEntity> listOfBadges = personaEntity.getListOfBadges();
+		ArrayOfBadgePacket arrayOfBadgePacket = new ArrayOfBadgePacket();
+		List<BadgePacket> badgePacketList = arrayOfBadgePacket.getBadgePacket();
+		for (BadgePersonaEntity badgePersonaEntity : listOfBadges) {
+			BadgePacket badgePacket = new BadgePacket();
+			AchievementRankEntity achievementRank = badgePersonaEntity.getAchievementRank();
+			AchievementDefinitionEntity achievementDefinition = achievementRank.getAchievementDefinition();
+			BadgeDefinitionEntity badgeDefinition = achievementDefinition.getBadgeDefinition();
+			badgePacket.setBadgeDefinitionId(badgeDefinition.getId().intValue());
+			badgePacket.setIsRare(false);
+			badgePacket.setRarity(0f);
+			badgePacket.setSlotId(badgePersonaEntity.getSlot());
+			badgePacket.setAchievementRankId(achievementRank.getId().intValue());
+			badgePacketList.add(badgePacket);
+		}
+		personaBase.setBadges(arrayOfBadgePacket);
+        personaBase.setIconIndex(personaEntity.getIconIndex());
+        personaBase.setLevel(personaEntity.getLevel());
+        personaBase.setMotto(personaEntity.getMotto());
+        personaBase.setName(personaEntity.getName());
+        personaBase.setPresence(1);
+        personaBase.setPersonaId(personaEntity.getPersonaId());
+        personaBase.setScore(personaEntity.getScore());
+        personaBase.setUserId(personaEntity.getUser().getId());
+        return personaBase;
+    }
 
 	public void deletePersona(Long personaId) {
 		PersonaEntity personaEntity = personaDao.findById(personaId);

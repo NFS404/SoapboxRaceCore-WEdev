@@ -11,7 +11,6 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
-import com.soapboxrace.core.jpa.BestTimeRaceEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.MostPopularEventEntity;
 
@@ -118,33 +117,6 @@ public class EventDataDAO extends BaseDAO<EventDataEntity> {
 	}
 	/**
 	 * Возвращает запрос
-	 * @return
-	 */
-	public BigInteger countBestTime(int eventid) {
-		Query query = entityManager.createNativeQuery("SELECT Count(*) cout FROM event_data d, customcar cc, persona p "
-				+ "WHERE d.carid = cc.id AND p.id = d.personaid AND d.eventid = "+eventid);
-		query.setMaxResults(1);
-		@SuppressWarnings("unchecked")
-		List<BigInteger> list = query.getResultList();
-		if (list.isEmpty())
-			return new BigInteger("0");
-		else return list.get(0);
-	}
-	/**
-	 * Получить список лучших заездов по времени
-	 * @param page - Номер страницы
-	 * @param onPage - Сколько позиций на странице
-	 * @author Vadimka
-	 */
-	public List<BestTimeRaceEntity> bestTime(int eventid, int page, int onPage) {
-		TypedQuery<BestTimeRaceEntity> query = entityManager.createNamedQuery("BestTimeRaceEntity.best",BestTimeRaceEntity.class);
-		query.setParameter("eventid", eventid);
-		query.setFirstResult((page-1) * onPage);
-		query.setMaxResults(onPage);
-		return query.getResultList();
-	}
-	/**
-	 * Возвращает запрос
 	 * Фильтрация по нику пользователя
 	 * @return
 	 */
@@ -159,21 +131,6 @@ public class EventDataDAO extends BaseDAO<EventDataEntity> {
 			count = objects;
 		}
 		return count;
-	}
-	/**
-	 * Получить список лучших заездов по времени
-	 * Фильтрация по имени профиля
-	 * @param page - Номер страницы
-	 * @param onPage - Сколько позиций на странице
-	 * @author Vadimka
-	 */
-	public List<BestTimeRaceEntity> bestTimeByPersona(int eventid, String personaName, int page, int onPage) {
-		TypedQuery<BestTimeRaceEntity> query = entityManager.createNamedQuery("BestTimeRaceEntity.findByPersonaName",BestTimeRaceEntity.class);
-		query.setParameter("eventid", eventid);
-		query.setParameter("pname", personaName);
-		query.setFirstResult((page-1) * onPage);
-		query.setMaxResults(onPage);
-		return query.getResultList();
 	}
 
 }

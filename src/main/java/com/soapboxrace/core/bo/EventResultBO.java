@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
-import com.soapboxrace.core.bo.util.OwnedCarConverter;
 import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
@@ -14,7 +13,6 @@ import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.jaxb.http.DragArbitrationPacket;
 import com.soapboxrace.jaxb.http.DragEventResult;
-import com.soapboxrace.jaxb.http.OwnedCarTrans;
 import com.soapboxrace.jaxb.http.PursuitArbitrationPacket;
 import com.soapboxrace.jaxb.http.PursuitEventResult;
 import com.soapboxrace.jaxb.http.RouteArbitrationPacket;
@@ -77,11 +75,6 @@ public class EventResultBO {
 		CustomCarEntity customCarEntityVer = ownedCarEntity.getCustomCar();
 		
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCarEntityVer.getPhysicsProfileHash());
-		return carClassesEntity.getCarVersion();
-	}
-	
-	public int carVersionCheckWeb(String customCarName) {
-		CarClassesEntity carClassesEntity = carClassesDAO.findByStoreName(customCarName);
 		return carClassesEntity.getCarVersion();
 	}
 

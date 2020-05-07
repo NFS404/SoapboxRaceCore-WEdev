@@ -10,6 +10,10 @@ import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ReportEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
+import com.soapboxrace.jaxb.http.ArrayOfBasicBlockPlayerInfo;
+import com.soapboxrace.jaxb.http.ArrayOfLong;
+import com.soapboxrace.jaxb.http.BasicBlockPlayerInfo;
+import com.soapboxrace.jaxb.http.PersonaBase;
 
 @Stateless
 public class SocialBO {
@@ -19,6 +23,9 @@ public class SocialBO {
 	
 	@EJB
 	private PersonaDAO personaDao;
+	
+	@EJB
+	private DriverPersonaBO driverPersonaBO;
 	
 	@EJB
 	private DiscordWebhook discordBot;
@@ -64,5 +71,100 @@ public class SocialBO {
 			discordBot.sendMessage(message);
 		}
 	}
+	
+	// Taken from SBRW-Core - https://github.com/SoapboxRaceWorld/soapbox-race-core/
+	public ArrayOfBasicBlockPlayerInfo getBlockedUserList(Long userId) {
+//        List<SocialRelationshipEntity> socialRelationshipEntityList =
+//                this.socialRelationshipDAO.findByUserIdAndStatus(userId, 2L);
+        ArrayOfBasicBlockPlayerInfo arrayOfBasicBlockPlayerInfo = new ArrayOfBasicBlockPlayerInfo();
+
+//        for (SocialRelationshipEntity socialRelationshipEntity : socialRelationshipEntityList) {
+//            this.addBlockedUserToList(arrayOfBasicBlockPlayerInfo, socialRelationshipEntity);
+//        }
+
+        return arrayOfBasicBlockPlayerInfo;
+    }
+
+    public ArrayOfLong getBlockersByUsers(Long personaId) {
+        PersonaEntity personaEntity = personaDao.findById(personaId);
+
+        if (personaEntity == null) {
+            //
+        }
+
+        ArrayOfLong arrayOfLong = new ArrayOfLong();
+
+ //       for (SocialRelationshipEntity socialRelationshipEntity :
+ //               this.socialRelationshipDAO.findByRemoteUserIdAndStatus(personaEntity.getUser().getId(), 2L)) {
+ //           arrayOfLong.getLong().add(socialRelationshipEntity.getUser().getId());
+ //       }
+
+        return arrayOfLong;
+    }
+    
+    public PersonaBase blockPlayer(Long userId, Long activePersonaId, Long otherPersonaId) {
+        PersonaEntity activePersonaEntity = personaDao.findById(activePersonaId);
+
+        if (activePersonaEntity == null) {
+            //
+        }
+
+        PersonaEntity otherPersonaEntity = personaDao.findById(otherPersonaId);
+
+        if (otherPersonaEntity == null) {
+            //
+        }
+
+//        SocialRelationshipEntity localSide = socialRelationshipDAO.findByLocalAndRemoteUser(userId,
+//                otherPersonaEntity.getUser().getId());
+//        SocialRelationshipEntity remoteSide =
+//                socialRelationshipDAO.findByLocalAndRemoteUser(otherPersonaEntity.getUser().getId(),
+//                        userId);
+
+//        if (localSide == null) {
+//            createNewRelationship(activePersonaEntity, otherPersonaEntity, 2L);
+//        } else {
+//            localSide.setStatus(2L);
+//            socialRelationshipDAO.update(localSide);
+//        }
+
+//        if (remoteSide != null) {
+//            socialRelationshipDAO.delete(remoteSide);
+//            sendPresencePacket(activePersonaEntity, 0L, otherPersonaId);
+//        }
+
+        return driverPersonaBO.getPersonaBase(otherPersonaEntity);
+    }
+
+    public PersonaBase unblockPlayer(Long userId, Long otherPersonaId) {
+        PersonaEntity otherPersonaEntity = personaDao.findById(otherPersonaId);
+
+        if (otherPersonaEntity == null) {
+            //
+        }
+
+//        SocialRelationshipEntity localSide = socialRelationshipDAO.findByLocalAndRemoteUser(userId,
+//                otherPersonaEntity.getUser().getId());
+
+//        if (localSide != null && localSide.getStatus() == 2L) {
+//            socialRelationshipDAO.delete(localSide);
+//        } else {
+            //
+//        }
+
+        return driverPersonaBO.getPersonaBase(otherPersonaEntity);
+    }
+    
+//    private void addBlockedUserToList(ArrayOfBasicBlockPlayerInfo arrayOfBasicBlockPlayerInfo,
+//            SocialRelationshipEntity socialRelationshipEntity) {
+//        for (PersonaEntity personaEntity : socialRelationshipEntity.getRemoteUser().getPersonas()) {
+//            BasicBlockPlayerInfo basicBlockPlayerInfo = new BasicBlockPlayerInfo();
+//
+//            basicBlockPlayerInfo.setPersonaId(personaEntity.getPersonaId());
+//            basicBlockPlayerInfo.setUserId(socialRelationshipEntity.getRemoteUser().getId());
+//
+//            arrayOfBasicBlockPlayerInfo.getBasicBlockPlayerInfo().add(basicBlockPlayerInfo);
+//            }
+//        }
 
 }

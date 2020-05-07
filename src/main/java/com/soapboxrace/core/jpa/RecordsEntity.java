@@ -3,9 +3,12 @@ package com.soapboxrace.core.jpa;
 import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -14,15 +17,28 @@ import javax.persistence.Table;
 @Table(name = "RECORDS")
 @NamedQueries({ //
 @NamedQuery(name = "RecordsEntity.findCurrentRace", //
-		query = "SELECT obj FROM RecordsEntity obj WHERE obj.eventId = :eventId AND obj.userId = :userId AND obj.powerUps = :powerUps AND obj.carClassHash = :carClassHash "),//
+		query = "SELECT obj FROM RecordsEntity obj WHERE obj.event = :event AND obj.user = :user AND obj.powerUps = :powerUps AND obj.carClassHash = :carClassHash "),//
 @NamedQuery(name = "RecordsEntity.calcRecordPlace", //
         query = "SELECT obj FROM RecordsEntity obj "
-        		+ "WHERE obj.eventId = :eventId "
+        		+ "WHERE obj.event = :event "
         		+ "AND obj.powerUps = :powerUps "
         		+ "AND obj.carClassHash = :carClassHash "
         		+ "AND obj.timeMS <= :timeMS "
         		+ "AND obj.userBan = false "
                 + "ORDER BY obj.timeMS "),//
+
+@NamedQuery(name = "RecordsEntity.statsEventAll", //
+        query = "SELECT obj FROM RecordsEntity obj "
+                + "WHERE obj.event = :event "
+                + "AND obj.powerUps = :powerUps "
+                + "AND obj.carClassHash = :carClassHash "
+                + "AND obj.userBan = false "
+                + "ORDER BY obj.timeMS "),//
+@NamedQuery(name = "RecordsEntity.statsEventPersona", //
+        query = "SELECT obj FROM RecordsEntity obj "
+                + "WHERE obj.event = :event "
+                + "AND obj.userBan = false "
+                + "AND obj.persona = :persona "),//
 })
 public class RecordsEntity {
 
@@ -50,12 +66,24 @@ public class RecordsEntity {
 	
 	private Long eventSessionId;
 	private Long eventDataId;
-	private Long eventPowerupsId;
-	private int eventId;
 	private int eventModeId;
-	private Long personaId;
-	private Long userId;
 	private boolean userBan;
+	
+	@ManyToOne
+	@JoinColumn(name = "EVENTPOWERUPSID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "RECORDS_EVENT_POWERUPS_FK"))
+	private EventPowerupsEntity eventPowerups;
+	
+	@ManyToOne
+	@JoinColumn(name = "EVENTID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "RECORDS_EVENT_FK"))
+	private EventEntity event;
+	
+	@ManyToOne
+	@JoinColumn(name = "PERSONAID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "RECORDS_PERSONA_FK"))
+	private PersonaEntity persona;
+	
+	@ManyToOne
+	@JoinColumn(name = "USERID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "RECORDS_USER_SB_FK"))
+	private UserEntity user;
 	
 	public Long getId() {
 		return id;
@@ -201,20 +229,20 @@ public class RecordsEntity {
 		this.eventDataId = eventDataId;
 	}
 	
-	public Long getEventPowerupsId() {
-		return eventPowerupsId;
+	public EventPowerupsEntity getEventPowerups() {
+		return eventPowerups;
 	}
 
-	public void setEventPowerupsId(Long eventPowerupsId) {
-		this.eventPowerupsId = eventPowerupsId;
+	public void setEventPowerups(EventPowerupsEntity eventPowerups) {
+		this.eventPowerups = eventPowerups;
 	}
 	
-	public int getEventId() {
-		return eventId;
+	public EventEntity getEvent() {
+		return event;
 	}
 
-	public void setEventId(int eventId) {
-		this.eventId = eventId;
+	public void setEvent(EventEntity event) {
+		this.event = event;
 	}
 	
 	public int getEventModeId() {
@@ -225,20 +253,20 @@ public class RecordsEntity {
 		this.eventModeId = eventModeId;
 	}
 	
-	public Long getPersonaId() {
-		return personaId;
+	public PersonaEntity getPersona() {
+		return persona;
 	}
 
-	public void setPersonaId(Long personaId) {
-		this.personaId = personaId;
+	public void setPersona(PersonaEntity persona) {
+		this.persona = persona;
 	}
 	
-	public Long getUserId() {
-		return userId;
+	public UserEntity getUser() {
+		return user;
 	}
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public void setUser(UserEntity user) {
+		this.user = user;
 	}
 	
 	public boolean getUserBan() {

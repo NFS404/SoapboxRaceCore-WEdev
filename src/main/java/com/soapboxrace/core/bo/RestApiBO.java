@@ -1,32 +1,34 @@
 package com.soapboxrace.core.bo;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.dao.BanDAO;
+import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.RecordsDAO;
 import com.soapboxrace.core.dao.ReportDAO;
 import com.soapboxrace.core.dao.TreasureHuntDAO;
 import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.BanEntity;
-import com.soapboxrace.core.jpa.BestTimeRaceEntity;
+import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CarNameEntity;
 import com.soapboxrace.core.jpa.ClassCountEntity;
 import com.soapboxrace.core.jpa.EventEntity;
+import com.soapboxrace.core.jpa.EventPowerupsEntity;
 import com.soapboxrace.core.jpa.MostPopularEventEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.PersonaTopRaceEntity;
 import com.soapboxrace.core.jpa.PersonaTopTreasureHunt;
 import com.soapboxrace.core.jpa.ProfileIconEntity;
+import com.soapboxrace.core.jpa.RecordsEntity;
 import com.soapboxrace.core.jpa.TreasureHuntEntity;
 import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.jaxb.http.ArrayOfCarClassHash;
@@ -102,6 +104,16 @@ public class RestApiBO {
 	 */
 	@EJB
 	private EventResultBO eventResultBO;
+	/**
+	 * Объект запросов в базу для получения списков рекордов
+	 */
+	@EJB
+	private RecordsDAO recordsDAO;
+	/**
+	 * Объект запросов в базу для получения списков рекордов
+	 */
+	@EJB
+	private CarClassesDAO carClassesDAO;
 	
 	
 	// ================= Функции выборки ================
@@ -233,31 +245,22 @@ public class RestApiBO {
 	 * @param page - Номер страницы
 	 * @param onPage - Сколько позиций на странице
 	 */
-	public ArrayOfRaceWithTime getTopTimeRace(int eventid, int page, int onPage) {
+	public ArrayOfRaceWithTime getTopTimeRace(int eventid, boolean powerups, int carclasshash, int page, int onPage) {
 		if (onPage > 300) onPage = 300;
 		ArrayOfRaceWithTime list = new ArrayOfRaceWithTime();
-		list.setCount(eventDataDAO.countBestTime(eventid));
+		list.setCount(recordsDAO.countRecords(eventid, powerups, carclasshash));
 		EventEntity event = eventDAO.findById(eventid);
 		if (event != null)
 			list.set(
 					event.getName(),
 					event.getEventModeId(),
-					event.getCarClassHash()
+					carclasshash
 				);
-		boolean isHacks;
-		SimpleDateFormat sf = new  SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		for (BestTimeRaceEntity race : eventDataDAO.bestTime(eventid, page, onPage)) {
-			switch (race.getHacksLevel()) {
-				case 8:
-				case 40:
-					isHacks = true;
-					break;
-				default:
-					isHacks = false;
-					break;
-			}
+		for (RecordsEntity race : recordsDAO.statsEventAll(event, powerups, carclasshash, page, onPage)) {
 			final boolean isCarVersionVaild;
-			int serverCarVersionValue = eventResultBO.carVersionCheckWeb(race.getCarName());
+			CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
+			EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
+			int serverCarVersionValue = carClassesEntity.getCarVersion();
 			if (serverCarVersionValue == race.getCarVersion()) {
 				isCarVersionVaild = true;
 			}
@@ -265,17 +268,31 @@ public class RestApiBO {
 				isCarVersionVaild = false;
 			}
 			list.add(
-					race.getUserName(), 
-					race.getUserIconId(), 
-					race.getCarName(), 
-					race.getCarClass(), 
-					race.getRaceTime(), 
-					race.getMaxSpeed(), 
-					race.isPerfectStart(),
-					isHacks,
-					race.getCollisions(),
-					sf.format(new Date(race.getdate())),
-					isCarVersionVaild
+					race.getPlayerName(),
+					race.getPersona().getIconIndex(),
+					carClassesEntity.getFullName(),
+					race.getCarClassHash(), 
+					race.getTimeMS().intValue(), 
+					race.getTimeMSAlt().intValue(), 
+					race.getAirTimeMS().intValue(), 
+					race.getBestLapTimeMS().intValue(), 
+					race.getTopSpeed(), 
+					race.getPerfectStart(),
+					race.getIsSingle(),
+					race.getDate().toString(),
+					isCarVersionVaild,
+					eventPowerupsEntity.getNosShot(),
+					eventPowerupsEntity.getSlingshot(),
+					eventPowerupsEntity.getOneMoreLap(),
+					eventPowerupsEntity.getReady(),
+					eventPowerupsEntity.getTrafficMagnet(),
+					eventPowerupsEntity.getShield(),
+					eventPowerupsEntity.getEmergencyEvade(),
+					eventPowerupsEntity.getJuggernaut(),
+					eventPowerupsEntity.getRunFlatTires(),
+					eventPowerupsEntity.getInstantCooldown(),
+					eventPowerupsEntity.getTeamEmergencyEvade(),
+					eventPowerupsEntity.getTeamSlingshot()
 				);
 		}
 		return list;
@@ -286,52 +303,52 @@ public class RestApiBO {
 	 * @param page - Номер страницы
 	 * @param onPage - Сколько позиций на странице
 	 */
-	public ArrayOfRaceWithTime getTopTimeRaceByPersona(int eventid, String personaName, int page, int onPage) {
-		if (onPage > 300) onPage = 300;
-		ArrayOfRaceWithTime list = new ArrayOfRaceWithTime();
-		list.setCount(eventDataDAO.countBestTimeByPersona(eventid, personaName));
-		EventEntity event = eventDAO.findById(eventid);
-		if (event != null)
-			list.set(
-					event.getName(),
-					event.getEventModeId(),
-					event.getCarClassHash()
-				);
-		for (BestTimeRaceEntity race : eventDataDAO.bestTimeByPersona(eventid, personaName, page, onPage)) {
-			final boolean isHacks;
-			switch (race.getHacksLevel()) {
-				case 8:
-				case 40:
-					isHacks = true;
-					break;
-				default:
-					isHacks = false;
-					break;
-			}
-			final boolean isCarVersionVaild;
-			int serverCarVersionValue = eventResultBO.carVersionCheckWeb(race.getCarName());
-			if (serverCarVersionValue == race.getCarVersion()) {
-				isCarVersionVaild = true;
-			}
-			else {
-				isCarVersionVaild = false;
-			}
-			list.add(
-					race.getUserName(), 
-					race.getUserIconId(), 
-					race.getCarName(), 
-					race.getCarClass(), 
-					race.getRaceTime(), 
-					race.getMaxSpeed(), 
-					race.isPerfectStart(),
-					isHacks,
-					race.getCollisions(),
-					"",
-					isCarVersionVaild
-				);
-		}
-		return list;
-	}
+//	public ArrayOfRaceWithTime getTopTimeRaceByPersona(int eventid, String personaName, boolean powerups, int carclasshash, int page, int onPage) {
+//		if (onPage > 300) onPage = 300;
+//		ArrayOfRaceWithTime list = new ArrayOfRaceWithTime();
+//		list.setCount(eventDataDAO.countBestTimeByPersona(eventid, personaName));
+//		EventEntity event = eventDAO.findById(eventid);
+//		if (event != null)
+//			list.set(
+//					event.getName(),
+//					event.getEventModeId(),
+//					event.getCarClassHash()
+//				);
+//		for (RecordsEntity race : recordsDAO.statsEventAll(eventid, powerups, carclasshash, page, onPage)) {
+//			final boolean isHacks;
+//			switch (race.getHacksLevel()) {
+//				case 8:
+//				case 40:
+//					isHacks = true;
+//					break;
+//				default:
+//					isHacks = false;
+//					break;
+//			}
+//			final boolean isCarVersionVaild;
+//			int serverCarVersionValue = eventResultBO.carVersionCheckWeb(race.getCarName());
+//			if (serverCarVersionValue == race.getCarVersion()) {
+//				isCarVersionVaild = true;
+//			}
+//			else {
+//				isCarVersionVaild = false;
+//			}
+//			list.add(
+//					race.getUserName(), 
+//					race.getUserIconId(), 
+//					race.getCarName(), 
+//					race.getCarClass(), 
+//					race.getRaceTime(), 
+//					race.getMaxSpeed(), 
+//					race.isPerfectStart(),
+//					isHacks,
+//					race.getCollisions(),
+//					"",
+//					isCarVersionVaild
+//				);
+//		}
+//		return list;
+//	}
 	/**
 	 * Список всех эвентов
 	 */

@@ -63,7 +63,7 @@ public class AdminBO {
                     openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is already banned."), personaId);
                     break;
                 }
-                recordsDAO.banRecords(userEntity.getId());
+                recordsDAO.banRecords(userEntity);
                 sendBan(personaEntity, commandInfo.timeEnd, commandInfo.reason);
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is banned."), personaId);
                 String message = ":heavy_minus_sign:"
@@ -77,7 +77,7 @@ public class AdminBO {
                     openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is already banned."), personaId);
                     break;
                 }
-                recordsDAO.banRecords(userEntity.getId());
+                recordsDAO.banRecords(userEntity);
                 sendBan(personaEntity, commandInfo.timeEnd, commandInfo.reason);
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is banned forever."), personaId);
                 String messageF = ":heavy_minus_sign:"
@@ -93,7 +93,7 @@ public class AdminBO {
                 break;
             case UNBAN:
             	banDAO.unbanUser(userEntity);
-            	recordsDAO.unbanRecords(userEntity.getId());
+            	recordsDAO.unbanRecords(userEntity);
 				HardwareInfoEntity hardwareInfoEntity = hardwareInfoDAO.findByUserId(personaEntity.getUser().getId());
 				// FIXME Sometimes appears with proper unban sequence
 				// FIXME Error 500 when user got a new account

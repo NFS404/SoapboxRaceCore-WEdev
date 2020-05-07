@@ -104,18 +104,18 @@ public class RestApi {
 	@GET
 	@Path("TopTimeOnEvent")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response race(@QueryParam("eventid") int eventid, @QueryParam("page") int page,@QueryParam("onpage") int onPage) {
-		return Response.ok(bo.getTopTimeRace(eventid, page, onPage)).build();
+	public Response race(@QueryParam("eventid") int eventid, @QueryParam("powerups") boolean powerups, @QueryParam("carclasshash") int carclasshash, @QueryParam("page") int page, @QueryParam("onpage") int onPage) {
+		return Response.ok(bo.getTopTimeRace(eventid, powerups, carclasshash, page, onPage)).build();
 	}
-	/**
-	 * Страница Трассы для профиля
-	 */
-	@GET
-	@Path("TopTimeRacesByPersona")
-	@Produces(MediaType.APPLICATION_XML)
-	public Response raceByPersona(@QueryParam("eventid") int eventid,@QueryParam("page") int page,@QueryParam("onpage") int onPage,@QueryParam("personaName") String personaName) {
-		return Response.ok(bo.getTopTimeRaceByPersona(eventid, personaName, page, onPage)).build();
-	}
+//	/**
+//	 * Страница Трассы для профиля
+//	 */
+//	@GET
+//	@Path("TopTimeRacesByPersona")
+//	@Produces(MediaType.APPLICATION_XML)
+//	public Response raceByPersona(@QueryParam("eventid") int eventid,@QueryParam("page") int page,@QueryParam("onpage") int onPage,@QueryParam("personaName") String personaName) {
+//		return Response.ok(bo.getTopTimeRaceByPersona(eventid, personaName, page, onPage)).build();
+//	}
 	/**
 	 * Страница Трассы
 	 */

@@ -10,6 +10,8 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
+import com.soapboxrace.core.jpa.EventEntity;
+import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.RecordsEntity;
 import com.soapboxrace.core.jpa.UserEntity;
 
@@ -21,10 +23,10 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		this.entityManager = entityManager;
 	}
 
-	public RecordsEntity findCurrentRace(int eventId, Long userId, boolean powerUps, int carClassHash) {
+	public RecordsEntity findCurrentRace(EventEntity event, UserEntity user, boolean powerUps, int carClassHash) {
 		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.findCurrentRace", RecordsEntity.class);
-		query.setParameter("eventId", eventId);
-		query.setParameter("userId", userId);
+		query.setParameter("event", event);
+		query.setParameter("user", user);
 		query.setParameter("powerUps", powerUps);
 		query.setParameter("carClassHash", carClassHash);
 
@@ -32,9 +34,9 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		return !resultList.isEmpty() ? resultList.get(0) : null;
 	}
 
-	public RecordsEntity getWRRecord(int eventId, Long userId, boolean powerUps, int carClassHash, Long timeMS) {
+	public RecordsEntity getWRRecord(EventEntity event, boolean powerUps, int carClassHash, Long timeMS) {
 		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.calcRecordPlace", RecordsEntity.class);
-		query.setParameter("eventId", eventId);
+		query.setParameter("event", event);
 		query.setParameter("powerUps", powerUps);
 		query.setParameter("carClassHash", carClassHash);
 		query.setParameter("timeMS", timeMS);
@@ -44,7 +46,7 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		return resultList.get(0);
 	}
 	
-	public BigInteger countRecordPlace(int eventId, Long userId, boolean powerUps, int carClassHash, Long timeMS) {
+	public BigInteger countRecordPlace(int eventId, boolean powerUps, int carClassHash, Long timeMS) {
 		Query query = entityManager.createNativeQuery(
 			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carClassHash = "+carClassHash+" and timeMS < "+timeMS
 		);
@@ -60,15 +62,59 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		return count; // 0 means 1st place
 	}
 	
-	public void banRecords(Long userId) {
-		Query createQuery = entityManager.createQuery("UPDATE RecordsEntity obj SET obj.userBan = true WHERE obj.userId = :userId");
-		createQuery.setParameter("userId", userId);
+	public BigInteger countRecords(int eventId, boolean powerUps, int carClassHash) {
+		Query query = entityManager.createNativeQuery(
+			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carClassHash = "+carClassHash
+		);
+		@SuppressWarnings("unchecked")
+		List<BigInteger> List = query.getResultList();
+		if (List.isEmpty())
+			return new BigInteger("0");
+		else return List.get(0);
+	}
+	
+	public void banRecords(UserEntity user) {
+		Query createQuery = entityManager.createQuery("UPDATE RecordsEntity obj SET obj.userBan = true WHERE obj.user = :user");
+		createQuery.setParameter("user", user);
 		createQuery.executeUpdate();
 	}
 	
-	public void unbanRecords(Long userId) {
-		Query createQuery = entityManager.createQuery("UPDATE RecordsEntity obj SET obj.userBan = false WHERE obj.userId = :userId");
-		createQuery.setParameter("userId", userId);
+	public void unbanRecords(UserEntity user) {
+		Query createQuery = entityManager.createQuery("UPDATE RecordsEntity obj SET obj.userBan = false WHERE obj.user = :user");
+		createQuery.setParameter("user", user);
 		createQuery.executeUpdate();
+	}
+	
+	/**
+	 * Получить список лучших заездов по времени
+	 * @param eventid - номер трассы
+	 * @param powerups - наличие бонусов (true/false)
+	 * @param carclasshash - номер класса машин
+	 * @param page - Номер страницы
+	 * @param onPage - Сколько позиций на странице
+	 * @author Vadimka, Hypercycle
+	 */
+	public List<RecordsEntity> statsEventAll(EventEntity event, boolean powerups, int carClassHash, int page, int onPage) {
+		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.statsEventAll",RecordsEntity.class);
+		query.setParameter("event", event);
+		query.setParameter("powerUps", powerups);
+		query.setParameter("carClassHash", carClassHash);
+		query.setFirstResult((page-1) * onPage);
+		query.setMaxResults(onPage);
+		return query.getResultList();
+	}
+	
+	/**
+	 * Получить список лучших заездов во всех вариациях трассы. Фильтрация по имени профиля
+	 * @param eventid - номер трассы
+	 * @param page - Номер страницы
+	 * @param onPage - Сколько позиций на странице
+	 * @author Vadimka, Hypercycle
+	 */
+	public List<RecordsEntity> statsEventPersona(EventEntity event, PersonaEntity personaEntity) {
+		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.statsEventPersona",RecordsEntity.class);
+		query.setParameter("event", event);
+		query.setParameter("personaId", personaEntity);
+		return query.getResultList();
 	}
 }

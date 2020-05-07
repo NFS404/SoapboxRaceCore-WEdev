@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Список заездов
- * @author Vadimka
+ * @author Vadimka, Hypercycle
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ArrayOfRaceWithTime", propOrder = {
@@ -58,83 +58,170 @@ public class ArrayOfRaceWithTime {
 		this.raceClass = raceClass;
 	}
 	public void add(
-			String username,
-			int iconid,
-			String carname,
-			int carclasshash,
-			BigInteger racetime,
-			double maxspeed,
+			String playerName,
+			int playerIconId,
+			String carName,
+			int carClassHash,
+			int raceTime,
+			int raceAltTime,
+			int airTime,
+			int lapTime,
+			float maxSpeed,
 			boolean perfectStart,
-			boolean useHacks,
-			int collisions,
+			boolean isSingle,
 			String date,
-			boolean isCarVersionVaild
+			boolean isCarVersionVaild,
+			int pNos,
+			int pSlingshot,
+			int pOneMoreLap,
+			int pReady,
+			int pMagnet,
+			int pShield,
+			int pEvade,
+			int pJuggernaut,
+			int pRunFlatTires,
+			int pCooldown,
+			int pTeamEvade,
+			int pTeamSlingshot
 		) {
-		races.add(new Race(username, iconid, carname, carclasshash, racetime, maxspeed, perfectStart, useHacks, collisions, date, isCarVersionVaild));
+		races.add(new Race(playerName, playerIconId, carName, carClassHash, raceTime, raceAltTime, airTime, lapTime, maxSpeed, perfectStart,
+				isSingle, date, isCarVersionVaild, pNos, pSlingshot, pOneMoreLap, pReady, pMagnet, pShield, pEvade, pJuggernaut, pRunFlatTires, 
+				pCooldown, pTeamEvade, pTeamSlingshot));
 	}
 	
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlType(name = "Race", propOrder = {
-		"userName",
-		"userIconId",
+		"playerName",
+		"playerIconId",
 		"carName",
 		"carClass",
 		"raceTime",
+		"raceAltTime",
+		"airTime",
+		"lapTime",
 		"maxSpeed",
 		"perfectStart",
-		"useHacks",
-		"collisions",
+		"isSingle",
 		"date",
-		"isCarVersionVaild"
+		"isCarVersionVaild",
+		"pNos",
+		"pSlingshot",
+		"pOneMoreLap",
+		"pReady",
+		"pMagnet",
+		"pShield",
+		"pEvade",
+		"pJuggernaut",
+		"pRunFlatTires",
+		"pCooldown",
+		"pTeamEvade",
+		"pTeamSlingshot"
 	})
 	public static class Race {
-		@XmlElement(name = "UserName")
-		private String userName;
-		@XmlElement(name = "UserIconId")
-		private int userIconId;
+		@XmlElement(name = "PlayerName")
+		private String playerName;
+		@XmlElement(name = "PlayerIconId")
+		private int playerIconId;
 		@XmlElement(name = "CarName")
 		private String carName;
 		@XmlElement(name = "CarClass")
 		private String carClass;
 		@XmlElement(name = "RaceTime")
-		private BigInteger raceTime;
+		private int raceTime;
+		@XmlElement(name = "RaceAltTime")
+		private int raceAltTime;
+		@XmlElement(name = "AirTime")
+		private int airTime;
+		@XmlElement(name = "LapTime")
+		private int lapTime;
 		@XmlElement(name = "MaxSpeed")
 		private double maxSpeed;
 		@XmlElement(name = "PerfectStart")
 		private boolean perfectStart;
-		@XmlElement(name = "MaybeHacks")
-		private boolean useHacks;
-		@XmlElement(name = "Collisions")
-		private int collisions;
+		@XmlElement(name = "IsSingle")
+		private boolean isSingle;
 		@XmlElement(name = "Date")
 		private String date;
 		@XmlElement(name = "IsCarVersionVaild")
 		private boolean isCarVersionVaild;
+		@XmlElement(name = "PNos")
+		private int pNos;
+		@XmlElement(name = "PSlingshot")
+		private int pSlingshot;
+		@XmlElement(name = "POneMoreLap")
+		private int pOneMoreLap;
+		@XmlElement(name = "PReady")
+		private int pReady;
+		@XmlElement(name = "PMagnet")
+		private int pMagnet;
+		@XmlElement(name = "PShield")
+		private int pShield;
+		@XmlElement(name = "PEvade")
+		private int pEvade;
+		@XmlElement(name = "PJuggernaut")
+		private int pJuggernaut;
+		@XmlElement(name = "PRunFlatTires")
+		private int pRunFlatTires;
+		@XmlElement(name = "PCooldown")
+		private int pCooldown;
+		@XmlElement(name = "PTeamEvade")
+		private int pTeamEvade;
+		@XmlElement(name = "PTeamSlingshot")
+		private int pTeamSlingshot;
 		
 		protected Race(
-				String username,
-				int iconid,
-				String carname,
-				int carclasshash,
-				BigInteger racetime,
-				double maxspeed,
+				String playerName,
+				int playerIconId,
+				String carName,
+				int carClassHash,
+				int raceTime,
+				int raceAltTime,
+				int airTime,
+				int lapTime,
+				float maxSpeed,
 				boolean perfectStart,
-				boolean useHacks,
-				int collisions,
+				boolean isSingle,
 				String date,
-				boolean isCarVersionVaild
+				boolean isCarVersionVaild,
+				int pNos,
+				int pSlingshot,
+				int pOneMoreLap,
+				int pReady,
+				int pMagnet,
+				int pShield,
+				int pEvade,
+				int pJuggernaut,
+				int pRunFlatTires,
+				int pCooldown,
+				int pTeamEvade,
+				int pTeamSlingshot
 			) {
-			userName = username;
-			userIconId = iconid;
-			carName = carname;
-			raceTime = racetime;
-			maxSpeed = maxspeed;
+			this.playerName = playerName;
+			this.playerIconId = playerIconId;
+			this.carName = carName;
+			this.raceTime = raceTime;
+			this.raceAltTime = raceAltTime;
+			this.airTime = airTime;
+			this.lapTime = lapTime;
+			this.maxSpeed = maxSpeed;	
 			this.perfectStart = perfectStart;
-			this.useHacks = useHacks;
+			this.isSingle = isSingle;
 			this.date = date;
-			this.collisions = collisions;
 			this.isCarVersionVaild = isCarVersionVaild;
-			switch(carclasshash) {
+			this.pNos = pNos;
+			this.pSlingshot = pSlingshot;
+			this.pOneMoreLap = pOneMoreLap;
+			this.pReady = pReady;
+			this.pMagnet = pMagnet;
+			this.pShield = pShield;
+			this.pEvade = pEvade;
+			this.pJuggernaut = pJuggernaut;
+			this.pRunFlatTires = pRunFlatTires;
+			this.pCooldown = pCooldown;
+			this.pTeamEvade = pTeamEvade;
+			this.pTeamSlingshot = pTeamSlingshot;
+			
+			switch(carClassHash) {
 			case 872416321:
 				carClass = "E";
 				break;

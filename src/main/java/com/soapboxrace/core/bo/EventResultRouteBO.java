@@ -4,11 +4,13 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.TeamsDAO;
+import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
@@ -77,6 +79,9 @@ public class EventResultRouteBO {
 	
 	@EJB
 	private RecordsBO recordsBO;
+	
+	@EJB
+	private CustomCarDAO customCarDAO;
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -84,10 +89,9 @@ public class EventResultRouteBO {
 		if (eventSessionEntity.getEnded() == null) {
 		    System.out.println("DEBUG some event ended with no ended time, id: " + eventSessionId);
 		}
-
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 		EventEntity eventEntity = eventDataEntity.getEvent();
-
+		int eventClass = eventEntity.getCarClassHash();
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 		
 		Long team1id = eventSessionEntity.getTeam1Id();
@@ -157,7 +161,7 @@ public class EventResultRouteBO {
 		RouteEventResult routeEventResult = new RouteEventResult();
 		int isDropableMode = 1;
 		// Give rare drop if it's a online class-restricted race
-		if (eventEntity.getCarClassHash() != 607077938 && arrayOfRouteEntrantResult.getRouteEntrantResult().size() >= 2) {
+		if (eventClass != 607077938 && arrayOfRouteEntrantResult.getRouteEntrantResult().size() >= 2) {
 			isDropableMode = 2;
 		}
 		routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode));
@@ -207,17 +211,20 @@ public class EventResultRouteBO {
 			}).start();
 		}
 		// Separate race stats
-		boolean raceIssues = false;
-		Long raceHacks = routeArbitrationPacket.getHacksDetected();
-		Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
-		Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
-		if (speedBugChance || routeArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
-				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000) {
-			raceIssues = true;
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
-		}
-		if (eventEntity.getCarClassHash() != 607077938 && !raceIssues) {
-			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity);
+		if (eventClass != 607077938) {
+			boolean raceIssues = false;
+			CustomCarEntity customCarEntity = customCarDAO.findById(eventDataEntity.getCarId());
+			Long raceHacks = routeArbitrationPacket.getHacksDetected();
+			Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
+			Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
+			if (speedBugChance || routeArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
+					|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 || eventClass != customCarEntity.getCarClassHash()) {
+				raceIssues = true;
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
+			}
+			if (!raceIssues) {
+				recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity);
+			}
 		}
 		
 		return routeEventResult;

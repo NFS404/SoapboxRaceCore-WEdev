@@ -15,11 +15,13 @@ import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.dao.RecordsDAO;
 import com.soapboxrace.core.jpa.CarClassesEntity;
+import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventPowerupsEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.RecordsEntity;
+import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
 
@@ -56,18 +58,18 @@ public class RecordsBO {
 	@EJB
 	private EventPowerupsDAO eventPowerupsDAO;
 
-	public void submitRecord(EventEntity eventEntity, PersonaEntity personaEntity, EventDataEntity eventDataEntity) {
+	public void submitRecord(EventEntity eventEntity, PersonaEntity personaEntity, EventDataEntity eventDataEntity, CustomCarEntity customCarEntity) {
 //		System.out.println("RecordEntry start");
 		boolean recordCaptureFinished = false;
 		Long personaId = personaEntity.getPersonaId();
+		UserEntity userEntity = personaEntity.getUser();
 		int eventId = eventEntity.getId();
-		Long userId = personaEntity.getUser().getId();
 		String playerName = personaEntity.getName();
 		int carClassHash = eventEntity.getCarClassHash();
 //		String eventName = eventEntity.getName();
 		Long eventDuration = eventDataEntity.getEventDurationInMilliseconds();
 		
-		int playerPhysicsHash = customCarDAO.findById(eventDataEntity.getCarId()).getPhysicsProfileHash();
+		int playerPhysicsHash = customCarEntity.getPhysicsProfileHash();
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
 		String carName = carClassesEntity.getModelSmall();
 		int carVersion = carClassesEntity.getCarVersion();
@@ -79,7 +81,7 @@ public class RecordsBO {
 		if (powerUpsInRace) {powerUpsMode = "P"; }
 		else {powerUpsMode = "N"; }
 		
-		RecordsEntity recordsEntity = recordsDAO.findCurrentRace(eventId, userId, powerUpsInRace, carClassHash);
+		RecordsEntity recordsEntity = recordsDAO.findCurrentRace(eventEntity, userEntity, powerUpsInRace, carClassHash);
 		if (recordsEntity == null) {
 			// Making the new record entry
 			RecordsEntity recordsEntityNew = new RecordsEntity();
@@ -105,17 +107,17 @@ public class RecordsBO {
 				
 			recordsEntityNew.setEventSessionId(eventDataEntity.getEventSessionId());
 			recordsEntityNew.setEventDataId(eventDataId);
-			recordsEntityNew.setEventPowerupsId(eventPowerupsEntity.getId());
-			recordsEntityNew.setEventId(eventEntity.getId());
+			recordsEntityNew.setEventPowerups(eventPowerupsEntity);
+			recordsEntityNew.setEvent(eventEntity);
 			recordsEntityNew.setEventModeId(eventEntity.getEventModeId());
-			recordsEntityNew.setPersonaId(personaId);
-			recordsEntityNew.setUserId(personaEntity.getUser().getId());
+			recordsEntityNew.setPersona(personaEntity);
+			recordsEntityNew.setUser(userEntity);
 				
 			recordCaptureFinished = true;
 			recordsDAO.insert(recordsEntityNew);
 			
-			BigInteger recordRank = recordsDAO.countRecordPlace(eventId, userId, powerUpsInRace, carClassHash, eventDuration);
-			RecordsEntity wrEntity = recordsDAO.getWRRecord(eventId, userId, powerUpsInRace, carClassHash, eventDuration);
+			BigInteger recordRank = recordsDAO.countRecordPlace(eventId, powerUpsInRace, carClassHash, eventDuration);
+			RecordsEntity wrEntity = recordsDAO.getWRRecord(eventEntity, powerUpsInRace, carClassHash, eventDuration);
 			String wrPlayerName = wrEntity.getPlayerName();
 			String wrCarName = wrEntity.getCarName();
 			String wrEventTime = timeReadConverter.convertRecord(wrEntity.getTimeMS());
@@ -154,17 +156,17 @@ public class RecordsBO {
 				
 			recordsEntity.setEventSessionId(eventDataEntity.getEventSessionId());
 			recordsEntity.setEventDataId(eventDataId);
-			recordsEntity.setEventPowerupsId(eventPowerupsEntity.getId());
-//			recordsEntity.setEventId(eventEntity.getId());
+			recordsEntity.setEventPowerups(eventPowerupsEntity);
+//			recordsEntity.setEvent(eventEntity);
 //			recordsEntity.setEventModeId(eventEntity.getEventModeId());
-			recordsEntity.setPersonaId(personaId);
-//			recordsEntity.setUserId(personaEntity.getUser().getId());
+			recordsEntity.setPersona(personaEntity);
+//			recordsEntity.setUser(personaEntity.getUser());
 				
 			recordCaptureFinished = true;
 			recordsDAO.update(recordsEntity);
 			
-			BigInteger recordRank = recordsDAO.countRecordPlace(eventId, userId, powerUpsInRace, carClassHash, eventDuration);
-			RecordsEntity wrEntity = recordsDAO.getWRRecord(eventId, userId, powerUpsInRace, carClassHash, eventDuration);
+			BigInteger recordRank = recordsDAO.countRecordPlace(eventId, powerUpsInRace, carClassHash, eventDuration);
+			RecordsEntity wrEntity = recordsDAO.getWRRecord(eventEntity, powerUpsInRace, carClassHash, eventDuration);
 			String wrPlayerName = wrEntity.getPlayerName();
 			String wrCarName = wrEntity.getCarName();
 			String wrEventTime = timeReadConverter.convertRecord(wrEntity.getTimeMS());
@@ -183,8 +185,8 @@ public class RecordsBO {
 		if (recordsEntity != null && recordsEntity.getTimeMS() < eventDuration && !recordCaptureFinished) {
 			recordCaptureFinished = true;
 			Long currentTimeMS = recordsEntity.getTimeMS();
-			BigInteger recordRank = recordsDAO.countRecordPlace(eventId, userId, powerUpsInRace, carClassHash, currentTimeMS);
-			RecordsEntity wrEntity = recordsDAO.getWRRecord(eventId, userId, powerUpsInRace, carClassHash, currentTimeMS);
+			BigInteger recordRank = recordsDAO.countRecordPlace(eventId, powerUpsInRace, carClassHash, currentTimeMS);
+			RecordsEntity wrEntity = recordsDAO.getWRRecord(eventEntity, powerUpsInRace, carClassHash, currentTimeMS);
 			String wrPlayerName = wrEntity.getPlayerName();
 			String wrCarName = wrEntity.getCarName();
 			String wrEventTime = timeReadConverter.convertRecord(wrEntity.getTimeMS());
