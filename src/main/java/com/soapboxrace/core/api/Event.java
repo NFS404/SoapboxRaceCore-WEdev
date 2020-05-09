@@ -59,10 +59,11 @@ public class Event {
 	@Path("/launched")
 	@Produces(MediaType.APPLICATION_XML)
 	public String launched(@HeaderParam("securityToken") String securityToken, @QueryParam("eventSessionId") Long eventSessionId) {
+		Long eventStarted = System.currentTimeMillis(); // Server-side event timer start
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
-		Long eventDataId = eventBO.createEventDataSession(activePersonaId, eventSessionId);
+		Long eventDataId = eventBO.createEventDataSession(activePersonaId, eventSessionId, eventStarted);
 		eventBO.createEventPowerupsSession(activePersonaId, eventDataId);
-		personaPresenceDAO.updateEventDataId(activePersonaId, eventDataId);
+		personaPresenceDAO.updateCurrentEvent(activePersonaId, eventDataId);
 		return "";
 	}
 
@@ -72,6 +73,7 @@ public class Event {
 	@Produces(MediaType.APPLICATION_XML)
 	public Object arbitration(InputStream arbitrationXml, @HeaderParam("securityToken") String securityToken,
 			@QueryParam("eventSessionId") Long eventSessionId) {
+		Long eventEnded = System.currentTimeMillis(); // Server-side event timer stop
 		EventSessionEntity eventSessionEntity = eventBO.findEventSessionById(eventSessionId);
 		EventEntity event = eventSessionEntity.getEvent();
 		EventMode eventMode = EventMode.fromId(event.getEventModeId());
@@ -81,31 +83,31 @@ public class Event {
 		case CIRCUIT:
 		case SPRINT:
 			RouteArbitrationPacket routeArbitrationPacket = UnmarshalXML.unMarshal(arbitrationXml, RouteArbitrationPacket.class);
-			if (event.getId() == 1003 && routeArbitrationPacket.getEventDurationInMilliseconds() < 186000) { // Test
-				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
-			}
-			if (event.getId() == 1003 && routeArbitrationPacket.getEventDurationInMilliseconds() > 186000) { // Test
-				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
-			}
-			if (event.getId() == 1004 && routeArbitrationPacket.getRank() == 1) { // Test
-				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
-			}
-			if (event.getId() == 1004 && routeArbitrationPacket.getRank() > 1) { // Test
-				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
-			}
-			if (event.getId() == 1018 && routeArbitrationPacket.getRank() == 1 && routeArbitrationPacket.getEventDurationInMilliseconds() > 255000) { // Test
-				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
-			}
-			if (event.getId() == 1018 && (routeArbitrationPacket.getEventDurationInMilliseconds() <= 255000 || routeArbitrationPacket.getRank() > 1)) { // Test
-				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
-			}
-			if (event.getId() == 1005 && routeArbitrationPacket.getRank() == 1) { // Test
-				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
-			}
-			if (event.getId() == 1005 && routeArbitrationPacket.getRank() > 1) { // Test
-				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
-			}
-			return eventResultBO.handleRaceEnd(eventSessionEntity, activePersonaId, routeArbitrationPacket);
+//			if (event.getId() == 1003 && routeArbitrationPacket.getEventDurationInMilliseconds() < 186000) { // Test
+//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
+//			}
+//			if (event.getId() == 1003 && routeArbitrationPacket.getEventDurationInMilliseconds() > 186000) { // Test
+//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
+//			}
+//			if (event.getId() == 1004 && routeArbitrationPacket.getRank() == 1) { // Test
+//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
+//			}
+//			if (event.getId() == 1004 && routeArbitrationPacket.getRank() > 1) { // Test
+//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
+//			}
+//			if (event.getId() == 1018 && routeArbitrationPacket.getRank() == 1 && routeArbitrationPacket.getEventDurationInMilliseconds() > 255000) { // Test
+//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
+//			}
+//			if (event.getId() == 1018 && (routeArbitrationPacket.getEventDurationInMilliseconds() <= 255000 || routeArbitrationPacket.getRank() > 1)) { // Test
+//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
+//			}
+//			if (event.getId() == 1005 && routeArbitrationPacket.getRank() == 1) { // Test
+//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
+//			}
+//			if (event.getId() == 1005 && routeArbitrationPacket.getRank() > 1) { // Test
+//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
+//			}
+			return eventResultBO.handleRaceEnd(eventSessionEntity, activePersonaId, routeArbitrationPacket, eventEnded);
 		case DRAG:
 			DragArbitrationPacket dragArbitrationPacket = UnmarshalXML.unMarshal(arbitrationXml, DragArbitrationPacket.class);
 			return eventResultBO.handleDragEnd(eventSessionEntity, activePersonaId, dragArbitrationPacket);
@@ -120,7 +122,7 @@ public class Event {
 		default:
 			break;
 		}
-		personaPresenceDAO.updateEventDataId(activePersonaId, null);
+		personaPresenceDAO.updateCurrentEvent(activePersonaId, null);
 		return "";
 	}
 
@@ -134,7 +136,7 @@ public class Event {
 		PursuitEventResult pursuitEventResult = new PursuitEventResult();
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
 		pursuitEventResult = eventResultBO.handlePursitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, true);
-		personaPresenceDAO.updateEventDataId(activePersonaId, null);
+		personaPresenceDAO.updateCurrentEvent(activePersonaId, null);
 		return pursuitEventResult;
 	}
 }

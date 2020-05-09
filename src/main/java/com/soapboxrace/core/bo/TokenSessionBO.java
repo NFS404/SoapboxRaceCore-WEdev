@@ -162,7 +162,7 @@ public class TokenSessionBO {
 				int maxOlinePayers = parameterBO.getIntParam("MAX_ONLINE_PLAYERS");
 				Boolean serverMaintenance = parameterBO.getBoolParam("SERVERMAINTENANCE");
 				
-				if (userEntity.isPremium()) {
+				if (userEntity.isPremium() && parameterBO.getBoolParam("PREMIUM_TIMELIMITED")) {
 				    LocalDate premiumDate = userEntity.getPremiumDate();
 				    LocalDate nowDate = LocalDate.now();
 				

@@ -1,6 +1,5 @@
 package com.soapboxrace.core.bo;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,8 +18,6 @@ import com.soapboxrace.jaxb.http.ProfileData;
 import com.soapboxrace.jaxb.http.User;
 import com.soapboxrace.jaxb.http.UserInfo;
 import com.soapboxrace.jaxb.login.LoginStatusVO;
-
-
 
 @Stateless
 public class UserBO {

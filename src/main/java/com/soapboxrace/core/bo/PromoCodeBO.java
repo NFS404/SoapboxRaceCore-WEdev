@@ -285,25 +285,22 @@ public class PromoCodeBO {
 				System.out.println("Player " + nickname + " got the Promo Code (Money amount BEFORE: " + cashPreValue + ")");
 				return "Premium Full is activated (restart the game), thank you! ;)";
 		    case "moneydrop":
-		    	if (userEntity.isPremium()) {
-		    		cashPreValue = personaEntity.getCash();
-		    		premiumMoneyValue = 10000000;
-		    		finalValue = playerInitialCash + premiumMoneyValue;
-		    		if (finalValue > maxCashPremiumAcc) {
-		    			extraMoneyTransit = (finalValue - maxCashPremiumAcc);
-		    			finalValue = maxCashPremiumAcc;
-		    			userEntity.setExtraMoney(userEntity.getExtraMoney() + extraMoneyTransit);
-		    		}
-		    		personaEntity.setCash(finalValue);
-		    	    personaDao.update(personaEntity);
-		    	
-		    	    promoCodeEntity.setIsUsed(true);
-				    promoCodeEntity.setUser(userEntity);
-				    promoCodeDao.update(promoCodeEntity);
-				    System.out.println("Player " + nickname + " got the Promo Code (Money amount BEFORE: " + cashPreValue + ")");
-				    return "Money Drop is activated (restart the game), thank you! ;)";
+		    	cashPreValue = personaEntity.getCash();
+		    	premiumMoneyValue = 10000000;
+		    	finalValue = playerInitialCash + premiumMoneyValue;
+		    	if (finalValue > maxCashPremiumAcc) {
+		    		extraMoneyTransit = (finalValue - maxCashPremiumAcc);
+		    		finalValue = maxCashPremiumAcc;
+		    		userEntity.setExtraMoney(userEntity.getExtraMoney() + extraMoneyTransit);
 		    	}
-		    	return "ERROR: you need to got the any Premium first, to use Money Drops";
+		    	personaEntity.setCash(finalValue);
+		    	personaDao.update(personaEntity);
+		    	
+		    	promoCodeEntity.setIsUsed(true);
+				promoCodeEntity.setUser(userEntity);
+				promoCodeDao.update(promoCodeEntity);
+				System.out.println("Player " + nickname + " got the Promo Code (Money amount BEFORE: " + cashPreValue + ")");
+				return "Money Drop is activated (restart the game), thank you! ;)";
 		    case "garage50":
 		    	premiumCarSlots(250, userEntity);
 		    	

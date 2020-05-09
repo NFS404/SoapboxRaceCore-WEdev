@@ -39,12 +39,13 @@ public class EventBO {
 		return eventDao.findByRotation(personaEntity.getLevel());
 	}
 
-	public Long createEventDataSession(Long personaId, Long eventSessionId) {
+	public Long createEventDataSession(Long personaId, Long eventSessionId, Long eventTimer) {
 		EventSessionEntity eventSessionEntity = findEventSessionById(eventSessionId);
 		EventDataEntity eventDataEntity = new EventDataEntity();
 		eventDataEntity.setPersonaId(personaId);
 		eventDataEntity.setEventSessionId(eventSessionId);
 		eventDataEntity.setEvent(eventSessionEntity.getEvent());
+		eventDataEntity.setServerEventDuration(eventTimer); // Temp value of the event timer (current system time)
 		eventDataDao.insert(eventDataEntity);
 		return eventDataEntity.getId();
 	}

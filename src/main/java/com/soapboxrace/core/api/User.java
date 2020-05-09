@@ -100,7 +100,7 @@ public class User {
 		friendBO.sendXmppPresenceToAllFriends(personaEntity, 0);
 		tokenBO.setActivePersonaId(securityToken, 0L, true);
 		tokenBO.updatePersonaPresence(personaEntity.getPersonaId(), 0);
-		personaPresenceDAO.updateEventDataId(personaId, null);
+		personaPresenceDAO.updateCurrentEvent(personaId, null);
 		return "";
 	}
 
@@ -118,7 +118,7 @@ public class User {
 		friendBO.sendXmppPresenceToAllFriends(personaEntity, 0);
 		tokenBO.setActivePersonaId(securityToken, 0L, true);
 		tokenBO.updatePersonaPresence(personaEntity.getPersonaId(), 0);
-		personaPresenceDAO.updateEventDataId(activePersonaId, null);
+		personaPresenceDAO.updateCurrentEvent(activePersonaId, null);
 		return "";
 	}
 

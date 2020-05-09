@@ -48,6 +48,7 @@ public class RecordsEntity {
 	
 	private long timeMS;
 	private long timeMSAlt;
+	private long timeMSSrv;
 	private long timeMSOld;
 	private long bestLapTimeMS;
 	
@@ -107,6 +108,14 @@ public class RecordsEntity {
 
 	public void setTimeMSAlt(Long timeMSAlt) {
 		this.timeMSAlt = timeMSAlt;
+	}
+	
+	public Long getTimeMSSrv() {
+		return timeMSSrv;
+	}
+
+	public void setTimeMSSrv(Long timeMSSrv) {
+		this.timeMSSrv = timeMSSrv;
 	}
 	
 	public Long getTimeMSOld() {

@@ -40,6 +40,7 @@ public class EventDataEntity {
 	private long alternateEventDurationInMilliseconds;
 	private long carId;
 	private long eventDurationInMilliseconds;
+	private long serverEventDuration;
 	private int finishReason;
 	private long hacksDetected;
 	private int rank;
@@ -141,6 +142,14 @@ public class EventDataEntity {
 
 	public void setEventDurationInMilliseconds(long value) {
 		this.eventDurationInMilliseconds = value;
+	}
+	
+	public long getServerEventDuration() {
+		return serverEventDuration;
+	}
+
+	public void setServerEventDuration(long value) {
+		this.serverEventDuration = value;
 	}
 
 	public int getFinishReason() {

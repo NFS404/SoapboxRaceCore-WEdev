@@ -83,7 +83,7 @@ public class EventResultRouteBO {
 	@EJB
 	private CustomCarDAO customCarDAO;
 
-	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket) {
+	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
 		eventSessionEntity.setEnded(System.currentTimeMillis());
 		if (eventSessionEntity.getEnded() == null) {
@@ -110,6 +110,8 @@ public class EventResultRouteBO {
 		achievementsBO.applyRaceAchievements(eventDataEntity, routeArbitrationPacket, personaEntity);
 		achievementsBO.applyAirTimeAchievement(routeArbitrationPacket, personaEntity);
 		achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventEntity.getTrackLength());
+		
+		eventDataEntity.setServerEventDuration(eventEnded - eventDataEntity.getServerEventDuration());
 		updateEventDataEntity(eventDataEntity, routeArbitrationPacket);
 
 		// RouteArbitrationPacket

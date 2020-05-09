@@ -68,6 +68,8 @@ public class RecordsBO {
 		int carClassHash = eventEntity.getCarClassHash();
 //		String eventName = eventEntity.getName();
 		Long eventDuration = eventDataEntity.getEventDurationInMilliseconds();
+		Long eventAltDuration = eventDataEntity.getAlternateEventDurationInMilliseconds();
+		Long eventSrvDuration = eventDataEntity.getServerEventDuration();
 		
 		int playerPhysicsHash = customCarEntity.getPhysicsProfileHash();
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
@@ -87,7 +89,8 @@ public class RecordsBO {
 			RecordsEntity recordsEntityNew = new RecordsEntity();
 			
 			recordsEntityNew.setTimeMS(eventDuration);
-			recordsEntityNew.setTimeMSAlt(eventDataEntity.getAlternateEventDurationInMilliseconds());
+			recordsEntityNew.setTimeMSAlt(eventAltDuration);
+			recordsEntityNew.setTimeMSSrv(eventSrvDuration); // Server-sided event timer, can differs from the main time but unaffected by game's bugs
 			recordsEntityNew.setTimeMSOld((long) 0); // There is no previous results yet
 			recordsEntityNew.setBestLapTimeMS(eventDataEntity.getBestLapDurationInMilliseconds());
 				
@@ -136,7 +139,8 @@ public class RecordsBO {
 			// Update the existing record entry	
 			recordsEntity.setTimeMSOld(recordsEntity.getTimeMS());
 			recordsEntity.setTimeMS(eventDuration);
-			recordsEntity.setTimeMSAlt(eventDataEntity.getAlternateEventDurationInMilliseconds());
+			recordsEntity.setTimeMSAlt(eventAltDuration);
+			recordsEntity.setTimeMSSrv(eventSrvDuration); // Server-sided event timer, can differs from the main time but unaffected by game's bugs
 			recordsEntity.setBestLapTimeMS(eventDataEntity.getBestLapDurationInMilliseconds());
 				
 			recordsEntity.setPowerUps(powerUpsInRace); 
