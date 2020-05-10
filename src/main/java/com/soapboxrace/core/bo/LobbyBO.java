@@ -445,9 +445,9 @@ public class LobbyBO {
 			}
 			LobbyEntity lobbyEntity = lobbyDao.findById(lobbyId);
 			List<LobbyEntrantEntity> entrants = lobbyEntity.getEntrants();
-			if (entrants.size() < 2 || entrants.size() > 8) {
+			if (entrants.size() < 2 || entrants.size() >= 8) {
 				for (LobbyEntrantEntity poorPlayer : entrants) {
-					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Too low or too many players on this lobby - cancelled."), poorPlayer.getPersona().getPersonaId());
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Too low or too many players in this lobby - cancelled."), poorPlayer.getPersona().getPersonaId());
 				}
 				return;
 			}
