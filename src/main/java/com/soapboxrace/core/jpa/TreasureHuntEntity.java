@@ -23,6 +23,7 @@ public class TreasureHuntEntity {
 	private Integer seed;
 	private Integer streak;
 	private LocalDate thDate;
+	private Integer reviveCount;
 
 	public Long getPersonaId() {
 		return personaId;
@@ -71,6 +72,13 @@ public class TreasureHuntEntity {
 	}
 	public void setThDate(LocalDate thDate) {
 		this.thDate = thDate;
+	}
+	
+	public Integer getReviveCount() {
+		return reviveCount;
+	}
+	public void setReviveCount(Integer reviveCount) {
+		this.reviveCount = reviveCount;
 	}
 
 }

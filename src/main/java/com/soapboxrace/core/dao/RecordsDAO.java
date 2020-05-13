@@ -73,6 +73,26 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		else return List.get(0);
 	}
 	
+	public BigInteger countRecordsAll(int eventId, boolean powerUps) {
+		Query query = entityManager.createNativeQuery(
+			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps);
+		@SuppressWarnings("unchecked")
+		List<BigInteger> List = query.getResultList();
+		if (List.isEmpty())
+			return new BigInteger("0");
+		else return List.get(0);
+	}
+	
+	public BigInteger countRecordsPersona(int eventId, Long userId) {
+		Query query = entityManager.createNativeQuery(
+			"SELECT Count(*) from records WHERE eventId = "+eventId+" and userId ="+userId);
+		@SuppressWarnings("unchecked")
+		List<BigInteger> List = query.getResultList();
+		if (List.isEmpty())
+			return new BigInteger("0");
+		else return List.get(0);
+	}
+	
 	public void banRecords(UserEntity user) {
 		Query createQuery = entityManager.createQuery("UPDATE RecordsEntity obj SET obj.userBan = true WHERE obj.user = :user");
 		createQuery.setParameter("user", user);
@@ -86,7 +106,7 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 	}
 	
 	/**
-	 * Получить список лучших заездов по времени
+	 * Получить список лучших заездов по времени в классе
 	 * @param eventid - номер трассы
 	 * @param powerups - наличие бонусов (true/false)
 	 * @param carclasshash - номер класса машин
@@ -94,8 +114,8 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 	 * @param onPage - Сколько позиций на странице
 	 * @author Vadimka, Hypercycle
 	 */
-	public List<RecordsEntity> statsEventAll(EventEntity event, boolean powerups, int carClassHash, int page, int onPage) {
-		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.statsEventAll",RecordsEntity.class);
+	public List<RecordsEntity> statsEventClass(EventEntity event, boolean powerups, int carClassHash, int page, int onPage) {
+		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.statsEventClass",RecordsEntity.class);
 		query.setParameter("event", event);
 		query.setParameter("powerUps", powerups);
 		query.setParameter("carClassHash", carClassHash);
@@ -105,16 +125,34 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 	}
 	
 	/**
-	 * Получить список лучших заездов во всех вариациях трассы. Фильтрация по имени профиля
+	 * Получить список лучших заездов по времени
 	 * @param eventid - номер трассы
+	 * @param powerups - наличие бонусов (true/false)
 	 * @param page - Номер страницы
 	 * @param onPage - Сколько позиций на странице
 	 * @author Vadimka, Hypercycle
 	 */
-	public List<RecordsEntity> statsEventPersona(EventEntity event, PersonaEntity personaEntity) {
-		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.statsEventPersona",RecordsEntity.class);
+	public List<RecordsEntity> statsEventAll(EventEntity event, boolean powerups, int page, int onPage) {
+		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.statsEventAll", RecordsEntity.class);
 		query.setParameter("event", event);
-		query.setParameter("personaId", personaEntity);
+		query.setParameter("powerUps", powerups);
+		query.setFirstResult((page-1) * onPage);
+		query.setMaxResults(onPage);
+		return query.getResultList();
+	}
+	
+	/**
+	 * Получить список лучших заездов во всех вариациях трассы. Фильтрация по имени профиля
+	 * @param eventid - номер трассы
+	 * @param userId - номер аккаунта игрока
+	 * @param page - Номер страницы
+	 * @param onPage - Сколько позиций на странице
+	 * @author Vadimka, Hypercycle
+	 */
+	public List<RecordsEntity> statsEventPersona(EventEntity event, UserEntity userEntity) {
+		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.statsEventPersona", RecordsEntity.class);
+		query.setParameter("event", event);
+		query.setParameter("user", userEntity);
 		return query.getResultList();
 	}
 }

@@ -242,13 +242,45 @@ public class RestApiBO {
 	}
 	/**
 	 * Получить список лучших заездов по времени
+	 * @param eventId - Номер трассы
+	 * @param powerups - Бонусы true/false
+	 * @param carclass - Класс машин
 	 * @param page - Номер страницы
 	 * @param onPage - Сколько позиций на странице
 	 */
-	public ArrayOfRaceWithTime getTopTimeRace(int eventid, boolean powerups, int carclasshash, int page, int onPage) {
+	public ArrayOfRaceWithTime getTopTimeRace(int eventid, boolean powerups, String carclass, int page, int onPage) {
 		if (onPage > 300) onPage = 300;
 		ArrayOfRaceWithTime list = new ArrayOfRaceWithTime();
-		list.setCount(recordsDAO.countRecords(eventid, powerups, carclasshash));
+		int carclasshash = 0;
+		switch (carclass) {
+		case "E":
+			carclasshash = 872416321;
+			break;
+		case "D":
+			carclasshash = 415909161;
+			break;
+		case "C":
+			carclasshash = 1866825865;
+			break;
+		case "B":
+			carclasshash = -406473455;
+			break;
+		case "A":
+			carclasshash = -405837480;
+			break;
+		case "S":
+			carclasshash = -2142411446;
+			break;
+		case "ALL":
+			break;
+		}
+
+		if (carclasshash == 0) {
+			list.setCount(recordsDAO.countRecordsAll(eventid, powerups));
+		}
+		else {
+			list.setCount(recordsDAO.countRecords(eventid, powerups, carclasshash));
+		}
 		EventEntity event = eventDAO.findById(eventid);
 		if (event != null)
 			list.set(
@@ -256,7 +288,116 @@ public class RestApiBO {
 					event.getEventModeId(),
 					carclasshash
 				);
-		for (RecordsEntity race : recordsDAO.statsEventAll(event, powerups, carclasshash, page, onPage)) {
+		// FIXME Do something with that mess
+		if (carclasshash == 0) {
+			for (RecordsEntity race : recordsDAO.statsEventAll(event, powerups, page, onPage)) {
+				final boolean isCarVersionVaild;
+				CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
+				EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
+				int serverCarVersionValue = carClassesEntity.getCarVersion();
+				if (serverCarVersionValue == race.getCarVersion()) {
+					isCarVersionVaild = true;
+				}
+				else {
+					isCarVersionVaild = false;
+				}
+				list.add(
+						race.getPlayerName(),
+						race.getPersona().getIconIndex(),
+						carClassesEntity.getFullName(),
+						race.getCarClassHash(), 
+						race.getTimeMS().intValue(), 
+						race.getTimeMSAlt().intValue(), 
+						race.getAirTimeMS().intValue(), 
+						race.getBestLapTimeMS().intValue(), 
+						race.getTopSpeed(), 
+						race.getPerfectStart(),
+						race.getIsSingle(),
+						race.getDate().toString(),
+						isCarVersionVaild,
+						eventPowerupsEntity.getNosShot(),
+						eventPowerupsEntity.getSlingshot(),
+						eventPowerupsEntity.getOneMoreLap(),
+						eventPowerupsEntity.getReady(),
+						eventPowerupsEntity.getTrafficMagnet(),
+						eventPowerupsEntity.getShield(),
+						eventPowerupsEntity.getEmergencyEvade(),
+						eventPowerupsEntity.getJuggernaut(),
+						eventPowerupsEntity.getRunFlatTires(),
+						eventPowerupsEntity.getInstantCooldown(),
+						eventPowerupsEntity.getTeamEmergencyEvade(),
+						eventPowerupsEntity.getTeamSlingshot()
+					);
+			}
+		}
+		else {
+			for (RecordsEntity race : recordsDAO.statsEventClass(event, powerups, carclasshash, page, onPage)) {
+				final boolean isCarVersionVaild;
+				CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
+				EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
+				int serverCarVersionValue = carClassesEntity.getCarVersion();
+				if (serverCarVersionValue == race.getCarVersion()) {
+					isCarVersionVaild = true;
+				}
+				else {
+					isCarVersionVaild = false;
+				}
+				list.add(
+						race.getPlayerName(),
+						race.getPersona().getIconIndex(),
+						carClassesEntity.getFullName(),
+						race.getCarClassHash(), 
+						race.getTimeMS().intValue(), 
+						race.getTimeMSAlt().intValue(), 
+						race.getAirTimeMS().intValue(), 
+						race.getBestLapTimeMS().intValue(), 
+						race.getTopSpeed(), 
+						race.getPerfectStart(),
+						race.getIsSingle(),
+						race.getDate().toString(),
+						isCarVersionVaild,
+						eventPowerupsEntity.getNosShot(),
+						eventPowerupsEntity.getSlingshot(),
+						eventPowerupsEntity.getOneMoreLap(),
+						eventPowerupsEntity.getReady(),
+						eventPowerupsEntity.getTrafficMagnet(),
+						eventPowerupsEntity.getShield(),
+						eventPowerupsEntity.getEmergencyEvade(),
+						eventPowerupsEntity.getJuggernaut(),
+						eventPowerupsEntity.getRunFlatTires(),
+						eventPowerupsEntity.getInstantCooldown(),
+						eventPowerupsEntity.getTeamEmergencyEvade(),
+						eventPowerupsEntity.getTeamSlingshot()
+					);
+			}
+		}
+		return list;
+	}
+	/**
+	 * Получить список лучших заездов по времени
+	 * Фильтрация по имени профиля
+	 * @param eventId - Номер трассы
+	 * @param powerups - Бонусы true/false
+	 * @param page - Номер страницы
+	 * @param personaName - Имя водителя
+	 * @param onPage - Сколько позиций на странице
+	 */
+	public ArrayOfRaceWithTime getTopTimeRaceByPersona(int eventid, String personaName, int page, int onPage) {
+		if (onPage > 300) onPage = 300;
+		ArrayOfRaceWithTime list = new ArrayOfRaceWithTime();
+		PersonaEntity personaEntity = personaDAO.findByName(personaName);
+		UserEntity userEntity = personaEntity.getUser();
+		Long userId = userEntity.getId();
+		
+		list.setCount(recordsDAO.countRecordsPersona(eventid, userId));
+		EventEntity event = eventDAO.findById(eventid);
+		if (event != null)
+			list.set(
+					event.getName(),
+					event.getEventModeId(),
+					0
+				);
+		for (RecordsEntity race : recordsDAO.statsEventPersona(event, userEntity)) {
 			final boolean isCarVersionVaild;
 			CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
 			EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
@@ -297,58 +438,7 @@ public class RestApiBO {
 		}
 		return list;
 	}
-	/**
-	 * Получить список лучших заездов по времени
-	 * Фильтрация по имени профиля
-	 * @param page - Номер страницы
-	 * @param onPage - Сколько позиций на странице
-	 */
-//	public ArrayOfRaceWithTime getTopTimeRaceByPersona(int eventid, String personaName, boolean powerups, int carclasshash, int page, int onPage) {
-//		if (onPage > 300) onPage = 300;
-//		ArrayOfRaceWithTime list = new ArrayOfRaceWithTime();
-//		list.setCount(eventDataDAO.countBestTimeByPersona(eventid, personaName));
-//		EventEntity event = eventDAO.findById(eventid);
-//		if (event != null)
-//			list.set(
-//					event.getName(),
-//					event.getEventModeId(),
-//					event.getCarClassHash()
-//				);
-//		for (RecordsEntity race : recordsDAO.statsEventAll(eventid, powerups, carclasshash, page, onPage)) {
-//			final boolean isHacks;
-//			switch (race.getHacksLevel()) {
-//				case 8:
-//				case 40:
-//					isHacks = true;
-//					break;
-//				default:
-//					isHacks = false;
-//					break;
-//			}
-//			final boolean isCarVersionVaild;
-//			int serverCarVersionValue = eventResultBO.carVersionCheckWeb(race.getCarName());
-//			if (serverCarVersionValue == race.getCarVersion()) {
-//				isCarVersionVaild = true;
-//			}
-//			else {
-//				isCarVersionVaild = false;
-//			}
-//			list.add(
-//					race.getUserName(), 
-//					race.getUserIconId(), 
-//					race.getCarName(), 
-//					race.getCarClass(), 
-//					race.getRaceTime(), 
-//					race.getMaxSpeed(), 
-//					race.isPerfectStart(),
-//					isHacks,
-//					race.getCollisions(),
-//					"",
-//					isCarVersionVaild
-//				);
-//		}
-//		return list;
-//	}
+		
 	/**
 	 * Список всех эвентов
 	 */

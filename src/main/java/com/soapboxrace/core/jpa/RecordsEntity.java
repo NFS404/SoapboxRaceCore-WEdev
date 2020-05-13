@@ -27,18 +27,24 @@ import javax.persistence.Table;
         		+ "AND obj.userBan = false "
                 + "ORDER BY obj.timeMS "),//
 
-@NamedQuery(name = "RecordsEntity.statsEventAll", //
+@NamedQuery(name = "RecordsEntity.statsEventClass", //
         query = "SELECT obj FROM RecordsEntity obj "
                 + "WHERE obj.event = :event "
                 + "AND obj.powerUps = :powerUps "
                 + "AND obj.carClassHash = :carClassHash "
                 + "AND obj.userBan = false "
                 + "ORDER BY obj.timeMS "),//
+@NamedQuery(name = "RecordsEntity.statsEventAll", //
+query = "SELECT obj FROM RecordsEntity obj "
+                + "WHERE obj.event = :event "
+                + "AND obj.powerUps = :powerUps "
+                + "AND obj.userBan = false "
+                + "ORDER BY obj.timeMS "),//
 @NamedQuery(name = "RecordsEntity.statsEventPersona", //
         query = "SELECT obj FROM RecordsEntity obj "
                 + "WHERE obj.event = :event "
                 + "AND obj.userBan = false "
-                + "AND obj.persona = :persona "),//
+                + "AND obj.user = :user "),//
 })
 public class RecordsEntity {
 
