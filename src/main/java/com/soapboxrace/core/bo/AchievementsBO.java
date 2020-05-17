@@ -25,6 +25,7 @@ import com.soapboxrace.core.dao.AchievementPersonaDAO;
 import com.soapboxrace.core.dao.AchievementRankDAO;
 import com.soapboxrace.core.dao.AchievementStateDAO;
 import com.soapboxrace.core.dao.BadgeDefinitionDAO;
+import com.soapboxrace.core.dao.BadgePersonaDAO;
 import com.soapboxrace.core.dao.BasketDefinitionDAO;
 import com.soapboxrace.core.dao.CarSlotDAO;
 import com.soapboxrace.core.dao.LobbyDAO;
@@ -36,6 +37,7 @@ import com.soapboxrace.core.jpa.AchievementPersonaEntity;
 import com.soapboxrace.core.jpa.AchievementRankEntity;
 import com.soapboxrace.core.jpa.AchievementStateEntity;
 import com.soapboxrace.core.jpa.BadgeDefinitionEntity;
+import com.soapboxrace.core.jpa.BadgePersonaEntity;
 import com.soapboxrace.core.jpa.BasketDefinitionEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
@@ -88,6 +90,9 @@ public class AchievementsBO {
 
 	@EJB
 	private BadgeDefinitionDAO badgeDefinitionDAO;
+	
+	@EJB
+	private BadgePersonaDAO badgePersonaDAO;
 
 	@EJB
 	private AchievementPersonaDAO achievementPersonaDAO;
@@ -121,6 +126,9 @@ public class AchievementsBO {
 
 	@EJB
 	private LobbyDAO lobbyDAO;
+	
+	@EJB
+	private PersonaBO personaBO;
 
 	public AchievementsPacket loadall(Long personaId) {
 		PersonaEntity personaEntity = new PersonaEntity();
@@ -457,7 +465,9 @@ public class AchievementsBO {
 		achievementPersonaDAO.update(achievementPersonaEntity);
 		AchievementRankEntity achievementRankEntity = achievementRankDAO.findByAchievementDefinitionIdThresholdValue( //
 				achievementType.getId(), thresholdValue);
+		
 		if (achievementRankEntity != null && achievementRankEntity.getAchievementDefinition().isVisible()) {
+			AchievementDefinitionEntity achievementDefinitionEntity = achievementRankEntity.getAchievementDefinition();
 			AchievementStateEntity achievementStateEntity = new AchievementStateEntity();
 			achievementStateEntity.setAchievedOn(LocalDateTime.now());
 			achievementStateEntity.setAchievementRank(achievementRankEntity);
@@ -469,6 +479,11 @@ public class AchievementsBO {
 			broadcastAchievement(personaEntity, achievementRankEntity);
 			processAchievementByThresholdRange(achievementPersonaEntity, AchievementType.LEGENDARY_DRIVER,
 					Integer.valueOf(personaEntity.getScore()).longValue());
+			
+			BadgePersonaEntity badgePersonaEntity = badgePersonaDAO.findByPersonaAndDefinition(personaEntity, achievementDefinitionEntity);
+			if (badgePersonaEntity != null) {
+				personaBO.updateBadgesProgress(personaEntity.getPersonaId(), achievementDefinitionEntity, achievementStateEntity, badgePersonaEntity.getSlot());
+			}
 		}
 	}
 

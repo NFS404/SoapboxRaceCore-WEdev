@@ -15,10 +15,14 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "BADGE_PERSONA")
-@NamedQueries({ @NamedQuery(name = "BadgePersonaEntity.findByPersonaId", //
+@NamedQueries({ @NamedQuery(name = "BadgePersonaEntity.findByPersona", //
 		        query = "SELECT obj FROM BadgePersonaEntity obj WHERE obj.persona = :persona"), //
+	    @NamedQuery(name = "BadgePersonaEntity.findByPersonaAndDefinition", //
+	    	    query = "SELECT obj FROM BadgePersonaEntity obj WHERE obj.persona = :persona AND obj.achievementId = :achievementId"), //
 		@NamedQuery(name = "BadgePersonaEntity.deleteByPersona", //
 				query = "DELETE FROM BadgePersonaEntity obj WHERE obj.persona = :persona"), //
+		@NamedQuery(name = "BadgePersonaEntity.deleteByPersonaSlot", //
+		        query = "DELETE FROM BadgePersonaEntity obj WHERE obj.persona = :persona AND obj.slot = :slot"), //
 		@NamedQuery(name = "BadgePersonaEntity.deleteByPersonaButExcludeRank", //
 		        query = "DELETE FROM BadgePersonaEntity obj WHERE obj.persona = :persona AND obj.achievementRank <> :achievementRank ") //
 })
@@ -36,6 +40,10 @@ public class BadgePersonaEntity {
 	@ManyToOne
 	@JoinColumn(name = "achievementRank", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "FK_BADGEPER_ACHRANK"))
 	private AchievementRankEntity achievementRank;
+	
+	@ManyToOne
+	@JoinColumn(name = "achievementId", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "FK_BADGEPER_ACHDEF"))
+	private AchievementDefinitionEntity achievementId;
 
 	private short slot;
 
@@ -61,6 +69,14 @@ public class BadgePersonaEntity {
 
 	public void setAchievementRank(AchievementRankEntity achievementRank) {
 		this.achievementRank = achievementRank;
+	}
+	
+	public AchievementDefinitionEntity getAchievementId() {
+		return achievementId;
+	}
+
+	public void setAchievementId(AchievementDefinitionEntity achievementId) {
+		this.achievementId = achievementId;
 	}
 
 	public short getSlot() {

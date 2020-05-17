@@ -50,8 +50,8 @@ public class EventResultBO {
 		return eventResultRouteBO.handleRaceEnd(eventSessionEntity, activePersonaId, routeArbitrationPacket, eventEnded);
 	}
 
-	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket) {
-		return eventResultDragBO.handleDragEnd(eventSessionEntity, activePersonaId, dragArbitrationPacket);
+	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket, Long eventEnded) {
+		return eventResultDragBO.handleDragEnd(eventSessionEntity, activePersonaId, dragArbitrationPacket, eventEnded);
 	}
 
 	public TeamEscapeEventResult handleTeamEscapeEnd(EventSessionEntity eventSessionEntity, Long activePersonaId,
@@ -76,6 +76,37 @@ public class EventResultBO {
 		
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCarEntityVer.getPhysicsProfileHash());
 		return carClassesEntity.getCarVersion();
+	}
+	
+	public String getCarClassLetter(int carClassHash) {
+		String letter = "";
+		switch(carClassHash) {
+		case 872416321:
+			letter = "E";
+			break;
+		case 415909161:
+			letter = "D";
+			break;
+		case 1866825865:
+			letter = "C";
+			break;
+		case -406473455:
+			letter = "B";
+			break;
+		case -405837480:
+			letter = "A";
+			break;
+		case -2142411446:
+			letter = "S";
+			break;
+		case 607077938 :
+			letter = "OR";
+			break;
+		default:
+			letter = "NPC";
+			break;
+		}
+		return letter;
 	}
 
 }

@@ -28,22 +28,22 @@ public class TestReward {
 	@EJB
 	private EventDAO eventDAO;
 
-	@POST
-	@Path("/pursuit/{personaId}/{eventId}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public RewardVO pursuit(PursuitArbitrationPacket pursuitArbitrationPacket, @PathParam(value = "personaId") Long personaId,
-			@PathParam(value = "eventId") Integer eventId) {
-		PersonaEntity personaEntity = personaBO.getPersonaById(personaId);
-		RewardVO rewardVO = pursuitBO.getRewardVO(personaEntity);
-		EventEntity eventEntity = eventDAO.findById(eventId);
-		pursuitBO.setPursuitRewards(personaEntity, eventEntity, pursuitArbitrationPacket, rewardVO);
-		return rewardVO;
-	}
+//	@POST
+//	@Path("/pursuit/{personaId}/{eventId}")
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public RewardVO pursuit(PursuitArbitrationPacket pursuitArbitrationPacket, @PathParam(value = "personaId") Long personaId,
+//			@PathParam(value = "eventId") Integer eventId) {
+//		PersonaEntity personaEntity = personaBO.getPersonaById(personaId);
+//		RewardVO rewardVO = pursuitBO.getRewardVO(personaEntity);
+//		EventEntity eventEntity = eventDAO.findById(eventId);
+//		pursuitBO.setPursuitRewards(personaEntity, eventEntity, pursuitArbitrationPacket, rewardVO);
+//		return rewardVO;
+//	}
 
-	@GET
-	@Path("/pursuit")
-	@Produces(MediaType.APPLICATION_JSON)
-	public PursuitArbitrationPacket vai() {
-		return new PursuitArbitrationPacket();
-	}
+//	@GET
+//	@Path("/pursuit")
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public PursuitArbitrationPacket vai() {
+//		return new PursuitArbitrationPacket();
+//	}
 }

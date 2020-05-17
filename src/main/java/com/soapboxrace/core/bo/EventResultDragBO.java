@@ -3,15 +3,18 @@ package com.soapboxrace.core.bo;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.core.xmpp.XmppEvent;
 import com.soapboxrace.jaxb.http.ArrayOfDragEntrantResult;
 import com.soapboxrace.jaxb.http.DragArbitrationPacket;
@@ -50,8 +53,14 @@ public class EventResultDragBO {
 	
 	@EJB
 	private EventResultBO eventResultBO;
+	
+	@EJB
+	private RecordsBO recordsBO;
+	
+	@EJB
+	private CustomCarDAO customCarDAO;
 
-	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket) {
+	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
 		eventSessionEntity.setEnded(System.currentTimeMillis());
 
@@ -81,6 +90,7 @@ public class EventResultDragBO {
 		achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventDataEntity.getEvent().getTrackLength());
 
 		int currentEventId = eventDataEntity.getEvent().getId();
+		EventEntity eventEntity = eventDataEntity.getEvent();
 		eventDataEntity.setAlternateEventDurationInMilliseconds(dragArbitrationPacket.getAlternateEventDurationInMilliseconds());
 		eventDataEntity.setCarId(dragArbitrationPacket.getCarId());
 		eventDataEntity.setEventDurationInMilliseconds(dragArbitrationPacket.getEventDurationInMilliseconds());
@@ -99,12 +109,12 @@ public class EventResultDragBO {
 		eventDataEntity.setSpeedBugChance(speedBugChance);
 		int carVersion = eventResultBO.carVersionCheck(activePersonaId);
 		eventDataEntity.setCarVersion(carVersion);
+		eventDataEntity.setServerEventDuration(eventEnded - eventDataEntity.getServerEventDuration());
 		eventDataDao.update(eventDataEntity);
 
 		ArrayOfDragEntrantResult arrayOfDragEntrantResult = new ArrayOfDragEntrantResult();
 		// +1 to play count for this track, MP
 		if (eventDataEntity.getRank() == 1 && arrayOfDragEntrantResult.getDragEntrantResult().size() > 1) {
-			EventEntity eventEntity = eventDAO.findById(currentEventId);
 			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
 			personaEntity.setRacesCount(personaEntity.getRacesCount() + 1);
 			eventDAO.update(eventEntity);
@@ -112,7 +122,6 @@ public class EventResultDragBO {
 		}
 		// +1 to play count for this track, SP
 		if (arrayOfDragEntrantResult.getDragEntrantResult().size() < 2) {
-			EventEntity eventEntity = eventDAO.findById(currentEventId);
 			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
 			personaEntity.setRacesCount(personaEntity.getRacesCount() + 1);
 			eventDAO.update(eventEntity);
@@ -155,6 +164,22 @@ public class EventResultDragBO {
 		dragEventResult.setInviteLifetimeInMilliseconds(0);
 		dragEventResult.setLobbyInviteId(0);
 		dragEventResult.setPersonaId(activePersonaId);
+		
+		// Separate race stats
+		boolean raceIssues = false;
+		CustomCarEntity customCarEntity = customCarDAO.findById(eventDataEntity.getCarId());
+		Long raceHacks = dragArbitrationPacket.getHacksDetected();
+		Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
+		Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
+		if (speedBugChance || dragArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
+				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000) {
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), activePersonaId);
+		}
+		if (!raceIssues) {
+			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity);
+		}
+		
 		return dragEventResult;
 	}
 
