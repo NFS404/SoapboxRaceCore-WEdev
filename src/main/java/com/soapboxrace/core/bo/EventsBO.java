@@ -108,6 +108,7 @@ public class EventsBO {
 		if (isBroken) {
 			treasureHuntEntity.setStreak(1);
 			treasureHuntEntity.setIsStreakBroken(false);
+			treasureHuntEntity.setReviveCount(0);
 		} else {
 			treasureHuntEntity.setStreak(treasureHuntEntity.getStreak() + 1);
 			treasureHuntEntity.setSeed(new Random().nextInt());
