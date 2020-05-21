@@ -19,6 +19,7 @@ import com.soapboxrace.core.jpa.SkillModRewardType;
 import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.jpa.TreasureHuntEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.Accolades;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
 import com.soapboxrace.jaxb.http.ArrayOfLuckyDrawBox;
@@ -95,6 +96,10 @@ public class EventsBO {
 		}
 		if (coins == 32767) {
 			achievementsBO.applyTreasureHuntAchievement(treasureHuntEntity);
+			int reviveCount = treasureHuntEntity.getReviveCount();
+			if (reviveCount > 0) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### THunt revival price will be increased by " + reviveCount++ + " times."), activePersonaId);
+			}
 			return accolades(activePersonaId, false);
 		}
 		return "";

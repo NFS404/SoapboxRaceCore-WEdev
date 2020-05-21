@@ -172,7 +172,7 @@ public class EventResultDragBO {
 		Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
 		Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
 		if (speedBugChance || dragArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
-				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000) {
+				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 || customCarEntity.getCarClassHash() == 0) {
 			raceIssues = true;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), activePersonaId);
 		}

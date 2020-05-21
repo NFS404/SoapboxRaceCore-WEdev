@@ -8,6 +8,7 @@ import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.OwnedCarConverter;
 import com.soapboxrace.core.dao.AchievementDAO;
+import com.soapboxrace.core.dao.AchievementRankDAO;
 import com.soapboxrace.core.dao.AchievementStateDAO;
 import com.soapboxrace.core.dao.BadgeDefinitionDAO;
 import com.soapboxrace.core.dao.BadgePersonaDAO;
@@ -64,6 +65,9 @@ public class PersonaBO {
 	
 	@EJB
 	private CommerceBO commerceBO;
+	
+	@EJB
+	private AchievementRankDAO achievementRankDAO;
 
 	public void changeDefaultCar(Long personaId, Long defaultCarId) {
 		PersonaEntity personaEntity = personaDAO.findById(personaId);
@@ -145,15 +149,15 @@ public class PersonaBO {
 	}
 
 	// Install new badges from the game client request
+	// Note: to properly recognize the custom achievement ranks, we should resolve the current rank manually
 	public void updateBadges(Long activePersonaId, BadgeBundle badgeBundle) {
 		PersonaEntity persona = personaDAO.findById(activePersonaId);
 		List<BadgePersonaEntity> listOfBadges = new ArrayList<>();
 		List<BadgeInput> badgeInputs = badgeBundle.getBadgeInputs();
 		for (BadgeInput badgeInput : badgeInputs) {
 			int idCheck = badgeInput.getBadgeDefinitionId();
-			AchievementStateEntity achievementStateEntity = achievementStateDAO.findByPersonaBadge(persona, (long) idCheck);
-			AchievementDefinitionEntity achievementDefinitionEntity = achievementDAO.findByBadgeId((long) idCheck);
-			
+			AchievementDefinitionEntity achievementDefinitionEntity = achievementDAO.findByBadgeId((long) idCheck);		
+			AchievementStateEntity achievementStateEntity = achievementStateDAO.findByPersonaBadge(persona, (long) idCheck); // Ordering by IDs to get the highest current rank
 			AchievementRankEntity achievementRank = achievementStateEntity.getAchievementRank();
 			BadgePersonaEntity badgePersonaEntity = new BadgePersonaEntity();
 			badgePersonaEntity.setSlot(badgeInput.getSlotId());

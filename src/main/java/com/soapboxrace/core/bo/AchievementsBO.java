@@ -494,6 +494,7 @@ public class AchievementsBO {
 		AchievementRankEntity achievementRankEntity = achievementRankDAO.findByAchievementDefinitionIdThresholdPersona(achievementType.getId(), thresholdValue,
 				personaEntity);
 		if (achievementRankEntity != null && achievementRankEntity.getAchievementDefinition().isVisible()) {
+			AchievementDefinitionEntity achievementDefinitionEntity = achievementRankEntity.getAchievementDefinition();
 			AchievementStateEntity achievementStateEntity = new AchievementStateEntity();
 			achievementStateEntity.setAchievedOn(LocalDateTime.now());
 			achievementStateEntity.setAchievementRank(achievementRankEntity);
@@ -505,6 +506,11 @@ public class AchievementsBO {
 			broadcastAchievement(personaEntity, achievementRankEntity);
 			processAchievementByThresholdRange(achievementPersonaEntity, AchievementType.LEGENDARY_DRIVER,
 					Integer.valueOf(personaEntity.getScore()).longValue());
+			
+			BadgePersonaEntity badgePersonaEntity = badgePersonaDAO.findByPersonaAndDefinition(personaEntity, achievementDefinitionEntity);
+			if (badgePersonaEntity != null) {
+				personaBO.updateBadgesProgress(personaEntity.getPersonaId(), achievementDefinitionEntity, achievementStateEntity, badgePersonaEntity.getSlot());
+			}
 		}
 	}
 
