@@ -1,5 +1,7 @@
 package com.soapboxrace.core.api;
 
+import java.net.URI;
+
 import javax.ejb.EJB;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -8,6 +10,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.codec.binary.StringUtils;
+
+import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.RestApiBO;
 import com.soapboxrace.jaxb.http.ChangePassword;
 
@@ -25,6 +30,11 @@ public class RestApi {
 	 */
 	@EJB
 	private RestApiBO bo;
+	/**
+	 * Параметры сервера
+	 */
+	@EJB
+	private ParameterBO parameterBO;
 	
 	
 	// ===================== Страницы =======================
@@ -140,7 +150,11 @@ public class RestApi {
 	@GET
 	@Path("Persona")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response personas(@QueryParam("personaName") String personaName) {
+	public Response personas(@QueryParam("personaName") String personaName, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.getPersonaInfo(personaName)).build();
 	}
 	/**
