@@ -13,12 +13,16 @@ import javax.ws.rs.core.MediaType;
 import com.soapboxrace.core.api.util.Secured;
 import com.soapboxrace.core.bo.AchievementsBO;
 import com.soapboxrace.core.bo.EventBO;
+import com.soapboxrace.core.bo.EventResultBO;
 import com.soapboxrace.core.bo.LobbyBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.dao.LobbyDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.jpa.EventSessionEntity;
+import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppChat;
+import com.soapboxrace.jaxb.http.CustomCarTrans;
 import com.soapboxrace.jaxb.http.LobbyInfo;
 import com.soapboxrace.jaxb.http.OwnedCarTrans;
 import com.soapboxrace.jaxb.http.SecurityChallenge;
@@ -47,6 +51,12 @@ public class MatchMaking {
 	
 	@EJB
 	private AchievementsBO achievementsBO;
+	
+	@EJB
+	private EventResultBO eventResultBO;
+	
+	@EJB
+	private OpenFireSoapBoxCli openFireSoapBoxCli;
 
 	@PUT
 	@Secured
@@ -54,9 +64,9 @@ public class MatchMaking {
 	@Produces(MediaType.APPLICATION_XML)
 	public String joinQueueRaceNow(@HeaderParam("securityToken") String securityToken) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
-		OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);
+		CustomCarTrans customCar = personaBO.getDefaultCar(activePersonaId).getCustomCar();
 //		lobbyBO.joinFastLobby(securityToken, activePersonaId, defaultCar.getCustomCar().getCarClassHash(), lobbyBO.carDivision(defaultCar.getCustomCar().getCarClassHash()), defaultCar.getCustomCar().getRaceFilter());
-		lobbyBO.joinFastLobby(securityToken, activePersonaId, defaultCar.getCustomCar().getCarClassHash(), defaultCar.getCustomCar().getRaceFilter());
+		lobbyBO.joinFastLobby(securityToken, activePersonaId, customCar.getCarClassHash(), customCar.getRaceFilter(), customCar.getPhysicsProfileHash());
 		return "";
 	}
 
@@ -97,12 +107,13 @@ public class MatchMaking {
 	@Path("/launchevent/{eventId}")
 	@Produces(MediaType.APPLICATION_XML)
 	public SessionInfo launchEvent(@HeaderParam("securityToken") String securityToken, @PathParam("eventId") int eventId) {
-		SessionInfo sessionInfo = new SessionInfo();
+		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 		SecurityChallenge securityChallenge = new SecurityChallenge();
 		securityChallenge.setChallengeId("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 		securityChallenge.setLeftSize(14);
 		securityChallenge.setPattern("FFFFFFFFFFFFFFFF");
 		securityChallenge.setRightSize(50);
+		SessionInfo sessionInfo = new SessionInfo();
 		sessionInfo.setChallenge(securityChallenge);
 		sessionInfo.setEventId(eventId);
 		EventSessionEntity createEventSession = eventBO.createEventSession(eventId);
@@ -110,19 +121,15 @@ public class MatchMaking {
 		tokenSessionBO.setActiveLobbyId(securityToken, 0L);
 		
 		if (eventId == 1003) {
-			Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 			achievementsBO.broadcastUICustom(activePersonaId, "Beat the time: 3:06.00");
 		}
 		if (eventId == 1004) {
-			Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st");
 		}
 		if (eventId == 1018) {
-			Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st after 4:15.00");
 		}
 		if (eventId == 1005) {
-			Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st");
 		}
 		return sessionInfo;
@@ -145,6 +152,12 @@ public class MatchMaking {
 	@Produces(MediaType.APPLICATION_XML)
 	public LobbyInfo acceptInvite(@HeaderParam("securityToken") String securityToken, @QueryParam("lobbyInviteId") Long lobbyInviteId) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
+		boolean isModCar = eventResultBO.modCarCheck(activePersonaId);
+		if (isModCar) { // ModCars cannot join to events
+			LobbyInfo lobbyInfoEmpty = new LobbyInfo();
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### ModCars is restricted from events."), activePersonaId);
+			return lobbyInfoEmpty;
+		}
 		tokenSessionBO.setActiveLobbyId(securityToken, lobbyInviteId);
 		return lobbyBO.acceptinvite(activePersonaId, lobbyInviteId);
 	}

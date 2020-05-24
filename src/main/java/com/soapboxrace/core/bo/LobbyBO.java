@@ -94,16 +94,23 @@ public class LobbyBO {
 		return "bas";
 	}
 		
-	public void joinFastLobby(String securityToken, Long personaId, int carClassHash, int raceFilter) {
+	public void joinFastLobby(String securityToken, Long personaId, int carClassHash, int raceFilter, int physicsProfileHash) {
 		// List<LobbyEntity> lobbys = lobbyDao.findAllOpen(carClassHash);
 //		System.out.println("MM START Time: " + System.currentTimeMillis());
-		List<LobbyEntity> lobbys = lobbyDao.findAllMPLobbies(carClassHash, raceFilter);
-		if (lobbys.isEmpty() && parameterBO.getBoolParam("RACENOW_RANDOMRACES")) {
-			PersonaEntity personaEntity = personaDao.findById(personaId);
-			createRandomLobby(securityToken, personaEntity);
+		boolean isModCar = false;
+		if (physicsProfileHash == 202813212 || physicsProfileHash == -840317713 || physicsProfileHash == -845093474) {
+			isModCar = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### ModCars is restricted from events."), personaId);
 		}
-		PersonaEntity personaEntity = personaDao.findById(personaId);
-		joinLobby(personaEntity, lobbys);
+		if (!isModCar) {
+			List<LobbyEntity> lobbys = lobbyDao.findAllMPLobbies(carClassHash, raceFilter);
+			if (lobbys.isEmpty() && parameterBO.getBoolParam("RACENOW_RANDOMRACES")) {
+				PersonaEntity personaEntity = personaDao.findById(personaId);
+				createRandomLobby(securityToken, personaEntity);
+			}
+			PersonaEntity personaEntity = personaDao.findById(personaId);
+			joinLobby(personaEntity, lobbys);
+		}
 	}
 
 	public void joinQueueEvent(Long personaId, int eventId, int carClassHash) {

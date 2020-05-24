@@ -20,6 +20,7 @@ import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.jaxb.http.ArrayOfEventDefinition;
 import com.soapboxrace.jaxb.http.ArrayOfInt;
+import com.soapboxrace.jaxb.http.CustomCarTrans;
 import com.soapboxrace.jaxb.http.EventDefinition;
 import com.soapboxrace.jaxb.http.EventsPacket;
 import com.soapboxrace.jaxb.http.OwnedCarTrans;
@@ -54,7 +55,13 @@ public class Events {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 		personaPresenceDAO.updateCurrentEvent(activePersonaId, null);
 		OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);
-		int carClassHash = defaultCar.getCustomCar().getCarClassHash();
+		CustomCarTrans customCarTrans = defaultCar.getCustomCar();
+		int carClassHash = customCarTrans.getCarClassHash();
+		int carPhysicsHash = customCarTrans.getPhysicsProfileHash();
+		boolean isModCar = false;
+		if (carPhysicsHash == 202813212 || carPhysicsHash == -840317713 || carPhysicsHash == -845093474) {
+			isModCar = true;
+		}
 
 		EventsPacket eventsPacket = new EventsPacket();
 		ArrayOfEventDefinition arrayOfEventDefinition = new ArrayOfEventDefinition();
@@ -62,12 +69,19 @@ public class Events {
 		for (EventEntity eventEntity : availableAtLevel) {
 			String carModel = eventEntity.getCarModel();
 			int eventClassHash = eventEntity.getCarClassHash();
+			boolean isLockedAlready = false;
 			// Event car model restriction (if present)
 			if ((eventClassHash != 607077938 && carClassHash != eventClassHash) || (carModel != null && !defaultCar.getCustomCar().getName().equalsIgnoreCase(carModel))) {
+				isLockedAlready = true;
 				eventEntity.setLocked(true);
 			}
 			// If player drives a AI or Drift-Spec car, he will be unable to play Drag events
-			if (eventEntity.getEventModeId() == 19 && (carClassHash == 0 || carClassHash == 1337)) {
+			if (!isLockedAlready && eventEntity.getEventModeId() == 19 && (carClassHash == 0 || carClassHash == 1337)) {
+				isLockedAlready = true;
+				eventEntity.setLocked(true);
+			}
+			// ModCars cannot join to events (ex. for Private Freeroam)
+			if (!isLockedAlready && isModCar && eventEntity.getId() != 1000) {
 				eventEntity.setLocked(true);
 			}
 			arrayOfEventDefinition.getEventDefinition().add(getEventDefinitionWithId(eventEntity));

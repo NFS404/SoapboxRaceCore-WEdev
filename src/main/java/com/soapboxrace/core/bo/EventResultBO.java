@@ -108,5 +108,19 @@ public class EventResultBO {
 		}
 		return letter;
 	}
+	
+	// Drift-Spec can be modified on the client side, but we don't want to let modders participate on the events
+	// FIXME Test code
+	public boolean modCarCheck(Long personaId) {
+		CarSlotEntity carSlotEntity = personaBO.getDefaultCarEntity(personaId);
+		OwnedCarEntity ownedCarEntity = carSlotEntity.getOwnedCar();
+		CustomCarEntity customCarEntity = ownedCarEntity.getCustomCar();
+		int carPhysicsHash = customCarEntity.getPhysicsProfileHash();
+		boolean isModCar = false;
+		if (carPhysicsHash == 202813212 || carPhysicsHash == -840317713 || carPhysicsHash == -845093474) {
+			isModCar = true;
+		}
+		return isModCar;
+	}
 
 }

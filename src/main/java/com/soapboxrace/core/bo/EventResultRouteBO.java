@@ -93,6 +93,7 @@ public class EventResultRouteBO {
 		EventEntity eventEntity = eventDataEntity.getEvent();
 		int eventClass = eventEntity.getCarClassHash();
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
+		String playerName = personaEntity.getName();
 		
 		Long team1id = eventSessionEntity.getTeam1Id();
 		Long team2id = eventSessionEntity.getTeam2Id();
@@ -103,7 +104,7 @@ public class EventResultRouteBO {
 		// XKAYA's arbitration exploit fix
 		boolean arbitStatus = eventDataEntity.getArbitration();
 		if (arbitStatus) {
-			System.out.println("WARINING - XKAYA's arbitration exploit attempt, driver: " + personaEntity.getName());
+			System.out.println("WARINING - XKAYA's arbitration exploit attempt, driver: " + playerName);
 			return null;
 		}
 		eventDataEntity.setArbitration(arbitStatus ? false : true);
@@ -130,6 +131,17 @@ public class EventResultRouteBO {
 		int carVersion = eventResultBO.carVersionCheck(activePersonaId);
 		eventDataEntity.setCarVersion(carVersion);
 		eventDataDao.update(eventDataEntity);
+		
+		CustomCarEntity customCarEntity = customCarDAO.findById(eventDataEntity.getCarId());
+		int carPhysicsHash = customCarEntity.getPhysicsProfileHash();
+		if (carPhysicsHash == 202813212 || carPhysicsHash == -840317713 || carPhysicsHash == -845093474) {
+			// Player on ModCar cannot finish any event (since he is restricted from), but if he somehow was finished it, we should know
+			System.out.println("Player " + playerName + "has illegally finished the event on ModCar.");
+			String message = ":heavy_minus_sign:"
+	        		+ "\n:japanese_goblin: **|** Nгрок **" + playerName + "** участвовал в гонках на **моддерском слоте**, покончите с ним."
+	        		+ "\n:japanese_goblin: **|** Player **" + playerName + "** was finished the event on **modder vehicle**, finish him.";
+			discordBot.sendMessage(message);
+		}
 
 		ArrayOfRouteEntrantResult arrayOfRouteEntrantResult = new ArrayOfRouteEntrantResult();
 		
@@ -215,7 +227,7 @@ public class EventResultRouteBO {
 		// Separate race stats
 		if (eventClass != 607077938) {
 			boolean raceIssues = false;
-			CustomCarEntity customCarEntity = customCarDAO.findById(eventDataEntity.getCarId());
+			
 			Long raceHacks = routeArbitrationPacket.getHacksDetected();
 			Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
 			Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
