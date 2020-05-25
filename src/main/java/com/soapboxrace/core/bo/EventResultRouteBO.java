@@ -134,7 +134,7 @@ public class EventResultRouteBO {
 		
 		CustomCarEntity customCarEntity = customCarDAO.findById(eventDataEntity.getCarId());
 		int carPhysicsHash = customCarEntity.getPhysicsProfileHash();
-		if (carPhysicsHash == 202813212 || carPhysicsHash == -840317713 || carPhysicsHash == -845093474) {
+		if (carPhysicsHash == 202813212 || carPhysicsHash == -840317713 || carPhysicsHash == -845093474 || carPhysicsHash == -133221572 || carPhysicsHash == -409661256) {
 			// Player on ModCar cannot finish any event (since he is restricted from), but if he somehow was finished it, we should know
 			System.out.println("Player " + playerName + "has illegally finished the event on ModCar.");
 			String message = ":heavy_minus_sign:"

@@ -11,12 +11,14 @@ import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.dao.ReportDAO;
 import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
+import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.dao.VinylStorageDAO;
 import com.soapboxrace.core.jpa.FriendListEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ReportEntity;
 import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.jpa.TokenSessionEntity;
+import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.core.xmpp.OpenFireRestApiCli;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
@@ -76,6 +78,9 @@ public class FriendBO {
 	
 	@EJB
 	private VinylStorageBO vinylStorageBO;
+	
+	@EJB
+	private UserDAO userDAO;
 
 	public PersonaFriendsList getFriendListFromUserId(Long userId) {
 		ArrayOfFriendPersona arrayOfFriendPersona = new ArrayOfFriendPersona();
@@ -260,7 +265,7 @@ public class FriendBO {
 			}
 			if (entryValue.contentEquals("PUBLIC") || entryValue.contentEquals("PRIVATE")) {
 				teamsBO.teamEntryIG(openEntryBool, leaderTeam);
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Team's entry rule has changed"), personaId);
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Team's entry rule has changed."), personaId);
 				return null;
 			}
 			return null;
@@ -275,6 +280,16 @@ public class FriendBO {
 		}
 		if (displayName.contains("/VINYLREMOVE ")) {
 			vinylStorageBO.vinylStorageRemove(personaId, displayName);
+		}
+		if (displayName.contains("/MODDER")) {
+			UserEntity userEntity = personaSender.getUser();
+			if (userEntity.isModder()) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You're already have a Modder status."), personaId);
+				return null;
+			}
+			userEntity.setModder(true);
+			userDAO.update(userEntity);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Modder access is enabled, please restart the game."), personaId);
 		}
 		// default add-a-friend interaction
 		if (!teamsActionInit) {

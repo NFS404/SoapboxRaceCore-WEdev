@@ -24,7 +24,7 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 		return entityManager.find(ProductEntity.class, id);
 	}
 
-	public List<ProductEntity> findByLevelEnabled(String categoryName, String productType, int minLevel, boolean enabled, boolean premium, boolean pFull) {
+	public List<ProductEntity> findByLevelEnabled(String categoryName, String productType, int minLevel, boolean enabled, boolean premium, boolean pFull, boolean isModder) {
 		TypedQuery<ProductEntity> query = entityManager.createNamedQuery("ProductEntity.findByLevelEnabled", ProductEntity.class);
 		query.setParameter("categoryName", categoryName);
 		query.setParameter("productType", productType);
@@ -32,6 +32,7 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 		query.setParameter("minLevel", minLevel);
 		query.setParameter("premium", premium);
 		query.setParameter("pFull", pFull);
+		query.setParameter("modder", isModder);
 		return query.getResultList();
 	}
 

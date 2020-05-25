@@ -18,7 +18,8 @@ import javax.persistence.Table;
 						+ "(obj.premium = false or obj.premium = :premium ) AND " //
 						+ "obj.categoryName = :categoryName AND "//
 						+ "obj.productType = :productType AND" //
-		                + "(obj.pFull = false or obj.pFull = :pFull )"), //
+		                + "(obj.pFull = false or obj.pFull = :pFull ) AND" //
+		                + "(obj.modder = false or obj.modder = :modder )"), //
 		@NamedQuery(name = "ProductEntity.findForEndRace", //
 				query = "SELECT obj FROM ProductEntity obj WHERE " //
 						+ "obj.enabled = true AND " //
@@ -67,6 +68,7 @@ public class ProductEntity {
 	private Float skillValue;
 	private Integer stars = 0;
 	private boolean pFull = false;
+	private boolean modder = false;
 
 	public Long getId() {
 		return id;
@@ -322,6 +324,14 @@ public class ProductEntity {
 
 	public void setPFull(boolean pFull) {
 		this.pFull = pFull;
+	}
+	
+	public boolean getModder() {
+		return modder;
+	}
+
+	public void setModder(boolean modder) {
+		this.modder = modder;
 	}
 
 }

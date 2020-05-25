@@ -117,7 +117,7 @@ public class EventResultBO {
 		CustomCarEntity customCarEntity = ownedCarEntity.getCustomCar();
 		int carPhysicsHash = customCarEntity.getPhysicsProfileHash();
 		boolean isModCar = false;
-		if (carPhysicsHash == 202813212 || carPhysicsHash == -840317713 || carPhysicsHash == -845093474) {
+		if (carPhysicsHash == 202813212 || carPhysicsHash == -840317713 || carPhysicsHash == -845093474 || carPhysicsHash == -133221572 || carPhysicsHash == -409661256) {
 			isModCar = true;
 		}
 		return isModCar;

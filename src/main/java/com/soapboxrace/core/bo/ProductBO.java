@@ -12,6 +12,7 @@ import com.soapboxrace.core.dao.VinylProductDAO;
 import com.soapboxrace.core.jpa.CategoryEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ProductEntity;
+import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.core.jpa.VinylProductEntity;
 import com.soapboxrace.jaxb.http.ArrayOfProductTrans;
 import com.soapboxrace.jaxb.http.ProductTrans;
@@ -34,16 +35,21 @@ public class ProductBO {
 	public List<ProductEntity> productsInCategory(String categoryName, String productType, Long personaId) {
 		boolean premium = false;
 		boolean pFull = false;
+		boolean isModder = false;
 		int level = 1;
 		if (personaId != null && !personaId.equals(0L)) {
 			PersonaEntity personaEntity = personaDao.findById(personaId);
-			premium = personaEntity.getUser().isPremium();
-			if (personaEntity.getUser().getPremiumType() != null && (personaEntity.getUser().getPremiumType().equalsIgnoreCase("full") || personaEntity.getUser().getPremiumType().equalsIgnoreCase("unlim"))) {
+			UserEntity userEntity = personaEntity.getUser();
+			premium = userEntity.isPremium();
+			if (userEntity.getPremiumType() != null && (userEntity.getPremiumType().equalsIgnoreCase("full") || userEntity.getPremiumType().equalsIgnoreCase("unlim"))) {
 				pFull = true;
 			}
 			level = personaEntity.getLevel();
+			if (userEntity.isModder()) {
+				isModder = true;
+			}
 		}
-		return ProductDAO.findByLevelEnabled(categoryName, productType, level, true, premium, pFull);
+		return ProductDAO.findByLevelEnabled(categoryName, productType, level, true, premium, pFull, isModder);
 	}
 
 	public List<CategoryEntity> categories() {

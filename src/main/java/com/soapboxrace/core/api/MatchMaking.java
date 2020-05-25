@@ -21,7 +21,6 @@ import com.soapboxrace.core.dao.LobbyDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
-import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.CustomCarTrans;
 import com.soapboxrace.jaxb.http.LobbyInfo;
 import com.soapboxrace.jaxb.http.OwnedCarTrans;
@@ -76,8 +75,8 @@ public class MatchMaking {
 	@Produces(MediaType.APPLICATION_XML)
 	public String joinQueueEvent(@HeaderParam("securityToken") String securityToken, @PathParam("eventId") int eventId) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
-		OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);
-		lobbyBO.joinQueueEvent(activePersonaId, eventId, defaultCar.getCustomCar().getCarClassHash());
+		CustomCarTrans customCar = personaBO.getDefaultCar(activePersonaId).getCustomCar();
+		lobbyBO.joinQueueEvent(activePersonaId, eventId, customCar.getCarClassHash());
 		return "";
 	}
 
@@ -141,8 +140,8 @@ public class MatchMaking {
 	@Produces(MediaType.APPLICATION_XML)
 	public String makePrivateLobby(@HeaderParam("securityToken") String securityToken, @PathParam("eventId") int eventId, @PathParam("carClassHash") int carClassHash) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
-		OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);
-		lobbyBO.createPrivateLobby(activePersonaId, eventId, defaultCar.getCustomCar().getCarClassHash());
+		CustomCarTrans customCar = personaBO.getDefaultCar(activePersonaId).getCustomCar();
+		lobbyBO.createPrivateLobby(activePersonaId, eventId, customCar.getCarClassHash());
 		return "";
 	}
 
@@ -152,12 +151,6 @@ public class MatchMaking {
 	@Produces(MediaType.APPLICATION_XML)
 	public LobbyInfo acceptInvite(@HeaderParam("securityToken") String securityToken, @QueryParam("lobbyInviteId") Long lobbyInviteId) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
-		boolean isModCar = eventResultBO.modCarCheck(activePersonaId);
-		if (isModCar) { // ModCars cannot join to events
-			LobbyInfo lobbyInfoEmpty = new LobbyInfo();
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### ModCars is restricted from events."), activePersonaId);
-			return lobbyInfoEmpty;
-		}
 		tokenSessionBO.setActiveLobbyId(securityToken, lobbyInviteId);
 		return lobbyBO.acceptinvite(activePersonaId, lobbyInviteId);
 	}

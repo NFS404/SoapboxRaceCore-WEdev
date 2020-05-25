@@ -3,6 +3,7 @@ package com.soapboxrace.core.bo;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
@@ -59,6 +60,9 @@ public class EventResultDragBO {
 	
 	@EJB
 	private CustomCarDAO customCarDAO;
+	
+	@EJB
+	private DiscordWebhook discordBot;
 
 	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -77,6 +81,7 @@ public class EventResultDragBO {
 		XMPP_ResponseTypeDragEntrantResult dragEntrantResultResponse = new XMPP_ResponseTypeDragEntrantResult();
 		dragEntrantResultResponse.setDragEntrantResult(xmppDragResult);
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
+		String playerName = personaEntity.getName();
 		
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 		// XKAYA's arbitration exploit fix
@@ -112,6 +117,17 @@ public class EventResultDragBO {
 		eventDataEntity.setServerEventDuration(eventEnded - eventDataEntity.getServerEventDuration());
 		eventDataDao.update(eventDataEntity);
 
+		CustomCarEntity customCarEntity = customCarDAO.findById(eventDataEntity.getCarId());
+		int carPhysicsHash = customCarEntity.getPhysicsProfileHash();
+		if (carPhysicsHash == 202813212 || carPhysicsHash == -840317713 || carPhysicsHash == -845093474 || carPhysicsHash == -133221572 || carPhysicsHash == -409661256) {
+			// Player on ModCar cannot finish any event (since he is restricted from), but if he somehow was finished it, we should know
+			System.out.println("Player " + playerName + "has illegally finished the event on ModCar.");
+			String message = ":heavy_minus_sign:"
+	        		+ "\n:japanese_goblin: **|** Nгрок **" + playerName + "** участвовал в гонках на **моддерском слоте**, покончите с ним."
+	        		+ "\n:japanese_goblin: **|** Player **" + playerName + "** was finished the event on **modder vehicle**, finish him.";
+			discordBot.sendMessage(message);
+		}
+		
 		ArrayOfDragEntrantResult arrayOfDragEntrantResult = new ArrayOfDragEntrantResult();
 		// +1 to play count for this track, MP
 		if (eventDataEntity.getRank() == 1 && arrayOfDragEntrantResult.getDragEntrantResult().size() > 1) {
@@ -167,7 +183,6 @@ public class EventResultDragBO {
 		
 		// Separate race stats
 		boolean raceIssues = false;
-		CustomCarEntity customCarEntity = customCarDAO.findById(eventDataEntity.getCarId());
 		Long raceHacks = dragArbitrationPacket.getHacksDetected();
 		Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
 		Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong

@@ -3,17 +3,19 @@ package com.soapboxrace.core.bo;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppEvent;
-import com.soapboxrace.jaxb.http.Accolades;
 import com.soapboxrace.jaxb.http.ArrayOfTeamEscapeEntrantResult;
 import com.soapboxrace.jaxb.http.ExitPath;
 import com.soapboxrace.jaxb.http.TeamEscapeArbitrationPacket;
@@ -51,6 +53,12 @@ public class EventResultTeamEscapeBO {
 	
 	@EJB
 	private EventResultBO eventResultBO;
+	
+	@EJB
+	private DiscordWebhook discordBot;
+	
+	@EJB
+	private CustomCarDAO customCarDAO;
 
 	public TeamEscapeEventResult handleTeamEscapeEnd(EventSessionEntity eventSessionEntity, Long activePersonaId,
 			TeamEscapeArbitrationPacket teamEscapeArbitrationPacket) {
@@ -69,6 +77,7 @@ public class EventResultTeamEscapeBO {
 		teamEscapeEntrantResultResponse.setTeamEscapeEntrantResult(xmppTeamEscapeResult);
 
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
+		String playerName = personaEntity.getName();
 
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 		// XKAYA's arbitration exploit fix
@@ -110,6 +119,17 @@ public class EventResultTeamEscapeBO {
 		eventDataEntity.setCarVersion(carVersion);
 		eventDataDao.update(eventDataEntity);
 
+		CustomCarEntity customCarEntity = customCarDAO.findById(eventDataEntity.getCarId());
+		int carPhysicsHash = customCarEntity.getPhysicsProfileHash();
+		if (carPhysicsHash == 202813212 || carPhysicsHash == -840317713 || carPhysicsHash == -845093474 || carPhysicsHash == -133221572 || carPhysicsHash == -409661256) {
+			// Player on ModCar cannot finish any event (since he is restricted from), but if he somehow was finished it, we should know
+			System.out.println("Player " + playerName + "has illegally finished the event on ModCar.");
+			String message = ":heavy_minus_sign:"
+	        		+ "\n:japanese_goblin: **|** Nгрок **" + playerName + "** участвовал в гонках на **моддерском слоте**, покончите с ним."
+	        		+ "\n:japanese_goblin: **|** Player **" + playerName + "** was finished the event on **modder vehicle**, finish him.";
+			discordBot.sendMessage(message);
+		}
+		
 		ArrayOfTeamEscapeEntrantResult arrayOfTeamEscapeEntrantResult = new ArrayOfTeamEscapeEntrantResult();
 		// +1 to play count for this track, MP
 		if (eventDataEntity.getRank() == 1 && arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() > 1) {

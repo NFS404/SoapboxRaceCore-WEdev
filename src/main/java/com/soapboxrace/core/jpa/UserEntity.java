@@ -58,6 +58,9 @@ public class UserEntity {
 	@Column(name = "isAdmin")
 	private boolean isAdmin;
 
+	@Column(name = "isModder")
+	private boolean isModder;
+	
 	@Column(name = "created")
 	private LocalDateTime created;
 
@@ -159,6 +162,14 @@ public class UserEntity {
 
 	public void setAdmin(boolean admin) {
 		isAdmin = admin;
+	}
+	
+	public boolean isModder() {
+		return isModder;
+	}
+
+	public void setModder(boolean modder) {
+		isModder = modder;
 	}
 
 	public LocalDateTime getLastLogin() {
