@@ -58,6 +58,7 @@ public class ArrayOfRaceWithTime {
 		this.raceClass = raceClass;
 	}
 	public void add(
+			int id,
 			String playerName,
 			int playerIconId,
 			String carName,
@@ -84,13 +85,14 @@ public class ArrayOfRaceWithTime {
 			int pTeamEvade,
 			int pTeamSlingshot
 		) {
-		races.add(new Race(playerName, playerIconId, carName, carClassHash, raceTime, raceAltTime, airTime, lapTime, maxSpeed, perfectStart,
+		races.add(new Race(id, playerName, playerIconId, carName, carClassHash, raceTime, raceAltTime, airTime, lapTime, maxSpeed, perfectStart,
 				isSingle, date, isCarVersionVaild, pNos, pSlingshot, pOneMoreLap, pReady, pMagnet, pShield, pEvade, pJuggernaut, pRunFlatTires, 
 				pCooldown, pTeamEvade, pTeamSlingshot));
 	}
 	
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlType(name = "Race", propOrder = {
+		"id",
 		"playerName",
 		"playerIconId",
 		"carName",
@@ -118,6 +120,8 @@ public class ArrayOfRaceWithTime {
 		"pTeamSlingshot"
 	})
 	public static class Race {
+		@XmlElement(name = "id")
+		private int id;
 		@XmlElement(name = "PlayerName")
 		private String playerName;
 		@XmlElement(name = "PlayerIconId")
@@ -170,6 +174,7 @@ public class ArrayOfRaceWithTime {
 		private int pTeamSlingshot;
 		
 		protected Race(
+				int id,
 				String playerName,
 				int playerIconId,
 				String carName,
@@ -196,6 +201,7 @@ public class ArrayOfRaceWithTime {
 				int pTeamEvade,
 				int pTeamSlingshot
 			) {
+			this.id = id;
 			this.playerName = playerName;
 			this.playerIconId = playerIconId;
 			this.carName = carName;

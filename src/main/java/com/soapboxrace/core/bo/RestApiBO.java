@@ -302,6 +302,7 @@ public class RestApiBO {
 					isCarVersionVaild = false;
 				}
 				list.add(
+						race.getId().intValue(), 
 						race.getPlayerName(),
 						race.getPersona().getIconIndex(),
 						carClassesEntity.getFullName(),
@@ -343,6 +344,7 @@ public class RestApiBO {
 					isCarVersionVaild = false;
 				}
 				list.add(
+						race.getId().intValue(), 
 						race.getPlayerName(),
 						race.getPersona().getIconIndex(),
 						carClassesEntity.getFullName(),
@@ -409,6 +411,7 @@ public class RestApiBO {
 				isCarVersionVaild = false;
 			}
 			list.add(
+					race.getId().intValue(), 
 					race.getPlayerName(),
 					race.getPersona().getIconIndex(),
 					carClassesEntity.getFullName(),
