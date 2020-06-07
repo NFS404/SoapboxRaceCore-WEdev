@@ -70,6 +70,9 @@ public class UserEntity {
 	@Column(name = "extramoney")
 	private double extramoney;
 	
+	@Column(name = "moneyGiven")
+	private double moneyGiven;
+	
 	@Column(name = "userAgent", length = 255)
 	private String ua;
 
@@ -202,6 +205,14 @@ public class UserEntity {
 	
 	public void setExtraMoney(double extramoney) {
 		this.extramoney = extramoney;
+	}
+	
+	public double getMoneyGiven() {
+		return moneyGiven;
+	}
+	
+	public void setMoneyGiven(double moneyGiven) {
+		this.moneyGiven = moneyGiven;
 	}
 	
 	public int getVinylSlotsUsed() {

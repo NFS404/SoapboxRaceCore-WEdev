@@ -1,18 +1,23 @@
 package com.soapboxrace.core.bo;
 
 import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.dao.InviteTicketDAO;
+import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.ServerInfoDAO;
 import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.InviteTicketEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.core.xmpp.OpenFireRestApiCli;
+import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.ArrayOfProfileData;
 import com.soapboxrace.jaxb.http.ProfileData;
 import com.soapboxrace.jaxb.http.User;
@@ -36,6 +41,15 @@ public class UserBO {
 
 	@EJB
 	private ParameterBO parameterBO;
+	
+	@EJB
+	private OpenFireSoapBoxCli openFireSoapBoxCli;
+	
+	@EJB
+	private PersonaDAO personaDAO;
+	
+	@EJB
+	private DiscordWebhook discordBot;
 
 	public void createXmppUser(UserInfo userInfo) {
 		String securityToken = userInfo.getUser().getSecurityToken();
@@ -123,5 +137,133 @@ public class UserBO {
 		userInfo.setUser(user);
 		return userInfo;
 	}
-
+	
+	// Send persona's money to another persona (/SENDMONEY nickName money)
+	public void sendMoney(PersonaEntity personaEntity, String displayName) {
+		Long personaId = personaEntity.getPersonaId();
+		String entryValue = displayName.replaceFirst("/SENDMONEY ", "");
+        String[] values = entryValue.split(" ");
+        if (values.length > 1 || values[1].isEmpty()) { // Wrong parameters
+        	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Command parameters is invaild, try again."), personaId);
+        }
+        String entryName = values[0].toString(); // Nickname value
+        double entryCash = (double) Integer.parseInt(values[1].toString()); // Cash value
+        
+        // Sender's info
+		UserEntity userEntitySender = personaEntity.getUser();
+		double personaMoneySender = personaEntity.getCash();
+		double moneyGivenAlready = userEntitySender.getMoneyGiven();
+        // FIXME You need a cron-task with moneyGiven values being reset every week
+		boolean premiumStatusSender = userEntitySender.isPremium();
+		double sendLimit = 0;
+		if (!premiumStatusSender) {
+			sendLimit = parameterBO.getIntParam("MAX_SENDMONEY_FREE");
+		}
+		if (premiumStatusSender) {
+			sendLimit = parameterBO.getIntParam("MAX_SENDMONEY_PREMIUM");
+		}
+		boolean canSendMore = true;
+		if (moneyGivenAlready >= sendLimit) {
+			canSendMore = false;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Unable to send money - transaction limit is already reached.\n"
+					+ "## Limit resets every Monday."), personaId);
+		}
+		if (entryCash > personaMoneySender) {
+			canSendMore = false;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Value is bigger than your money, check the value and try again."), personaId);
+		}
+		
+		PersonaEntity personaEntityTarget = personaDAO.findByName(entryName);
+		if (personaEntityTarget == null) {
+			canSendMore = false;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Wrong nickname, check the name and try again."), personaId);
+		}
+		
+		if (canSendMore) {
+			// Target player's info
+			boolean canProceed = true;
+			UserEntity userEntityTarget = personaEntityTarget.getUser();
+			double personaMoneyTarget = personaEntityTarget.getCash();
+			boolean premiumStatusTarget = userEntityTarget.isPremium();
+			
+			int moneyLimit = 0;
+			double moneyDiff = 0;
+			if (!premiumStatusTarget) {
+				moneyLimit = parameterBO.getIntParam("MAX_PLAYER_CASH_FREE");
+			}
+			if (premiumStatusTarget) {
+				moneyLimit = parameterBO.getIntParam("MAX_PLAYER_CASH_PREMIUM");
+			}
+			if (personaMoneyTarget >= moneyLimit) {
+				canProceed = false;
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This player cannot get more money."), personaId);
+			}
+			
+			if (canProceed) {
+				double personaMoneyTargetNew = personaMoneyTarget + entryCash;
+				if (personaMoneyTargetNew > moneyLimit) {
+					personaMoneyTargetNew = moneyLimit;
+				}
+				moneyDiff = personaMoneyTargetNew - personaMoneyTarget;
+				personaEntityTarget.setCash(personaMoneyTargetNew);
+				personaEntity.setCash(personaMoneySender - moneyDiff);
+				userEntitySender.setMoneyGiven(moneyGivenAlready + moneyDiff);
+				
+				personaDAO.update(personaEntityTarget);
+				personaDAO.update(personaEntity);
+				userDao.update(userEntitySender);
+				
+				String senderName = personaEntity.getName();
+				String targetName = personaEntityTarget.getName();
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### $" + (int) moneyDiff + " has been sent to this persona."), personaId);
+				String message = ":heavy_minus_sign:"
+		        		+ "\n:money_with_wings: **|** Nгрок **" + senderName + "** отправил **" + (int) moneyDiff + "$** игроку **" + targetName + "**."
+		        		+ "\n:money_with_wings: **|** Player **" + senderName + "** has sent **$" + (int) moneyDiff + "** to player **" + targetName + "**.";
+				discordBot.sendMessage(message);
+			}
+		}
+	}
+	
+	// Get extra reserve money to current persona - re-fill the persona's cash account
+	public void getMoney(PersonaEntity personaEntity) {
+		UserEntity userEntity = personaEntity.getUser();
+		double extraMoneyCur = userEntity.getExtraMoney(); // Orig. full value
+		double personaMoney = personaEntity.getCash();
+		boolean premiumStatus = userEntity.isPremium();
+		Long personaId = personaEntity.getPersonaId();
+		
+		double extraMoneyLimited = extraMoneyCur; // Value with cash limit applied
+		int moneyLimit = 0;
+		double moneyDiff = 0;
+		if (!premiumStatus) {
+			moneyLimit = parameterBO.getIntParam("MAX_PLAYER_CASH_FREE");
+		}
+		if (premiumStatus) {
+			moneyLimit = parameterBO.getIntParam("MAX_PLAYER_CASH_PREMIUM");
+		}
+		
+		if (extraMoneyCur == 0) {
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You cannot have any money on the WeBank."), personaId);
+		}
+		if (personaMoney >= moneyLimit) {
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your money limit is reached already."), personaId);
+		}
+		else { // Transaction
+			if (extraMoneyCur > moneyLimit) {
+				extraMoneyLimited = moneyLimit;
+			}
+			double personaMoneyNew = personaMoney + extraMoneyLimited;
+			if (personaMoneyNew > moneyLimit) {
+				personaMoneyNew = moneyLimit;
+			}
+			moneyDiff = personaMoneyNew - personaMoney;
+			userEntity.setExtraMoney(extraMoneyCur - moneyDiff);
+			
+			personaEntity.setCash(personaMoneyNew);
+			personaDAO.update(personaEntity);
+			userDao.update(userEntity);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### $" + (int) moneyDiff + " has been added to your cash account.\n"
+					+ "## Current WeBank money amount: $" + (int) userEntity.getExtraMoney()), personaId);
+		}
+	}
 }

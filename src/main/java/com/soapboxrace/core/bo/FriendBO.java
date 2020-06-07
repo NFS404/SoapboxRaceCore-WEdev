@@ -81,6 +81,9 @@ public class FriendBO {
 	
 	@EJB
 	private UserDAO userDAO;
+	
+	@EJB
+	private UserBO userBO;
 
 	public PersonaFriendsList getFriendListFromUserId(Long userId) {
 		ArrayOfFriendPersona arrayOfFriendPersona = new ArrayOfFriendPersona();
@@ -290,6 +293,14 @@ public class FriendBO {
 			userEntity.setModder(true);
 			userDAO.update(userEntity);
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Modder access is enabled, please restart the game."), personaId);
+		}
+		// Send persona's money to another persona (/SENDMONEY nickName money)
+		if (displayName.contains("/SENDMONEY ")) {
+			userBO.sendMoney(personaSender, displayName);
+		}
+		// Get extra reserve money to current persona
+		if (displayName.contains("/GETMONEY")) {
+			userBO.getMoney(personaSender);
 		}
 		// default add-a-friend interaction
 		if (!teamsActionInit) {

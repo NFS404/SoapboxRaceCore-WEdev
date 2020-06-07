@@ -2,6 +2,7 @@ package com.soapboxrace.core.bo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -290,7 +291,15 @@ public class RestApiBO {
 				);
 		// FIXME Do something with that mess
 		if (carclasshash == 0) {
+			ArrayList<Long> userIdList = new ArrayList<>();
 			for (RecordsEntity race : recordsDAO.statsEventAll(event, powerups, page, onPage)) {
+				Long userId = race.getUser().getId();
+				if (!userIdList.contains(userId)) {
+					userIdList.add(userId);
+				}
+				else {
+					continue;
+				}
 				final boolean isCarVersionVaild;
 				CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
 				EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
