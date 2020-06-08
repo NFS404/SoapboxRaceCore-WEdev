@@ -74,7 +74,7 @@ import com.soapboxrace.jaxb.http.RouteArbitrationPacket;
 import com.soapboxrace.jaxb.http.StatConversion;
 import com.soapboxrace.jaxb.http.TeamEscapeArbitrationPacket;
 import com.soapboxrace.jaxb.http.WalletTrans;
-import com.soapboxrace.jaxb.util.UnmarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 import com.soapboxrace.jaxb.xmpp.AchievementAwarded;
 import com.soapboxrace.jaxb.xmpp.AchievementProgress;
 import com.soapboxrace.jaxb.xmpp.AchievementsAwarded;
@@ -660,7 +660,7 @@ public class AchievementsBO {
 					throw new IllegalArgumentException(String.format("No basket definition for %s", product.getProductId()));
 				}
 				String ownedCarTransStr = basketDefinitonEntity.getOwnedCarTrans();
-				OwnedCarTrans ownedCarTrans = UnmarshalXML.unMarshal(ownedCarTransStr, OwnedCarTrans.class);
+				OwnedCarTrans ownedCarTrans = JAXBUtility.unMarshal(ownedCarTransStr, OwnedCarTrans.class);
 				ownedCarTrans.setId(0L);
 				ownedCarTrans.getCustomCar().setId(0);
 				CarSlotEntity carSlotEntity = new CarSlotEntity();

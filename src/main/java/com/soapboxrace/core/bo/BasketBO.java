@@ -1,10 +1,8 @@
 package com.soapboxrace.core.bo;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 
 import javax.ejb.EJB;
@@ -12,8 +10,6 @@ import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.OwnedCarConverter;
-import com.soapboxrace.core.bo.util.RewardDestinyType;
-import com.soapboxrace.core.bo.util.RewardType;
 import com.soapboxrace.core.dao.AchievementRankDAO;
 import com.soapboxrace.core.dao.BasketDefinitionDAO;
 import com.soapboxrace.core.dao.CarClassesDAO;
@@ -28,8 +24,6 @@ import com.soapboxrace.core.dao.RewardDropDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.TreasureHuntDAO;
 import com.soapboxrace.core.dao.VisualPartDAO;
-import com.soapboxrace.core.jpa.AchievementRankEntity;
-import com.soapboxrace.core.jpa.AchievementStateEntity;
 import com.soapboxrace.core.jpa.BasketDefinitionEntity;
 import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
@@ -39,22 +33,13 @@ import com.soapboxrace.core.jpa.InventoryItemEntity;
 import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ProductEntity;
-import com.soapboxrace.core.jpa.ProductType;
-import com.soapboxrace.core.jpa.RewardDropEntity;
 import com.soapboxrace.core.jpa.TreasureHuntEntity;
-import com.soapboxrace.jaxb.http.AchievementRewards;
-import com.soapboxrace.jaxb.http.AchievementState;
 import com.soapboxrace.jaxb.http.ArrayOfCommerceItemTrans;
-import com.soapboxrace.jaxb.http.ArrayOfInventoryItemTrans;
-import com.soapboxrace.jaxb.http.ArrayOfOwnedCarTrans;
-import com.soapboxrace.jaxb.http.ArrayOfWalletTrans;
 import com.soapboxrace.jaxb.http.CommerceItemTrans;
 import com.soapboxrace.jaxb.http.CommerceResultStatus;
 import com.soapboxrace.jaxb.http.CommerceResultTrans;
-import com.soapboxrace.jaxb.http.InvalidBasketTrans;
 import com.soapboxrace.jaxb.http.OwnedCarTrans;
-import com.soapboxrace.jaxb.http.WalletTrans;
-import com.soapboxrace.jaxb.util.UnmarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 
 @Stateless
 public class BasketBO {
@@ -125,7 +110,7 @@ public class BasketBO {
 			throw new IllegalArgumentException(String.format("No basket definition for %s", productId));
 		}
 		String ownedCarTrans = basketDefinitonEntity.getOwnedCarTrans();
-		return UnmarshalXML.unMarshal(ownedCarTrans, OwnedCarTrans.class);
+		return JAXBUtility.unMarshal(ownedCarTrans, OwnedCarTrans.class);
 	}
 
 	public CommerceResultStatus repairCar(String productId, PersonaEntity personaEntity) {

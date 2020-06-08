@@ -45,8 +45,7 @@ import com.soapboxrace.jaxb.http.InventoryTrans;
 import com.soapboxrace.jaxb.http.OwnedCarTrans;
 import com.soapboxrace.jaxb.http.ProductTrans;
 import com.soapboxrace.jaxb.http.WalletTrans;
-import com.soapboxrace.jaxb.util.MarshalXML;
-import com.soapboxrace.jaxb.util.UnmarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 
 @Path("/personas")
 public class Personas {
@@ -82,7 +81,7 @@ public class Personas {
 
 		CommerceSessionResultTrans commerceSessionResultTrans = new CommerceSessionResultTrans();
 
-		CommerceSessionTrans commerceSessionTrans = UnmarshalXML.unMarshal(commerceXml, CommerceSessionTrans.class);
+		CommerceSessionTrans commerceSessionTrans = JAXBUtility.unMarshal(commerceXml, CommerceSessionTrans.class);
 		List<BasketItemTrans> basketItemTrans = commerceSessionTrans.getBasket().getItems().getBasketItemTrans();
 		CarSlotEntity defaultCarEntity = personaBO.getDefaultCarEntity(personaId);
 		CommerceOp commerceOp = commerceBO.detectCommerceOperation(commerceSessionTrans, defaultCarEntity);
@@ -136,7 +135,7 @@ public class Personas {
 
 		ArrayOfOwnedCarTrans arrayOfOwnedCarTrans = new ArrayOfOwnedCarTrans();
 
-		BasketTrans basketTrans = UnmarshalXML.unMarshal(basketXml, BasketTrans.class);
+		BasketTrans basketTrans = JAXBUtility.unMarshal(basketXml, BasketTrans.class);
 		String productId = basketTrans.getItems().getBasketItemTrans().get(0).getProductId();
 		if ("-1".equals(productId) || "SRV-GARAGESLOT".equals(productId)) {
 			commerceResultTrans.setStatus(CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS);
@@ -239,7 +238,7 @@ public class Personas {
 		sessionBO.verifyPersona(securityToken, personaId);
 		if (basketBO.sellCar(securityToken, personaId, serialNumber)) {
 			OwnedCarTrans ownedCarTrans = personaBO.getDefaultCar(personaId);
-			return MarshalXML.marshal(ownedCarTrans);
+			return JAXBUtility.marshal(ownedCarTrans);
 		}
 		return "";
 	}
@@ -275,7 +274,7 @@ public class Personas {
 		// update car (skill and performance shop)
 		sessionBO.verifyPersona(securityToken, personaId);
 		OwnedCarTrans ownedCarTrans = personaBO.getDefaultCar(personaId);
-		return MarshalXML.marshal(ownedCarTrans);
+		return JAXBUtility.marshal(ownedCarTrans);
 	}
 
 	@GET

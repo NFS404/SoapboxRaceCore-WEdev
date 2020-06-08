@@ -8,7 +8,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import com.soapboxrace.core.dao.HardwareInfoDAO;
 import com.soapboxrace.core.jpa.HardwareInfoEntity;
 import com.soapboxrace.jaxb.http.HardwareInfo;
-import com.soapboxrace.jaxb.util.MarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 
 @Stateless
 public class HardwareInfoBO {
@@ -34,7 +34,7 @@ public class HardwareInfoBO {
 		hardwareInfo.setGpuDriverBuild(0);
 		hardwareInfo.setGpuDriverSubversion(0);
 		hardwareInfo.setGpuDriverVersion(0);
-		String hardwareInfoXml = MarshalXML.marshal(hardwareInfo);
+		String hardwareInfoXml = JAXBUtility.marshal(hardwareInfo);
 		String calcHardwareInfoHash = calcHardwareInfoHash(hardwareInfoXml);
 		HardwareInfoEntity hardwareInfoEntityTmp = hardwareInfoDAO.findByHardwareHash(calcHardwareInfoHash);
 		if (hardwareInfoEntityTmp == null) {

@@ -1,7 +1,6 @@
 package com.soapboxrace.core.xmpp;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
@@ -9,7 +8,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 
 import com.soapboxrace.core.bo.ParameterBO;
-import com.soapboxrace.jaxb.util.MarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 
 @Startup
 @Singleton
@@ -51,7 +50,7 @@ public class OpenFireSoapBoxCli {
 		if (xmppTalk.getSocket().isClosed()) {
 			restart();
 		}
-		String responseXmlStr = MarshalXML.marshal(object);
+		String responseXmlStr = JAXBUtility.marshal(object);
 		this.send(responseXmlStr, to);
 		// System.out.println("DEBUG OpenFire SendObject attempt");
 	}

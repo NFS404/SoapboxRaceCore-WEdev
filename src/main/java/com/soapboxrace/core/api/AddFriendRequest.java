@@ -10,7 +10,7 @@ import javax.ws.rs.core.MediaType;
 import com.soapboxrace.core.api.util.Secured;
 import com.soapboxrace.core.bo.FriendBO;
 import com.soapboxrace.jaxb.http.FriendResult;
-import com.soapboxrace.jaxb.util.MarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 
 @Path("/addfriendrequest")
 public class AddFriendRequest {
@@ -27,7 +27,7 @@ public class AddFriendRequest {
 		if (friendResult == null) {
 			return "";
 		}
-		return MarshalXML.marshal(friendResult);
+		return JAXBUtility.marshal(friendResult);
 	}
 
 }

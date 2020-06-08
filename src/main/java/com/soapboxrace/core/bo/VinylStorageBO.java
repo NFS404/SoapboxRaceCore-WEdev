@@ -1,7 +1,6 @@
 package com.soapboxrace.core.bo;
 
 import java.security.SecureRandom;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.ejb.EJB;
@@ -19,7 +18,6 @@ import com.soapboxrace.core.dao.VinylStorageDAO;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.OwnedCarEntity;
-import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.core.jpa.VinylStorageEntity;
 import com.soapboxrace.core.xmpp.OpenFireRestApiCli;
@@ -27,8 +25,7 @@ import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.CustomCarTrans;
 import com.soapboxrace.jaxb.http.OwnedCarTrans;
-import com.soapboxrace.jaxb.util.MarshalXML;
-import com.soapboxrace.jaxb.util.UnmarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 
 @Stateless
 public class VinylStorageBO {
@@ -104,7 +101,7 @@ public class VinylStorageBO {
 				"<OwnershipType>CustomizedCar</OwnershipType></OwnedCarTrans>";
 				String transFormEnd = transForm1 + paintTrans + transForm2 + vinylTrans + transForm3;
 				
-				OwnedCarTrans OwnedVinylTrans = UnmarshalXML.unMarshal(transFormEnd, OwnedCarTrans.class);
+				OwnedCarTrans OwnedVinylTrans = JAXBUtility.unMarshal(transFormEnd, OwnedCarTrans.class);
 				
 				CustomCarTrans customCarTrans = OwnedVinylTrans.getCustomCar();
 					
@@ -139,10 +136,10 @@ public class VinylStorageBO {
 			vinylStorageEntity.setAppliedCount(0);
 			vinylStorageEntity.setCarHash(defaultCarEntity.getPhysicsProfileHash());
 			
-			String paintTrans = MarshalXML.marshal(customCarTrans.getPaints());
+			String paintTrans = JAXBUtility.marshal(customCarTrans.getPaints());
 			paintTrans = paintTrans.replace("<ArrayOfCustomPaintTrans>", "<Paints>");
 			paintTrans = paintTrans.replace("</ArrayOfCustomPaintTrans>", "</Paints>");
-			String vinylTrans = MarshalXML.marshal(customCarTrans.getVinyls());
+			String vinylTrans = JAXBUtility.marshal(customCarTrans.getVinyls());
 			vinylTrans = vinylTrans.replace("<ArrayOfCustomVinylTrans>", "<Vinyls>");
 			vinylTrans = vinylTrans.replace("</ArrayOfCustomVinylTrans>", "</Vinyls>");
 			vinylStorageEntity.setPaintTrans(paintTrans);

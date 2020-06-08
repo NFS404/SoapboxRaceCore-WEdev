@@ -10,7 +10,7 @@ import javax.ws.rs.core.MediaType;
 import com.soapboxrace.core.api.util.Secured;
 import com.soapboxrace.core.bo.FriendBO;
 import com.soapboxrace.jaxb.http.PersonaBase;
-import com.soapboxrace.jaxb.util.MarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 
 @Path("/resolvefriendsrequest")
 public class ResolveFriendsRequest {
@@ -27,7 +27,7 @@ public class ResolveFriendsRequest {
 		if (presonaResult == null) {
 			return "";
 		}
-		return MarshalXML.marshal(presonaResult);
+		return JAXBUtility.marshal(presonaResult);
 //		StringBuilder stringBuilder = new StringBuilder();
 //		stringBuilder.append("<PersonaBase xmlns=\"http://schemas.datacontract.org/2004/07/Victory.Service.Objects\" ");
 //		stringBuilder.append("xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\">");

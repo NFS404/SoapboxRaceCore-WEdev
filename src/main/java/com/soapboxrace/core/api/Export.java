@@ -12,7 +12,7 @@ import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.jaxb.http.OwnedCarTrans;
-import com.soapboxrace.jaxb.util.MarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 
 @Path("/Export")
 public class Export {
@@ -33,7 +33,7 @@ public class Export {
 		if (parameterBO.getStrParam("ADMIN_TOKEN").equals(adminToken)) {
 			PersonaEntity personaEntity = personaDAO.findByNameIgnoreCase(playerName);
 			OwnedCarTrans ownedCarTrans = personaBO.getDefaultCar(personaEntity.getPersonaId());
-			return MarshalXML.marshal(ownedCarTrans);
+			return JAXBUtility.marshal(ownedCarTrans);
 		}
 		return "ERROR: invalid token";
 	}

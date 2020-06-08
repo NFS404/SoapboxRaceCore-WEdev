@@ -1,8 +1,6 @@
 package com.soapboxrace.core.bo;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Random;
 
@@ -29,7 +27,7 @@ import com.soapboxrace.jaxb.http.EnumRewardType;
 import com.soapboxrace.jaxb.http.LuckyDrawBox;
 import com.soapboxrace.jaxb.http.LuckyDrawInfo;
 import com.soapboxrace.jaxb.http.TreasureHuntEventSession;
-import com.soapboxrace.jaxb.util.MarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 
 @Stateless
 public class EventsBO {
@@ -108,7 +106,7 @@ public class EventsBO {
 	public String accolades(Long activePersonaId, Boolean isBroken) {
 		TreasureHuntEntity treasureHuntEntity = treasureHuntDao.findById(activePersonaId);
 		if (isBroken && !treasureHuntEntity.getIsStreakBroken()) {
-			return MarshalXML.marshal(getTreasureHuntAccolades(activePersonaId, treasureHuntEntity));
+			return JAXBUtility.marshal(getTreasureHuntAccolades(activePersonaId, treasureHuntEntity));
 		}
 		if (isBroken) {
 			treasureHuntEntity.setStreak(1);
@@ -142,7 +140,7 @@ public class EventsBO {
 			}
 		}
 		
-		return MarshalXML.marshal(getTreasureHuntAccolades(activePersonaId, treasureHuntEntity));
+		return JAXBUtility.marshal(getTreasureHuntAccolades(activePersonaId, treasureHuntEntity));
 	}
 
 	private TreasureHuntEventSession createNewTreasureHunt(TreasureHuntEntity treasureHuntEntity, Boolean isBroken) {

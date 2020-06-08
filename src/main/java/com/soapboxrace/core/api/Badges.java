@@ -4,7 +4,7 @@ import com.soapboxrace.core.api.util.Secured;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.jaxb.http.BadgeBundle;
-import com.soapboxrace.jaxb.util.UnmarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 
 import javax.ejb.EJB;
 import javax.ws.rs.HeaderParam;
@@ -24,7 +24,7 @@ public class Badges {
 	@Secured
 	@Path("/set")
 	public String set(@HeaderParam("securityToken") String securityToken, InputStream is) {
-		BadgeBundle badgeBundle = UnmarshalXML.unMarshal(is, BadgeBundle.class);
+		BadgeBundle badgeBundle = JAXBUtility.unMarshal(is, BadgeBundle.class);
 		personaBO.updateBadges(tokenSessionBO.getActivePersonaId(securityToken), badgeBundle);
 		return "";
 	}

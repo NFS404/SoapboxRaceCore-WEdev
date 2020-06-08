@@ -19,6 +19,7 @@ import com.soapboxrace.core.xmpp.OpenFireRestApiCli;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.ArrayOfProfileData;
+import com.soapboxrace.jaxb.http.FriendResult;
 import com.soapboxrace.jaxb.http.ProfileData;
 import com.soapboxrace.jaxb.http.User;
 import com.soapboxrace.jaxb.http.UserInfo;
@@ -139,15 +140,24 @@ public class UserBO {
 	}
 	
 	// Send persona's money to another persona (/SENDMONEY nickName money)
-	public void sendMoney(PersonaEntity personaEntity, String displayName) {
+	// FriendResult allows to stop the function with "return null", since it's called from FriendBO
+	public FriendResult sendMoney(PersonaEntity personaEntity, String displayName) {
 		Long personaId = personaEntity.getPersonaId();
 		String entryValue = displayName.replaceFirst("/SENDMONEY ", "");
         String[] values = entryValue.split(" ");
-        if (values.length > 1 || values[1].isEmpty()) { // Wrong parameters
-        	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Command parameters is invaild, try again."), personaId);
-        }
+        
         String entryName = values[0].toString(); // Nickname value
-        double entryCash = (double) Integer.parseInt(values[1].toString()); // Cash value
+        double entryCash = 0;
+        try {
+        	entryCash = (double) Integer.parseInt(values[1].toString()); // Cash value
+        } catch (NumberFormatException|ArrayIndexOutOfBoundsException ex) {
+        	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Money number is invaild, try again."), personaId);
+        	return null;
+        }
+        if (entryCash == 0) {
+    		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Unable to send a nothing."), personaId);
+    		return null;
+        }
         
         // Sender's info
 		UserEntity userEntitySender = personaEntity.getUser();
@@ -162,26 +172,24 @@ public class UserBO {
 		if (premiumStatusSender) {
 			sendLimit = parameterBO.getIntParam("MAX_SENDMONEY_PREMIUM");
 		}
-		boolean canSendMore = true;
 		if (moneyGivenAlready >= sendLimit) {
-			canSendMore = false;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Unable to send money - transaction limit is already reached.\n"
 					+ "## Limit resets every Monday."), personaId);
+			return null;
 		}
 		if (entryCash > personaMoneySender) {
-			canSendMore = false;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Value is bigger than your money, check the value and try again."), personaId);
+			return null;
 		}
 		
 		PersonaEntity personaEntityTarget = personaDAO.findByName(entryName);
 		if (personaEntityTarget == null) {
-			canSendMore = false;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Wrong nickname, check the name and try again."), personaId);
+			return null;
 		}
 		
-		if (canSendMore) {
+		else {
 			// Target player's info
-			boolean canProceed = true;
 			UserEntity userEntityTarget = personaEntityTarget.getUser();
 			double personaMoneyTarget = personaEntityTarget.getCash();
 			boolean premiumStatusTarget = userEntityTarget.isPremium();
@@ -195,11 +203,11 @@ public class UserBO {
 				moneyLimit = parameterBO.getIntParam("MAX_PLAYER_CASH_PREMIUM");
 			}
 			if (personaMoneyTarget >= moneyLimit) {
-				canProceed = false;
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This player cannot get more money."), personaId);
+				return null;
 			}
 			
-			if (canProceed) {
+			else {
 				double personaMoneyTargetNew = personaMoneyTarget + entryCash;
 				if (personaMoneyTargetNew > moneyLimit) {
 					personaMoneyTargetNew = moneyLimit;
@@ -217,11 +225,12 @@ public class UserBO {
 				String targetName = personaEntityTarget.getName();
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### $" + (int) moneyDiff + " has been sent to this persona."), personaId);
 				String message = ":heavy_minus_sign:"
-		        		+ "\n:money_with_wings: **|** Nгрок **" + senderName + "** отправил **" + (int) moneyDiff + "$** игроку **" + targetName + "**."
+		        		+ "\n:money_with_wings: **|** Nгрок **" + senderName + "** отправил **$" + (int) moneyDiff + "** игроку **" + targetName + "**."
 		        		+ "\n:money_with_wings: **|** Player **" + senderName + "** has sent **$" + (int) moneyDiff + "** to player **" + targetName + "**.";
 				discordBot.sendMessage(message);
 			}
 		}
+		return null;
 	}
 	
 	// Get extra reserve money to current persona - re-fill the persona's cash account

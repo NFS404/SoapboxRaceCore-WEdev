@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 import com.soapboxrace.core.bo.ParameterBO;
-import com.soapboxrace.jaxb.util.MarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 import com.soapboxrace.jaxb.xmpp.XMPP_MessageType;
 
 public abstract class BaseOpenFireTalk implements IOpenFireTalk {
@@ -86,7 +86,7 @@ public abstract class BaseOpenFireTalk implements IOpenFireTalk {
 		messageType.setTo(to);
 		messageType.setBody(msg);
 		messageType.setSubject(SubjectCalc.calculateHash(messageType.getTo().toCharArray(), msg.toCharArray()));
-		String packet = MarshalXML.marshal(messageType);
+		String packet = JAXBUtility.marshal(messageType);
 		write(packet);
 	}
 
@@ -96,7 +96,7 @@ public abstract class BaseOpenFireTalk implements IOpenFireTalk {
 		messageType.setToPersonaId(personaId);
 		messageType.setBody(msg);
 		messageType.setSubject(SubjectCalc.calculateHash(messageType.getTo().toCharArray(), msg.toCharArray()));
-		String packet = MarshalXML.marshal(messageType);
+		String packet = JAXBUtility.marshal(messageType);
 		write(packet);
 	}
 

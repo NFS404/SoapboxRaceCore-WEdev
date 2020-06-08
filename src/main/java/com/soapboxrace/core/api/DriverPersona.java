@@ -23,7 +23,6 @@ import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.bo.UserBO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.jpa.PersonaEntity;
-import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.jaxb.http.ArrayOfInt;
 import com.soapboxrace.jaxb.http.ArrayOfLong;
@@ -33,8 +32,7 @@ import com.soapboxrace.jaxb.http.PersonaIdArray;
 import com.soapboxrace.jaxb.http.PersonaMotto;
 import com.soapboxrace.jaxb.http.PersonaPresence;
 import com.soapboxrace.jaxb.http.ProfileData;
-import com.soapboxrace.jaxb.util.MarshalXML;
-import com.soapboxrace.jaxb.util.UnmarshalXML;
+import com.soapboxrace.jaxb.util.JAXBUtility;
 
 @Path("/DriverPersona")
 public class DriverPersona {
@@ -256,7 +254,7 @@ public class DriverPersona {
 	@Path("/GetPersonaBaseFromList")
 	@Produces(MediaType.APPLICATION_XML)
 	public ArrayOfPersonaBase getPersonaBaseFromList(InputStream is) {
-		PersonaIdArray personaIdArray = UnmarshalXML.unMarshal(is, PersonaIdArray.class);
+		PersonaIdArray personaIdArray = JAXBUtility.unMarshal(is, PersonaIdArray.class);
 		ArrayOfLong personaIds = personaIdArray.getPersonaIds();
 		return bo.getPersonaBaseFromList(personaIds.getLong());
 	}
@@ -285,7 +283,7 @@ public class DriverPersona {
 		if (personaPresenceByName.getPersonaId() == 0) {
 			return "";
 		}
-		return MarshalXML.marshal(personaPresenceByName);
+		return JAXBUtility.marshal(personaPresenceByName);
 	}
 
 	@POST
@@ -293,7 +291,7 @@ public class DriverPersona {
 	@Path("/UpdateStatusMessage")
 	@Produces(MediaType.APPLICATION_XML)
 	public PersonaMotto updateStatusMessage(InputStream statusXml, @HeaderParam("securityToken") String securityToken, @Context Request request) {
-		PersonaMotto personaMotto = UnmarshalXML.unMarshal(statusXml, PersonaMotto.class);
+		PersonaMotto personaMotto = JAXBUtility.unMarshal(statusXml, PersonaMotto.class);
 		tokenSessionBo.verifyPersona(securityToken, personaMotto.getPersonaId());
 
 		bo.updateStatusMessage(personaMotto.getMessage(), personaMotto.getPersonaId());
