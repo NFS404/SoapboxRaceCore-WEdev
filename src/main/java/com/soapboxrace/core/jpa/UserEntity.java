@@ -73,6 +73,9 @@ public class UserEntity {
 	@Column(name = "moneyGiven")
 	private double moneyGiven;
 	
+	@Column(name = "boost")
+	private double boost;
+	
 	@Column(name = "userAgent", length = 255)
 	private String ua;
 
@@ -213,6 +216,14 @@ public class UserEntity {
 	
 	public void setMoneyGiven(double moneyGiven) {
 		this.moneyGiven = moneyGiven;
+	}
+	
+	public double getBoost() {
+		return boost;
+	}
+	
+	public void setBoost(double boost) {
+		this.boost = boost;
 	}
 	
 	public int getVinylSlotsUsed() {

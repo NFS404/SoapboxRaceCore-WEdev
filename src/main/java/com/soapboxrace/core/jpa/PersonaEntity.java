@@ -30,7 +30,6 @@ public class PersonaEntity {
 	@Column(name = "ID", nullable = false)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long personaId;
-	private double boost;
 	private double cash;
 	private int iconIndex;
 	private int level;
@@ -58,14 +57,6 @@ public class PersonaEntity {
 
 	@Column(name = "created")
 	private LocalDateTime created;
-
-	public double getBoost() {
-		return boost;
-	}
-
-	public void setBoost(double boost) {
-		this.boost = boost;
-	}
 
 	public double getCash() {
 		return cash;

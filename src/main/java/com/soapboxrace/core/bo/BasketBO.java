@@ -23,6 +23,7 @@ import com.soapboxrace.core.dao.ProductDAO;
 import com.soapboxrace.core.dao.RewardDropDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.TreasureHuntDAO;
+import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.dao.VisualPartDAO;
 import com.soapboxrace.core.jpa.BasketDefinitionEntity;
 import com.soapboxrace.core.jpa.CarClassesEntity;
@@ -34,6 +35,7 @@ import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ProductEntity;
 import com.soapboxrace.core.jpa.TreasureHuntEntity;
+import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.jaxb.http.ArrayOfCommerceItemTrans;
 import com.soapboxrace.jaxb.http.CommerceItemTrans;
 import com.soapboxrace.jaxb.http.CommerceResultStatus;
@@ -103,6 +105,9 @@ public class BasketBO {
 	
 	@EJB
 	private AchievementRankDAO achievementRankDAO;
+	
+	@EJB
+	private UserDAO userDAO;
 
 	private OwnedCarTrans getCar(String productId) {
 		BasketDefinitionEntity basketDefinitonEntity = basketDefinitionsDAO.findById(productId);
@@ -262,18 +267,29 @@ public class BasketBO {
 	// FIXME Add the cash & cars drop ability
 	public CommerceResultStatus buyCardPack(String productId, PersonaEntity personaEntity, CommerceResultTrans commerceResultTrans) {
         ProductEntity bundleProduct = productDao.findByProductId(productId);
+        UserEntity userEntity = personaEntity.getUser();
         if (bundleProduct == null) {
             return CommerceResultStatus.FAIL_INVALID_BASKET;
         }
+        String currencyType = bundleProduct.getCurrency(); // CASH or _NS (Boost)
+        float bundlePrice = bundleProduct.getPrice();
         if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
-        	float bundlePrice = bundleProduct.getPrice();
-        	if (personaEntity.getCash() < bundlePrice) {
+        	if (currencyType.contentEquals("CASH") && personaEntity.getCash() < bundlePrice) {
 	        	return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
 			}
-			personaEntity.setCash(personaEntity.getCash() - bundlePrice);
+        	if (currencyType.contentEquals("_NS") && userEntity.getBoost() < bundlePrice) {
+	        	return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
+			}
+        	switch (currencyType) {
+        	case "CASH":
+        		personaEntity.setCash(personaEntity.getCash() - bundlePrice);
+        		personaDao.update(personaEntity);
+        	case "_NS":
+        		userEntity.setBoost(userEntity.getBoost() - bundlePrice);
+        		userDAO.update(userEntity);
+        	}
 		}
-		personaDao.update(personaEntity);
-       
+		
         ArrayOfCommerceItemTrans arrayOfCommerceItemTrans = new ArrayOfCommerceItemTrans();
         commerceResultTrans.setCommerceItems(arrayOfCommerceItemTrans);
 		List<CommerceItemTrans> commerceItems = new ArrayList<>();
@@ -320,6 +336,40 @@ public class BasketBO {
 		return CommerceResultStatus.SUCCESS;
     }
 	
+	// IGC to Boost conversion Card Pack
+	public CommerceResultStatus buyBoostConversion(String productId, PersonaEntity personaEntity, CommerceResultTrans commerceResultTrans) {
+	    ProductEntity bundleProduct = productDao.findByProductId(productId);
+	    UserEntity userEntity = personaEntity.getUser();
+	    if (bundleProduct == null) {
+	        return CommerceResultStatus.FAIL_INVALID_BASKET;
+	    }
+	    float bundlePrice = bundleProduct.getPrice();
+        if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
+	        if (personaEntity.getCash() < bundlePrice) {
+		       	return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
+			}
+	    	personaEntity.setCash(personaEntity.getCash() - bundlePrice);
+	    	personaDao.update(personaEntity);
+		}
+			
+	    ArrayOfCommerceItemTrans arrayOfCommerceItemTrans = new ArrayOfCommerceItemTrans();
+	    commerceResultTrans.setCommerceItems(arrayOfCommerceItemTrans);
+		List<CommerceItemTrans> commerceItems = new ArrayList<>();
+
+		CommerceItemTrans item = new CommerceItemTrans();
+		int boostAmount = Integer.parseInt(bundleProduct.getLongDescription()); // LongDescription of this item is the currency amount
+		item.setHash(723701634); // Special item with icon
+		
+		item.setTitle(boostAmount + " SPEEDBOOST");
+		userEntity.setBoost(userEntity.getBoost() + boostAmount);
+		userDAO.update(userEntity);
+		commerceItems.add(item);
+			
+		arrayOfCommerceItemTrans.getCommerceItemTrans().addAll(commerceItems);
+		commerceResultTrans.setCommerceItems(arrayOfCommerceItemTrans);
+		return CommerceResultStatus.SUCCESS;
+	}
+	
 	// Gives a random available stock car, 25% chance
 	// FIXME Replace the arrays to normal car-list load
 	public CommerceResultStatus buyCarRandom(String productId, PersonaEntity personaEntity, String securityToken) {
@@ -343,7 +393,8 @@ public class BasketBO {
 				"SRV-CAR100","SRV-CAR137","SRV-CAR91","SRV-CAR172","SRV-CAR35","SRV-CAR126","SRV-CAR26","SRV-CAR123","SRV-CAR13","SRV-CAR33",
 				"SRV-FCAR4","SRV-CAR170","SRV-CAR59","SRV-CAR5","SRV-CAR135","SRV-CAR86","SRV-CAR57","SRV-FCAR0","SRV-CAR109","SRV-CAR46",
 				"SRV-CAR98","SRV-CAR97","SRV-CAR56","SRV-CAR305","SRV-CAR306","SRV-CAR119","SRV-CAR375","SRV-FCAR6","SRV-FCAR1","SRV-FCAR28",
-				"SRV-BRERA1","SRV-CAR239","SRV-FCAR30", "SRV-FCAR8", "SRV-FCAR7", "SRV-CAR382", "SRV-CAR381", "SRV-CAR380", "SRV-FCAR32" }; // "SRV-FCAR11" - MW05 cop
+				"SRV-BRERA1","SRV-CAR239","SRV-FCAR30", "SRV-FCAR8", "SRV-FCAR7", "SRV-FCAR32" }; 
+		        // "SRV-FCAR11", "SRV-CAR380", "SRV-CAR381", "SRV-CAR382" - AI Cars
 		String[] productIdBadArray = { "SRV-CAR40","SRV-CAR151","SRV-CAR165","SRV-CAR143","SRV-CAR154","SRV-CAR173","SRV-CAR141","SRV-CAR142",
 				"SRV-CAR181","SRV-CAR159","SRV-CAR121","SRV-CAR96","SRV-CAR93","SRV-CAR169","SRV-CAR127","SRV-CAR81","SRV-CAR21","SRV-CAR148",
 				"SRV-CAR155","SRV-CAR11","SRV-CAR18","SRV-CAR164","SRV-CAR53","SRV-CAR139","SRV-CAR6","SRV-CAR65","SRV-CAR158","SRV-CAR166",

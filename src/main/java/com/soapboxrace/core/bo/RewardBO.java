@@ -20,6 +20,7 @@ import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ProductEntity;
 import com.soapboxrace.core.jpa.SkillModPartEntity;
 import com.soapboxrace.core.jpa.SkillModRewardType;
+import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.jaxb.http.Accolades;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
 import com.soapboxrace.jaxb.http.ArrayOfDragEntrantResult;
@@ -409,11 +410,12 @@ public class RewardBO {
 	public RewardVO getRewardVO(PersonaEntity personaEntity) {
 		Boolean enableEconomy = parameterBO.getBoolParam("ENABLE_ECONOMY");
 		Boolean enableReputation = parameterBO.getBoolParam("ENABLE_REPUTATION");
+		UserEntity userEntity = personaEntity.getUser();
 		int maxLevel = getMaxLevel(personaEntity);
 		if (personaEntity.getLevel() >= maxLevel) {
 			enableReputation = false;
 		}
-		if (personaEntity.getBoost() > 9999999) {
+		if (userEntity.getBoost() > 9999999) {
 			enableEconomy = false;
 		}
 		return new RewardVO(enableEconomy, enableReputation);
