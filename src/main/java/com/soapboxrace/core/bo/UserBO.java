@@ -1,7 +1,6 @@
 package com.soapboxrace.core.bo;
 
 import java.time.LocalDateTime;
-import java.util.Calendar;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -179,6 +178,10 @@ public class UserBO {
 		}
 		if (entryCash > personaMoneySender) {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Value is bigger than your money, check the value and try again."), personaId);
+			return null;
+		}
+		if (entryCash > sendLimit) {
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Cannot send more than the limit ($" + sendLimit + " per week."), personaId);
 			return null;
 		}
 		
