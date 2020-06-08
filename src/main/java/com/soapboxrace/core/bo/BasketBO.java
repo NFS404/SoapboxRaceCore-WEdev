@@ -370,6 +370,12 @@ public class BasketBO {
 		return CommerceResultStatus.SUCCESS;
 	}
 	
+	// Acquire the Premium with SpeedBoost
+	public CommerceResultStatus buyPremiumSB(String productId, PersonaEntity personaEntity, CommerceResultTrans commerceResultTrans) {
+	    return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
+        // FIXME Do the code until players got a needed SB amount...
+	}
+	
 	// Gives a random available stock car, 25% chance
 	// FIXME Replace the arrays to normal car-list load
 	public CommerceResultStatus buyCarRandom(String productId, PersonaEntity personaEntity, String securityToken) {

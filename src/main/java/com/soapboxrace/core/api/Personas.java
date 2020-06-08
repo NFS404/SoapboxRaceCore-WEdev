@@ -149,6 +149,8 @@ public class Personas {
 			commerceResultTrans.setStatus(basketBO.buyCardPack(productId, personaEntity, commerceResultTrans));	
 		} else if (productId.contains("SRV-CARDPACK4")) {
 			commerceResultTrans.setStatus(basketBO.buyBoostConversion(productId, personaEntity, commerceResultTrans));	
+		} else if (productId.contains("SRV-CARDPACK5")) {
+			commerceResultTrans.setStatus(basketBO.buyPremiumSB(productId, personaEntity, commerceResultTrans));	
 		} else if ("SRV-CARLOOTBOX".equals(productId)) {
 			OwnedCarTrans ownedCarTrans = new OwnedCarTrans();
 			commerceResultTrans.setPurchasedCars(arrayOfOwnedCarTrans);
