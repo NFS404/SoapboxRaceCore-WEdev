@@ -284,9 +284,11 @@ public class BasketBO {
         	case "CASH":
         		personaEntity.setCash(personaEntity.getCash() - bundlePrice);
         		personaDao.update(personaEntity);
+        		break;
         	case "_NS":
         		userEntity.setBoost(userEntity.getBoost() - bundlePrice);
         		userDAO.update(userEntity);
+        		break;
         	}
 		}
 		
@@ -367,6 +369,8 @@ public class BasketBO {
 			
 		arrayOfCommerceItemTrans.getCommerceItemTrans().addAll(commerceItems);
 		commerceResultTrans.setCommerceItems(arrayOfCommerceItemTrans);
+		String playerName = personaEntity.getName();
+		System.out.println(playerName + " has exchanged his IGC to Boost (" + boostAmount + ").");
 		return CommerceResultStatus.SUCCESS;
 	}
 	

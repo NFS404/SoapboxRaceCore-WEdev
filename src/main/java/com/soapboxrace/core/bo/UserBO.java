@@ -231,7 +231,7 @@ public class UserBO {
 		        		+ "\n:money_with_wings: **|** Nгрок **" + senderName + "** отправил **$" + (int) moneyDiff + "** игроку **" + targetName + "**."
 		        		+ "\n:money_with_wings: **|** Player **" + senderName + "** has sent **$" + (int) moneyDiff + "** to player **" + targetName + "**.";
 				discordBot.sendMessage(message);
-				System.out.println("Player " + senderName + " has sent $" + (int) moneyDiff + "to player" + targetName + ".");
+				System.out.println("Player " + senderName + " has sent $" + (int) moneyDiff + " to player " + targetName + ".");
 			}
 		}
 		return null;
@@ -279,7 +279,7 @@ public class UserBO {
 			String senderName = personaEntity.getName();
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### $" + (int) moneyDiff + " has been added to your cash account.\n"
 					+ "## Current WeBank money amount: $" + (int) userEntity.getExtraMoney()), personaId);
-			System.out.println("Player " + senderName + " has taken $" + (int) moneyDiff + "from his Bank account.");
+			System.out.println("Player " + senderName + " has taken $" + (int) moneyDiff + " from his Bank account.");
 		}
 	}
 }
