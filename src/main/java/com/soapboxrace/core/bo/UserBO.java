@@ -162,6 +162,7 @@ public class UserBO {
 		UserEntity userEntitySender = personaEntity.getUser();
 		double personaMoneySender = personaEntity.getCash();
 		double moneyGivenAlready = userEntitySender.getMoneyGiven();
+		int levelCap = parameterBO.getIntParam("SENDMONEY_LEVELCAP");
         // FIXME You need a cron-task with moneyGiven values being reset every week
 		boolean premiumStatusSender = userEntitySender.isPremium();
 		double sendLimit = 0;
@@ -182,6 +183,10 @@ public class UserBO {
 		}
 		if (entryCash > sendLimit) {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Cannot send more than the limit ($" + sendLimit + " per week."), personaId);
+			return null;
+		}
+		if (personaEntity.getLevel() < levelCap) {
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### To send money, you should have level " + levelCap + " or higher."), personaId);
 			return null;
 		}
 		
