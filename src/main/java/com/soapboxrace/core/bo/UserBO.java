@@ -186,7 +186,7 @@ public class UserBO {
 			return null;
 		}
 		if (personaEntity.getLevel() < levelCap) {
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### To send money, you should have level " + levelCap + " or higher."), personaId);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### To send money, you should have Level " + levelCap + " or higher."), personaId);
 			return null;
 		}
 		
