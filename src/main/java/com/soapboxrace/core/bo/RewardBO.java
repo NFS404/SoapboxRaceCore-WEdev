@@ -111,12 +111,8 @@ public class RewardBO {
 	}
 
 	private int getMaxLevel(PersonaEntity personaEntity) {
-		int maxLevel = 60;
-		if (personaEntity.getUser().isPremium()) {
-			maxLevel = parameterBO.getIntParam("MAX_LEVEL_PREMIUM");
-		} else {
-			maxLevel = parameterBO.getIntParam("MAX_LEVEL_FREE");
-		}
+		int maxLevel = 60; // Default NFSW level-cap
+		maxLevel = parameterBO.getIntParam("MAX_LEVEL");
 		return maxLevel;
 	}
 

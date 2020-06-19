@@ -129,6 +129,25 @@ public class TeamsBO {
 		discordBot.sendMessage(message, true);
 	}
 	
+	// Team break, note that the team infos and leader ID stays on DB
+	public void teamBreakIG(PersonaEntity personaEntity, TeamsEntity teamsEntity) {
+		String teamName = teamsEntity.getTeamName();
+		List<PersonaEntity> listOfTeammates = teamsEntity.getListOfTeammates();
+		for (PersonaEntity personaEntityTeam : listOfTeammates) {
+			personaEntityTeam.setTeam(null);
+			personaDao.update(personaEntityTeam);
+		}
+		teamsEntity.setPlayersCount(0);
+		teamsEntity.setActive(false);
+		teamsEntity.setOpenEntry(false);
+		teamsDao.update(teamsEntity);
+
+		String message = ":heavy_minus_sign:"
+        		+ "\n:regional_indicator_f: **|** Команда **" + teamName + "** была распущена лидером."
+        		+ "\n:regional_indicator_f: **|** Team **" + teamName + "** is no longer exists.";
+		discordBot.sendMessage(message, true);
+	}
+	
 	// Basic 1-ball team race, based on racers ranks (they should be correct on DB...), win 1 min timeout
 	// The fastest racer of his team will bring a win on this race, depending on opponent's teams position - Hypercycle
 	// carClass 0 = open races for all classes

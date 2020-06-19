@@ -178,6 +178,7 @@ public class PromoCodeBO {
 		double cashPreValue = 0;
 		double extraMoneyTransit = 0;
 		int playerInitialLevel = personaEntity.getLevel();
+		int maxLevelCap = parameterBO.getIntParam("MAX_LEVEL");
 		// Predefined World Evolved premium types - Hypercycle
 		// TODO Kick the player while applying the premium?
 		switch (premiumCodeType) {
@@ -317,6 +318,19 @@ public class PromoCodeBO {
 				promoCodeDao.update(promoCodeEntity);
 				System.out.println("Player " + nickname + " got the Promo Code.");
 				return "Garage150+ is activated (restart the game), thank you! ;)";
+		    case "levelup":
+		    	int newLevel = playerInitialLevel + 25;
+		    	if (newLevel > maxLevelCap) {
+		    		newLevel = maxLevelCap;
+		    	}
+		    	personaEntity.setLevel(newLevel);
+		    	personaDao.update(personaEntity);
+		    	
+		    	promoCodeEntity.setIsUsed(true);
+				promoCodeEntity.setUser(userEntity);
+				promoCodeDao.update(promoCodeEntity);
+				System.out.println("Player " + nickname + " got the Promo Code.");
+				return "Level-Up is activated (restart the game), thank you! ;)";
             default:
             	return "ERROR: invaild Premium code, please contact to server support";
 		}
