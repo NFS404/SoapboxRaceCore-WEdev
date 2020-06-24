@@ -26,6 +26,9 @@ public class RewardRouteBO extends RewardBO {
 	
 	@EJB
 	private PersonaBO personaBO;
+	
+	@EJB
+	private ParameterBO parameterBO;
 
 	public Accolades getRouteAccolades(Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, EventSessionEntity eventSessionEntity, ArrayOfRouteEntrantResult arrayOfRouteEntrantResult, int isDropableMode) {
 		boolean isSingle = false;
@@ -50,7 +53,7 @@ public class RewardRouteBO extends RewardBO {
 
 		applyRaceReward(rewardVO.getRep(), rewardVO.getCash(), personaEntity);
 		boolean isTeamRace = false;
-		if (eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check()) {
+		if (eventSessionEntity.getTeam2Check() && parameterBO.getIntParam("TEAM_CURRENTSEASON") != 0) {
 			isTeamRace = true;
 		}
 		return getAccolades(personaEntity, routeArbitrationPacket, rewardVO, isDropableMode, isTeamRace);
