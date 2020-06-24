@@ -124,8 +124,6 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 
 		TypedQuery<ProductEntity> productQuery = entityManager.createQuery(sqlProduct.toString(), ProductEntity.class);
 		productQuery.setParameter("productType", productType);
-		
-		
 
 		productQuery.setFirstResult(number);
 		productQuery.setMaxResults(1);
