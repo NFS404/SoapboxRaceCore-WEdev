@@ -99,8 +99,8 @@ public class EventResultBO {
 		case -2142411446:
 			letter = "S";
 			break;
-		case 607077938 :
-			letter = "OR";
+		case 607077938:
+			letter = "ALL";
 			break;
 		default:
 			letter = "NPC";
