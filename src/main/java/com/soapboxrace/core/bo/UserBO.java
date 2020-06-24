@@ -223,7 +223,9 @@ public class UserBO {
 				moneyDiff = personaMoneyTargetNew - personaMoneyTarget;
 				personaEntityTarget.setCash(personaMoneyTargetNew);
 				personaEntity.setCash(personaMoneySender - moneyDiff);
-				userEntitySender.setMoneyGiven(moneyGivenAlready + moneyDiff);
+				double moneyGivenFinal = moneyGivenAlready + moneyDiff;
+				userEntitySender.setMoneyGiven(moneyGivenFinal);
+				double moneyGivenFinal2 = sendLimit - moneyGivenFinal;
 				
 				personaDAO.update(personaEntityTarget);
 				personaDAO.update(personaEntity);
@@ -231,7 +233,8 @@ public class UserBO {
 				
 				String senderName = personaEntity.getName();
 				String targetName = personaEntityTarget.getName();
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### $" + (int) moneyDiff + " has been sent to this persona."), personaId);
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### $" + (int) moneyDiff + " has been sent to this persona.\n"
+						+ "## You can still send $" + moneyGivenFinal2 + " on this week."), personaId);
 				String message = ":heavy_minus_sign:"
 		        		+ "\n:money_with_wings: **|** Nгрок **" + senderName + "** отправил **$" + (int) moneyDiff + "** игроку **" + targetName + "**."
 		        		+ "\n:money_with_wings: **|** Player **" + senderName + "** has sent **$" + (int) moneyDiff + "** to player **" + targetName + "**.";
