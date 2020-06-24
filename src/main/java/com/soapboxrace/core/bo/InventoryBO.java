@@ -373,6 +373,8 @@ public class InventoryBO {
 			break;
 		case POWERUP:
 			return false;
+		case REWARD:
+			return false;
 		default:
 			break;
 		}
