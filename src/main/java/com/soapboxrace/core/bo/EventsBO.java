@@ -194,7 +194,7 @@ public class EventsBO {
 		if (!treasureHuntEntity.getIsStreakBroken()) {
 			rewardBO.applyRaceReward(rewardVO.getRep(), rewardVO.getCash(), personaEntity);
 		}
-		Accolades accolades = rewardBO.getAccolades(personaEntity, arbitrationPacket, rewardVO, 2);
+		Accolades accolades = rewardBO.getAccolades(personaEntity, arbitrationPacket, rewardVO, 2, false);
 		accolades.setLuckyDrawInfo(getLuckyDrawInfo(treasureHuntEntity));
 
 		return accolades;

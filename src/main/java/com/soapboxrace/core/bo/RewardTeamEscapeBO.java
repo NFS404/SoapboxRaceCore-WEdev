@@ -74,6 +74,6 @@ public class RewardTeamEscapeBO extends RewardBO {
 		Random random = new Random();
 		teamEscapeArbitrationPacket.setRank(random.nextInt(4));
 		applyRaceReward(rewardVO.getRep(), rewardVO.getCash(), personaEntity);
-		return getAccolades(personaEntity, teamEscapeArbitrationPacket, rewardVO, 1);
+		return getAccolades(personaEntity, teamEscapeArbitrationPacket, rewardVO, 1, false);
 	}
 }

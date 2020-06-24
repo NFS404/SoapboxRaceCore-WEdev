@@ -3,17 +3,25 @@ package com.soapboxrace.core.dao;
 import java.util.List;
 import java.util.Random;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
+import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.dao.util.BaseDAO;
 import com.soapboxrace.core.jpa.ProductEntity;
+import com.soapboxrace.jaxb.http.LuckyDrawItem;
 
 @Stateless
 public class ProductDAO extends BaseDAO<ProductEntity> {
+	
+	@EJB
+	private ParameterBO parameterBO;
 
 	@PersistenceContext
 	protected void setEntityManager(EntityManager entityManager) {
@@ -69,7 +77,7 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 		return !resultList.isEmpty() ? resultList.get(0) : null;
 	}
 
-	public ProductEntity getRandomDrop(String productType, int isDropableMode) {
+	public ProductEntity getRandomDrop(String productType, int isDropableMode, boolean isTeamRace) {
 		StringBuilder sqlWhere = new StringBuilder();
 		// 1 - main drop items (1 + 3), 2 - main + rare (1 + 2 + 3), 3 - weak drop items (3), 4 - card-packs only
 		if (isDropableMode == 1) {
@@ -93,6 +101,22 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 
 		Random random = new Random();
 		int number = random.nextInt(count.intValue());
+		int isSBCard = 0;
+		if (isTeamRace) {
+			isSBCard = random.nextInt(2); // 0,1,2 - 33% chance to got the SpeedBoost card IF value is 1
+			if (isSBCard == 1) {
+				// FIXME Hard-coded item, should be in Product table
+				ProductEntity speedBoostProduct = new ProductEntity();
+				int sbAmount = parameterBO.getIntParam("REWARD_SB_AMOUNT");
+				speedBoostProduct.setProductTitle(sbAmount + " SPEEDBOOST");
+				speedBoostProduct.setHash(723701634);
+				speedBoostProduct.setIcon("package_4_3");
+				speedBoostProduct.setUseCount(1);
+				speedBoostProduct.setResalePrice(0);
+				speedBoostProduct.setProductType("reward");
+				return speedBoostProduct;
+			}
+		}
 
 		StringBuilder sqlProduct = new StringBuilder();
 		sqlProduct.append("SELECT obj FROM ProductEntity obj");
@@ -100,6 +124,8 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 
 		TypedQuery<ProductEntity> productQuery = entityManager.createQuery(sqlProduct.toString(), ProductEntity.class);
 		productQuery.setParameter("productType", productType);
+		
+		
 
 		productQuery.setFirstResult(number);
 		productQuery.setMaxResults(1);

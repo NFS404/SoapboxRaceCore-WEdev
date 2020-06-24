@@ -49,7 +49,11 @@ public class RewardRouteBO extends RewardBO {
 		setMultiplierReward(eventEntity, rewardVO);
 
 		applyRaceReward(rewardVO.getRep(), rewardVO.getCash(), personaEntity);
-		return getAccolades(personaEntity, routeArbitrationPacket, rewardVO, isDropableMode);
+		boolean isTeamRace = false;
+		if (eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check()) {
+			isTeamRace = true;
+		}
+		return getAccolades(personaEntity, routeArbitrationPacket, rewardVO, isDropableMode, isTeamRace);
 	}
 
 }

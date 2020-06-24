@@ -1,7 +1,5 @@
 package com.soapboxrace.core.api.util;
 
-import java.io.IOException;
-
 import javax.annotation.Priority;
 import javax.ejb.EJB;
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +29,7 @@ public class HwBanFilter implements ContainerRequestFilter {
 	private HttpServletRequest sr;
 
 	@Override
-	public void filter(ContainerRequestContext requestContext) throws IOException {
+	public void filter(ContainerRequestContext requestContext) {
 		String securityToken = requestContext.getHeaderString("securityToken");
 		UserEntity user = tokenBO.getUser(securityToken);
 		String gameHardwareHash = user.getGameHardwareHash();

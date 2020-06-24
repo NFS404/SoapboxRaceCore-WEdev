@@ -287,7 +287,8 @@ public class RestApiBO {
 			list.set(
 					event.getName(),
 					event.getEventModeId(),
-					carclasshash
+					carclasshash,
+					eventResultBO.getCarClassLetter(event.getCarClassHash())
 				);
 		// FIXME Do something with that mess
 		if (carclasshash == 0) {
@@ -406,7 +407,8 @@ public class RestApiBO {
 			list.set(
 					event.getName(),
 					event.getEventModeId(),
-					0
+					0,
+					"all"
 				);
 		for (RecordsEntity race : recordsDAO.statsEventPersona(event, userEntity)) {
 			final boolean isCarVersionVaild;

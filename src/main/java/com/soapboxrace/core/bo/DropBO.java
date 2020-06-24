@@ -34,7 +34,7 @@ public class DropBO {
 	@EJB
 	private ProductDAO productDao;
 
-	public ProductEntity getRandomProductItem(String eventMode, int isDropableMode) {
+	public ProductEntity getRandomProductItem(String eventMode, int isDropableMode, boolean isTeamRace) {
 		// Put "POWERUP" for power-ups drop, disabled for WEv2 - Hypercycle
 		Random random = new Random();
 		int number = 0;
@@ -50,7 +50,7 @@ public class DropBO {
 			productTypeChosen = productTypeArr[number];
 		}
 		// isDropableMode values: 1 - default drop, 2 - default + rare items, 3 - weak drop
-		return productDao.getRandomDrop(productTypeChosen, isDropableMode);
+		return productDao.getRandomDrop(productTypeChosen, isDropableMode, isTeamRace);
 	}
 
 	public LuckyDrawItem copyProduct2LuckyDraw(ProductEntity productEntity) {

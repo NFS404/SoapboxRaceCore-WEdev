@@ -12,6 +12,7 @@ import com.soapboxrace.core.dao.AchievementStateDAO;
 import com.soapboxrace.core.dao.LevelRepDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.ProductDAO;
+import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.AchievementRankEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.CardDecks;
@@ -65,6 +66,9 @@ public class RewardBO {
 	
 	@EJB
 	private AchievementRankDAO achievementRankDao;
+	
+	@EJB
+	private UserDAO userDao;
 
 	public Reward getFinalReward(Integer rep, Integer cash) {
 		Reward finalReward = new Reward();
@@ -77,25 +81,30 @@ public class RewardBO {
 		return (long) (personaEntity.getRepAtCurrentLevel() + exp) >= levelRepDao.findByLevel((long) personaEntity.getLevel()).getExpPoint();
 	}
 
-	public LuckyDrawInfo getLuckyDrawInfo(Integer rank, Integer level, PersonaEntity personaEntity, int isDropableMode) {
+	public LuckyDrawInfo getLuckyDrawInfo(Integer rank, Integer level, PersonaEntity personaEntity, int isDropableMode, boolean isTeamRace) {
 		LuckyDrawInfo luckyDrawInfo = new LuckyDrawInfo();
 		if (!parameterBO.getBoolParam("ENABLE_DROP_ITEM")) {
 			return luckyDrawInfo;
 		}
 		ArrayOfLuckyDrawItem arrayOfLuckyDrawItem = new ArrayOfLuckyDrawItem();
-		arrayOfLuckyDrawItem.getLuckyDrawItem().add(getItemFromProduct(personaEntity, null, isDropableMode));
+		arrayOfLuckyDrawItem.getLuckyDrawItem().add(getItemFromProduct(personaEntity, null, isDropableMode, isTeamRace));
 		luckyDrawInfo.setCardDeck(CardDecks.forRank(rank));
 		luckyDrawInfo.setItems(arrayOfLuckyDrawItem);
 		return luckyDrawInfo;
 	}
 
-	public LuckyDrawItem getItemFromProduct(PersonaEntity personaEntity, String eventMode, int isDropableMode) {
-		ProductEntity productEntity = dropBO.getRandomProductItem(eventMode, isDropableMode);
+	public LuckyDrawItem getItemFromProduct(PersonaEntity personaEntity, String eventMode, int isDropableMode, boolean isTeamRace) {
+		ProductEntity productEntity = dropBO.getRandomProductItem(eventMode, isDropableMode, isTeamRace);
 		if (productEntity.getStars() != null && productEntity.getStars() == 4 && productEntity.getProductType().contentEquals("SKILLMODPART")) {
 			achievementsBO.applyDropAchievements(personaEntity, AchievementType.WEV2_EARNSKILL);
 		}
 		LuckyDrawItem luckyDrawItem = dropBO.copyProduct2LuckyDraw(productEntity);
 		boolean inventoryFull = inventoryBO.isInventoryFull(productEntity, personaEntity);
+        if (productEntity.getProductTitle().contains("SPEEDBOOST")) {
+			UserEntity userEntity = personaEntity.getUser();
+			userEntity.setBoost(userEntity.getBoost() + parameterBO.getIntParam("REWARD_SB_AMOUNT"));
+			userDao.update(userEntity);
+		}
 		if (inventoryFull) {
 			luckyDrawItem.setWasSold(true);
 			if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
@@ -218,11 +227,11 @@ public class RewardBO {
 		rewardVO.add(0, finalCash.intValue(), EnumRewardCategory.SKILL_MOD, EnumRewardType.TOKEN_AMPLIFIER);
 	}
 
-	public Accolades getAccolades(PersonaEntity personaEntity, ArbitrationPacket arbitrationPacket, RewardVO rewardVO, int isDropableMode) {
+	public Accolades getAccolades(PersonaEntity personaEntity, ArbitrationPacket arbitrationPacket, RewardVO rewardVO, int isDropableMode, boolean isTeamRace) {
 		Accolades accolades = new Accolades();
 		accolades.setFinalRewards(getFinalReward(rewardVO.getRep(), rewardVO.getCash()));
 		accolades.setHasLeveledUp(isLeveledUp(personaEntity, rewardVO.getRep()));
-		accolades.setLuckyDrawInfo(getLuckyDrawInfo(arbitrationPacket.getRank(), personaEntity.getLevel(), personaEntity, isDropableMode));
+		accolades.setLuckyDrawInfo(getLuckyDrawInfo(arbitrationPacket.getRank(), personaEntity.getLevel(), personaEntity, isDropableMode, isTeamRace));
 		accolades.setOriginalRewards(getFinalReward(rewardVO.getRep(), rewardVO.getCash()));
 		accolades.setRewardInfo(rewardVO.getArrayOfRewardPart());
 		return accolades;
