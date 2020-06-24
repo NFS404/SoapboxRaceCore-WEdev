@@ -202,7 +202,7 @@ public class EventsBO {
 
 	private LuckyDrawInfo getLuckyDrawInfo(TreasureHuntEntity treasureHuntEntity) {
 		ArrayOfLuckyDrawItem arrayOfLuckyDrawItem = new ArrayOfLuckyDrawItem();
-		arrayOfLuckyDrawItem.getLuckyDrawItem().add(rewardBO.getItemFromProduct(personaDao.findById(treasureHuntEntity.getPersonaId()), "thunt", 2, true));
+		arrayOfLuckyDrawItem.getLuckyDrawItem().add(rewardBO.getItemFromProduct(personaDao.findById(treasureHuntEntity.getPersonaId()), "thunt", 2, false));
 
 		ArrayOfLuckyDrawBox arrayOfLuckyDrawBox = new ArrayOfLuckyDrawBox();
 		LuckyDrawBox luckyDrawBox = new LuckyDrawBox();
