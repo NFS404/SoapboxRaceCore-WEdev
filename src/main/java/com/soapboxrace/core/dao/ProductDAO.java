@@ -113,7 +113,7 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 				speedBoostProduct.setIcon("package_4_3");
 				speedBoostProduct.setUseCount(1);
 				speedBoostProduct.setResalePrice(0);
-				speedBoostProduct.setProductType("reward");
+				speedBoostProduct.setProductType("REWARD");
 				return speedBoostProduct;
 			}
 		}
