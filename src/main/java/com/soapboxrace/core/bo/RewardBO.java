@@ -101,9 +101,10 @@ public class RewardBO {
 		LuckyDrawItem luckyDrawItem = dropBO.copyProduct2LuckyDraw(productEntity);
 		boolean inventoryFull = inventoryBO.isInventoryFull(productEntity, personaEntity);
         if (productEntity.getProductTitle().contains("SPEEDBOOST")) {
-        	System.out.println("Player " + personaEntity.getName() + " has recieved a SpeedBoost reward.");
+        	int sbAmount = parameterBO.getIntParam("REWARD_SB_AMOUNT");
+        	System.out.println("### Player " + personaEntity.getName() + " has recieved a " + sbAmount + " SpeedBoost reward.");
 			UserEntity userEntity = personaEntity.getUser();
-			userEntity.setBoost(userEntity.getBoost() + parameterBO.getIntParam("REWARD_SB_AMOUNT"));
+			userEntity.setBoost(userEntity.getBoost() + sbAmount);
 			userDao.update(userEntity);
 		}
 		if (inventoryFull) {
