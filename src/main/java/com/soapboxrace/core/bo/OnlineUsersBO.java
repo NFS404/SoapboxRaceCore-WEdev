@@ -58,7 +58,8 @@ public class OnlineUsersBO {
 		if (parameterBO.getBoolParam("DISCORD_ONLINECOUNT")) {
 			String message = ":heavy_minus_sign:"
 	        		+ "\n:cityscape: **|** Сейчас игроков на сервере: **" + openFireRestApiCli.getTotalOnlineUsers() + "**"
-	        		+ "\n:cityscape: **|** Players online now on server: **" + openFireRestApiCli.getTotalOnlineUsers() + "**";
+	        		+ "\n:cityscape: **|** Players online now on server: **" + openFireRestApiCli.getTotalOnlineUsers() + "**"
+			        + "\n:cityscape: **|** Текущая ротация трасс / Track Rotation: **#" + parameterBO.getIntParam("ROTATIONID") + "**";
 			discordBot.sendMessage(message);
 		}
 	}

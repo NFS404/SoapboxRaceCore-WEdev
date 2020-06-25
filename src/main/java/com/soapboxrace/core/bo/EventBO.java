@@ -3,17 +3,20 @@ package com.soapboxrace.core.bo;
 import java.util.List;
 
 import javax.ejb.EJB;
+import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventPowerupsDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
+import com.soapboxrace.core.dao.ParameterDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventPowerupsEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
+import com.soapboxrace.core.jpa.ParameterEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 
 @Stateless
@@ -33,6 +36,12 @@ public class EventBO {
 
 	@EJB
 	private PersonaDAO personaDao;
+	
+	@EJB
+	private ParameterBO parameterBO;
+	
+	@EJB
+	private ParameterDAO parameterDAO;
 
 	public List<EventEntity> availableAtLevel(Long personaId) {
 		PersonaEntity personaEntity = personaDao.findById(personaId);
@@ -67,6 +76,24 @@ public class EventBO {
 		eventSessionEntity.setTeamNOS(true);
 		eventSessionDao.insert(eventSessionEntity);
 		return eventSessionEntity;
+	}
+	
+	// Change the current events list (every week)
+	// If ROTATION_COUNT defined as 1, server will not change it (set all event's rotation ids to 1)
+	@Schedule(dayOfWeek = "MON", persistent = false)
+	public String eventRotation() {
+		int rotationCount = parameterBO.getIntParam("ROTATION_COUNT");
+		if (rotationCount == 1) {
+			return "";
+		}
+		ParameterEntity parameterEntity = parameterDAO.findById("ROTATIONID");
+		int rotationCur = Integer.valueOf(parameterEntity.getValue()) + 1;
+		if (rotationCur > rotationCount) {
+			rotationCur = 1;
+		}
+		parameterEntity.setValue(String.valueOf(rotationCur));
+		parameterDAO.update(parameterEntity);
+		return "";
 	}
 
 	public EventSessionEntity findEventSessionById(Long id) {

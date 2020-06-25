@@ -108,6 +108,9 @@ public class BasketBO {
 	
 	@EJB
 	private UserDAO userDAO;
+	
+	@EJB
+	private CommerceBO commerceBO;
 
 	private OwnedCarTrans getCar(String productId) {
 		BasketDefinitionEntity basketDefinitonEntity = basketDefinitionsDAO.findById(productId);
@@ -246,6 +249,7 @@ public class BasketBO {
 		if (carClassesEntity == null) {
 			return CommerceResultStatus.FAIL_INVALID_BASKET;
 		}
+		commerceBO.calcNewCarClass(customCarEntityVer);
 		ownedCarEntity.setCarVersion(carClassesEntity.getCarVersion());
 
 		carSlotDAO.insert(carSlotEntity);

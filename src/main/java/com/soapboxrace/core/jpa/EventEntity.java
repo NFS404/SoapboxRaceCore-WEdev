@@ -15,7 +15,7 @@ import javax.persistence.Table;
 		@NamedQuery(name = "EventEntity.findAll", query = "SELECT obj FROM EventEntity obj WHERE obj.rotation <> 999"), //
 		@NamedQuery(name = "EventEntity.findAllEnabled", query = "SELECT obj FROM EventEntity obj WHERE isEnabled = true"), //
 		@NamedQuery(name = "EventEntity.findByLevel", query = "SELECT obj FROM EventEntity obj WHERE :level >= obj.minLevel AND :level <= obj.maxLevel AND isEnabled = true"), //
-		@NamedQuery(name = "EventEntity.findByRotation", query = "SELECT obj FROM EventEntity obj WHERE :level >= obj.minLevel AND :level <= obj.maxLevel AND isEnabled = true AND rotation IN ('0', :rotation)") //
+		@NamedQuery(name = "EventEntity.findByRotation", query = "SELECT obj FROM EventEntity obj WHERE :level >= obj.minLevel AND :level <= obj.maxLevel AND isEnabled = true AND rotation = :rotation") //
 })
 public class EventEntity {
 

@@ -9,6 +9,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PromoCodeBO;
+import com.soapboxrace.core.bo.SalesBO;
 
 @Path("/PromoCode")
 public class PromoCode {
@@ -18,6 +19,9 @@ public class PromoCode {
 
 	@EJB
 	private ParameterBO parameterBO;
+	
+	@EJB
+	private SalesBO salesBO;
 
 	@POST
 	@Path("/createPromoCode")
@@ -65,6 +69,6 @@ public class PromoCode {
 		if (saleManagerToken != null && !parameterBO.getStrParam("SALE_MANAGERTOKEN").equals(saleManagerToken)) {
 			return "ERROR: invalid token";
 		}
-		return bo.saleGen(saleTime, saleName, saleCar1, saleCar2, saleCar3, saleCar4);
+		return salesBO.saleGen(saleTime, saleName, saleCar1, saleCar2, saleCar3, saleCar4);
 	}
 }
