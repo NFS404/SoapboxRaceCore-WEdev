@@ -75,7 +75,7 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 	
 	public BigInteger countRecordsAll(int eventId, boolean powerUps) {
 		Query query = entityManager.createNativeQuery(
-			"SELECT Count(DISTINCT userId) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps);
+			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps);
 		@SuppressWarnings("unchecked")
 		List<BigInteger> List = query.getResultList();
 		if (List.isEmpty())

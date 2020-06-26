@@ -335,7 +335,7 @@ public class LobbyBO {
 		Long teamRacerPersona = personaId;
 		PersonaEntity personaEntityRacer = personaDao.findById(teamRacerPersona);
 		TeamsEntity racerTeamEntity = personaEntityRacer.getTeam();
-		if (racerTeamEntity != null && racerTeamEntity.getActive()) {
+		if (racerTeamEntity != null && racerTeamEntity.getActive() && parameterBO.getIntParam("TEAM_CURRENTSEASON") > 0) { // 0 means there is no active team racing
 			int serverCarClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
 			OwnedCarTrans defaultCar = personaBO.getDefaultCar(personaId);
 			int playerCarClass = defaultCar.getCustomCar().getCarClassHash();
@@ -356,7 +356,7 @@ public class LobbyBO {
 				}
 				if (team2id == racerTeamId) {
 					team1Name = teamsDao.findById(team1id).getTeamName();
-					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team joined as #2. Second team is " + team1Name), teamRacerPersona);
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team joined as #2. First team is " + team1Name), teamRacerPersona);
 				}
 				if (team1id == null && !teamIsAssigned) {
 					lobbyEntity.setTeam1Id(racerTeamId);
@@ -368,6 +368,13 @@ public class LobbyBO {
 					teamIsAssigned = true;
 					team1Name = teamsDao.findById(team1id).getTeamName();
 					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team joined as #2. First team is " + team1Name), teamRacerPersona);
+					
+					for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
+						PersonaEntity entrantPersona = lobbyEntrantEntity.getPersona();
+						if (entrantPersona.getTeam().getTeamId() == team1id) {
+							openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Second team is " + team2Name), entrantPersona.getPersonaId());
+						}
+					}
 				}
 				if (team1id != racerTeamId && team2id != racerTeamId && !teamIsAssigned) {
 					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team is not participate on that event."), teamRacerPersona);

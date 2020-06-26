@@ -5,9 +5,6 @@
 		    Your token: <input type="text" name="saleManagerToken" /><br /><br /> 
 			<br /> 
 			Sale's name (anything you want, but related to chosen cars): <input type="text" name="saleName" /><br /><br />
-			Time of sale:<br />
-			<input type="radio" name="saleTime" value="friMon"/>Friday - Monday (00:00 MSK)<br />
-			<input type="radio" name="saleTime" value="satTue"/>Saturday - Tuesday (00:00 MSK)<br />
 			<br />Choose the cars to sale (copy their names in the forms):<br /><br />
 
 			S_AGERA<br />
@@ -27,10 +24,13 @@
 			A_911_GT2_997<br />
 			A_911_GT3_RS<br />
 			A_911_GT3_RS_40<br />
-			A_959 BFH_SUV<br />
+			A_918RSR<br />
+			A_959<br />
+			A_BFH_SUV<br />
 			A_BOSS302_12<br />
 			A_CAMARO_ZL1ELITE<br />
-			A_CARRERA_S CCX<br />
+			A_CARRERA_S<br />
+			A_CCX<br />
 			A_CONTINENTAL_CONV<br />
 			A_CONTINENTAL_COUPE<br />
 			A_CORVETTE_CARBON<br />
@@ -40,6 +40,7 @@
 			A_DBS_VOLANTE<br />
 			A_ESTOQUE<br />
 			A_EVORA<br />
+			A_F40<br />
 			A_FORDGT<br />
 			A_GALLARDO_VB<br />
 			A_GT500_SS<br />
@@ -50,28 +51,33 @@
 			A_M3_GTS<br />
 			A_A_MARUSSIA_B2<br />
 			A_MIURA_CONCEPT<br />
-			A_MP412C MURCIELAGO<br />
+			A_MP412C<br />
+			A_MURCIELAGO<br />
 			A_MURCIELAGO_RDSTR<br />
 			A_MURCIELAGO_SV<br />
 			A_POLICEINTERCEPTOR<br />
 			A_R8_52FSI<br />
 			A_R34GTR_NISMO<br />
-			A_REVENTON SESTOELEMENTO<br />
+			A_REVENTON<br />
+			A_SESTOELEMENTO<br />
 			A_SLR_722 V12_VANTAGE<br />
 			A_VIPER_ACR<br />
-			A_XKR Z4_GT3<br />
+			A_XKR<br />
+			A_Z4_GT3<br />
 			A_ZONDA_F<br />
 			A_ZONDA_F_RDSTR<br /><br />
 
 			B_1MSERIES<br />
 			B_911RSR30<br />
-			B_9146GT A1<br />
+			B_9146GT<br />
+			B_A1<br />
 			B_BOSS302_69<br />
 			B_BOXSTER<br />
 			B_CAMARO_ZL1<br />
 			B_CHALLENGER_N<br />
 			B_COBRA_427_SC<br />
-			B_E92 ELISE<br />
+			B_E92<br />
+			B_ELISE<br />
 			B_ESCORT_MK1<br />
 			B_EUROPA_S<br />
 			B_GALLARDO<br />
@@ -86,6 +92,7 @@
 			B_M6<br />
 			B_M6CONV<br />
 			B_MONARO<br />
+			B_MUSTANGGT05<br />
 			B_PANAMERA<br />
 			B_R8<br />
 			B_ROADRUNNER<br />
@@ -116,6 +123,7 @@
 			C_LANCIADELTAHF<br />
 			C_IMPREZA_SEDAN<br />
 			C_M3E30<br />
+			C_MB190EVO2<br />
 			C_MEGANERS<br />
 			C_MIURASV<br />
 			C_NSX<br />
@@ -157,7 +165,7 @@
 			D_RX8<br />
 			D_RX8_09<br />
 			D_SCIONTC<br />
-			D_SOLSTICE Z4<br />
+			D_SOLSTICE<br />
 			D_Z4<br /><br />
 
 			E_200SX<br />
@@ -177,7 +185,7 @@
 			Car #4 (can be empty): <input type="text" name="saleCar4" /><br />
 		    
 			<br /><input type="submit" value="Generate the Sale!" /><br /><br />
-			<i>Note: left the note here thx</i><br /><br />
+			<i>Sale will be deactivated automatically on Tuesday</i><br /><br />
 			<i>World Evolved v2 SaleGen</i>
 	</form>
 </body>

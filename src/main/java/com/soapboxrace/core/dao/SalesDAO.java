@@ -14,5 +14,9 @@ public class SalesDAO extends BaseDAO<SalesEntity> {
 	protected void setEntityManager(EntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
+	
+	public SalesEntity findById(Long id) {
+		return entityManager.find(SalesEntity.class, id);
+	}
 
 }

@@ -65,10 +65,10 @@ public class PromoCode {
 	@POST
 	@Path("/saleGen")
 	@Produces(MediaType.TEXT_HTML)
-	public String saleGen(@FormParam("saleManagerToken") String saleManagerToken, @FormParam("saleTime") String saleTime, @FormParam("saleCar1") String saleCar1, @FormParam("saleCar2") String saleCar2, @FormParam("saleCar3") String saleCar3, @FormParam("saleCar4") String saleCar4, @FormParam("saleName") String saleName) {
+	public String saleGen(@FormParam("saleManagerToken") String saleManagerToken, @FormParam("saleCar1") String saleCar1, @FormParam("saleCar2") String saleCar2, @FormParam("saleCar3") String saleCar3, @FormParam("saleCar4") String saleCar4, @FormParam("saleName") String saleName) {
 		if (saleManagerToken != null && !parameterBO.getStrParam("SALE_MANAGERTOKEN").equals(saleManagerToken)) {
 			return "ERROR: invalid token";
 		}
-		return salesBO.saleGen(saleTime, saleName, saleCar1, saleCar2, saleCar3, saleCar4);
+		return salesBO.saleGen(saleName, saleCar1, saleCar2, saleCar3, saleCar4);
 	}
 }
