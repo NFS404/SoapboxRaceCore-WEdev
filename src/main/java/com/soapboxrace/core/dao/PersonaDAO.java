@@ -2,13 +2,15 @@ package com.soapboxrace.core.dao;
 
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.dao.util.BaseDAO;
+import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.PersonaTopRaceEntity;
 import com.soapboxrace.core.jpa.PersonaTopTreasureHunt;
@@ -16,6 +18,12 @@ import com.soapboxrace.core.jpa.ProfileIconEntity;
 
 @Stateless
 public class PersonaDAO extends BaseDAO<PersonaEntity> {
+	
+	@EJB
+	private CarClassesDAO carClassesDAO;
+
+	@EJB
+	private PersonaBO personaBO;
 
 	@PersistenceContext
 	protected void setEntityManager(EntityManager entityManager) {
@@ -55,15 +63,10 @@ public class PersonaDAO extends BaseDAO<PersonaEntity> {
 	 * @return
 	 */
 	public String getCurrentCar(Long personaID) {
-		Query query = entityManager.createNativeQuery("SELECT cc.name " + 
-				"FROM persona p, customcar cc " + 
-				"WHERE cc.id = p.curcarindex AND p.id="+personaID);
-		query.setMaxResults(1);
-		@SuppressWarnings("unchecked")
-		List<String> list = query.getResultList();
-		String carname = "";
-		if (!list.isEmpty()) carname = list.get(0);
-		return carname;
+		CarSlotEntity carSlotEntity = personaBO.getDefaultCarEntity(personaID);
+		String carCode = carSlotEntity.getOwnedCar().getCustomCar().getName();
+		String fullCarName = carClassesDAO.getFullCarName(carCode);
+		return fullCarName;
 	}
 	/**
 	 * Получает топ профилей по очкам	

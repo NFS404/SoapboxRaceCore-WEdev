@@ -1,8 +1,12 @@
 package com.soapboxrace.core.dao;
 
+import java.math.BigInteger;
+import java.util.List;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
@@ -40,5 +44,16 @@ public class CarClassesDAO extends BaseDAO<CarClassesEntity> {
 			// TODO: handle exception
 		}
 		return null;
+	}
+	
+	public String getFullCarName(String carName) {
+		Query query = entityManager.createNativeQuery(
+			"SELECT full_name from car_classes WHERE store_name = '"+carName+"'");
+		@SuppressWarnings("unchecked")
+		List<String> fullCarName = query.getResultList();
+		if (fullCarName.isEmpty()) {
+			return "temp350";
+		}
+		return fullCarName.get(0); 
 	}
 }

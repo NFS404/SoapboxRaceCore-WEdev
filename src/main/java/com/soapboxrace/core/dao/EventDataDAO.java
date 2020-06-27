@@ -65,8 +65,8 @@ public class EventDataDAO extends BaseDAO<EventDataEntity> {
 	 */
 	public BigInteger countHackRacesByPersona(Long personaID) {
 		Query query = entityManager.createNativeQuery("SELECT COUNT(*) " + 
-				"FROM event_data " + 
-				"WHERE personaid = "+personaID+" AND (hacksDetected = 8 OR hacksDetected = 40)");
+				"FROM report " + 
+				"WHERE abuserpersonaid = "+personaID+" AND (hacksDetected = 8 OR hacksDetected = 40)");
 		query.setMaxResults(1);
 		@SuppressWarnings("unchecked")
 		List<BigInteger> list = query.getResultList();

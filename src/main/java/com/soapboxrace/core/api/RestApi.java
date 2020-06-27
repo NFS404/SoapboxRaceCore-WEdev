@@ -10,8 +10,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.codec.binary.StringUtils;
-
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.RestApiBO;
 import com.soapboxrace.jaxb.http.ChangePassword;
@@ -46,7 +44,11 @@ public class RestApi {
 	@GET
 	@Path("GetTopScore")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response topScores(@QueryParam("onpage") int onpage) {
+	public Response topScores(@QueryParam("onpage") int onpage, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.getTopScores(onpage)).build();
 	}
 	/**
@@ -56,7 +58,11 @@ public class RestApi {
 	@GET
 	@Path("GetTopRacers")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response topRaces(@QueryParam("onpage") int onPage) {
+	public Response topRaces(@QueryParam("onpage") int onPage, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.getTopRacers(onPage)).build();
 	}
 	/**
@@ -66,7 +72,11 @@ public class RestApi {
 	@GET
 	@Path("GetTopTreasureHunt")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response topTreasureHunt(@QueryParam("onpage") int onPage) {
+	public Response topTreasureHunt(@QueryParam("onpage") int onPage, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.TopProfileTreasureHunt(onPage)).build();
 	}
 	/**
@@ -75,7 +85,11 @@ public class RestApi {
 	@GET
 	@Path("GetPopularRaces")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response mostPupularRace() {
+	public Response mostPupularRace(@QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.MostPopularRaces()).build();
 	}
 	/**
@@ -85,7 +99,11 @@ public class RestApi {
 	@GET
 	@Path("GetPopularCarClasses")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response mostPupularCarClass(@QueryParam("onpage") int onPage) {
+	public Response mostPupularCarClass(@QueryParam("onpage") int onPage, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.getPopularCarClass(onPage)).build();
 	}
 	/**
@@ -95,7 +113,11 @@ public class RestApi {
 	@GET
 	@Path("GetPopularProfileIcons")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response mostPupularProfileIcon(@QueryParam("onpage") int onPage) {
+	public Response mostPupularProfileIcon(@QueryParam("onpage") int onPage, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.getPopularProfileIcons(onPage)).build();
 	}
 	/**
@@ -105,7 +127,11 @@ public class RestApi {
 	@GET
 	@Path("GetPopularCarName")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response mostPopularCarName(@QueryParam("onpage") int onPage) {
+	public Response mostPopularCarName(@QueryParam("onpage") int onPage, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.getTopCarName(onPage)).build();
 	}
 	/**
@@ -114,7 +140,12 @@ public class RestApi {
 	@GET
 	@Path("TopTimeOnEvent")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response race(@QueryParam("eventid") int eventid, @QueryParam("powerups") boolean powerups, @QueryParam("carclass") String carclass, @QueryParam("page") int page, @QueryParam("onpage") int onPage) {
+	public Response race(@QueryParam("eventid") int eventid, @QueryParam("powerups") boolean powerups, 
+			@QueryParam("carclass") String carclass, @QueryParam("page") int page, @QueryParam("onpage") int onPage, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.getTopTimeRace(eventid, powerups, carclass, page, onPage)).build();
 	}
 	/**
@@ -123,7 +154,12 @@ public class RestApi {
 	@GET
 	@Path("TopTimeRacesByPersona")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response race(@QueryParam("eventid") int eventid, @QueryParam("personaname") String personaname, @QueryParam("page") int page, @QueryParam("onpage") int onPage) {
+	public Response race(@QueryParam("eventid") int eventid, @QueryParam("personaname") String personaname, @QueryParam("page") int page, 
+			@QueryParam("onpage") int onPage, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.getTopTimeRaceByPersona(eventid, personaname, page, onPage)).build();
 	}
 	/**
@@ -132,7 +168,11 @@ public class RestApi {
 	@GET
 	@Path("Events")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response races(@QueryParam("all") boolean all) {
+	public Response races(@QueryParam("all") boolean all, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.getRaces(all)).build();
 	}
 	/**
@@ -141,7 +181,11 @@ public class RestApi {
 	@GET
 	@Path("Personas")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response personas(@QueryParam("page") int page,@QueryParam("onpage") int onPage) {
+	public Response personas(@QueryParam("page") int page,@QueryParam("onpage") int onPage, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.getPersonas(page, onPage)).build();
 	}
 	/**
@@ -166,7 +210,11 @@ public class RestApi {
 	public Response personasPremium(
 				@QueryParam("personaName") String personaName,
 				@QueryParam("email") String email,
-				@QueryParam("password") String password) {
+				@QueryParam("password") String password, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		return Response.ok(bo.getPersonaPremiumInfo(personaName, password, email)).build();
 	}
 	/**
@@ -175,7 +223,12 @@ public class RestApi {
 	@GET
 	@Path("ChangePassword")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response changePassword(@QueryParam("email") String email, @QueryParam("password") String password, @QueryParam("newPassword") String newPassword) {
+	public Response changePassword(@QueryParam("email") String email, @QueryParam("password") String password, 
+			@QueryParam("newPassword") String newPassword, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
 		ChangePassword obj = bo.changePassword(email, password, newPassword);
 		if (obj.isOk()) return Response.ok(obj).build();
 		return Response.serverError().entity(obj).build();
