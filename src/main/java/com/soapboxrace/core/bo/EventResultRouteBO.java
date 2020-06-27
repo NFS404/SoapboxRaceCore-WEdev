@@ -9,6 +9,7 @@ import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.RecordsDAO;
 import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
@@ -82,6 +83,9 @@ public class EventResultRouteBO {
 	
 	@EJB
 	private CustomCarDAO customCarDAO;
+	
+	@EJB
+	private RecordsDAO recordsDAO;
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -235,6 +239,11 @@ public class EventResultRouteBO {
 					|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 || eventClass != customCarEntity.getCarClassHash()) {
 				raceIssues = true;
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
+			}
+			// If some server admin did a manual player unban via DB, and forgot to uncheck the userBan field for him, this player should know about it
+			if (!recordsDAO.countBannedRecords(personaEntity.getUser().getId()).equals(0)) {
+				raceIssues = true;
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Some records on this account is still banned, contact to server staff."), personaId);
 			}
 			if (!raceIssues) {
 				recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity);

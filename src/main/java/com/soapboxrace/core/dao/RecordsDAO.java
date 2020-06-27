@@ -48,22 +48,20 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 	
 	public BigInteger countRecordPlace(int eventId, boolean powerUps, int carClassHash, Long timeMS) {
 		Query query = entityManager.createNativeQuery(
-			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carClassHash = "+carClassHash+" and timeMS < "+timeMS
+			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carClassHash = "+carClassHash
+					+ "and timeMS < "+timeMS+" and userBan = false"
 		);
 		BigInteger count;
 		@SuppressWarnings("unchecked")
 		List<BigInteger> List = query.getResultList();
-		if (!List.isEmpty()) {
-		  count = List.get(0);
-		} else {
-		  count = BigInteger.valueOf(1);
-		}
+		count = List.get(0);
+		count = count.add(BigInteger.valueOf(1));
 		return count; // 0 means 1st place
 	}
 	
 	public BigInteger countRecords(int eventId, boolean powerUps, int carClassHash) {
 		Query query = entityManager.createNativeQuery(
-			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carClassHash = "+carClassHash
+			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carClassHash = "+carClassHash+" and userBan = false"
 		);
 		@SuppressWarnings("unchecked")
 		List<BigInteger> List = query.getResultList();
@@ -74,7 +72,7 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 	
 	public BigInteger countRecordsAll(int eventId, boolean powerUps) {
 		Query query = entityManager.createNativeQuery(
-			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps);
+			"SELECT Count(DISTINCT userId) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and userBan = false");
 		@SuppressWarnings("unchecked")
 		List<BigInteger> List = query.getResultList();
 		if (List.isEmpty())
@@ -90,6 +88,17 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		if (List.isEmpty())
 			return new BigInteger("0");
 		else return List.get(0);
+	}
+	
+	// If some server admin did a manual player unban via DB, and forgot to uncheck the userBan field for him, this player should know about it
+	public BigInteger countBannedRecords(Long userId) {
+		Query query = entityManager.createNativeQuery(
+			"SELECT Count(*) from records WHERE userId = "+userId+" and userBan = true");
+		BigInteger count;
+		@SuppressWarnings("unchecked")
+		List<BigInteger> List = query.getResultList();
+		count = List.get(0);
+		return count; 
 	}
 	
 	public void banRecords(UserEntity user) {

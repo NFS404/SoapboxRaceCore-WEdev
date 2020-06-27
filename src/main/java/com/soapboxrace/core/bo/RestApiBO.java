@@ -292,15 +292,15 @@ public class RestApiBO {
 				);
 		// FIXME Do something with that mess
 		if (carclasshash == 0) {
-			// ArrayList<Long> userIdList = new ArrayList<>();
+			ArrayList<Long> userIdList = new ArrayList<>();
 			for (RecordsEntity race : recordsDAO.statsEventAll(event, powerups, page, onPage)) {
-				// Long userId = race.getUser().getId();
-				// if (!userIdList.contains(userId)) {
-				//  	userIdList.add(userId);
-				// }
-				// else {
-				// 	continue;
-				// }
+				Long userId = race.getUser().getId();
+				if (!userIdList.contains(userId)) {
+				 	userIdList.add(userId);
+				}
+				else {
+					continue;
+				}
 				final boolean isCarVersionVaild;
 				CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
 				EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
