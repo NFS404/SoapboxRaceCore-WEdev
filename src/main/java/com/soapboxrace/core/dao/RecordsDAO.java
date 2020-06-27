@@ -55,7 +55,6 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		List<BigInteger> List = query.getResultList();
 		if (!List.isEmpty()) {
 		  count = List.get(0);
-		  count = count.add(BigInteger.valueOf(1));
 		} else {
 		  count = BigInteger.valueOf(1);
 		}
