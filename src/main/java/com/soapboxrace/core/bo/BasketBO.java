@@ -407,7 +407,7 @@ public class BasketBO {
 				"SRV-CAR100","SRV-CAR137","SRV-CAR91","SRV-CAR172","SRV-CAR35","SRV-CAR126","SRV-CAR26","SRV-CAR123","SRV-CAR13","SRV-CAR33",
 				"SRV-FCAR4","SRV-CAR170","SRV-CAR59","SRV-CAR5","SRV-CAR135","SRV-CAR86","SRV-CAR57","SRV-FCAR0","SRV-CAR109","SRV-CAR46",
 				"SRV-CAR98","SRV-CAR97","SRV-CAR56","SRV-CAR305","SRV-CAR306","SRV-CAR119","SRV-CAR375","SRV-FCAR6","SRV-FCAR1","SRV-FCAR28",
-				"SRV-BRERA1","SRV-CAR239","SRV-FCAR30", "SRV-FCAR8", "SRV-FCAR7", "SRV-FCAR32" }; 
+				"SRV-BRERA1","SRV-CAR239","SRV-FCAR30", "SRV-FCAR8", "SRV-FCAR7", "SRV-FCAR32", "SRV-FCAR36", "SRV-FCAR37" }; 
 		        // "SRV-FCAR11", "SRV-CAR380", "SRV-CAR381", "SRV-CAR382" - AI Cars
 		String[] productIdBadArray = { "SRV-CAR40","SRV-CAR151","SRV-CAR165","SRV-CAR143","SRV-CAR154","SRV-CAR173","SRV-CAR141","SRV-CAR142",
 				"SRV-CAR181","SRV-CAR159","SRV-CAR121","SRV-CAR96","SRV-CAR93","SRV-CAR169","SRV-CAR127","SRV-CAR81","SRV-CAR21","SRV-CAR148",
@@ -485,7 +485,8 @@ public class BasketBO {
 
 	public boolean sellCar(String securityToken, Long personaId, Long serialNumber) {
 		this.tokenSessionBO.verifyPersona(securityToken, personaId);
-
+		PersonaEntity personaEntity = personaDao.findById(personaId);
+		
 		OwnedCarEntity ownedCarEntity = ownedCarDAO.findById(serialNumber);
 		if (ownedCarEntity == null) {
 			return false;
@@ -494,12 +495,13 @@ public class BasketBO {
 		if (carSlotEntity == null) {
 			return false;
 		}
+		if (!carSlotEntity.getPersona().getPersonaId().equals(personaEntity.getPersonaId())) {
+            return false;
+        }
 		int personaCarCount = getPersonaCarCount(personaId);
 		if (personaCarCount <= 1) {
 			return false;
 		}
-
-		PersonaEntity personaEntity = personaDao.findById(personaId);
 
 		final int maxCash = parameterBO.getMaxCash(securityToken);
 		if (personaEntity.getCash() < maxCash) {

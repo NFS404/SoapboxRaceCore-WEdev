@@ -132,8 +132,7 @@ public class LaunchFilter implements ContainerRequestFilter {
 				||
 				!UserAgentData[0].equalsIgnoreCase("GameLauncherReborn")
 				||
-				!UserAgentData[2].equalsIgnoreCase("WinForms (+https://github.com/worldunitedgg/GameLauncher_NFSW)")
-				// !UserAgentData[2].equalsIgnoreCase("WinForms (+https://github.com/SoapboxRaceWorld/GameLauncher_NFSW)")
+				!UserAgentData[2].equalsIgnoreCase("WinForms (+https://github.com/SoapboxRaceWorld/GameLauncher_NFSW)")
 			) {
 			return false;
 		}
