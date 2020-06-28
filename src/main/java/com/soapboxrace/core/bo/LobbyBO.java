@@ -279,7 +279,8 @@ public class LobbyBO {
 
 	public LobbyInfo acceptinvite(Long personaId, Long lobbyInviteId) {
 		LobbyEntity lobbyEntity = lobbyDao.findById(lobbyInviteId);
-		int eventId = lobbyEntity.getEvent().getId();
+		EventEntity eventEntity = lobbyEntity.getEvent();
+		int eventId = eventEntity.getId();
 
 		LobbyCountdown lobbyCountdown = new LobbyCountdown();
 		lobbyCountdown.setLobbyId(lobbyInviteId);
@@ -335,7 +336,8 @@ public class LobbyBO {
 		Long teamRacerPersona = personaId;
 		PersonaEntity personaEntityRacer = personaDao.findById(teamRacerPersona);
 		TeamsEntity racerTeamEntity = personaEntityRacer.getTeam();
-		if (racerTeamEntity != null && racerTeamEntity.getActive() && parameterBO.getIntParam("TEAM_CURRENTSEASON") > 0) { // 0 means there is no active team racing
+		if (racerTeamEntity != null && racerTeamEntity.getActive() && parameterBO.getIntParam("TEAM_CURRENTSEASON") > 0
+				&& eventEntity.getCarClassHash() != 607077938) { // 0 means there is no active team racing
 			int serverCarClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
 			OwnedCarTrans defaultCar = personaBO.getDefaultCar(personaId);
 			int playerCarClass = defaultCar.getCustomCar().getCarClassHash();
