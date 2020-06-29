@@ -39,6 +39,7 @@ public class EventDAO extends BaseDAO<EventEntity> {
 	 */
 	public List<EventEntity> findAllEnabled() {
 		TypedQuery<EventEntity> query = entityManager.createNamedQuery("EventEntity.findAllEnabled", EventEntity.class);
+		query.setParameter("rotation", parameterBO.getIntParam("ROTATIONID"));
 		return query.getResultList();
 	}
 	/**
