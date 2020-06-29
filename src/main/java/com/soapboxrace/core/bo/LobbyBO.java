@@ -369,11 +369,12 @@ public class LobbyBO {
 					lobbyEntity.setTeam2Id(racerTeamId);
 					teamIsAssigned = true;
 					team1Name = teamsDao.findById(team1id).getTeamName();
+					team2Name = racerTeamEntity.getTeamName();
 					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team joined as #2. First team is " + team1Name), teamRacerPersona);
 					
 					for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
 						PersonaEntity entrantPersona = lobbyEntrantEntity.getPersona();
-						if (entrantPersona.getTeam().getTeamId() == team1id) {
+						if (entrantPersona.getTeam() != null && entrantPersona.getTeam().getTeamId() == team1id) {
 							openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Second team is " + team2Name), entrantPersona.getPersonaId());
 						}
 					}
