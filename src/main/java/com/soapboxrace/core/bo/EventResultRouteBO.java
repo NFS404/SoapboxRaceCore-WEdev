@@ -1,5 +1,7 @@
 package com.soapboxrace.core.bo;
 
+import java.math.BigInteger;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
@@ -241,7 +243,8 @@ public class EventResultRouteBO {
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
 			}
 			// If some server admin did a manual player unban via DB, and forgot to uncheck the userBan field for him, this player should know about it
-			if (!recordsDAO.countBannedRecords(personaEntity.getUser().getId()).equals(0)) {
+			BigInteger zeroCheck = new BigInteger("0");
+			if (!recordsDAO.countBannedRecords(personaEntity.getUser().getId()).equals(zeroCheck)) {
 				raceIssues = true;
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Some records on this account is still banned, contact to server staff."), personaId);
 			}
