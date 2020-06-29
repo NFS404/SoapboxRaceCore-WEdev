@@ -80,6 +80,7 @@ public class EventBO {
 	
 	// Change the current events list (every week)
 	// If ROTATION_COUNT defined as 1, server will not change it (set all event's rotation ids to 1)
+	// Rotation on "0" - track is always enable, "999" - not used
 	@Schedule(dayOfWeek = "MON", persistent = false)
 	public String eventRotation() {
 		int rotationCount = parameterBO.getIntParam("ROTATION_COUNT");
