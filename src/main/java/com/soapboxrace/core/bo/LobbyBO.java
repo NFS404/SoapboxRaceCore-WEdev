@@ -348,13 +348,7 @@ public class LobbyBO {
 				String team2Name = "";
 				Long racerTeamId = racerTeamEntity.getTeamId();
 				if (team1id == racerTeamId) {
-					if (team2id != null) {
-						team2Name = teamsDao.findById(team2id).getTeamName();
-						openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team joined as #1. Second team is " + team2Name), teamRacerPersona);
-					}
-					else {
-						openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team joined as #1."), teamRacerPersona);
-					}
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team joined as #1."), teamRacerPersona);
 				}
 				if (team2id == racerTeamId) {
 					team1Name = teamsDao.findById(team1id).getTeamName();

@@ -103,7 +103,7 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 		int number = random.nextInt(count.intValue());
 		int isSBCard = 0;
 		if (isTeamRace) {
-			isSBCard = random.nextInt(4); // 0,1,2,3,4 - 15% chance to got the SpeedBoost card IF value is 1
+			isSBCard = random.nextInt(10); // Chance to got the SpeedBoost card IF value is 1
 			if (isSBCard == 1) {
 				// FIXME Hard-coded item, should be in Product table
 				ProductEntity speedBoostProduct = new ProductEntity();

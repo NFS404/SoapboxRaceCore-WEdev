@@ -98,6 +98,9 @@ public class RewardBO {
 		if (productEntity.getStars() != null && productEntity.getStars() == 4 && productEntity.getProductType().contentEquals("SKILLMODPART")) {
 			achievementsBO.applyDropAchievements(personaEntity, AchievementType.WEV2_EARNSKILL);
 		}
+		if (isTeamRace) {
+			System.out.println("### TEAMS: Player " + personaEntity.getName() + " has got the item: " + productEntity.getProductTitle());
+		}
 		LuckyDrawItem luckyDrawItem = dropBO.copyProduct2LuckyDraw(productEntity);
 		boolean inventoryFull = inventoryBO.isInventoryFull(productEntity, personaEntity);
         if (productEntity.getProductTitle().contains("SPEEDBOOST")) {

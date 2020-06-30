@@ -1,9 +1,6 @@
 package com.soapboxrace.core.bo;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
-
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
