@@ -1,5 +1,6 @@
 package com.soapboxrace.core.dao;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
 
@@ -99,12 +100,13 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 		countQuery.setParameter("productType", productType);
 		Long count = (Long) countQuery.getSingleResult();
 
+		SecureRandom randomS = new SecureRandom(); // Important to have a more "fair" random for SB-drops
 		Random random = new Random();
 		int number = random.nextInt(count.intValue());
 		int isSBCard = 0;
 		if (isTeamRace) {
-			isSBCard = random.nextInt(10); // Chance to got the SpeedBoost card IF value is 1
-			if (isSBCard == 1) {
+			isSBCard = randomS.nextInt(12); // Chance to got the SpeedBoost card IF value is 1
+			if (isSBCard == 5) {
 				// FIXME Hard-coded item, should be in Product table
 				ProductEntity speedBoostProduct = new ProductEntity();
 				int sbAmount = parameterBO.getIntParam("REWARD_SB_AMOUNT");
