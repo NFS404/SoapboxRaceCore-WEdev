@@ -224,10 +224,4 @@ public class EventsBO {
 		return luckyDrawInfo;
 	}
 
-//	private void trackRotationCycle() { // Track rotation lists is changing every Monday on 00:00 local server time
-//		int curRotation = parameterBO.getIntParam("ROTATIONID");
-//		if (LocalDateTime.now().equals(DayOfWeek.MONDAY)) {
-//			//
-//		}
-//	}
 }

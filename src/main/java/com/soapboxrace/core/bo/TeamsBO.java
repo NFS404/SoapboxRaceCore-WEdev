@@ -1,6 +1,5 @@
 package com.soapboxrace.core.bo;
 
-import java.sql.Time;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -158,6 +157,7 @@ public class TeamsBO {
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
 			}
+			System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, proceed");
 			EventSessionEntity eventSessionEntity = eventSessionDAO.findById(eventSessionId);
 			String message = "";
 			String messageDebug = "";
