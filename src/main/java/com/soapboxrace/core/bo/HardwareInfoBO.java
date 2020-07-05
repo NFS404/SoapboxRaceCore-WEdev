@@ -44,7 +44,9 @@ public class HardwareInfoBO {
 			hardwareInfoEntityTmp.setHardwareHash(calcHardwareInfoHash);
 			hardwareInfoDAO.insert(hardwareInfoEntityTmp);
 		} else {
-			hardwareInfoEntityTmp.setUserIdOld(hardwareInfoEntityTmp.getUserId());
+			if (hardwareInfoEntityTmp.getUserId() != userId) {
+				hardwareInfoEntityTmp.setUserIdOld(hardwareInfoEntityTmp.getUserId());
+			}
 			hardwareInfoEntityTmp.setUserId(userId);
 			hardwareInfoDAO.update(hardwareInfoEntityTmp);
 		}

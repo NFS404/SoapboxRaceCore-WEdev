@@ -82,6 +82,9 @@ public class UserEntity {
 	@Column(name = "vinylSlotsUsed")
 	private int vinylSlotsUsed;
 	
+	@Column(name = "ignoreHWBan")
+	private boolean ignoreHWBan;
+	
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -232,6 +235,14 @@ public class UserEntity {
 	
 	public void setVinylSlotsUsed(int vinylSlotsUsed) {
 		this.vinylSlotsUsed = vinylSlotsUsed;
+	}
+	
+	public boolean getIgnoreHWBan() {
+		return ignoreHWBan;
+	}
+
+	public void setIgnoreHWBan(boolean ignoreHWBan) {
+		this.ignoreHWBan = ignoreHWBan;
 	}
 
 }

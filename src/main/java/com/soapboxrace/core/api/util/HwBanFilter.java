@@ -33,7 +33,7 @@ public class HwBanFilter implements ContainerRequestFilter {
 		String securityToken = requestContext.getHeaderString("securityToken");
 		UserEntity user = tokenBO.getUser(securityToken);
 		String gameHardwareHash = user.getGameHardwareHash();
-		if (hardwareInfoBO.isHardwareHashBanned(gameHardwareHash)) {
+		if (hardwareInfoBO.isHardwareHashBanned(gameHardwareHash) && !user.getIgnoreHWBan()) {
 			requestContext.abortWith(Response.status(Response.Status.GONE).build());
 		}
 	}

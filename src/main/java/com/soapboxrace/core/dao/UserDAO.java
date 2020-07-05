@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
@@ -33,6 +34,18 @@ public class UserDAO extends BaseDAO<UserEntity> {
 
 		List<UserEntity> resultList = query.getResultList();
 		return !resultList.isEmpty() ? resultList.get(0) : null;
+	}
+	
+	public void ignoreHWBan(Long userId) {
+		Query createQuery = entityManager.createQuery("UPDATE UserEntity obj SET obj.ignoreHWBan = true WHERE obj.id = :id");
+		createQuery.setParameter("id", userId);
+		createQuery.executeUpdate();
+	}
+	
+	public void ignoreHWBanDisable(Long userId) {
+		Query createQuery = entityManager.createQuery("UPDATE UserEntity obj SET obj.ignoreHWBan = false WHERE obj.id = :id");
+		createQuery.setParameter("id", userId);
+		createQuery.executeUpdate();
 	}
 
 }

@@ -65,6 +65,7 @@ public class AdminBO {
                 }
                 recordsDAO.banRecords(userEntity);
                 sendBan(personaEntity, commandInfo.timeEnd, commandInfo.reason);
+                userDao.ignoreHWBanDisable(userEntity.getId());
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is banned."), personaId);
                 String message = ":heavy_minus_sign:"
                 		+ "\n:hammer: **|** Nгрок **" + bannedPlayer + "** был забанен модератором **" + adminPlayer + "**. Помянем его."
@@ -79,6 +80,7 @@ public class AdminBO {
                 }
                 recordsDAO.banRecords(userEntity);
                 sendBan(personaEntity, commandInfo.timeEnd, commandInfo.reason);
+                userDao.ignoreHWBanDisable(userEntity.getId());
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is banned forever."), personaId);
                 String messageF = ":heavy_minus_sign:"
                 		+ "\n:hammer: **|** Nгрок **" + bannedPlayer + "** был забанен модератором **" + adminPlayer + "**. Помянем его."
@@ -87,25 +89,32 @@ public class AdminBO {
         		
                 break;
             case KICK:
-                sendKick(personaEntity.getUser().getId(), personaEntity.getPersonaId());
+                sendKick(userEntity.getId(), personaEntity.getPersonaId());
                 System.out.println("Player " + personaEntity.getName() + " was kicked, by " + adminPlayer);
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Tactical kick is deployed."), personaId);
+                break;
+            case IGNORE_HW:
+                userDao.ignoreHWBan(userEntity.getId());
+                openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This user is allowed to play with banned HW entrys."), personaId);
                 break;
             case UNBAN:
             	banDAO.unbanUser(userEntity);
             	recordsDAO.unbanRecords(userEntity);
-				HardwareInfoEntity hardwareInfoEntity = hardwareInfoDAO.findByUserId(personaEntity.getUser().getId());
-				// FIXME Sometimes appears with proper unban sequence
-				// FIXME Error 500 when user got a new account
+				HardwareInfoEntity hardwareInfoEntity = hardwareInfoDAO.findByUserId(userEntity.getId());
+				if (hardwareInfoEntity == null) {
+                	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Unable to find HW entry for user - maybe user created a new account?"), personaId);
+                	HardwareInfoEntity hardwareInfoEntityCheck = hardwareInfoDAO.findByHardwareHash(userEntity.getGameHardwareHash());
+                	UserEntity bannedGuyEntity = userDao.findById(hardwareInfoEntityCheck.getUserId());
+                	if (bannedGuyEntity.getPassword().equals(userEntity.getPassword()) || bannedGuyEntity.getIpAddress().equals(userEntity.getIpAddress())) {
+                		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This guy have other accounts (password or IP is the same)."), personaId);
+                	}
+				}
 				if (!hardwareInfoEntity.isBanned()) {
-					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This user is not banned. For now."), personaId);
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Some of user's HW entrys was not banned at all."), personaId);
 				}
 				if (hardwareInfoEntity != null) {
 					hardwareInfoEntity.setBanned(false);
 					hardwareInfoDAO.update(hardwareInfoEntity);
-				}
-                if (hardwareInfoEntity == null) {
-                	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Can't find HW entry for user - maybe user created a new account?"), personaId);
 				}
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is unbanned."), personaId);
                 break;
@@ -159,6 +168,9 @@ public class AdminBO {
                 case "ban_f":
                     action = CmdAction.BAN_F;
                     break;
+                case "ignore_hw":
+                    action = CmdAction.IGNORE_HW;
+                    break;
                 case "kick":
                     action = CmdAction.KICK;
                     break;
@@ -209,6 +221,7 @@ public class AdminBO {
             BAN,
             BAN_F,
             UNBAN,
+            IGNORE_HW,
             UNKNOWN
         }
     }
