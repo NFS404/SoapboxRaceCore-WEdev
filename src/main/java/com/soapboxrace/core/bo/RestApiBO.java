@@ -461,9 +461,9 @@ public class RestApiBO {
 		list.setCount(eventDAO.countAll(all));
 		List<EventEntity> races = null;
 		if (all)
-			races = eventDAO.findAll();
+			races = eventDAO.findAllStats();
 		else
-			races = eventDAO.findAllEnabled();
+			races = eventDAO.findAllEnabledStats();
 		for (EventEntity race : races) {
 			list.add(race.getId(), race.getName(), race.getCarClassHash(), String.valueOf(race.getEventModeId()));
 		}

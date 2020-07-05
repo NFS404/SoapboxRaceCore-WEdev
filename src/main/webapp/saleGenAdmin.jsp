@@ -83,7 +83,8 @@
 			B_GALLARDO<br />
 			B_GALLARDO_SPYDER<br />
 			B_GRANDCHEROKEE_SRT<br />
-			B_GT40 GTR<br />
+			B_GT40<br />
+			B_GTR<br />
 			B_H1ALPHA<br />
 			B_HEMICUDA<br />
 			B_IMPREZA_HATCH<br />

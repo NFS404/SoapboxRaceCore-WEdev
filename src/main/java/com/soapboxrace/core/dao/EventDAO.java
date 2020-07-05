@@ -29,16 +29,16 @@ public class EventDAO extends BaseDAO<EventEntity> {
 		return entityManager.find(EventEntity.class, id);
 	}
 
-	public List<EventEntity> findAll() {
-		TypedQuery<EventEntity> query = entityManager.createNamedQuery("EventEntity.findAll", EventEntity.class);
+	public List<EventEntity> findAllStats() {
+		TypedQuery<EventEntity> query = entityManager.createNamedQuery("EventEntity.findAllStats", EventEntity.class);
 		return query.getResultList();
 	}
 	/**
 	 * Все включенные эвенты
 	 * @author Vadimka
 	 */
-	public List<EventEntity> findAllEnabled() {
-		TypedQuery<EventEntity> query = entityManager.createNamedQuery("EventEntity.findAllEnabled", EventEntity.class);
+	public List<EventEntity> findAllEnabledStats() {
+		TypedQuery<EventEntity> query = entityManager.createNamedQuery("EventEntity.findAllEnabledStats", EventEntity.class);
 		query.setParameter("rotation", parameterBO.getIntParam("ROTATIONID"));
 		return query.getResultList();
 	}

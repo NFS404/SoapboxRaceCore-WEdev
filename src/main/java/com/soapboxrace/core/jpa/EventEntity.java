@@ -12,8 +12,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "EVENT")
 @NamedQueries({ //
-		@NamedQuery(name = "EventEntity.findAll", query = "SELECT obj FROM EventEntity obj WHERE obj.rotation <> 999"), //
-		@NamedQuery(name = "EventEntity.findAllEnabled", query = "SELECT obj FROM EventEntity obj WHERE rotation = :rotation OR rotation = 0"), //
+		@NamedQuery(name = "EventEntity.findAllStats", query = "SELECT obj FROM EventEntity obj WHERE obj.rotation <> 999 AND obj.statsVisible = true"), //
+		@NamedQuery(name = "EventEntity.findAllEnabledStats", query = "SELECT obj FROM EventEntity obj WHERE rotation = :rotation OR rotation = 0 AND obj.statsVisible = true"), //
 		@NamedQuery(name = "EventEntity.findByLevel", query = "SELECT obj FROM EventEntity obj WHERE :level >= obj.minLevel AND :level <= obj.maxLevel AND isEnabled = true"), //
 		@NamedQuery(name = "EventEntity.findByRotation", query = "SELECT obj FROM EventEntity obj WHERE :level >= obj.minLevel AND :level <= obj.maxLevel AND isEnabled = true AND (rotation = :rotation OR rotation = 0)") //
 })
@@ -68,6 +68,7 @@ public class EventEntity {
 	private long minTime;
 	private int rotation;
 	private float trackLength;
+	private boolean statsVisible;
 
 	public int getId() {
 		return id;
@@ -435,5 +436,13 @@ public class EventEntity {
 
 	public void setTrackLength(float trackLength) {
 		this.trackLength = trackLength;
+	}
+	
+	public boolean getStatsVisible() {
+		return statsVisible;
+	}
+
+	public void setStatsVisible(boolean statsVisible) {
+		this.statsVisible = statsVisible;
 	}
 }
