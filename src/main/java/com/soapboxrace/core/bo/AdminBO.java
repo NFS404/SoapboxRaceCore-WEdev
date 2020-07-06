@@ -110,7 +110,7 @@ public class AdminBO {
                 	}
 				}
 				if (!hardwareInfoEntity.isBanned()) {
-					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Some of user's HW entrys was not banned at all."), personaId);
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Some of user HW entrys was not banned at all."), personaId);
 				}
 				if (hardwareInfoEntity != null) {
 					hardwareInfoEntity.setBanned(false);

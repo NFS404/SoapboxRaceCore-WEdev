@@ -194,7 +194,7 @@ public class LobbyBO {
 	    int randomId = eventIdArray[rand.nextInt(eventIdArray.length)];
 		
 		EventEntity eventEntity = eventDao.findById(randomId);
-		    if (!eventEntity.getIsEnabled() || eventEntity.getRotation() != curRotation) {
+		    if (!eventEntity.getIsEnabled() || (eventEntity.getRotation() != curRotation && eventEntity.getRotation() != 0)) {
 		    //	System.out.println("randomEventId value is not available - REPEAT");
 	        	return randomEventId(securityToken);
 	        }
