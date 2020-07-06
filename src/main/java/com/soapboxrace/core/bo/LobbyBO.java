@@ -178,6 +178,7 @@ public class LobbyBO {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 		OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);
 		int playerRaceFilter = defaultCar.getCustomCar().getRaceFilter();
+		int curRotation = parameterBO.getIntParam("ROTATIONID");
 		
 		int[] eventIdArray = { 3,9,10,13,14,15,16,17,18,19,20,21,23,24,
 				27,28,29,30,33,34,35,36,37,41,45,47,49,50,53,54,
@@ -193,7 +194,7 @@ public class LobbyBO {
 	    int randomId = eventIdArray[rand.nextInt(eventIdArray.length)];
 		
 		EventEntity eventEntity = eventDao.findById(randomId);
-		    if (!eventEntity.getIsEnabled()) {
+		    if (!eventEntity.getIsEnabled() || eventEntity.getRotation() != curRotation) {
 		    //	System.out.println("randomEventId value is not available - REPEAT");
 	        	return randomEventId(securityToken);
 	        }
