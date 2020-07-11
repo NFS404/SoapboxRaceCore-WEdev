@@ -89,7 +89,7 @@ public class AdminBO {
         		
                 break;
             case KICK:
-                sendKick(userEntity.getId(), personaEntity.getPersonaId());
+                sendKick(personaEntity.getPersonaId());
                 System.out.println("Player " + personaEntity.getName() + " was kicked, by " + adminPlayer);
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Tactical kick is deployed."), personaId);
                 break;
@@ -135,7 +135,7 @@ public class AdminBO {
         banEntity.setData(userEntity.getEmail());
         banDAO.insert(banEntity);
         userDao.update(userEntity);
-        sendKick(userEntity.getId(), personaEntity.getPersonaId());
+        sendKick(personaEntity.getPersonaId());
 
         HardwareInfoEntity hardwareInfoEntity = hardwareInfoDAO.findByUserId(userEntity.getId());
 
@@ -145,9 +145,22 @@ public class AdminBO {
         }
     }
 
-    private void sendKick(Long userId, Long personaId) {
+    private void sendKick(Long personaId) {
         openFireSoapBoxCli.send("<NewsArticleTrans><ExpiryTime><", personaId);
     }
+    
+    public String renamePersonaAdmin(String nickname, String newNickname) {
+    	PersonaEntity personaEntity = personaDao.findByName(nickname);
+    	if (personaEntity == null) {
+    		return "ERROR: wrong nickname";
+    	}
+    	personaEntity.setName("newNickname");
+    	personaDao.update(personaEntity);
+    	
+    	sendKick(personaEntity.getPersonaId());
+    	System.out.println("### Player nickname of "+ nickname +" has been changed to "+ newNickname +".");
+		return "Player's nickname has been changed.";
+	}
 
     private static class CommandInfo {
         public CommandInfo.CmdAction action;

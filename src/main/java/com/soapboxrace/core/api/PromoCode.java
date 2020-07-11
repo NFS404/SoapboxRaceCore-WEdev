@@ -26,11 +26,11 @@ public class PromoCode {
 	@POST
 	@Path("/createPromoCode")
 	@Produces(MediaType.TEXT_HTML)
-	public String createPromoCode(@FormParam("promoCodeToken") String promoCodeToken, @FormParam("codeType") String codeType) {
-		if (parameterBO.getStrParam("PROMO_CODE_TOKEN").equals(promoCodeToken) && codeType != null) {
+	public String createPromoCode(@FormParam("token") String token, @FormParam("codeType") String codeType) {
+		if (parameterBO.getStrParam("MODERATOR_TOKEN").equals(token) && codeType != null) {
 			return bo.createPromoCode(codeType);
 		}
-		if (parameterBO.getStrParam("PROMO_CODE_TOKEN").equals(promoCodeToken) && codeType == null) {
+		if (parameterBO.getStrParam("MODERATOR_TOKEN").equals(token) && codeType == null) {
 			return "ERROR: Code type is not selected, please try again";
 		}
 		return "ERROR: invalid token (not a staff? quit right now, hacker)";
@@ -46,7 +46,7 @@ public class PromoCode {
 		if (token == null && (promoCode.isEmpty() || email.isEmpty() || password.isEmpty() || nickname.isEmpty())) {
 			return "ERROR: empty email, password, nickname or code";
 		}
-		if (token != null && !parameterBO.getStrParam("PROMO_CODE_TOKEN").equals(token)) {
+		if (token != null && !parameterBO.getStrParam("MODERATOR_TOKEN").equals(token)) {
 			return "ERROR: invalid token (not a staff? quit right now, hacker)";
 		}
 		return bo.usePromoCode(promoCode, email, password, nickname, token);

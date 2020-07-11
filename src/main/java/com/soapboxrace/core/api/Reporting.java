@@ -3,6 +3,7 @@ package com.soapboxrace.core.api;
 import java.io.InputStream;
 
 import javax.ejb.EJB;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -13,7 +14,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.soapboxrace.core.api.util.Secured;
+import com.soapboxrace.core.bo.AdminBO;
 import com.soapboxrace.core.bo.HardwareInfoBO;
+import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.HardwareInfoEntity;
@@ -32,6 +35,12 @@ public class Reporting {
 
 	@EJB
 	private UserDAO userDAO;
+	
+	@EJB
+	private ParameterBO parameterBO;
+	
+	@EJB
+	private AdminBO adminBO;
 
 	@POST
 	@Secured
@@ -84,5 +93,15 @@ public class Reporting {
 	public String genericEmptyPut(@PathParam("path") String path) {
 		System.out.println("Reporting empty PUT!!!" + path);
 		return "";
+	}
+	
+	@POST
+	@Path("/renamePersonaAdmin")
+	@Produces(MediaType.TEXT_HTML)
+	public String createPromoCode(@FormParam("token") String token, @FormParam("nickname") String nickname, @FormParam("newNickname") String newNickname) {
+		if (parameterBO.getStrParam("MODERATOR_TOKEN").equals(token) && nickname != null && newNickname != null) {
+			return adminBO.renamePersonaAdmin(nickname, newNickname);
+		}
+		return "ERROR: invalid token (not a staff? quit right now, hacker)";
 	}
 }

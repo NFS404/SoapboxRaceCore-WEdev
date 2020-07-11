@@ -2,7 +2,7 @@
 <head></head>
 <body>
 	<form action="Engine.svc/PromoCode/createPromoCode" method="post">
-		    Your token: <input type="text" name="promoCodeToken" /><br /><br /> 
+		    Your token: <input type="text" name="token" /><br /><br /> 
 		    Premium Type: <br />
 		    <input type="radio" name="codeType" value="powerup"/> Power-Up<br />
 		    <input type="radio" name="codeType" value="base"/> Premium Base<br />
