@@ -97,25 +97,25 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 		countQuery.setParameter("productType", productType);
 		Long count = (Long) countQuery.getSingleResult();
 
-		SecureRandom randomS = new SecureRandom(); // Important to have a more "fair" random for SB-drops
+//		SecureRandom randomS = new SecureRandom(); // Important to have a more "fair" random for SB-drops
 		Random random = new Random();
 		int number = random.nextInt(count.intValue());
-		int isSBCard = 0;
-		if (isTeamRace) {
-			isSBCard = randomS.nextInt(12); // Chance to got the SpeedBoost card IF value is 1
-			if (isSBCard == 5) {
-				// FIXME Hard-coded item, should be in Product table
-				ProductEntity speedBoostProduct = new ProductEntity();
-				int sbAmount = parameterBO.getIntParam("REWARD_SB_AMOUNT");
-				speedBoostProduct.setProductTitle(sbAmount + " SPEEDBOOST");
-				speedBoostProduct.setHash(723701634);
-				speedBoostProduct.setIcon("package_4_3");
-				speedBoostProduct.setUseCount(1);
-				speedBoostProduct.setResalePrice(0);
-				speedBoostProduct.setProductType("REWARD");
-				return speedBoostProduct;
-			}
-		}
+//		int isSBCard = 0;
+//		if (isTeamRace) {
+//			isSBCard = randomS.nextInt(12); // Chance to got the SpeedBoost card IF value is 1
+//			if (isSBCard == 5) {
+//				// FIXME Hard-coded item, should be in Product table
+//				ProductEntity speedBoostProduct = new ProductEntity();
+//				int sbAmount = parameterBO.getIntParam("REWARD_SB_AMOUNT");
+//				speedBoostProduct.setProductTitle(sbAmount + " SPEEDBOOST");
+//				speedBoostProduct.setHash(723701634);
+//				speedBoostProduct.setIcon("package_4_3");
+//				speedBoostProduct.setUseCount(1);
+//				speedBoostProduct.setResalePrice(0);
+//				speedBoostProduct.setProductType("REWARD");
+//				return speedBoostProduct;
+//			}
+//		}
 
 		StringBuilder sqlProduct = new StringBuilder();
 		sqlProduct.append("SELECT obj FROM ProductEntity obj");
