@@ -370,7 +370,7 @@ public class LobbyBO {
 						PersonaEntity entrantPersona = lobbyEntrantEntity.getPersona();
 						TeamsEntity teamsEntity1 = entrantPersona.getTeam();
 						if (teamsEntity1 != null && teamsEntity1.getTeamId() == team1id) {
-							System.out.println("### TEAMS: " + entrantPersona.getName() + " has got the Team2 (" + team2Name + ") message, his team:" + teamsEntity1.getTeamName());
+							System.out.println("### TEAMS: " + entrantPersona.getName() + " has got the Team2 (" + team2Name + ") message, his team: " + teamsEntity1.getTeamName());
 							openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Second team is " + team2Name), entrantPersona.getPersonaId());
 						}
 					}

@@ -151,10 +151,14 @@ public class AdminBO {
     
     public String renamePersonaAdmin(String nickname, String newNickname) {
     	PersonaEntity personaEntity = personaDao.findByName(nickname);
+    	PersonaEntity personaEntityCheck = personaDao.findByName(newNickname);
     	if (personaEntity == null) {
     		return "ERROR: wrong nickname";
     	}
-    	personaEntity.setName("newNickname");
+    	if (personaEntityCheck != null) {
+    		return "ERROR: this nickname is already taken";
+    	}
+    	personaEntity.setName(newNickname);
     	personaDao.update(personaEntity);
     	
     	sendKick(personaEntity.getPersonaId());
