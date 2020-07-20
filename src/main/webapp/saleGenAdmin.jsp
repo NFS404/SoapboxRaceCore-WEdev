@@ -60,7 +60,8 @@
 			A_R34GTR_NISMO<br />
 			A_REVENTON<br />
 			A_SESTOELEMENTO<br />
-			A_SLR_722 V12_VANTAGE<br />
+			A_SLR_722<br />
+			A_V12_VANTAGE<br />
 			A_VIPER_ACR<br />
 			A_XKR<br />
 			A_Z4_GT3<br />

@@ -96,7 +96,7 @@ public class EventsBO {
 			achievementsBO.applyTreasureHuntAchievement(treasureHuntEntity);
 			int reviveCount = treasureHuntEntity.getReviveCount();
 			if (reviveCount > 0) {
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### THunt revival price will be increased by " + reviveCount++ + " times."), activePersonaId);
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### THunt streak was revived by " + reviveCount++ + " times."), activePersonaId);
 			}
 			return accolades(activePersonaId, false);
 		}

@@ -138,7 +138,6 @@ public class BasketBO {
 		return CommerceResultStatus.SUCCESS;
 	}
 	
-	// FIXME The final price might not be displayed on the failed in-game window
 	public CommerceResultStatus restoreTreasureHunt(String productId, PersonaEntity personaEntity) {
 		Long personaId = personaEntity.getPersonaId();
         TreasureHuntEntity treasureHuntEntity = treasureHuntDAO.findById(personaId);
@@ -149,10 +148,9 @@ public class BasketBO {
         else {
         	reviveCount++;
         }
-        // More you revive the streak, more expensive it will cost
-        int price = ((int) productDao.findByProductId(productId).getPrice() * reviveCount);
-
-        if(personaEntity.getCash() < price) {
+        
+        int price = ((int) productDao.findByProductId(productId).getPrice());
+        if (personaEntity.getCash() < price) {
             return CommerceResultStatus.FAIL_LOCKED_PRODUCT_NOT_ACCESSIBLE_TO_THIS_USER;
         }
         if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
@@ -429,9 +427,7 @@ public class BasketBO {
 		if (!isGoodRange) {
 			randomProductId = productIdBadArray[rand.nextInt(productIdBadArray.length)];
 		}
-		if (randomProductId.contentEquals("SRV-BRERA1") && !parameterBO.getBoolParam("ITEM_LOOTBOX_BRERA")) { // Alfa Romeo Brera is supposed to be a rare car
-			return CommerceResultStatus.FAIL_INVALID_BASKET;
-		}
+
 		OwnedCarTrans ownedCarTrans = getCar(randomProductId);
 		ownedCarTrans.setId(0L);
 		ownedCarTrans.getCustomCar().setId(0);
