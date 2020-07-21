@@ -567,6 +567,25 @@ public class RestApiBO {
 		// =============== Premium ===============
 		LocalDate premiumEnds = user.getPremiumDate();
 		if (premiumEnds != null) premiumEnds = premiumEnds.plusDays(186);
+		String premiumType = user.getPremiumType();
+		String premiumTypeFull = "";
+	    switch (premiumType) {
+	        case "powerup":
+    			premiumTypeFull = "Power-Up";
+    			break;
+	    	case "base":
+	    		premiumTypeFull = "Base";
+	    		break;
+	    	case "plus":
+	    		premiumTypeFull = "Plus";
+	    		break;
+	    	case "full":
+	    		premiumTypeFull = "Full";
+	    		break;
+	    	case "unlim":
+	    		premiumTypeFull = "Unlimited";
+	    		break;
+	    }
 		
 		PersonaPremiumInfo premiumInfo;
 		
@@ -575,7 +594,7 @@ public class RestApiBO {
 					username, 
 					user.getExtraMoney(),
 					user.isPremium(),
-					user.getPremiumType(), 
+					premiumTypeFull, 
 					premiumEnds
 				);
 		else

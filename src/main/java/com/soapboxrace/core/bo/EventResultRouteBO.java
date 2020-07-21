@@ -234,26 +234,25 @@ public class EventResultRouteBO {
 			}).start();
 		}
 		// Separate race stats
-		if (eventClass != 607077938) {
-			boolean raceIssues = false;
-			
-			Long raceHacks = routeArbitrationPacket.getHacksDetected();
-			Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
-			Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
-			if (speedBugChance || routeArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
-					|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 || eventClass != customCarEntity.getCarClassHash()) {
-				raceIssues = true;
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
-			}
-			// If some server admin did a manual player unban via DB, and forgot to uncheck the userBan field for him, this player should know about it
-			BigInteger zeroCheck = new BigInteger("0");
-			if (!recordsDAO.countBannedRecords(personaEntity.getUser().getId()).equals(zeroCheck)) {
-				raceIssues = true;
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Some records on this account is still banned, contact to server staff."), personaId);
-			}
-			if (!raceIssues) {
-				recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity);
-			}
+		boolean raceIssues = false;
+		
+		Long raceHacks = routeArbitrationPacket.getHacksDetected();
+		Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
+		Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
+		if (speedBugChance || routeArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
+				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 
+				|| (eventClass != 607077938 && eventClass != customCarEntity.getCarClassHash())) {
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
+		}
+		// If some server admin did a manual player unban via DB, and forgot to uncheck the userBan field for him, this player should know about it
+		BigInteger zeroCheck = new BigInteger("0");
+		if (!recordsDAO.countBannedRecords(personaEntity.getUser().getId()).equals(zeroCheck)) {
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Some records on this account is still banned, contact to server staff."), personaId);
+		}
+		if (!raceIssues) {
+			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity);
 		}
 		
 		return routeEventResult;

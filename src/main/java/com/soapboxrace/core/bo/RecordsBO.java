@@ -83,15 +83,22 @@ public class RecordsBO {
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
 		String carName = carClassesEntity.getModelSmall();
 		int carVersion = carClassesEntity.getCarVersion();
+		int eventMode = eventEntity.getEventModeId();
+		String carClassLetter = "";
 		
 		Long eventDataId = eventDataEntity.getId();
 		EventPowerupsEntity eventPowerupsEntity = eventPowerupsDAO.findByEventDataId(eventDataId);
 		boolean powerUpsInRace = eventPowerupsBO.isPowerupsUsed(eventPowerupsEntity);
 		String modeSymbol = ""; // Mode symbol, appears as the indicator 
+		String chatIndicator = "";
 		if (powerUpsInRace) {modeSymbol = "P"; }
 		if (!powerUpsInRace) {modeSymbol = "N"; }
 		if (openClass) {
-			modeSymbol = eventResultBO.getCarClassLetter(carClassHash);
+			carClassLetter = eventResultBO.getCarClassLetter(carClassHash);
+			chatIndicator = carClassLetter;
+		}
+		if (eventMode == 9 || eventMode == 4) { // Sprints and Circuits
+			chatIndicator = modeSymbol + "/" + carClassLetter;
 		}
 		
 		RecordsEntity recordsEntity = recordsDAO.findCurrentRace(eventEntity, userEntity, powerUpsInRace, carClassHash);
@@ -137,8 +144,8 @@ public class RecordsBO {
 			String wrEventTime = timeReadConverter.convertRecord(wrEntity.getTimeMS());
 			String eventTime = timeReadConverter.convertRecord(eventDuration);
 			
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + modeSymbol + ": " + eventTime + " (#" + recordRank + ")\n"
-					+ "## WR | " + modeSymbol + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + chatIndicator + ": " + eventTime + " (#" + recordRank + ")\n"
+					+ "## WR | " + chatIndicator + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
 			
 //			String carFullName = carClassesEntity.getFullName();
 //			String message = ":camera_with_flash: **|** *" + playerName + "* **:** *" + carFullName + "* **: " + eventName + " (" + eventTime + ") :** *" + powerUpsMode + "*";
@@ -188,9 +195,9 @@ public class RecordsBO {
 			String eventTime = timeReadConverter.convertRecord(eventDataEntity.getEventDurationInMilliseconds());
 			String eventTimeOld = timeReadConverter.convertRecord(recordsEntity.getTimeMSOld());
 			
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + modeSymbol + ": " + eventTime + " (#" + recordRank + ")\n"
-					+ "## Previous Time | " + modeSymbol + ": " + eventTimeOld + " / " + oldCar
-					+ "\n## WR | " + modeSymbol + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + chatIndicator + ": " + eventTime + " (#" + recordRank + ")\n"
+					+ "## Previous Time | " + chatIndicator + ": " + eventTimeOld + " / " + oldCar
+					+ "\n## WR | " + chatIndicator + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
 
 //			String carFullName = carClassesEntity.getFullName();
 //			String message = ":camera_with_flash: **|** *" + playerName + "* **:** *" + carFullName + "* **: " + eventName + " (" + eventTime + ") :** *" + powerUpsMode + "*";
@@ -207,8 +214,8 @@ public class RecordsBO {
 			String wrEventTime = timeReadConverter.convertRecord(wrEntity.getTimeMS());
 			String eventTime = timeReadConverter.convertRecord(currentTimeMS);
 			
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your Current Record | " + modeSymbol + ": " + eventTime + " (#" + recordRank + ") / " + recordsEntity.getCarName()
-			+ "\n## WR | " + modeSymbol + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your Current Record | " + chatIndicator + ": " + eventTime + " (#" + recordRank + ") / " + recordsEntity.getCarName()
+			+ "\n## WR | " + chatIndicator + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
 		}
 //		System.out.println("RecordEntry end");
 	}
