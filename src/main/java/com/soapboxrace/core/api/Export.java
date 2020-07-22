@@ -14,7 +14,7 @@ import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.jaxb.http.OwnedCarTrans;
 import com.soapboxrace.jaxb.util.JAXBUtility;
 
-@Path("/Export")
+@Path("/export")
 public class Export {
 
 	@EJB

@@ -275,6 +275,7 @@ public class DriverPersonaBO {
 		treasureHuntEntity.setIsStreakBroken(false);
 		treasureHuntEntity.setNumCoins(15);
 		treasureHuntEntity.setPersonaId(personaEntity.getPersonaId());
+		treasureHuntEntity.setReviveCount(0);
 		treasureHuntEntity.setSeed(-1142185119);
 		treasureHuntEntity.setStreak(1);
 		treasureHuntEntity.setThDate(LocalDate.now());

@@ -1,7 +1,7 @@
 <html>
 <head></head>
 <body>
-	<form action="Engine.svc/export/getPlayerDefaultCar" method="post">
+	<form action="Engine.svc/personas/giveCarsBundle" method="post">
 		Token: <input type="text" name="adminToken" /><br /> 
 		Nickname: <input type="text" name="playerName" /><br /><br /> 
 		<input type="submit" value="Proceed" />

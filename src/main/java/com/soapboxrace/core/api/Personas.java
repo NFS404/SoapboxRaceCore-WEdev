@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import javax.ejb.EJB;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -156,13 +157,13 @@ public class Personas {
 			commerceResultTrans.setPurchasedCars(arrayOfOwnedCarTrans);
 			arrayOfOwnedCarTrans.getOwnedCarTrans().add(ownedCarTrans);
 
-			commerceResultTrans.setStatus(basketBO.buyCarRandom(productId, personaEntity, securityToken));
+			commerceResultTrans.setStatus(basketBO.buyCarRandom(productId, personaEntity));
 		} else { // Car
 			OwnedCarTrans ownedCarTrans = new OwnedCarTrans();
 			commerceResultTrans.setPurchasedCars(arrayOfOwnedCarTrans);
 			arrayOfOwnedCarTrans.getOwnedCarTrans().add(ownedCarTrans);
 
-			commerceResultTrans.setStatus(basketBO.buyCar(productId, personaEntity, securityToken));
+			commerceResultTrans.setStatus(basketBO.buyCar(productId, personaEntity, false));
 		}
 		return commerceResultTrans;
 	}
@@ -298,6 +299,23 @@ public class Personas {
 		sessionBO.verifyPersona(securityToken, personaId);
 		personaBO.changeDefaultCar(personaId, carId);
 		return "";
+	}
+	
+	@POST
+	@Path("/giveCarsBundle")
+	@Produces(MediaType.TEXT_PLAIN)
+	// Give the special bundle, cars of which is included in ITEM_SPECIALCARS_BUNDLE
+	public String giveCarsBundle(@FormParam("adminToken") String adminToken, @FormParam("playerName") String playerName) {
+		if (parameterBO.getStrParam("ADMIN_TOKEN").equals(adminToken)) {
+			PersonaEntity personaEntity = personaDao.findByNameIgnoreCase(playerName);
+			String carsBundleInit = parameterBO.getStrParam("ITEM_SPECIALCARS_BUNDLE");
+            String[] carsBundle = carsBundleInit.split(",");
+            for (String carProduct : carsBundle) { // Give every car in the list (productId), to the player
+            	basketBO.buyCar(carProduct, personaEntity, true);
+            }
+			return "Cars (" + carsBundle.length + ") was given to the player " + personaEntity.getName() + ".";
+		}
+		return "ERROR: invalid token";
 	}
 
 }
