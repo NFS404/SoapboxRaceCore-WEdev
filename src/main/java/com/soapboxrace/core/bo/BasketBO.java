@@ -216,13 +216,13 @@ public class BasketBO {
 		return CommerceResultStatus.SUCCESS;
 	}
 
-	public CommerceResultStatus buyCar(String productId, PersonaEntity personaEntity, boolean isFree) {
-		if (!isFree && getPersonaCarCount(personaEntity.getPersonaId()) >= personaEntity.getCarSlots()) {
+	public CommerceResultStatus buyCar(String productId, PersonaEntity personaEntity, boolean webAction) {
+		if (!webAction && getPersonaCarCount(personaEntity.getPersonaId()) >= personaEntity.getCarSlots()) {
 			return CommerceResultStatus.FAIL_INSUFFICIENT_CAR_SLOTS;
 		}
 
 		ProductEntity productEntity = productDao.findByProductId(productId);
-		if (productEntity == null || (!isFree && personaEntity.getCash() < productEntity.getPrice())) {
+		if (!webAction && (productEntity == null || personaEntity.getCash() < productEntity.getPrice())) {
 			return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
 		}
 		
@@ -252,7 +252,7 @@ public class BasketBO {
 
 		carSlotDAO.insert(carSlotEntity);
 
-		if (!isFree && parameterBO.getBoolParam("ENABLE_ECONOMY")) {
+		if (!webAction && parameterBO.getBoolParam("ENABLE_ECONOMY")) {
 			personaEntity.setCash(personaEntity.getCash() - productEntity.getPrice());
 		}
 		personaDao.update(personaEntity);
@@ -262,6 +262,7 @@ public class BasketBO {
 			productEntity.setEnabled(false);
 			productDao.update(productEntity);
 		}
+		System.out.println("TEST");
 		return CommerceResultStatus.SUCCESS;
 	}
 	

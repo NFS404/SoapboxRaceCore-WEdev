@@ -143,9 +143,11 @@ public class RecordsBO {
 			String wrCarName = wrEntity.getCarName();
 			String wrEventTime = timeReadConverter.convertRecord(wrEntity.getTimeMS());
 			String eventTime = timeReadConverter.convertRecord(eventDuration);
+//			int skillpoints = calcSkillPoints(eventId, powerUpsInRace, carClassHash, recordRank.intValue());
 			
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + chatIndicator + ": " + eventTime + " (#" + recordRank + ")\n"
 					+ "## WR | " + chatIndicator + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
+//			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### SP Earned: " + skillpoints), personaId);
 			
 //			String carFullName = carClassesEntity.getFullName();
 //			String message = ":camera_with_flash: **|** *" + playerName + "* **:** *" + carFullName + "* **: " + eventName + " (" + eventTime + ") :** *" + powerUpsMode + "*";
@@ -194,10 +196,12 @@ public class RecordsBO {
 			String wrEventTime = timeReadConverter.convertRecord(wrEntity.getTimeMS());
 			String eventTime = timeReadConverter.convertRecord(eventDataEntity.getEventDurationInMilliseconds());
 			String eventTimeOld = timeReadConverter.convertRecord(recordsEntity.getTimeMSOld());
+//			int skillpoints = calcSkillPoints(eventId, powerUpsInRace, carClassHash, recordRank.intValue());
 			
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### NEW Personal Best | " + chatIndicator + ": " + eventTime + " (#" + recordRank + ")\n"
 					+ "## Previous Time | " + chatIndicator + ": " + eventTimeOld + " / " + oldCar
 					+ "\n## WR | " + chatIndicator + ": " + wrPlayerName + " with " + wrEventTime + " / " + wrCarName), personaId);
+//			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### SP Earned: " + skillpoints), personaId);
 
 //			String carFullName = carClassesEntity.getFullName();
 //			String message = ":camera_with_flash: **|** *" + playerName + "* **:** *" + carFullName + "* **: " + eventName + " (" + eventTime + ") :** *" + powerUpsMode + "*";
@@ -219,4 +223,18 @@ public class RecordsBO {
 		}
 //		System.out.println("RecordEntry end");
 	}
+	
+	// TrackMania-like score points system
+	public int calcSkillPoints(int eventId, boolean powerUpsInRace, int carClassHash, int recordRank) {
+		int recordCount = recordsDAO.countRecords(eventId, powerUpsInRace, carClassHash).intValue();
+		int skillpoints = 0;
+		if (recordCount < 2) {
+			skillpoints = 25; // 1st from of 2 players will got 50 SP, so for the single result on the event, player will have initial 25 SP
+		}
+		else {
+			skillpoints = (recordCount - 1) * 50 / recordRank;
+		}
+		return skillpoints;
+	}
+	
 }
