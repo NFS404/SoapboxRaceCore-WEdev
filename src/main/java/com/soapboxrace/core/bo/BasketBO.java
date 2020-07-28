@@ -262,7 +262,6 @@ public class BasketBO {
 			productEntity.setEnabled(false);
 			productDao.update(productEntity);
 		}
-		System.out.println("TEST");
 		return CommerceResultStatus.SUCCESS;
 	}
 	

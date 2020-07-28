@@ -223,16 +223,21 @@ public class EventResultRouteBO {
 		}
 		// Initiate the final team action check, only if both teams are registered for event
 		// FIXME Make a db-based system, where 1st player will save the personaId into eventSession AND trigger the team action. Other players will read this value and ignore it
-		if (eventDataEntity.getRank() == 1 && preRegTeams) {
-			System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, check");
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Debug - Teams finish, init, " + eventSessionId), personaId);
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, init");
-					teamsBo.teamAccoladesBasic(eventSessionId);
-				}
-			}).start();
+		Long isWinnerPresented = eventSessionEntity.getPersonaWinner();
+		if (isWinnerPresented == null) {
+			eventSessionEntity.setPersonaWinner(activePersonaId);
+			eventSessionDao.update(eventSessionEntity);
+			if (preRegTeams) {
+				System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, check");
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Debug - Teams finish, init, " + eventSessionId), personaId);
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, init");
+						teamsBo.teamAccoladesBasic(eventSessionId);
+					}
+				}).start();
+			}
 		}
 		// Separate race stats
 		boolean raceIssues = false;
