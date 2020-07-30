@@ -61,7 +61,8 @@ public class RecordsBO {
 	@EJB
 	private EventResultBO eventResultBO;
 
-	public void submitRecord(EventEntity eventEntity, PersonaEntity personaEntity, EventDataEntity eventDataEntity, CustomCarEntity customCarEntity) {
+	public void submitRecord(EventEntity eventEntity, PersonaEntity personaEntity, EventDataEntity eventDataEntity, CustomCarEntity customCarEntity, 
+			CarClassesEntity carClassesEntity) {
 //		System.out.println("RecordEntry start");
 		boolean recordCaptureFinished = false;
 		Long personaId = personaEntity.getPersonaId();
@@ -80,7 +81,6 @@ public class RecordsBO {
 		Long eventSrvDuration = eventDataEntity.getServerEventDuration();
 		
 		int playerPhysicsHash = customCarEntity.getPhysicsProfileHash();
-		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
 		String carName = carClassesEntity.getModelSmall();
 		int carVersion = carClassesEntity.getCarVersion();
 		int eventMode = eventEntity.getEventModeId();

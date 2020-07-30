@@ -6,6 +6,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
@@ -13,6 +14,7 @@ import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.RecordsDAO;
 import com.soapboxrace.core.dao.TeamsDAO;
+import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
@@ -88,6 +90,9 @@ public class EventResultRouteBO {
 	
 	@EJB
 	private RecordsDAO recordsDAO;
+	
+	@EJB
+	private CarClassesDAO carClassesDAO;
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -245,11 +250,18 @@ public class EventResultRouteBO {
 		Long raceHacks = routeArbitrationPacket.getHacksDetected();
 		Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
 		Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
+		int playerPhysicsHash = customCarEntity.getPhysicsProfileHash();
+		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
+		
 		if (speedBugChance || routeArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
 				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 
 				|| (eventClass != 607077938 && eventClass != customCarEntity.getCarClassHash())) {
 			raceIssues = true;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
+		}
+		if (carClassesEntity.getModelSmall() == null) { // If the car doesn't have a modelSmall name - we will not allow it for records
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Records cannot be saved on this car."), personaId);
 		}
 		// If some server admin did a manual player unban via DB, and forgot to uncheck the userBan field for him, this player should know about it
 		BigInteger zeroCheck = new BigInteger("0");
@@ -258,7 +270,7 @@ public class EventResultRouteBO {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Some records on this account is still banned, contact to server staff."), personaId);
 		}
 		if (!raceIssues) {
-			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity);
+			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity, carClassesEntity);
 		}
 		
 		return routeEventResult;

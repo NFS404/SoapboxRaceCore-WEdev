@@ -4,11 +4,13 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
@@ -63,6 +65,9 @@ public class EventResultDragBO {
 	
 	@EJB
 	private DiscordWebhook discordBot;
+	
+	@EJB
+	private CarClassesDAO carClassesDAO;
 
 	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -186,13 +191,20 @@ public class EventResultDragBO {
 		Long raceHacks = dragArbitrationPacket.getHacksDetected();
 		Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
 		Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
+		int playerPhysicsHash = customCarEntity.getPhysicsProfileHash();
+		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
+		
 		if (speedBugChance || dragArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
 				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 || customCarEntity.getCarClassHash() == 0) {
 			raceIssues = true;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), activePersonaId);
 		}
+		if (carClassesEntity.getModelSmall() == null) { // If the car doesn't have a modelSmall name - we will not allow it for records
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Records cannot be saved on this car."), activePersonaId);
+		}
 		if (!raceIssues) {
-			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity);
+			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity, carClassesEntity);
 		}
 		
 		return dragEventResult;
