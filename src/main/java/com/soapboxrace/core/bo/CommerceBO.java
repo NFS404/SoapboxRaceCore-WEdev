@@ -136,6 +136,15 @@ public class CommerceBO {
 			OwnedCarConverter.paints2NewEntity(customCarTrans, customCarEntity);
 			break;
 		case PERFORMANCE:
+			// FIXME Quick limitation to prevent the tuning of traffic cars
+//			if (customCarEntity.getPhysicsProfileHash() == 1998148470 || 
+//					customCarEntity.getPhysicsProfileHash() == -1395003737 ||
+//					customCarEntity.getPhysicsProfileHash() == -176312983 ||
+//					customCarEntity.getPhysicsProfileHash() == -1288301010 ||
+//					customCarEntity.getPhysicsProfileHash() == -794649382 ||
+//					customCarEntity.getPhysicsProfileHash() == -1794142318) {
+//				break;
+//			}
 			performancePartDAO.deleteByCustomCar(customCarEntity);
 			OwnedCarConverter.performanceParts2NewEntity(customCarTrans, customCarEntity);
 			CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCarEntity.getPhysicsProfileHash());
