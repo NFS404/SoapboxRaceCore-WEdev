@@ -44,7 +44,9 @@ query = "SELECT obj FROM RecordsEntity obj "
         query = "SELECT obj FROM RecordsEntity obj "
                 + "WHERE obj.event = :event "
                 + "AND obj.userBan = false "
-                + "AND obj.user = :user "),//
+                + "AND obj.powerUps = :powerUps "
+                + "AND obj.user = :user "
+                + "ORDER BY obj.timeMS "),//
 })
 public class RecordsEntity {
 

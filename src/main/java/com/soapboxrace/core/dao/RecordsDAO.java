@@ -79,9 +79,9 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		else return List.get(0);
 	}
 	
-	public BigInteger countRecordsPersona(int eventId, Long userId) {
+	public BigInteger countRecordsPersona(int eventId, boolean powerUps, Long userId) {
 		Query query = entityManager.createNativeQuery(
-			"SELECT Count(*) from records WHERE eventId = "+eventId+" and userId ="+userId);
+			"SELECT Count(*) from records WHERE eventId = "+eventId+" and userId ="+userId+" and powerUps = "+powerUps);
 		@SuppressWarnings("unchecked")
 		List<BigInteger> List = query.getResultList();
 		if (List.isEmpty())
@@ -156,9 +156,10 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 	 * @param onPage - Сколько позиций на странице
 	 * @author Vadimka, Hypercycle
 	 */
-	public List<RecordsEntity> statsEventPersona(EventEntity event, UserEntity userEntity) {
+	public List<RecordsEntity> statsEventPersona(EventEntity event, boolean powerups, UserEntity userEntity) {
 		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.statsEventPersona", RecordsEntity.class);
 		query.setParameter("event", event);
+		query.setParameter("powerUps", powerups);
 		query.setParameter("user", userEntity);
 		return query.getResultList();
 	}

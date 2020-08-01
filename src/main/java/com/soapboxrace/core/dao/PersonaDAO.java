@@ -35,6 +35,9 @@ public class PersonaDAO extends BaseDAO<PersonaEntity> {
 	}
 
 	public PersonaEntity findByName(String name) {
+		if (name == null) {
+			return null;
+		}
 		name = name.toUpperCase();
 		TypedQuery<PersonaEntity> query = entityManager.createNamedQuery("PersonaEntity.findByName", PersonaEntity.class);
 		query.setParameter("name", name);

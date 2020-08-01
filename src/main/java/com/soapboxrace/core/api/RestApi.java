@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.RestApiBO;
+import com.soapboxrace.jaxb.http.ArrayOfRaceWithTime;
 import com.soapboxrace.jaxb.http.ChangePassword;
 
 /**
@@ -140,7 +141,7 @@ public class RestApi {
 	@GET
 	@Path("TopTimeOnEvent")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response race(@QueryParam("eventid") int eventid, @QueryParam("powerups") boolean powerups, 
+	public Response racesEvent(@QueryParam("eventid") int eventid, @QueryParam("powerups") boolean powerups, 
 			@QueryParam("carclass") String carclass, @QueryParam("page") int page, @QueryParam("onpage") int onPage, @QueryParam("key") String key) {
 		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
 			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
@@ -154,14 +155,14 @@ public class RestApi {
 	@GET
 	@Path("TopTimeRacesByPersona")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response race(@QueryParam("eventid") int eventid, @QueryParam("personaname") String personaname, @QueryParam("page") int page, 
-			@QueryParam("onpage") int onPage, @QueryParam("key") String key) {
-		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
-			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
-			return Response.temporaryRedirect(URI.create(accessDenied)).build();
-		}
-		return Response.ok(bo.getTopTimeRaceByPersona(eventid, personaname, page, onPage)).build();
-	}
+	public Response racesPersona(@QueryParam("eventid") int eventid, @QueryParam("powerups") boolean powerups, @QueryParam("personaname") String personaname, @QueryParam("page") int page, 
+            @QueryParam("onpage") int onPage, @QueryParam("key") String key) {
+        if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+            String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+            return Response.temporaryRedirect(URI.create(accessDenied)).build();
+        }
+        return Response.ok(bo.getTopTimeRaceByPersona(eventid, powerups, personaname, page, onPage)).build();
+    }
 	/**
 	 * Страница Трассы
 	 */

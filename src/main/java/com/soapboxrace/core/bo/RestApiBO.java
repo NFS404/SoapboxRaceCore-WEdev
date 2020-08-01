@@ -394,14 +394,17 @@ public class RestApiBO {
 	 * @param personaName - Имя водителя
 	 * @param onPage - Сколько позиций на странице
 	 */
-	public ArrayOfRaceWithTime getTopTimeRaceByPersona(int eventid, String personaName, int page, int onPage) {
+	public ArrayOfRaceWithTime getTopTimeRaceByPersona(int eventid, boolean powerups, String personaName, int page, int onPage) {
 		if (onPage > 300) onPage = 300;
 		ArrayOfRaceWithTime list = new ArrayOfRaceWithTime();
 		PersonaEntity personaEntity = personaDAO.findByName(personaName);
+		if (personaEntity == null) {
+			return list;
+		}
 		UserEntity userEntity = personaEntity.getUser();
 		Long userId = userEntity.getId();
 		
-		list.setCount(recordsDAO.countRecordsPersona(eventid, userId));
+		list.setCount(recordsDAO.countRecordsPersona(eventid, powerups, userId));
 		EventEntity event = eventDAO.findById(eventid);
 		if (event != null)
 			list.set(
@@ -410,7 +413,7 @@ public class RestApiBO {
 					0,
 					"all"
 				);
-		for (RecordsEntity race : recordsDAO.statsEventPersona(event, userEntity)) {
+		for (RecordsEntity race : recordsDAO.statsEventPersona(event, powerups, userEntity)) {
 			final boolean isCarVersionVaild;
 			CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
 			EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
