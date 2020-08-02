@@ -237,7 +237,8 @@ public class RestApiBO {
 		ArrayOfCarNameTop names = new ArrayOfCarNameTop();
 		List<CarNameEntity> list = carDAO.getTopCarName(onPage);
 		for (CarNameEntity car : list) {
-			names.add(car.getCount(), car.getName());
+			CarClassesEntity carClassesEntity = carClassesDAO.findByStoreName(car.getName());
+			names.add(car.getCount(), carClassesEntity.getModel());
 		}
 		return names;
 	}
