@@ -2,7 +2,6 @@ package com.soapboxrace.core.bo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -572,6 +571,9 @@ public class RestApiBO {
 		LocalDate premiumEnds = user.getPremiumDate();
 		if (premiumEnds != null) premiumEnds = premiumEnds.plusDays(186);
 		String premiumType = user.getPremiumType();
+		if (premiumType == null) {
+			premiumType = "none";
+		}
 		String premiumTypeFull = "";
 	    switch (premiumType) {
 	        case "powerup":
@@ -588,6 +590,9 @@ public class RestApiBO {
 	    		break;
 	    	case "unlim":
 	    		premiumTypeFull = "Unlimited";
+	    		break;
+	    	case "none":
+	    		premiumTypeFull = "None";
 	    		break;
 	    }
 		
