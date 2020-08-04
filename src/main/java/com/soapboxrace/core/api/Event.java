@@ -16,6 +16,7 @@ import com.soapboxrace.core.bo.AchievementsBO;
 import com.soapboxrace.core.bo.EventBO;
 import com.soapboxrace.core.bo.EventResultBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
+import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventMode;
@@ -44,6 +45,9 @@ public class Event {
 	
 	@EJB
 	private PersonaPresenceDAO personaPresenceDAO;
+	
+	@EJB
+	private EventDataDAO eventDataDAO;
 
 	@POST
 	@Secured
@@ -62,7 +66,10 @@ public class Event {
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
 		Long eventDataId = eventBO.createEventDataSession(activePersonaId, eventSessionId, eventStarted);
 		eventBO.createEventPowerupsSession(activePersonaId, eventDataId);
-		personaPresenceDAO.updateCurrentEvent(activePersonaId, eventDataId);
+		int eventModeId = eventDataDAO.findById(eventDataId).getEvent().getEventModeId();
+		System.out.println("TEST launched: " + eventModeId);
+		
+		personaPresenceDAO.updateCurrentEvent(activePersonaId, eventDataId, eventModeId);
 		return "";
 	}
 
@@ -114,14 +121,14 @@ public class Event {
 			break;
 		case PURSUIT_MP:
 			TeamEscapeArbitrationPacket teamEscapeArbitrationPacket = JAXBUtility.unMarshal(arbitrationXml, TeamEscapeArbitrationPacket.class);
-			return eventResultBO.handleTeamEscapeEnd(eventSessionEntity, activePersonaId, teamEscapeArbitrationPacket);
+			return eventResultBO.handleTeamEscapeEnd(eventSessionEntity, activePersonaId, teamEscapeArbitrationPacket, eventEnded);
 		case PURSUIT_SP:
 			PursuitArbitrationPacket pursuitArbitrationPacket = JAXBUtility.unMarshal(arbitrationXml, PursuitArbitrationPacket.class);
-			return eventResultBO.handlePursitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, false);
+			return eventResultBO.handlePursuitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, false, eventEnded);
 		default:
 			break;
 		}
-		personaPresenceDAO.updateCurrentEvent(activePersonaId, null);
+		personaPresenceDAO.updateCurrentEvent(activePersonaId, null, 0);
 		return "";
 	}
 
@@ -131,11 +138,12 @@ public class Event {
 	@Produces(MediaType.APPLICATION_XML)
 	public PursuitEventResult bust(InputStream bustXml, @HeaderParam("securityToken") String securityToken, @QueryParam("eventSessionId") Long eventSessionId) {
 		EventSessionEntity eventSessionEntity = eventBO.findEventSessionById(eventSessionId);
+		Long eventEnded = System.currentTimeMillis(); // Server-side event timer stop
 		PursuitArbitrationPacket pursuitArbitrationPacket = (PursuitArbitrationPacket) JAXBUtility.unMarshal(bustXml, PursuitArbitrationPacket.class);
 		PursuitEventResult pursuitEventResult = new PursuitEventResult();
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
-		pursuitEventResult = eventResultBO.handlePursitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, true);
-		personaPresenceDAO.updateCurrentEvent(activePersonaId, null);
+		pursuitEventResult = eventResultBO.handlePursuitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, true, eventEnded);
+		personaPresenceDAO.updateCurrentEvent(activePersonaId, null, 0);
 		return pursuitEventResult;
 	}
 }

@@ -61,7 +61,7 @@ public class EventResultTeamEscapeBO {
 	private CustomCarDAO customCarDAO;
 
 	public TeamEscapeEventResult handleTeamEscapeEnd(EventSessionEntity eventSessionEntity, Long activePersonaId,
-			TeamEscapeArbitrationPacket teamEscapeArbitrationPacket) {
+			TeamEscapeArbitrationPacket teamEscapeArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
 		eventSessionEntity.setEnded(System.currentTimeMillis());
 
@@ -90,6 +90,7 @@ public class EventResultTeamEscapeBO {
 		achievementsBO.applyPursuitCostToState(teamEscapeArbitrationPacket, personaEntity);
 		achievementsBO.applyTeamEscape(teamEscapeArbitrationPacket, personaEntity);
 		achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventDataEntity.getEvent().getTrackLength());
+		eventDataEntity.setServerEventDuration(eventEnded - eventDataEntity.getServerEventDuration());
 		eventDataEntity.setAlternateEventDurationInMilliseconds(teamEscapeArbitrationPacket.getAlternateEventDurationInMilliseconds());
 		eventDataEntity.setBustedCount(teamEscapeArbitrationPacket.getBustedCount());
 		eventDataEntity.setCarId(teamEscapeArbitrationPacket.getCarId());

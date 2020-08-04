@@ -36,6 +36,7 @@ public class SocialBO {
 	public void sendReport(Long personaId, Long abuserPersonaId, Integer petitionType, String description, Integer customCarID, Integer chatMinutes, Long hacksDetected) {
 		ReportEntity reportEntity = new ReportEntity();
 		PersonaEntity personaEntityAbuser = personaDao.findById(abuserPersonaId);
+		String personaAbuserName = personaEntityAbuser.getName();
 		PersonaEntity personaEntitySender = personaDao.findById(personaId);
 		
 		reportEntity.setAbuserPersonaId(abuserPersonaId);
@@ -60,14 +61,14 @@ public class SocialBO {
 				reportSender = personaEntitySender.getName();
 			}
 			String message = ":heavy_minus_sign:"
-	        		+ "\n:incoming_envelope: **|** Nгрок **" + reportSender + "** прислал репорт на игрока **" + personaEntityAbuser.getName() + "**, причина: *" + description + "*"
-	        		+ "\n:incoming_envelope: **|** Player **" + reportSender + "** sent a report for player **" + personaEntityAbuser.getName() + "**, reason: *" + description + "*";
+	        		+ "\n:incoming_envelope: **|** Nгрок **" + reportSender + "** прислал репорт на игрока **" + personaAbuserName + "**, причина: *" + description + "*"
+	        		+ "\n:incoming_envelope: **|** Player **" + reportSender + "** sent a report for player **" + personaAbuserName + "**, reason: *" + description + "*";
 			discordBot.sendMessage(message);
 		}
 		if (hacksDetected != 32 && hacksDetected != 0) {
 			String message = ":heavy_minus_sign:"
-	        		+ "\n:clap: **|** Nгрок **" + personaEntityAbuser.getName() + "** использовал читы или стороннее ПО во время заезда (*Код " + hacksDetected + ", " + description + "*)."
-	        		+ "\n:clap: **|** Player **" + personaEntityAbuser.getName() + "** used a cheats or 3rd-party tools during the event (*Code " + hacksDetected + ", " + description + "*).";
+	        		+ "\n:clap: **|** Nгрок **" + personaAbuserName + "** использовал читы или стороннее ПО во время заезда (*Код " + hacksDetected + ", " + description + "*)."
+	        		+ "\n:clap: **|** Player **" + personaAbuserName + "** used a cheats or 3rd-party tools during the event (*Code " + hacksDetected + ", " + description + "*).";
 			discordBot.sendMessage(message);
 		}
 	}

@@ -236,6 +236,19 @@ public class TokenSessionBO {
 		}
 		return tokenSessionEntity.getActivePersonaId();
 	}
+	
+	// Sends ActivePersonaId and UserId at the same time
+	public Long[] getActivePersonaIdAndUserId(String securityToken) {
+		TokenSessionEntity tokenSessionEntity = activePersonas.get(securityToken);
+		if (tokenSessionEntity == null) {
+			tokenSessionEntity = tokenDAO.findBySecurityToken(securityToken);
+		}
+		Long[] infoPackage = new Long[2];
+		infoPackage[0] = tokenSessionEntity.getActivePersonaId();
+		infoPackage[1] = tokenSessionEntity.getUserId();
+		
+		return infoPackage;
+	}
 
 	public void setActivePersonaId(String securityToken, Long personaId, Boolean isLogout) {
 		TokenSessionEntity tokenSessionEntity = tokenDAO.findBySecurityToken(securityToken);

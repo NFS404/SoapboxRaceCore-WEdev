@@ -11,8 +11,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "VINYLSTORAGE")
 @NamedQueries({ //
-@NamedQuery(name = "VinylStorageEntity.findByCode", //
-		query = "SELECT obj FROM VinylStorageEntity obj WHERE obj.code = :code "),//
+        @NamedQuery(name = "VinylStorageEntity.findByCode", //
+		        query = "SELECT obj FROM VinylStorageEntity obj WHERE obj.code = :code "),//
+        @NamedQuery(name = "VinylStorageEntity.deleteAllVinyls", //
+                query = "DELETE FROM VinylStorageEntity obj WHERE obj.userId = :userId "),//
 })
 public class VinylStorageEntity {
 

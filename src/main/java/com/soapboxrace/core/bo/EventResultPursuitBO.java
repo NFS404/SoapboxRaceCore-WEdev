@@ -57,8 +57,8 @@ public class EventResultPursuitBO {
     @EJB
 	private ParameterBO parameterBO;
 
-	public PursuitEventResult handlePursitEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, PursuitArbitrationPacket pursuitArbitrationPacket,
-			Boolean isBusted) {
+	public PursuitEventResult handlePursuitEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, PursuitArbitrationPacket pursuitArbitrationPacket,
+			Boolean isBusted, Long eventEnded) {
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 		
 		Long eventSessionId = eventSessionEntity.getId();
@@ -73,6 +73,7 @@ public class EventResultPursuitBO {
 			return null;
 		}
 		int currentEventId = eventDataEntity.getEvent().getId();
+		eventDataEntity.setServerEventDuration(eventEnded - eventDataEntity.getServerEventDuration());
 		eventDataEntity.setArbitration(eventDataEntity.getArbitration() ? false : true);
 		eventDataEntity.setAlternateEventDurationInMilliseconds(pursuitArbitrationPacket.getAlternateEventDurationInMilliseconds());
 		eventDataEntity.setCarId(pursuitArbitrationPacket.getCarId());

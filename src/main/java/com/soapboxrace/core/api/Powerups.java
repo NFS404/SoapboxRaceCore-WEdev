@@ -15,11 +15,13 @@ import com.soapboxrace.core.bo.InventoryBO;
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
+import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
+import com.soapboxrace.core.jpa.PersonaPresenceEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.jaxb.xmpp.XMPP_PowerupActivatedType;
 import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypePowerupActivated;
@@ -53,13 +55,21 @@ public class Powerups {
 	
 	@EJB
 	private EventPowerupsBO eventPowerupsBO;
+	
+	@EJB
+	private PersonaPresenceDAO personaPresenceDAO;
+	
+	@EJB
+	private DiscordWebhook discordBot;
 
 	@POST
 	@Path("/activated/{powerupHash}")
 	@Produces(MediaType.APPLICATION_XML)
 	public String activated(@HeaderParam("securityToken") String securityToken, @PathParam(value = "powerupHash") Integer powerupHash,
 			@QueryParam("targetId") Long targetId, @QueryParam("receivers") String receivers, @QueryParam("eventSessionId") Long eventSessionId) {
-		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
+		Long[] infoPackage = tokenBO.getActivePersonaIdAndUserId(securityToken);
+		Long activePersonaId = infoPackage[0].longValue();
+		Long userId = infoPackage[1].longValue();
 
 		if (parameterBO.getBoolParam("POWERUPS_ENABLED")) {
 			// TeamNOS - if race has been randomly started without NOS, team players wouldn't be able to use it, but others will be able
@@ -90,7 +100,6 @@ public class Powerups {
 				}
 		    }
 			if (eventSessionId != 0) { // If player has played on any of events, game will never set the Session to 0 again until the restart
-				Long userId = tokenBO.getUser(securityToken).getId();
 				eventPowerupsBO.recordPowerups(powerupHash, userId);
 			}
 		}
@@ -101,6 +110,18 @@ public class Powerups {
 		}
 		if (parameterBO.getBoolParam("ENABLE_POWERUP_DECREASE")) {
 			inventoryBO.decrementUsage(activePersonaId, powerupHash);
+		}
+		if ((powerupHash == -1564932069 || powerupHash == 1113720384)) {
+			PersonaPresenceEntity personaPresenceEntity = personaPresenceDAO.findByUserId(userId);
+			 // It's illegal to activate the Team power-ups outside of Team Escape
+			if (personaPresenceEntity.getCurrentEventModeId() == 0 || personaPresenceEntity.getCurrentEventModeId() == 9 
+					|| personaPresenceEntity.getCurrentEventModeId() == 4 || personaPresenceEntity.getCurrentEventModeId() == 12) {
+				String personaName = personaDAO.findById(activePersonaId).getName();
+				String message = ":heavy_minus_sign:"
+		        		+ "\n:japanese_goblin: **|** Nгрок **" + personaName + "** активировал командные бонусы за пределами погонь."
+		        		+ "\n:japanese_goblin: **|** Player **" + personaName + "** has used the team power-ups outside of the pursuits.";
+				discordBot.sendMessage(message);
+			}
 		}
 		PersonaEntity personaEntity = personaBO.getPersonaById(activePersonaId);
 		achievementsBO.applyPowerupAchievement(personaEntity);

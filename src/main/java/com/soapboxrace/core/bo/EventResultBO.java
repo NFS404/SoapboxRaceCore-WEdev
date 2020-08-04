@@ -41,9 +41,9 @@ public class EventResultBO {
 	@EJB
 	private CarClassesDAO carClassesDAO;
 
-	public PursuitEventResult handlePursitEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, PursuitArbitrationPacket pursuitArbitrationPacket,
-			Boolean isBusted) {
-		return eventResultPursuitBO.handlePursitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, isBusted);
+	public PursuitEventResult handlePursuitEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, PursuitArbitrationPacket pursuitArbitrationPacket,
+			Boolean isBusted, Long eventEnded) {
+		return eventResultPursuitBO.handlePursuitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, isBusted, eventEnded);
 	}
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, Long eventEnded) {
@@ -55,8 +55,8 @@ public class EventResultBO {
 	}
 
 	public TeamEscapeEventResult handleTeamEscapeEnd(EventSessionEntity eventSessionEntity, Long activePersonaId,
-			TeamEscapeArbitrationPacket teamEscapeArbitrationPacket) {
-		return eventResultTeamEscapeBO.handleTeamEscapeEnd(eventSessionEntity, activePersonaId, teamEscapeArbitrationPacket);
+			TeamEscapeArbitrationPacket teamEscapeArbitrationPacket, Long eventEnded) {
+		return eventResultTeamEscapeBO.handleTeamEscapeEnd(eventSessionEntity, activePersonaId, teamEscapeArbitrationPacket, eventEnded);
 	}
 	
 	// after 2 hours of playing, NFSW's time system can glitch sometimes, giving a possible player advantage

@@ -59,6 +59,7 @@ public class EventDataDAO extends BaseDAO<EventDataEntity> {
 		List<EventDataEntity> resultList = query.getResultList();
 		return !resultList.isEmpty() ? resultList.get(0) : null;
 	}
+	
 	/**
 	 * Количество трасс, на которых профиль подозрвался в читерстве
 	 * @param personaID - Идентификатор профиля

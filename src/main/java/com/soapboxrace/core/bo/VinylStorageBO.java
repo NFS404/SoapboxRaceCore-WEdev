@@ -181,4 +181,10 @@ public class VinylStorageBO {
 			}
 		}
 	}
+	
+	public void vinylStorageRemoveAll(Long personaId) {
+		UserEntity userEntity = personaDAO.findById(personaId).getUser();
+		vinylStorageDAO.deleteAllVinyls(userEntity.getId());
+		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your Vinyl Storage has been wiped."), personaId);
+	}
 }

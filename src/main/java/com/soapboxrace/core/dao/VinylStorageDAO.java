@@ -9,9 +9,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
-import com.soapboxrace.core.jpa.CustomCarEntity;
-import com.soapboxrace.core.jpa.ProductEntity;
-import com.soapboxrace.core.jpa.VinylEntity;
+import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.VinylStorageEntity;
 
 @Stateless
@@ -28,6 +26,12 @@ public class VinylStorageDAO extends BaseDAO<VinylStorageEntity> {
 
 		List<VinylStorageEntity> resultList = query.getResultList();
 		return !resultList.isEmpty() ? resultList.get(0) : null;
+	}
+	
+	public void deleteAllVinyls(Long userId) {
+		Query query = entityManager.createNamedQuery("VinylStorageEntity.deleteAllVinyls");
+		query.setParameter("userId", userId);
+		query.executeUpdate();
 	}
 
 }

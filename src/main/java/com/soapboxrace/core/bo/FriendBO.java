@@ -302,6 +302,9 @@ public class FriendBO {
 		if (displayName.contains("/VINYLREMOVE ")) {
 			vinylStorageBO.vinylStorageRemove(personaId, displayName);
 		}
+		if (displayName.contains("/VINYLWIPEALL")) {
+			vinylStorageBO.vinylStorageRemoveAll(personaId);
+		}
 		if (displayName.contains("/MODDER")) {
 			UserEntity userEntity = personaSender.getUser();
 			if (userEntity.isModder()) {
