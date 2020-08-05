@@ -67,7 +67,6 @@ public class Event {
 		Long eventDataId = eventBO.createEventDataSession(activePersonaId, eventSessionId, eventStarted);
 		eventBO.createEventPowerupsSession(activePersonaId, eventDataId);
 		int eventModeId = eventDataDAO.findById(eventDataId).getEvent().getEventModeId();
-		System.out.println("TEST launched: " + eventModeId);
 		
 		personaPresenceDAO.updateCurrentEvent(activePersonaId, eventDataId, eventModeId);
 		return "";
