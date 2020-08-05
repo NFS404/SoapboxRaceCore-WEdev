@@ -17,13 +17,14 @@ import com.soapboxrace.core.bo.EventResultBO;
 import com.soapboxrace.core.bo.LobbyBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
+import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.LobbyDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.jaxb.http.CustomCarTrans;
 import com.soapboxrace.jaxb.http.LobbyInfo;
-import com.soapboxrace.jaxb.http.OwnedCarTrans;
 import com.soapboxrace.jaxb.http.SecurityChallenge;
 import com.soapboxrace.jaxb.http.SessionInfo;
 
@@ -56,6 +57,9 @@ public class MatchMaking {
 	
 	@EJB
 	private OpenFireSoapBoxCli openFireSoapBoxCli;
+	
+	@EJB
+	private CarClassesDAO carClassesDAO;
 
 	@PUT
 	@Secured
@@ -64,8 +68,9 @@ public class MatchMaking {
 	public String joinQueueRaceNow(@HeaderParam("securityToken") String securityToken) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 		CustomCarTrans customCar = personaBO.getDefaultCar(activePersonaId).getCustomCar();
+		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCar.getPhysicsProfileHash());
 //		lobbyBO.joinFastLobby(securityToken, activePersonaId, defaultCar.getCustomCar().getCarClassHash(), lobbyBO.carDivision(defaultCar.getCustomCar().getCarClassHash()), defaultCar.getCustomCar().getRaceFilter());
-		lobbyBO.joinFastLobby(securityToken, activePersonaId, customCar.getCarClassHash(), customCar.getRaceFilter(), customCar.getPhysicsProfileHash());
+		lobbyBO.joinFastLobby(securityToken, activePersonaId, customCar.getCarClassHash(), customCar.getRaceFilter(), carClassesEntity.getQuickRaceAllowed());
 		return "";
 	}
 

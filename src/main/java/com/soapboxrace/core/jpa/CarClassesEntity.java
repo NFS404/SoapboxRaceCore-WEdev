@@ -53,6 +53,8 @@ public class CarClassesEntity implements Serializable {
 	private Integer haVar3;
 	@Column(name = "carversion")
 	private Integer carVersion;
+	@Column(name = "quickraceallowed")
+	private boolean quickRaceAllowed;
 
 	public void setStoreName(String storeName) {
 		this.storeName = storeName;
@@ -212,6 +214,14 @@ public class CarClassesEntity implements Serializable {
 
 	public void setCarVersion(int carVersion) {
 		this.carVersion = carVersion;
+	}
+	
+	public boolean getQuickRaceAllowed() {
+		return quickRaceAllowed;
+	}
+
+	public void setQuickRaceAllowed(boolean quickRaceAllowed) {
+		this.quickRaceAllowed = quickRaceAllowed;
 	}
 
 }

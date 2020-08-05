@@ -84,13 +84,13 @@ public class LobbyBO {
 		return "bas";
 	}
 		
-	public void joinFastLobby(String securityToken, Long personaId, int carClassHash, int raceFilter, int physicsProfileHash) {
+	public void joinFastLobby(String securityToken, Long personaId, int carClassHash, int raceFilter, boolean quickRaceAllowed) {
 		// List<LobbyEntity> lobbys = lobbyDao.findAllOpen(carClassHash);
 //		System.out.println("MM START Time: " + System.currentTimeMillis());
 		boolean isModCar = false;
-		if (physicsProfileHash == 202813212 || physicsProfileHash == -840317713 || physicsProfileHash == -845093474) {
+		if (quickRaceAllowed = false) {
 			isModCar = true;
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### ModCars is restricted from events."), personaId);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You cannot join to racing on this vehicle."), personaId);
 		}
 		if (!isModCar) {
 			List<LobbyEntity> lobbys = lobbyDao.findAllMPLobbies(carClassHash, raceFilter);
