@@ -87,12 +87,10 @@ public class LobbyBO {
 	public void joinFastLobby(String securityToken, Long personaId, int carClassHash, int raceFilter, boolean quickRaceAllowed) {
 		// List<LobbyEntity> lobbys = lobbyDao.findAllOpen(carClassHash);
 //		System.out.println("MM START Time: " + System.currentTimeMillis());
-		boolean isModCar = false;
-		if (quickRaceAllowed = false) {
-			isModCar = true;
+		if (quickRaceAllowed == false) {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You cannot join to racing on this vehicle."), personaId);
 		}
-		if (!isModCar) {
+		else {
 			List<LobbyEntity> lobbys = lobbyDao.findAllMPLobbies(carClassHash, raceFilter);
 			if (lobbys.isEmpty() && parameterBO.getBoolParam("RACENOW_RANDOMRACES")) {
 				PersonaEntity personaEntity = personaDao.findById(personaId);
