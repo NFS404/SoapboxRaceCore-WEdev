@@ -16,7 +16,9 @@ import com.soapboxrace.core.bo.EventsBO;
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
+import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
+import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.jaxb.http.ArrayOfEventDefinition;
 import com.soapboxrace.jaxb.http.ArrayOfInt;
@@ -47,6 +49,9 @@ public class Events {
 	
 	@EJB
 	private PersonaPresenceDAO personaPresenceDAO;
+	
+	@EJB
+	private CarClassesDAO carClassesDAO;
 
 	@GET
 	@Path("/availableatlevel")
@@ -58,8 +63,9 @@ public class Events {
 		CustomCarTrans customCarTrans = defaultCar.getCustomCar();
 		int carClassHash = customCarTrans.getCarClassHash();
 		int carPhysicsHash = customCarTrans.getPhysicsProfileHash();
+		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(carPhysicsHash);
 		boolean isModCar = false;
-		if (carPhysicsHash == 202813212 || carPhysicsHash == -840317713 || carPhysicsHash == -845093474 || carPhysicsHash == -133221572 || carPhysicsHash == -409661256) {
+		if (!carClassesEntity.getQuickRaceAllowed()) {
 			isModCar = true;
 		}
 
