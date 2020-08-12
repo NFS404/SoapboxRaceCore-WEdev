@@ -34,6 +34,7 @@ public class ServerInfoEntity {
 	private String adminList;
 	private String ownerList;
 	private Integer numberOfRegistered;
+	private Integer onlineNumber;
 	private String allowedCountries;
 	private String newsUrl;
 	private Boolean rwacAllow;
@@ -44,8 +45,6 @@ public class ServerInfoEntity {
 	@Convert(converter = SceneryGroupConverter.class)
 	private List<String> disactivatedHolidaySceneryGroups;
 
-	@Transient
-	private Integer onlineNumber;
 	@Transient
 	private boolean requireTicket = false;
 	@Transient

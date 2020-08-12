@@ -20,12 +20,11 @@ public class GetServerInformationBO {
 
 	public ServerInfoEntity getServerInformation() {
 		ServerInfoEntity serverInfoEntity = serverInfoDAO.findInfo();
-		serverInfoEntity.setOnlineNumber(onlineUsersBO.updateOnlineUsers());
 		String ticketToken = parameterBO.getStrParam("TICKET_TOKEN");
 		if (ticketToken != null && !ticketToken.equals("null")) {
 			serverInfoEntity.setRequireTicket(true);
 		}
-		serverInfoEntity.setServerVersion("0.0.7");
+		serverInfoEntity.setServerVersion("sbrw_wevolved");
 		Integer maxOnlinePlayers = parameterBO.getIntParam("MAX_ONLINE_PLAYERS");
 		serverInfoEntity.setMaxOnlinePlayers(maxOnlinePlayers);
 		return serverInfoEntity;

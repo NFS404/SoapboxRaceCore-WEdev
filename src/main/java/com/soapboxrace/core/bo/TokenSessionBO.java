@@ -15,9 +15,11 @@ import javax.ws.rs.NotAuthorizedException;
 import com.soapboxrace.core.api.util.GeoIp2;
 import com.soapboxrace.core.api.util.UUIDGen;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
+import com.soapboxrace.core.dao.ServerInfoDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.PersonaPresenceEntity;
+import com.soapboxrace.core.jpa.ServerInfoEntity;
 import com.soapboxrace.core.jpa.TokenSessionEntity;
 import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.jaxb.login.LoginStatusVO;
@@ -41,6 +43,9 @@ public class TokenSessionBO {
 	
 	@EJB
 	private PersonaPresenceDAO personaPresenceDAO;
+	
+	@EJB
+	private ServerInfoDAO serverInfoDAO;
 
 	private static Map<String, TokenSessionEntity> activePersonas = new HashMap<>(300);
 
@@ -158,7 +163,8 @@ public class TokenSessionBO {
 		if (email != null && !email.isEmpty() && password != null && !password.isEmpty()) {
 			UserEntity userEntity = userDAO.findByEmail(email);
 			if (userEntity != null) {
-				int numberOfUsersOnlineNow = onlineUsersBO.updateOnlineUsers();
+				ServerInfoEntity serverInfoEntity = serverInfoDAO.findInfo();
+				int numberOfUsersOnlineNow = serverInfoEntity.getOnlineNumber();
 				int maxOlinePayers = parameterBO.getIntParam("MAX_ONLINE_PLAYERS");
 				Boolean serverMaintenance = parameterBO.getBoolParam("SERVERMAINTENANCE");
 				

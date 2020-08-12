@@ -286,7 +286,8 @@ public class UserBO {
 			
 			String senderName = personaEntity.getName();
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### $" + (int) moneyDiff + " has been added to your cash account.\n"
-					+ "## Current WeBank money amount: $" + (int) userEntity.getExtraMoney()), personaId);
+					+ "## Current WeBank money amount: $" + (int) userEntity.getExtraMoney() + "\n"
+					+ "## Please re-login into account."), personaId);
 			System.out.println("Player " + senderName + " has taken $" + (int) moneyDiff + " from his Bank account.");
 		}
 	}

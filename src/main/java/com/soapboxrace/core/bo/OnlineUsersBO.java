@@ -1,9 +1,5 @@
 package com.soapboxrace.core.bo;
 
-
-import java.util.List;
-import java.util.Random;
-
 import javax.ejb.EJB;
 import javax.ejb.Lock;
 import javax.ejb.Schedule;
@@ -16,11 +12,9 @@ import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
+import com.soapboxrace.core.dao.ServerInfoDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
-import com.soapboxrace.core.jpa.EventDataEntity;
-import com.soapboxrace.core.jpa.PersonaEntity;
-import com.soapboxrace.core.jpa.PersonaPresenceEntity;
-import com.soapboxrace.core.jpa.TokenSessionEntity;
+import com.soapboxrace.core.jpa.ServerInfoEntity;
 
 @Singleton
 public class OnlineUsersBO {
@@ -45,20 +39,26 @@ public class OnlineUsersBO {
 	
 	@EJB
 	private PersonaDAO personaDAO;
+	
+	@EJB
+	private ServerInfoDAO serverInfoDAO;
     
-	// FIXME 1-minute online counter with DB entry, where only one process will rewrite this entry, other ones - request DB data
-	@Schedule(minute = "*", hour = "*", persistent = false)
+	@Schedule(minute = "*/1", hour = "*", persistent = false)
 	@Lock(LockType.READ)
-	public int updateOnlineUsers() {
-		return openFireRestApiCli.getTotalOnlineUsers();
+	public void updateOnlineUsers() {
+		ServerInfoEntity serverInfoEntity = serverInfoDAO.findInfo();
+		serverInfoEntity.setOnlineNumber(openFireRestApiCli.getTotalOnlineUsers());
+		serverInfoDAO.update(serverInfoEntity);
 	}
 	
 	@Schedule(minute = "*/10", hour = "*", persistent = false)
 	public void OnlineCountDiscord() {
 		if (parameterBO.getBoolParam("DISCORD_ONLINECOUNT")) {
+			ServerInfoEntity serverInfoEntity = serverInfoDAO.findInfo();
+			int onlineCount = serverInfoEntity.getOnlineNumber();
 			String message = ":heavy_minus_sign:"
-	        		+ "\n:cityscape: **|** Сейчас игроков на сервере: **" + openFireRestApiCli.getTotalOnlineUsers() + "**"
-	        		+ "\n:cityscape: **|** Players online now on server: **" + openFireRestApiCli.getTotalOnlineUsers() + "**"
+	        		+ "\n:cityscape: **|** Сейчас игроков на сервере: **" + onlineCount + "**"
+	        		+ "\n:cityscape: **|** Players online now on server: **" + onlineCount + "**"
 			        + "\n:cityscape: **|** Текущая ротация трасс / Track Rotation: **#" + parameterBO.getIntParam("ROTATIONID") + "**";
 			discordBot.sendMessage(message);
 		}
