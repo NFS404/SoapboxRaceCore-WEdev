@@ -195,6 +195,10 @@ public class UserBO {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Wrong nickname, check the name and try again."), personaId);
 			return null;
 		}
+		if (personaEntityTarget.getName().contentEquals(personaEntity.getName())) {
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You already have your own money."), personaId);
+			return null;
+		}
 		
 		else {
 			// Target player's info
