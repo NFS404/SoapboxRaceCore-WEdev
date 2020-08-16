@@ -20,8 +20,7 @@ public class EventPowerupsBO {
 	@EJB
 	private EventPowerupsDAO eventPowerupsDAO;
 
-	public String recordPowerups(int powerupHash, Long userId) {
-		Long eventDataId = personaPresenceDAO.findByUserId(userId).getCurrentEventDataId();
+	public String recordPowerups(int powerupHash, Long userId, Long eventDataId) {
 		EventPowerupsEntity eventPowerupsEntity = eventPowerupsDAO.findByEventDataId(eventDataId);
 		if (eventPowerupsEntity == null) {
 			return "";

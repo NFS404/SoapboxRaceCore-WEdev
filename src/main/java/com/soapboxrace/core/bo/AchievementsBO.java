@@ -604,6 +604,18 @@ public class AchievementsBO {
 		achievementsAwarded.setAchievements(achievements);
 		openFireSoapBoxCli.send(achievementsAwarded, personaId);
 	}
+	
+	// Test attempt in custom server HUD alerts
+	public void broadcastUICustomThin(PersonaEntity personaEntity) {
+		AchievementsAwarded achievementsAwarded = new AchievementsAwarded();
+		AchievementProgress achievementProgress = new AchievementProgress();
+		achievementProgress.setAchievementDefinitionId((long) 104);
+		achievementProgress.setCurrentValue(1337);
+		List<AchievementProgress> progressedList = new ArrayList<>();
+		progressedList.add(achievementProgress);
+		achievementsAwarded.setProgressed(progressedList);
+		openFireSoapBoxCli.send(achievementsAwarded, personaEntity.getPersonaId());
+	}
 
 	public AchievementRewards redeemReward(Long personaId, Long achievementRankId) {
 		PersonaEntity personaEntity = personaDAO.findById(personaId);

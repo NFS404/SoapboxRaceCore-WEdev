@@ -1,7 +1,6 @@
 package com.soapboxrace.core.bo;
 
 import java.util.List;
-
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
 import javax.ejb.Stateless;
@@ -73,7 +72,7 @@ public class EventBO {
 		EventSessionEntity eventSessionEntity = new EventSessionEntity();
 		eventSessionEntity.setEvent(eventEntity);
 		eventSessionEntity.setStarted(System.currentTimeMillis());
-		eventSessionEntity.setTeamNOS(true);
+		eventSessionEntity.setTeamNOS(true); // Temporal value
 		eventSessionDao.insert(eventSessionEntity);
 		return eventSessionEntity;
 	}

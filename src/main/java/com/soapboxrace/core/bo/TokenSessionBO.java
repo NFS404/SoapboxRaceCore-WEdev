@@ -14,6 +14,7 @@ import javax.ws.rs.NotAuthorizedException;
 
 import com.soapboxrace.core.api.util.GeoIp2;
 import com.soapboxrace.core.api.util.UUIDGen;
+import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.dao.ServerInfoDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
@@ -46,6 +47,9 @@ public class TokenSessionBO {
 	
 	@EJB
 	private ServerInfoDAO serverInfoDAO;
+	
+	@EJB
+	private PersonaDAO personaDAO;
 
 	private static Map<String, TokenSessionEntity> activePersonas = new HashMap<>(300);
 
@@ -243,15 +247,17 @@ public class TokenSessionBO {
 		return tokenSessionEntity.getActivePersonaId();
 	}
 	
-	// Sends ActivePersonaId and UserId at the same time
-	public Long[] getActivePersonaIdAndUserId(String securityToken) {
+	// Sends ActivePersonaId, UserId and TeamId
+	public Long[] getActivePersonaUserTeamId(String securityToken) {
 		TokenSessionEntity tokenSessionEntity = activePersonas.get(securityToken);
 		if (tokenSessionEntity == null) {
 			tokenSessionEntity = tokenDAO.findBySecurityToken(securityToken);
 		}
-		Long[] infoPackage = new Long[2];
+		Long[] infoPackage = new Long[3];
 		infoPackage[0] = tokenSessionEntity.getActivePersonaId();
 		infoPackage[1] = tokenSessionEntity.getUserId();
+		if (tokenSessionEntity.getTeamId() == null) {infoPackage[2] = (long) 0;}
+		else {infoPackage[2] = tokenSessionEntity.getTeamId();}
 		
 		return infoPackage;
 	}
@@ -266,9 +272,13 @@ public class TokenSessionBO {
 				throw new NotAuthorizedException("Persona not owned by user");
 			}
 		}
-
 		tokenSessionEntity.setActivePersonaId(personaId);
 		tokenSessionEntity.setIsLoggedIn(!isLogout);
+		
+		Long teamId = null;
+		if (personaId != 0) {teamId = personaDAO.findById(personaId).getTeam().getTeamId();}
+		tokenSessionEntity.setTeamId(teamId);
+		
 //		personaPresenceDAO.updatePersonaPresence(personaId, 1);
 		personaPresenceEntity.setPersonaPresence(1);
 		personaPresenceEntity.setActivePersonaId(personaId);

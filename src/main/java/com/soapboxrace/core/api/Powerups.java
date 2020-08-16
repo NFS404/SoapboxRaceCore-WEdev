@@ -19,7 +19,6 @@ import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
-import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.PersonaPresenceEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
@@ -67,19 +66,20 @@ public class Powerups {
 	@Produces(MediaType.APPLICATION_XML)
 	public String activated(@HeaderParam("securityToken") String securityToken, @PathParam(value = "powerupHash") Integer powerupHash,
 			@QueryParam("targetId") Long targetId, @QueryParam("receivers") String receivers, @QueryParam("eventSessionId") Long eventSessionId) {
-		Long[] infoPackage = tokenBO.getActivePersonaIdAndUserId(securityToken);
+		Long[] infoPackage = tokenBO.getActivePersonaUserTeamId(securityToken);
 		Long activePersonaId = infoPackage[0].longValue();
 		Long userId = infoPackage[1].longValue();
+		Long teamId = infoPackage[2].longValue();
+		PersonaPresenceEntity personaPresenceEntity = personaPresenceDAO.findByUserId(userId);
+		Long serverEventSessionId = personaPresenceEntity.getCurrentEventSessionId();
 
 		if (parameterBO.getBoolParam("POWERUPS_ENABLED")) {
 			// TeamNOS - if race has been randomly started without NOS, team players wouldn't be able to use it, but others will be able
-//			PersonaEntity personaEntityTeam = personaDAO.findById(activePersonaId);
-//			if (personaEntityTeam.getTeam() != null && eventSessionId != 0) {
-//				EventSessionEntity eventSessionEntity = eventSessionDao.findById(eventSessionId);
-//				if (!eventSessionEntity.getTeamNOS() && powerupHash == -1681514783) {
-//					return "";
-//				}
-//			}
+			if (teamId != 0 && powerupHash == -1681514783 && serverEventSessionId != null) {
+				if (!eventSessionDao.findById(serverEventSessionId).getTeamNOS()) {
+					return "";
+				}
+			}
 			XMPP_ResponseTypePowerupActivated powerupActivatedResponse = new XMPP_ResponseTypePowerupActivated();
 			XMPP_PowerupActivatedType powerupActivated = new XMPP_PowerupActivatedType();
 			powerupActivated.setId(Long.valueOf(powerupHash));
@@ -99,8 +99,11 @@ public class Powerups {
 					openFireSoapBoxCli.send(powerupActivatedResponse, receiverPersonaId);
 				}
 		    }
-			if (eventSessionId != 0) { // If player has played on any of events, game will never set the Session to 0 again until the restart
-				eventPowerupsBO.recordPowerups(powerupHash, userId);
+            // If player has played on any of events, game will never set the eventSession to 0 again until the restart
+			// So we check it on the server-side
+			Long eventDataId = personaPresenceEntity.getCurrentEventDataId();
+			if (eventDataId != null) {
+				eventPowerupsBO.recordPowerups(powerupHash, userId, eventDataId);
 			}
 		}
 
@@ -112,7 +115,6 @@ public class Powerups {
 			inventoryBO.decrementUsage(activePersonaId, powerupHash);
 		}
 		if ((powerupHash == -1564932069 || powerupHash == 1113720384)) {
-			PersonaPresenceEntity personaPresenceEntity = personaPresenceDAO.findByUserId(userId);
 			 // It's illegal to activate the Team power-ups outside of Team Escape
 			if (personaPresenceEntity.getCurrentEventModeId() == 0 || personaPresenceEntity.getCurrentEventModeId() == 9 
 					|| personaPresenceEntity.getCurrentEventModeId() == 4 || personaPresenceEntity.getCurrentEventModeId() == 12) {

@@ -53,6 +53,8 @@ public class TokenSessionEntity {
 	private String clientHostIp;
 	
 	private boolean isLoggedIn;
+	
+	private Long teamId;
 
 	public String getSecurityToken() {
 		return securityToken;
@@ -132,6 +134,14 @@ public class TokenSessionEntity {
 
 	public void setIsLoggedIn(boolean isLoggedIn) {
 		this.isLoggedIn = isLoggedIn;
+	}
+	
+	public Long getTeamId() {
+		return teamId;
+	}
+
+	public void setTeamId(Long teamId) {
+		this.teamId = teamId;
 	}
 
 }

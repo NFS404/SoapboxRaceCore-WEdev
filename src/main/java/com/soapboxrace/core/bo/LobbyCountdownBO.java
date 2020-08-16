@@ -1,6 +1,7 @@
 package com.soapboxrace.core.bo;
 
 import java.nio.ByteBuffer;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -17,10 +18,12 @@ import javax.ejb.TimerService;
 
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.LobbyDAO;
+import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.LobbyEntity;
 import com.soapboxrace.core.jpa.LobbyEntrantEntity;
+import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.TokenSessionEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
@@ -53,6 +56,9 @@ public class LobbyCountdownBO {
 	@EJB
 	private OpenFireSoapBoxCli openFireSoapBoxCli;
 	
+	@EJB
+	private PersonaDAO personaDAO;
+	
 	@Resource
     private TimerService timerService;
 
@@ -82,20 +88,21 @@ public class LobbyCountdownBO {
 		List<XMPP_P2PCryptoTicketType> p2pCryptoTicket = xMPP_CryptoTicketsType.getP2PCryptoTicket();
 		int i = 0;
 		byte numOfRacers = (byte) entrants.size();
-		EventSessionEntity eventDataEntity = new EventSessionEntity();
-		eventDataEntity.setStarted(System.currentTimeMillis());
-		eventDataEntity.setEvent(lobbyEntity.getEvent());
-		eventDataEntity.setTeam1Id(lobbyEntity.getTeam1Id());
-		eventDataEntity.setTeam2Id(lobbyEntity.getTeam2Id());
-//			Long team2NOSTest = eventDataEntity.getTeam2Id();
-//			boolean teamNOStext = true;
-//			// TeamNOS - if race has been randomly started without NOS, team players wouldn't be able to use it, but others will be able
-//			if (team2NOSTest != null) {
-//				Random randNOS = new Random();
-//				eventDataEntity.setTeamNOS(randNOS.nextBoolean());
-//				teamNOStext = eventDataEntity.getTeamNOS();
-//			}
-		eventSessionDao.insert(eventDataEntity);
+		EventSessionEntity eventSessionEntity = new EventSessionEntity();
+		eventSessionEntity.setStarted(System.currentTimeMillis());
+		eventSessionEntity.setEvent(lobbyEntity.getEvent());
+		eventSessionEntity.setTeam1Id(lobbyEntity.getTeam1Id());
+		eventSessionEntity.setTeam2Id(lobbyEntity.getTeam2Id());
+		
+		Long team2NOSTest = eventSessionEntity.getTeam2Id();
+		boolean teamNOS = true;
+		// TeamNOS - if race has been randomly started without NOS, team players wouldn't be able to use it, but others will be able
+		if (team2NOSTest != null) {
+			SecureRandom randNOS = new SecureRandom();
+			teamNOS = randNOS.nextBoolean();
+			eventSessionEntity.setTeamNOS(teamNOS);
+		}
+		eventSessionDao.insert(eventSessionEntity);
 		String udpRaceIp = parameterBO.getStrParam("UDP_RACE_IP");
 		for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
 			// eventDataEntity.setIsSinglePlayer(false);
@@ -106,7 +113,7 @@ public class LobbyCountdownBO {
 			ByteBuffer byteBuffer = ByteBuffer.allocate(48);
 			byteBuffer.put(gridIndex);
 			byteBuffer.put(helloPacket);
-			byteBuffer.putInt(eventDataEntity.getId().intValue());
+			byteBuffer.putInt(eventSessionEntity.getId().intValue());
 			byteBuffer.put(numOfRacers);
 			byteBuffer.putInt(personaId.intValue());
 			byte[] cryptoTicketBytes = byteBuffer.array();
@@ -129,10 +136,11 @@ public class LobbyCountdownBO {
 				lobbyEntrantInfoType.setUdpRaceHostIp(tokenEntity.getClientHostIp());
 			}
 			lobbyEntrantInfo.add(lobbyEntrantInfoType);
-//				PersonaEntity personaEntityTeam = personaDao.findById(personaId);
-//				if (personaEntityTeam.getTeam() != null && team2NOSTest != null) {
-//					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Team NOS on this race: " + teamNOStext), personaId);
-//				}
+			
+			PersonaEntity personaEntityTeam = personaDAO.findById(personaId);
+			if (personaEntityTeam.getTeam() != null && team2NOSTest != null) {
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Team NOS on this race: " + teamNOS), personaId);
+			}
 		}
 		XMPP_EventSessionType xMPP_EventSessionType = new XMPP_EventSessionType();
 		ChallengeType challengeType = new ChallengeType();
@@ -143,7 +151,7 @@ public class LobbyCountdownBO {
 
 		xMPP_EventSessionType.setEventId(lobbyEntity.getEvent().getId());
 		xMPP_EventSessionType.setChallenge(challengeType);
-		xMPP_EventSessionType.setSessionId(eventDataEntity.getId());
+		xMPP_EventSessionType.setSessionId(eventSessionEntity.getId());
 		lobbyLaunched.setNewRelayServer(true);
 		lobbyLaunched.setLobbyId(lobbyEntity.getId());
 		lobbyLaunched.setUdpRelayHost(udpRaceIp);

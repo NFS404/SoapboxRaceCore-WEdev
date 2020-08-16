@@ -68,7 +68,7 @@ public class Event {
 		eventBO.createEventPowerupsSession(activePersonaId, eventDataId);
 		int eventModeId = eventDataDAO.findById(eventDataId).getEvent().getEventModeId();
 		
-		personaPresenceDAO.updateCurrentEvent(activePersonaId, eventDataId, eventModeId);
+		personaPresenceDAO.updateCurrentEvent(activePersonaId, eventDataId, eventModeId, eventSessionId);
 		return "";
 	}
 
@@ -127,7 +127,7 @@ public class Event {
 		default:
 			break;
 		}
-		personaPresenceDAO.updateCurrentEvent(activePersonaId, null, 0);
+		personaPresenceDAO.updateCurrentEvent(activePersonaId, null, 0, null);
 		return "";
 	}
 
@@ -142,7 +142,7 @@ public class Event {
 		PursuitEventResult pursuitEventResult = new PursuitEventResult();
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
 		pursuitEventResult = eventResultBO.handlePursuitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, true, eventEnded);
-		personaPresenceDAO.updateCurrentEvent(activePersonaId, null, 0);
+		personaPresenceDAO.updateCurrentEvent(activePersonaId, null, 0, null);
 		return pursuitEventResult;
 	}
 }
