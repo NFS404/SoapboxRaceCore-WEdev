@@ -21,6 +21,7 @@ import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.PersonaPresenceEntity;
 import com.soapboxrace.core.jpa.ServerInfoEntity;
+import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.jpa.TokenSessionEntity;
 import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.jaxb.login.LoginStatusVO;
@@ -262,6 +263,7 @@ public class TokenSessionBO {
 		return infoPackage;
 	}
 
+	@SuppressWarnings("null")
 	public void setActivePersonaId(String securityToken, Long personaId, Boolean isLogout) {
 		TokenSessionEntity tokenSessionEntity = tokenDAO.findBySecurityToken(securityToken);
 		Long userId = tokenSessionEntity.getUserId();
@@ -275,8 +277,10 @@ public class TokenSessionBO {
 		tokenSessionEntity.setActivePersonaId(personaId);
 		tokenSessionEntity.setIsLoggedIn(!isLogout);
 		
-		Long teamId = null;
-		if (personaId != 0) {teamId = personaDAO.findById(personaId).getTeam().getTeamId();}
+		Long teamId = 0L;
+		TeamsEntity teamsEntity = null;
+		if (personaId != 0) {teamsEntity = personaDAO.findById(personaId).getTeam();}
+		if (teamsEntity != null) {teamId = teamsEntity.getTeamId();}
 		tokenSessionEntity.setTeamId(teamId);
 		
 //		personaPresenceDAO.updatePersonaPresence(personaId, 1);
