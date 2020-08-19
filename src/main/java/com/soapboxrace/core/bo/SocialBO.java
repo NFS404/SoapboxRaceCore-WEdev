@@ -61,9 +61,9 @@ public class SocialBO {
 				reportSender = personaEntitySender.getName();
 			}
 			String message = ":heavy_minus_sign:"
-	        		+ "\n:incoming_envelope: **|** Nгрок **" + reportSender + "** прислал репорт на игрока **" + personaAbuserName + "**, причина: *" + description + "*"
-	        		+ "\n:incoming_envelope: **|** Player **" + reportSender + "** sent a report for player **" + personaAbuserName + "**, reason: *" + description + "*";
-			discordBot.sendMessage(message);
+	        		+ "\n:incoming_envelope: **|** Nгрок **" + reportSender + "** прислал репорт на игрока **" + personaAbuserName + "**, причина: *reportDescPlace*"
+	        		+ "\n:incoming_envelope: **|** Player **" + reportSender + "** sent a report for player **" + personaAbuserName + "**, reason: *reportDescPlace*";
+			discordBot.sendMessageReport(message, description);
 		}
 		if (hacksDetected != 32 && hacksDetected != 0) {
 			String message = ":heavy_minus_sign:"

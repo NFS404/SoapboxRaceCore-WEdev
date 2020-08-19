@@ -20,9 +20,16 @@ public class DiscordWebhook {
 
 	public void sendMessage(String message, String webHookUrl, String botName) {
 		TemmieWebhook temmie = new TemmieWebhook(webHookUrl);
-		// Russian letters encoding - Hypercycle
+		DiscordMessage dm = DiscordMessage.builder().username(botName).content(message).build();
+		temmie.sendMessage(dm);
+	}
+	
+	public void sendMessageReport(String message, String reportDesc, String webHookUrl, String botName) {
+		TemmieWebhook temmie = new TemmieWebhook(webHookUrl);
 		try {
-			message = new String (message.getBytes("cp1251"),"UTF-8");
+			// Russian letters encoding (from core), in-game cyrillic text is fine without additional encoding
+			message = new String (message.getBytes("cp1251"));
+			message = message.replace("reportDescPlace", reportDesc);
 		}
 		catch (IOException ioe) {
 		}
@@ -36,6 +43,10 @@ public class DiscordWebhook {
 
 	public void sendMessage(String message) {
 		sendMessage(message, parameterBO.getStrParam("DISCORD_WEBHOOK_DEFAULTURL"), parameterBO.getStrParam("DISCORD_WEBHOOK_DEFAULTNAME"));
+	}
+	
+	public void sendMessageReport(String message, String reportDesc) {
+		sendMessageReport(message, reportDesc, parameterBO.getStrParam("DISCORD_WEBHOOK_DEFAULTURL"), parameterBO.getStrParam("DISCORD_WEBHOOK_DEFAULTNAME"));
 	}
 	
 	public void sendMessage(String message, boolean teamAction) {
