@@ -20,6 +20,11 @@ public class DiscordWebhook {
 
 	public void sendMessage(String message, String webHookUrl, String botName) {
 		TemmieWebhook temmie = new TemmieWebhook(webHookUrl);
+		try {
+			message = new String (message.getBytes("cp1251"),"UTF-8");
+		}
+		catch (IOException ioe) {
+		}
 		DiscordMessage dm = DiscordMessage.builder().username(botName).content(message).build();
 		temmie.sendMessage(dm);
 	}
