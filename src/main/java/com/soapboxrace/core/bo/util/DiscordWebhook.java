@@ -31,9 +31,16 @@ public class DiscordWebhook {
 	
 	public void sendMessageReport(String message, String reportDesc, String webHookUrl, String botName) {
 		TemmieWebhook temmie = new TemmieWebhook(webHookUrl);
+		boolean winEncoding = parameterBO.getBoolParam("TWEAK_WINENCODING");
 		try {
 			// Russian letters encoding (from core), in-game cyrillic text is fine without additional encoding
-			message = new String (message.getBytes("cp1251"));
+			// But the server's core cyrillic can depend on the different display method (Linux or Windows host)
+			if (winEncoding) {
+				message = new String (message.getBytes("cp1251"),"UTF-8");
+			}
+			else {
+				message = new String (message.getBytes("cp1251"));
+			}
 			message = message.replace("reportDescPlace", reportDesc);
 		}
 		catch (IOException ioe) {
