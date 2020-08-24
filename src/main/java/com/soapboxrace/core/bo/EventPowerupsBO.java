@@ -71,10 +71,11 @@ public class EventPowerupsBO {
 	public boolean isPowerupsUsed(EventPowerupsEntity eventPowerupsEntity) {
 		boolean isPowerupsUsed = false;
 		if (eventPowerupsEntity.getNosShot() != 0 || eventPowerupsEntity.getSlingshot() != 0 || eventPowerupsEntity.getOneMoreLap() != 0 || 
-				eventPowerupsEntity.getReady() != 0 || eventPowerupsEntity.getShield() != 0 || eventPowerupsEntity.getTrafficMagnet() != 0 ||
-				eventPowerupsEntity.getTrafficMagnet() != 0 || eventPowerupsEntity.getJuggernaut() != 0 || eventPowerupsEntity.getEmergencyEvade() != 0 ||
+				eventPowerupsEntity.getTrafficMagnet() != 0 || eventPowerupsEntity.getTrafficMagnet() != 0 || eventPowerupsEntity.getJuggernaut() != 0 ||
 				eventPowerupsEntity.getTeamEmergencyEvade() != 0 || eventPowerupsEntity.getRunFlatTires() != 0 || 
-				eventPowerupsEntity.getInstantCooldown() != 0 || eventPowerupsEntity.getTeamSlingshot() != 0 ) {
+				eventPowerupsEntity.getInstantCooldown() != 0 || eventPowerupsEntity.getTeamSlingshot() != 0 
+				|| eventPowerupsEntity.getEmergencyEvade() != 0 ) {
+			// eventPowerupsEntity.getShield() != 0 || eventPowerupsEntity.getReady() != 0
 			isPowerupsUsed = true;
 		}
 		return isPowerupsUsed;

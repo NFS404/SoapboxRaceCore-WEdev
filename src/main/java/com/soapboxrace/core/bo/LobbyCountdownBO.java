@@ -96,6 +96,7 @@ public class LobbyCountdownBO {
 		
 		Long team2NOSTest = eventSessionEntity.getTeam2Id();
 		boolean teamNOS = true;
+		eventSessionEntity.setTeamNOS(teamNOS); // True by default
 		// TeamNOS - if race has been randomly started without NOS, team players wouldn't be able to use it, but others will be able
 		if (team2NOSTest != null) {
 			SecureRandom randNOS = new SecureRandom();
