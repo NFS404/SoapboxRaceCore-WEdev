@@ -27,23 +27,19 @@ public class CarClassesDAO extends BaseDAO<CarClassesEntity> {
 	public CarClassesEntity findByHash(int hash) {
 		TypedQuery<CarClassesEntity> query = entityManager.createQuery("SELECT obj FROM CarClassesEntity obj WHERE obj.hash = :hash", CarClassesEntity.class);
 		query.setParameter("hash", hash);
-		try {
-			return query.getSingleResult();
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-		return null;
+		return query.getSingleResult();
 	}
 	
 	public CarClassesEntity findByStoreName(String customCarName) {
 		TypedQuery<CarClassesEntity> query = entityManager.createQuery("SELECT obj FROM CarClassesEntity obj WHERE obj.storeName = :storeName", CarClassesEntity.class);
 		query.setParameter("storeName", customCarName);
-		try {
-			return query.getSingleResult();
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-		return null;
+		return query.getSingleResult();
+	}
+	
+	public List<CarClassesEntity> findByLootboxType(int lootboxType) {
+		TypedQuery<CarClassesEntity> query = entityManager.createQuery("SELECT obj FROM CarClassesEntity obj WHERE obj.lootboxType = :lootboxType", CarClassesEntity.class);
+		query.setParameter("lootboxType", lootboxType);
+		return query.getResultList();
 	}
 	
 	public String getFullCarName(String carName) {

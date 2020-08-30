@@ -14,6 +14,7 @@ import com.soapboxrace.core.dao.InventoryDAO;
 import com.soapboxrace.core.dao.InventoryItemDAO;
 import com.soapboxrace.core.dao.LobbyEntrantDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.RecordsDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.TreasureHuntDAO;
 import com.soapboxrace.core.dao.UserDAO;
@@ -75,6 +76,9 @@ public class DriverPersonaBO {
 
 	@EJB
 	private OpenFireRestApiCli openFireRestApiCli;
+	
+	@EJB
+	private RecordsDAO recordsDAO;
 
 	public ProfileData createPersona(Long userId, PersonaEntity personaEntity) {
 		UserEntity userEntity = userDao.findById(userId);
@@ -220,6 +224,7 @@ public class DriverPersonaBO {
 		inventoryDAO.deleteByPersona(personaId);
 		achievementPersonaDAO.deleteByPersona(personaId);
 		achievementStateDAO.deleteByPersona(personaId);
+		recordsDAO.deletePersonaRecords(personaId);
 		personaDao.delete(personaEntity);
 	}
 	
@@ -231,6 +236,7 @@ public class DriverPersonaBO {
 		personaEntity.setUser(userEntityTemp);
 		personaEntity.setName(personaEntity.getName() + "_TD");
 		personaEntity.setCreated(LocalDateTime.now()); // can check when driver got deleted
+		recordsDAO.banPersonaRecords(personaId);
 		personaDao.insert(personaEntity);
 	}
 

@@ -107,6 +107,20 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		createQuery.executeUpdate();
 	}
 	
+	// When user has deleted one of his personas (Temp)
+	public void banPersonaRecords(Long personaId) {
+		Query createQuery = entityManager.createQuery("UPDATE RecordsEntity obj SET obj.userBan = true WHERE obj.personaId = :personaId");
+		createQuery.setParameter("personaId", personaId);
+		createQuery.executeUpdate();
+	}
+	
+	// When user has deleted one of his personas
+	public void deletePersonaRecords(Long personaId) {
+		Query createQuery = entityManager.createQuery("DELETE RecordsEntity obj WHERE obj.personaId = :personaId");
+		createQuery.setParameter("personaId", personaId);
+		createQuery.executeUpdate();
+	}
+	
 	public void unbanRecords(UserEntity user) {
 		Query createQuery = entityManager.createQuery("UPDATE RecordsEntity obj SET obj.userBan = false WHERE obj.user = :user");
 		createQuery.setParameter("user", user);
