@@ -178,7 +178,6 @@ public class BasketBO {
 		if (powerupProduct == null) {
 			return CommerceResultStatus.FAIL_INVALID_BASKET;
 		}
-
 		if (personaEntity.getCash() < powerupProduct.getPrice()) {
 			return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
 		}
@@ -195,11 +194,8 @@ public class BasketBO {
 		if (item == null) {
 			return CommerceResultStatus.FAIL_INVALID_BASKET;
 		}
-
 		boolean upgradedAmount = false;
-
 		int newUsageCount = item.getRemainingUseCount() + 15;
-
 		if (newUsageCount > 99)
 			newUsageCount = 99;
 
@@ -213,18 +209,35 @@ public class BasketBO {
 			personaEntity.setCash(personaEntity.getCash() - powerupProduct.getPrice());
 			personaDao.update(personaEntity);
 		}
-
 		return CommerceResultStatus.SUCCESS;
 	}
 
-	public CommerceResultStatus buyCar(String productId, PersonaEntity personaEntity, boolean webAction) {
+	public CommerceResultStatus buyCar(String productId, PersonaEntity personaEntity, boolean webAction, UserEntity userEntity) {
 		if (!webAction && getPersonaCarCount(personaEntity.getPersonaId()) >= personaEntity.getCarSlots()) {
 			return CommerceResultStatus.FAIL_INSUFFICIENT_CAR_SLOTS;
 		}
-
 		ProductEntity productEntity = productDao.findByProductId(productId);
-		if (!webAction && (productEntity == null || personaEntity.getCash() < productEntity.getPrice())) {
-			return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
+		boolean isEconomyOn = parameterBO.getBoolParam("ENABLE_ECONOMY");
+		
+		if (!webAction && isEconomyOn) {
+			String currencyType = productEntity.getCurrency();
+			switch (currencyType) {
+			case "cash":
+				if (productEntity == null || personaEntity.getCash() < productEntity.getPrice()) {
+					return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
+				}
+				personaEntity.setCash(personaEntity.getCash() - productEntity.getPrice());
+				personaDao.update(personaEntity);
+				break;
+			case "_NS":
+				Double speedBoost = userEntity.getBoost();
+				if (productEntity == null || speedBoost < productEntity.getPrice()) {
+					return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
+				}
+				userEntity.setBoost(speedBoost - productEntity.getPrice());
+				userDAO.update(userEntity);
+				break;
+			}
 		}
 		
 		OwnedCarTrans ownedCarTrans = getCar(productId);
@@ -250,14 +263,8 @@ public class BasketBO {
 		}
 		commerceBO.calcNewCarClass(customCarEntityVer);
 		ownedCarEntity.setCarVersion(carClassesEntity.getCarVersion());
-
 		carSlotDAO.insert(carSlotEntity);
-
-		if (!webAction && parameterBO.getBoolParam("ENABLE_ECONOMY")) {
-			personaEntity.setCash(personaEntity.getCash() - productEntity.getPrice());
-		}
-		personaDao.update(personaEntity);
-
+		
 		personaBo.changeDefaultCar(personaEntity.getPersonaId(), carSlotEntity.getOwnedCar().getId());
 		if (parameterBO.getBoolParam("DISABLE_ITEM_AFTER_BUY")) {
 			productEntity.setEnabled(false);
@@ -299,6 +306,8 @@ public class BasketBO {
         commerceResultTrans.setCommerceItems(arrayOfCommerceItemTrans);
 		List<CommerceItemTrans> commerceItems = new ArrayList<>();
 		String cardPackType = "";
+		boolean randomMultiplier = false;
+		int doubleItem = 0;
 		switch (productId) {
 		case "SRV-CARDPACK1":
 			cardPackType = "VISUALPART";
@@ -309,6 +318,12 @@ public class BasketBO {
 		case "SRV-CARDPACK3":
 			cardPackType = "SKILLMODPART";
 			break;
+		case "SRV-CARDPACK6":
+			cardPackType = "POWERPACK";
+			randomMultiplier = true;
+			Random random = new Random();
+			doubleItem = random.nextInt(4);
+			break;
 		}
 		List<ProductEntity> productDrops = rewardDropDAO.getBundleDrops(cardPackType);
 		Collections.shuffle(productDrops);
@@ -316,6 +331,8 @@ public class BasketBO {
 		if (inventoryFull) {
 			return CommerceResultStatus.FAIL_MAX_STACK_OR_RENTAL_LIMIT;
 		}
+		
+		int count = 0;
 		for (ProductEntity productDropEntity : productDrops) {
 			CommerceItemTrans item = new CommerceItemTrans();
 //			if (productDropEntity.getProductType().contentEquals("CASH")) { // Not used
@@ -328,11 +345,22 @@ public class BasketBO {
 //			}
 //			else {
 				String productTitle = productDropEntity.getProductTitle();
-				String title = productTitle.replace(" x15", "");
 				item.setHash(productDropEntity.getHash());
-				item.setTitle(title);
+//				System.out.println("count: " + count);
+//				System.out.println("doubleItem: " + doubleItem);
+				if (randomMultiplier && count == doubleItem) {
+//					System.out.println("concat ACTIVE");
+					productTitle = productTitle.concat(" x2");
+				}
+				item.setTitle(productTitle);
 				productDropEntity.setUseCount(1);
 				inventoryBO.addDroppedItem(productDropEntity, personaEntity);
+//				System.out.println("drop: " + productTitle);
+				if (productTitle.contains(" x2")) { // Add this item again
+//					System.out.println("drop TWICE: " + productTitle);
+					inventoryBO.addDroppedItem(productDropEntity, personaEntity);
+				}
+				count++;
 //			}
 			commerceItems.add(item);
 		}
@@ -399,7 +427,7 @@ public class BasketBO {
 		String randomProductId = "";
 		isGoodRange = rand.nextBoolean();
 		// Cutting down the chance from 50% to 25%
-		if (isGoodRange) {
+		if (isGoodRange && parameterBO.getBoolParam("ITEM_LOOTBOX_REDUCECHANCE")) {
 			isGoodRange = rand.nextBoolean();
 		}
 		if (isGoodRange) {lootboxType = 1;}

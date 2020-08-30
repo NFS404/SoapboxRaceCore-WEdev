@@ -402,6 +402,15 @@ public class InventoryBO {
 			capacity = inventoryEntity.getVisualPartsCapacity();
 			usedSlotCount = inventoryEntity.getVisualPartsUsedSlotCount();
 			break;
+		case "POWERPACK":
+			int perfCapacity = inventoryEntity.getPerformancePartsCapacity();
+			int perfUsedSlotCount = inventoryEntity.getPerformancePartsUsedSlotCount();
+			int skillCapacity = inventoryEntity.getSkillModPartsCapacity();
+			int skillUsedSlotCount = inventoryEntity.getSkillModPartsUsedSlotCount();
+			if (perfUsedSlotCount < perfCapacity && skillUsedSlotCount < skillCapacity) {
+				return false;
+			}
+			break;
 		case "POWERUP":
 			return false;
 		default:

@@ -13,7 +13,6 @@ import javax.persistence.TypedQuery;
 import com.soapboxrace.core.dao.util.BaseDAO;
 import com.soapboxrace.core.jpa.AchievementRankEntity;
 import com.soapboxrace.core.jpa.ProductEntity;
-import com.soapboxrace.core.jpa.ProductType;
 import com.soapboxrace.core.jpa.RewardDropEntity;
 
 @Stateless
@@ -67,38 +66,49 @@ public class RewardDropDAO extends BaseDAO<RewardDropEntity> {
 	}
 	
 	public List<ProductEntity> getBundleDrops(String productType) {
-		List<ProductEntity> productList = new ArrayList<>();
-		StringBuilder sqlWhere = new StringBuilder();
-		sqlWhere.append(" WHERE obj.productType = :productType AND obj.isDropableMode <> 0");
-
-		StringBuilder sqlCount = new StringBuilder();
-		sqlCount.append("SELECT COUNT(*) FROM ProductEntity obj ");
-		sqlCount.append(sqlWhere.toString());
-
-		Query countQuery = entityManager.createQuery(sqlCount.toString());
-		countQuery.setParameter("productType", productType);
-		Long count = (Long) countQuery.getSingleResult();
-
-		StringBuilder sqlProduct = new StringBuilder();
-		sqlProduct.append("SELECT obj FROM ProductEntity obj");
-		sqlProduct.append(sqlWhere.toString());
-
-		TypedQuery<ProductEntity> productQuery = entityManager.createQuery(sqlProduct.toString(), ProductEntity.class);
-		productQuery.setParameter("productType", productType);
-
-		int number = count.intValue();
-		Random random = new Random();
-		productQuery.setMaxResults(1);
-		
-		boolean isPackReduced = random.nextBoolean();
-		int cardAmount = (isPackReduced ? 5 : 3);
-		
-		int max = Math.max(1, cardAmount);
-		for (int i = 0; i < max; i++) {
-			number = random.nextInt(count.intValue());
-			productQuery.setFirstResult(number);
-			productList.add(productQuery.getSingleResult());
+		// 5-Stars Performance Parts, 4-Stars Skillmods and the Percentage Performance Parts
+		if (productType.contentEquals("POWERPACK")) {
+			Query countQuery = entityManager.createQuery("SELECT COUNT(*) FROM ProductEntity obj WHERE obj.isDropableMode = 2 OR (obj.stars = 5 AND obj.longDescription LIKE '%tuned%')");
+			Long count = (Long) countQuery.getSingleResult();
+			List<ProductEntity> productList = new ArrayList<>();
+			TypedQuery<ProductEntity> productQuery = entityManager.createQuery("SELECT obj FROM ProductEntity obj WHERE obj.isDropableMode = 2 OR (obj.stars = 5 AND obj.longDescription LIKE '%tuned%')", ProductEntity.class);
+			
+			int number = count.intValue();
+			Random random = new Random();
+			productQuery.setMaxResults(1);
+			int cardAmount = 5;
+			
+			for (int i = 0; i < cardAmount; i++) {
+				number = random.nextInt(count.intValue());
+				productQuery.setFirstResult(number);
+				ProductEntity productEntity = productQuery.getSingleResult();
+				productList.add(productEntity);
+			}
+			return productList;
 		}
-		return productList;
+		else {
+			Query countQuery = entityManager.createQuery("SELECT COUNT(*) FROM ProductEntity obj WHERE obj.productType = :productType AND obj.isDropableMode <> 0");
+			countQuery.setParameter("productType", productType);
+			Long count = (Long) countQuery.getSingleResult();
+			
+			List<ProductEntity> productList = new ArrayList<>();
+			TypedQuery<ProductEntity> productQuery = entityManager.createQuery("SELECT obj FROM ProductEntity obj WHERE obj.productType = :productType AND obj.isDropableMode <> 0", ProductEntity.class);
+			productQuery.setParameter("productType", productType);
+			
+			int number = count.intValue();
+			Random random = new Random();
+			productQuery.setMaxResults(1);
+			
+			boolean isPackReduced = random.nextBoolean();
+			int cardAmount = (!isPackReduced ? 5 : 3);
+			
+			int max = Math.max(1, cardAmount);
+			for (int i = 0; i < max; i++) {
+				number = random.nextInt(count.intValue());
+				productQuery.setFirstResult(number);
+				productList.add(productQuery.getSingleResult());
+			}
+			return productList;
+		}
 	}
 }

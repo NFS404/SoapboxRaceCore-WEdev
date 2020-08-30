@@ -28,6 +28,7 @@ import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
+import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.jaxb.http.ArrayOfCommerceItemTrans;
 import com.soapboxrace.jaxb.http.ArrayOfInventoryItemTrans;
 import com.soapboxrace.jaxb.http.ArrayOfOwnedCarTrans;
@@ -116,18 +117,24 @@ public class Personas {
 		sessionBO.verifyPersona(securityToken, personaId);
 
 		PersonaEntity personaEntity = personaBO.getPersonaById(personaId);
+		UserEntity userEntity = personaEntity.getUser();
 
 		CommerceResultTrans commerceResultTrans = new CommerceResultTrans();
 
 		ArrayOfInventoryItemTrans arrayOfInventoryItemTrans = new ArrayOfInventoryItemTrans();
 		arrayOfInventoryItemTrans.getInventoryItemTrans().add(new InventoryItemTrans());
 
-		WalletTrans walletTrans = new WalletTrans();
-		walletTrans.setBalance(personaEntity.getCash());
-		walletTrans.setCurrency("CASH");
+		WalletTrans cashWallet = new WalletTrans();
+        cashWallet.setBalance(personaEntity.getCash());
+        cashWallet.setCurrency("CASH");
 
-		ArrayOfWalletTrans arrayOfWalletTrans = new ArrayOfWalletTrans();
-		arrayOfWalletTrans.getWalletTrans().add(walletTrans);
+        WalletTrans boostWallet = new WalletTrans();
+        boostWallet.setBalance(userEntity.getBoost());
+        boostWallet.setCurrency("BOOST"); // why doesn't _NS work? Truly a mystery... - LeoCodes21
+
+        ArrayOfWalletTrans arrayOfWalletTrans = new ArrayOfWalletTrans();
+        arrayOfWalletTrans.getWalletTrans().add(cashWallet);
+        arrayOfWalletTrans.getWalletTrans().add(boostWallet);
 
 		commerceResultTrans.setWallets(arrayOfWalletTrans);
 		commerceResultTrans.setCommerceItems(new ArrayOfCommerceItemTrans());
@@ -146,7 +153,8 @@ public class Personas {
 			commerceResultTrans.setStatus(basketBO.buyPowerups(productId, personaEntity));
 		} else if ("SRV-REPAIR".equals(productId)) {
 			commerceResultTrans.setStatus(basketBO.repairCar(productId, personaEntity));
-		} else if (productId.contains("SRV-CARDPACK1") || productId.contains("SRV-CARDPACK2") || productId.contains("SRV-CARDPACK3")) {
+		} else if (productId.contains("SRV-CARDPACK1") || productId.contains("SRV-CARDPACK2") || productId.contains("SRV-CARDPACK3") 
+				|| productId.contains("SRV-CARDPACK6")) {
 			commerceResultTrans.setStatus(basketBO.buyCardPack(productId, personaEntity, commerceResultTrans));	
 		} else if (productId.contains("SRV-CARDPACK4")) {
 			commerceResultTrans.setStatus(basketBO.buyBoostConversion(productId, personaEntity, commerceResultTrans));	
@@ -163,7 +171,7 @@ public class Personas {
 			commerceResultTrans.setPurchasedCars(arrayOfOwnedCarTrans);
 			arrayOfOwnedCarTrans.getOwnedCarTrans().add(ownedCarTrans);
 
-			commerceResultTrans.setStatus(basketBO.buyCar(productId, personaEntity, false));
+			commerceResultTrans.setStatus(basketBO.buyCar(productId, personaEntity, false, userEntity));
 		}
 		return commerceResultTrans;
 	}
@@ -308,10 +316,11 @@ public class Personas {
 	public String giveCarsBundle(@FormParam("adminToken") String adminToken, @FormParam("playerName") String playerName) {
 		if (parameterBO.getStrParam("ADMIN_TOKEN").equals(adminToken)) {
 			PersonaEntity personaEntity = personaDao.findByNameIgnoreCase(playerName);
+			UserEntity userEntity = personaEntity.getUser();
 			String carsBundleInit = parameterBO.getStrParam("ITEM_SPECIALCARS_BUNDLE");
             String[] carsBundle = carsBundleInit.split(",");
             for (String carProduct : carsBundle) { // Give every car in the list (productId), to the player
-            	basketBO.buyCar(carProduct, personaEntity, true);
+            	basketBO.buyCar(carProduct, personaEntity, true, userEntity);
             }
 			return "Cars (" + carsBundle.length + ") was given to the player " + personaEntity.getName() + ".";
 		}
