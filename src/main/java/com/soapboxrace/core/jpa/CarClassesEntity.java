@@ -57,6 +57,8 @@ public class CarClassesEntity implements Serializable {
 	private boolean quickRaceAllowed;
 	@Column(name = "lootboxtype")
 	private Integer lootboxType;
+	@Column(name = "israre")
+	private boolean isRare;
 
 	public void setStoreName(String storeName) {
 		this.storeName = storeName;
@@ -232,6 +234,14 @@ public class CarClassesEntity implements Serializable {
 
 	public void setLootboxType(int lootboxType) {
 		this.lootboxType = lootboxType;
+	}
+	
+	public boolean isRare() {
+		return isRare;
+	}
+
+	public void setIsRare(boolean setIsRare) {
+		this.isRare = setIsRare;
 	}
 
 }

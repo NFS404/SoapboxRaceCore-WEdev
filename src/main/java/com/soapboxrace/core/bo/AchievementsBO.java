@@ -400,6 +400,9 @@ public class AchievementsBO {
 		case WEV2_SELL_AFTERMARKET:
 			int AftermarketSold = achievementPersonaEntity.getAftermarketSold();
 			return Integer.valueOf(AftermarketSold).longValue();
+		case WEV2_LUCKY_COLLECTOR:
+			int containerCars = achievementPersonaEntity.getContainerCars();
+			return Integer.valueOf(containerCars).longValue();
 		default:
 			break;
 		}
@@ -951,6 +954,14 @@ public class AchievementsBO {
 		aftermarketSoldValue = aftermarketSoldValue + 1;
 		achievementPersonaEntity.setAftermarketSold(aftermarketSoldValue);
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_SELL_AFTERMARKET, Integer.valueOf(aftermarketSoldValue).longValue());
+	}
+	
+	public void applyLuckyCollector(PersonaEntity personaEntity) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		int containerCarsValue = achievementPersonaEntity.getContainerCars();
+		containerCarsValue = containerCarsValue + 1;
+		achievementPersonaEntity.setContainerCars(containerCarsValue);
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_LUCKY_COLLECTOR, Integer.valueOf(containerCarsValue).longValue());
 	}
 	
 	// Used if player got a lvl 100 but achiv. itself was unactive earlier

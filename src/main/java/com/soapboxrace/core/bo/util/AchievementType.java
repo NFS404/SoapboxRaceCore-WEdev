@@ -328,7 +328,19 @@ public enum AchievementType {
 	/**
 	 * sell X amount of aftermarket parts
 	 */
-	WEV2_SELL_AFTERMARKET(104); //
+	WEV2_SELL_AFTERMARKET(104), //
+	/**
+	 * get X cars of A or S class (or rare) cars from car lootbox
+	 */
+	WEV2_LUCKY_COLLECTOR(105), //
+	/**
+	 * drive in all events
+	 */
+	WEV2_TRAVELLER(106), //
+	/**
+	 * install 4-star skills on all slots for X cars
+	 */
+	WEV2_SKILL_MASTER(107); //
 
 	private int id;
 

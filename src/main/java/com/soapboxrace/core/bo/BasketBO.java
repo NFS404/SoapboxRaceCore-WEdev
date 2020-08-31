@@ -111,6 +111,9 @@ public class BasketBO {
 	
 	@EJB
 	private CommerceBO commerceBO;
+	
+	@EJB
+	private AchievementsBO achievementsBO;
 
 	private OwnedCarTrans getCar(String productId) {
 		BasketDefinitionEntity basketDefinitonEntity = basketDefinitionsDAO.findById(productId);
@@ -457,6 +460,11 @@ public class BasketBO {
 
 		if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
 			personaEntity.setCash(personaEntity.getCash() - productEntity.getPrice());
+		}
+		int carClassHash = customCarEntity.getCarClassHash();
+		// A, S class or rare car
+		if (carClassHash == -405837480 || carClassHash == -2142411446 || selectedCar.isRare()) {
+			achievementsBO.applyLuckyCollector(personaEntity);
 		}
 		personaDao.update(personaEntity);
 		personaBo.changeDefaultCar(personaEntity.getPersonaId(), carSlotEntity.getOwnedCar().getId());
