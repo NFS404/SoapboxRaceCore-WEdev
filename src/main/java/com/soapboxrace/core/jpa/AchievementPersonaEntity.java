@@ -70,6 +70,7 @@ public class AchievementPersonaEntity {
 	private int aftermarketSold;
 	private int containerCars;
 	private int driverAgeDays;
+	private int sbAgeTaken;
 
 	public int getId() {
 		return id;
@@ -357,5 +358,13 @@ public class AchievementPersonaEntity {
 
 	public void setDriverAgeDays(int driverAgeDays) {
 		this.driverAgeDays = driverAgeDays;
+	}
+	
+	public int getSBAgeTaken() {
+		return sbAgeTaken;
+	}
+
+	public void setSBAgeTaken(int sbAgeTaken) {
+		this.sbAgeTaken = sbAgeTaken;
 	}
 }

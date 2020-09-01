@@ -861,18 +861,25 @@ public class AchievementsBO {
 		achievementPersonaEntity.setDriverAgeDays(driverAgeDays);
 		achievementPersonaDAO.update(achievementPersonaEntity);
 		boolean isNewRank = false;
+		boolean reward = true;
+		if (achievementPersonaEntity.getSBAgeTaken() >= 3) {reward = false;} // Prevent creating a new profiles for SB rewards
 		
 		if (driverAgeDays >= 365) {
-			isNewRank = forceAchievementApply(529, personaEntity);
-			forceAchievementApply(528, personaEntity);
-			forceAchievementApply(527, personaEntity);
+			isNewRank = forceAchievementApply(529, personaEntity, reward);
+			forceAchievementApply(528, personaEntity, reward);
+			forceAchievementApply(527, personaEntity, reward);
+			int sbAgeTaken = achievementPersonaEntity.getSBAgeTaken();
+			if (sbAgeTaken < 3) {
+				achievementPersonaEntity.setSBAgeTaken(sbAgeTaken + 1);
+				achievementPersonaDAO.update(achievementPersonaEntity);
+			}
 		}
         if (!isNewRank && driverAgeDays >= 180) {
-        	isNewRank = forceAchievementApply(528, personaEntity);
-			forceAchievementApply(527, personaEntity);
+        	isNewRank = forceAchievementApply(528, personaEntity, reward);
+			forceAchievementApply(527, personaEntity, reward);
 		}
         if (!isNewRank && driverAgeDays >= 90) {
-        	isNewRank = forceAchievementApply(527, personaEntity);
+        	isNewRank = forceAchievementApply(527, personaEntity, reward);
 		}
 	}
 
@@ -1003,13 +1010,15 @@ public class AchievementsBO {
 	}
 	
 	// True - rank has been added, False - rank is already achieved
-	public boolean forceAchievementApply (int rankId, PersonaEntity personaEntity) {
+	// Reward: True - give the reward items, False - no reward items (react alike they given already)
+	public boolean forceAchievementApply (int rankId, PersonaEntity personaEntity, boolean reward) {
 		AchievementRankEntity achievementRankEntity = achievementRankDAO.findById((long) rankId);
 		if (achievementStateDAO.findByPersonaAchievementRank(personaEntity, achievementRankEntity) == null) {
 			AchievementStateEntity achievementStateEntity = new AchievementStateEntity();
 			achievementStateEntity.setAchievedOn(LocalDateTime.now());
 			achievementStateEntity.setAchievementRank(achievementRankEntity);
-			achievementStateEntity.setAchievementState(AchievementState.REWARD_WAITING);
+			if (reward) {achievementStateEntity.setAchievementState(AchievementState.REWARD_WAITING);}
+			else {achievementStateEntity.setAchievementState(AchievementState.COMPLETED);}
 			achievementStateEntity.setPersona(personaEntity);
 			achievementStateDAO.insert(achievementStateEntity);
 			personaEntity.setScore(personaEntity.getScore() + achievementRankEntity.getPoints());
