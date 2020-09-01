@@ -165,10 +165,10 @@ public class RewardBO {
 					if (personaEntity.getLevel() == 100) { // If player don't have a previous achiv. stages
 						AchievementRankEntity achievementRankEntity100 = achievementRankDao.findById((long) 111);
 						if (achievementStateDao.findByPersonaAchievementRank(personaEntity, achievementRankEntity100) == null) {
-							achievementsBO.debugAchievementApply(111, personaEntity);
-							achievementsBO.debugAchievementApply(112, personaEntity);
-							achievementsBO.debugAchievementApply(113, personaEntity);
-							achievementsBO.debugAchievementApply(114, personaEntity);
+							achievementsBO.forceAchievementApply(111, personaEntity);
+							achievementsBO.forceAchievementApply(112, personaEntity);
+							achievementsBO.forceAchievementApply(113, personaEntity);
+							achievementsBO.forceAchievementApply(114, personaEntity);
 						}
 					}
 					personaEntity.setRepAtCurrentLevel((int) (expMax - expToNextLevel));

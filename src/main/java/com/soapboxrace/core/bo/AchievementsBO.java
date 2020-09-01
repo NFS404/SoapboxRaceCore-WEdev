@@ -682,7 +682,7 @@ public class AchievementsBO {
 				userDAO.update(userEntity);
 				item.setHash(723701634); // SpeedBoost Icon
 				String boostFormat = NumberFormat.getNumberInstance(Locale.US).format(rewardDropEntity.getAmount());
-				item.setTitle(boostFormat + "SPEEDBOOST");
+				item.setTitle(boostFormat + " SPEEDBOOST");
 				break;
 			case GARAGE:
 				// FIXME pog copiada do basketbo
@@ -855,10 +855,25 @@ public class AchievementsBO {
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.OUTLAW, Integer.valueOf(pursuitWins).longValue());
 	}
 	
+	// FIXME Hardcoded achievement stages
 	public void applyDriverAgeAchievement(PersonaEntity personaEntity, int driverAgeDays) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		achievementPersonaEntity.setDriverAgeDays(driverAgeDays);
-		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.REACH_DRIVERAGE, Integer.valueOf(driverAgeDays).longValue());
+		achievementPersonaDAO.update(achievementPersonaEntity);
+		boolean isNewRank = false;
+		
+		if (driverAgeDays >= 365) {
+			isNewRank = forceAchievementApply(529, personaEntity);
+			forceAchievementApply(528, personaEntity);
+			forceAchievementApply(527, personaEntity);
+		}
+        if (!isNewRank && driverAgeDays >= 180) {
+        	isNewRank = forceAchievementApply(528, personaEntity);
+			forceAchievementApply(527, personaEntity);
+		}
+        if (!isNewRank && driverAgeDays >= 90) {
+        	isNewRank = forceAchievementApply(527, personaEntity);
+		}
 	}
 
 	public void applyDragAchievement(EventDataEntity eventDataEntity, DragArbitrationPacket dragArbitrationPacket, Long activePersonaId) {
@@ -987,8 +1002,8 @@ public class AchievementsBO {
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_LUCKY_COLLECTOR, Integer.valueOf(containerCarsValue).longValue());
 	}
 	
-	// Used if player got a lvl 100 but achiv. itself was unactive earlier
-	public void debugAchievementApply (int rankId, PersonaEntity personaEntity) {
+	// True - rank has been added, False - rank is already achieved
+	public boolean forceAchievementApply (int rankId, PersonaEntity personaEntity) {
 		AchievementRankEntity achievementRankEntity = achievementRankDAO.findById((long) rankId);
 		if (achievementStateDAO.findByPersonaAchievementRank(personaEntity, achievementRankEntity) == null) {
 			AchievementStateEntity achievementStateEntity = new AchievementStateEntity();
@@ -999,6 +1014,8 @@ public class AchievementsBO {
 			achievementStateDAO.insert(achievementStateEntity);
 			personaEntity.setScore(personaEntity.getScore() + achievementRankEntity.getPoints());
 			personaDAO.update(personaEntity);
+			return true;
 		}
+		return false;
 	}
 }
