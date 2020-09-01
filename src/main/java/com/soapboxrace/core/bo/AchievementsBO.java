@@ -32,6 +32,7 @@ import com.soapboxrace.core.dao.LobbyDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.RewardDropDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
+import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.AchievementDefinitionEntity;
 import com.soapboxrace.core.jpa.AchievementPersonaEntity;
 import com.soapboxrace.core.jpa.AchievementRankEntity;
@@ -49,6 +50,7 @@ import com.soapboxrace.core.jpa.ProductEntity;
 import com.soapboxrace.core.jpa.RewardDropEntity;
 import com.soapboxrace.core.jpa.TokenSessionEntity;
 import com.soapboxrace.core.jpa.TreasureHuntEntity;
+import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.jaxb.http.AchievementDefinitionPacket;
 import com.soapboxrace.jaxb.http.AchievementRankPacket;
@@ -129,6 +131,9 @@ public class AchievementsBO {
 	
 	@EJB
 	private PersonaBO personaBO;
+	
+	@EJB
+	private UserDAO userDAO;
 
 	public AchievementsPacket loadall(Long personaId) {
 		PersonaEntity personaEntity = new PersonaEntity();
@@ -385,6 +390,9 @@ public class AchievementsBO {
 			return Integer.valueOf(mpRaces).longValue();
 		case XKR_SPEED_HUNTER:
 			return 0l;
+		case REACH_DRIVERAGE:
+			int days = achievementPersonaEntity.getDriverAgeDays();
+			return Integer.valueOf(days).longValue();
 //		case WEV2_EXTRALVL:
 //			int extraLVL = achievementPersonaEntity.getExtraLVL();
 //			return Integer.valueOf(extraLVL).longValue();
@@ -622,6 +630,7 @@ public class AchievementsBO {
 
 	public AchievementRewards redeemReward(Long personaId, Long achievementRankId) {
 		PersonaEntity personaEntity = personaDAO.findById(personaId);
+		UserEntity userEntity = personaEntity.getUser();
 
 		AchievementRankEntity achievementRankEntity = achievementRankDAO.findById(achievementRankId);
 		AchievementStateEntity personaAchievementRank = achievementStateDAO.findByPersonaAchievementRank(personaEntity, achievementRankEntity);
@@ -668,6 +677,13 @@ public class AchievementsBO {
 				String moneyFormat = NumberFormat.getNumberInstance(Locale.US).format(rewardDropEntity.getAmount());
 				item.setTitle("$" + moneyFormat);
 				break;
+			case SPEEDBOOST:
+				userEntity.setBoost(userEntity.getBoost() + rewardDropEntity.getAmount().doubleValue());
+				userDAO.update(userEntity);
+				item.setHash(723701634); // SpeedBoost Icon
+				String boostFormat = NumberFormat.getNumberInstance(Locale.US).format(rewardDropEntity.getAmount());
+				item.setTitle(boostFormat + "SPEEDBOOST");
+				break;
 			case GARAGE:
 				// FIXME pog copiada do basketbo
 				BasketDefinitionEntity basketDefinitonEntity = basketDefinitionsDAO.findById(product.getProductId());
@@ -689,16 +705,13 @@ public class AchievementsBO {
 				carSlotEntity.setOwnedCar(ownedCarEntity);
 				OwnedCarConverter.trans2Entity(ownedCarTrans, ownedCarEntity);
 				OwnedCarConverter.details2NewEntity(ownedCarTrans, ownedCarEntity);
-
 				carSlotDAO.insert(carSlotEntity);
 
 				// FIXME get better icon hash, like gift
 				item.setHash(product.getHash());
 				item.setTitle(rewardDropEntity.getAchievementRank().getRewardText());
-
 				break;
 			case INVENTORY:
-
 				String productTitle = product.getProductTitle();
 				String title = productTitle.replace(" x15", "");
 				if (rewardDropEntity.getAmount().intValue() > 1) {
@@ -706,7 +719,6 @@ public class AchievementsBO {
 				}
 				item.setHash(product.getHash());
 				item.setTitle(title);
-
 				product.setUseCount(rewardDropEntity.getAmount().intValue());
 				inventoryBO.addDroppedItem(product, personaEntity);
 				break;
@@ -721,12 +733,17 @@ public class AchievementsBO {
 		ArrayOfCommerceItemTrans arrayOfCommerceItemTrans = new ArrayOfCommerceItemTrans();
 		arrayOfCommerceItemTrans.getCommerceItemTrans().addAll(commerceItems);
 		achievementRewards.setCommerceItems(arrayOfCommerceItemTrans);
-		WalletTrans walletTrans = new WalletTrans();
-		walletTrans.setBalance(personaEntity.getCash());
-		walletTrans.setCurrency("CASH");
+		
+		WalletTrans cashWallet = new WalletTrans();
+		cashWallet.setBalance(personaEntity.getCash());
+		cashWallet.setCurrency("CASH");
+		WalletTrans boostWallet = new WalletTrans();
+        boostWallet.setBalance(userEntity.getBoost());
+        boostWallet.setCurrency("BOOST"); // why doesn't _NS work? Truly a mystery... - LeoCodes21
 
 		ArrayOfWalletTrans arrayOfWalletTrans = new ArrayOfWalletTrans();
-		arrayOfWalletTrans.getWalletTrans().add(walletTrans);
+		arrayOfWalletTrans.getWalletTrans().add(cashWallet);
+        arrayOfWalletTrans.getWalletTrans().add(boostWallet);
 
 		achievementRewards.setWallets(arrayOfWalletTrans);
 		achievementRewards.setStatus(CommerceResultStatus.SUCCESS);
@@ -836,6 +853,12 @@ public class AchievementsBO {
 		pursuitWins = pursuitWins + 1;
 		achievementPersonaEntity.setPursuitWins(pursuitWins);
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.OUTLAW, Integer.valueOf(pursuitWins).longValue());
+	}
+	
+	public void applyDriverAgeAchievement(PersonaEntity personaEntity, int driverAgeDays) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		achievementPersonaEntity.setDriverAgeDays(driverAgeDays);
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.REACH_DRIVERAGE, Integer.valueOf(driverAgeDays).longValue());
 	}
 
 	public void applyDragAchievement(EventDataEntity eventDataEntity, DragArbitrationPacket dragArbitrationPacket, Long activePersonaId) {

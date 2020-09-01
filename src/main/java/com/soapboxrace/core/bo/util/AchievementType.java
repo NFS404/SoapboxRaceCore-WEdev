@@ -4,97 +4,6 @@ import java.util.Arrays;
 
 public enum AchievementType {
 
-	// GENERAL PLAY
-	/**
-	 * earn [x] cash total
-	 */
-	PAYDAY(17), //
-	/**
-	 * reach driver level [x]
-	 */
-	LEVEL_UP(23), //
-	/**
-	 * reach [x] total driver score by completing achievements
-	 */
-	LEGENDARY_DRIVER(24), //
-	/**
-	 * activate [x] powerup(s)
-	 */
-	POWERING_UP(66), //
-	/**
-	 * accumulate [x] of total airtime in events
-	 */
-	AIRTIME(13), //
-	/**
-	 * drive [x] (km/mi) in events
-	 */
-	LONG_HAUL(14), //
-
-	// DRAG ONLY
-	/**
-	 * win [x] multiplayer drag races
-	 */
-	DRAG_RACER(7), //
-
-	// CAR MOD ONLY
-	/**
-	 * applly [x] vinyls
-	 */
-	CAR_ARTIST(25), //
-	/**
-	 * install [x] performance parts (3-star or better)
-	 */
-	PRO_TUNER(18), //
-	/**
-	 * install [x] explore skill mods (3-star or better)
-	 */
-	EXPLORE_MODDER(19), //
-	/**
-	 * install [x] pursuit skill mods (3-star or better)
-	 */
-	PURSUIT_MODDER(20), //
-	/**
-	 * install [x] race skill mods (3-star or better)
-	 */
-	RACE_MODDER(21), //
-	/**
-	 * apply [x] paints
-	 */
-	FRESH_COAT(22), //
-	/**
-	 * install [x] aftermarket parts
-	 */
-	AFTERMARKET_SPECIALIST(15), //
-
-	// TREASURE HUNT ONLY
-	/**
-	 * complete [x] treasure hunts
-	 */
-	TREASURE_HUNTER(68), //
-	/**
-	 * complete [x] consecutive treasure hunts
-	 */
-	DAILY_HUNTER(69), //
-	/**
-	 * complete a treasure hunt in under [x] using the jaguar xkr
-	 */
-	XKR_SPEED_HUNTER(72), //
-
-	// TEAM ESCAPE EVENTS ONLY
-	/**
-	 * disable [x] cops in team escape
-	 */
-	HEAVY_HITTER(10), //
-	/**
-	 * dodge [x] roadblocks in team escape
-	 */
-	THREADING_THE_NEEDLE(11), //
-	/**
-	 * complete [x] team escapes with at least one teammate evading
-	 */
-	GETAWAY_DRIVER(12), //
-
-	// SPRINT CIRCUIT ONLY
 	/**
 	 * win [x] a-class restricted multiplayer sprint & circuits
 	 */
@@ -120,19 +29,9 @@ public enum AchievementType {
 	 */
 	S_CLASS_CHAMPION(6), //
 	/**
-	 * play [x] multiplayer sprints & circuits
+	 * win [x] multiplayer drag races
 	 */
-	WORLD_RACER(67), //
-	/**
-	 * play [x] sprints & circuits in private matches
-	 */
-	CREW_RACER(70), //
-	/**
-	 * play [x] sprints & circuits in single player
-	 */
-	SOLO_RACER(71), //
-
-	// PURSUIT EVENTS ONLY
+	DRAG_RACER(7), //
 	/**
 	 * accumulate [x] cost to state incurred in pursuits
 	 */
@@ -141,8 +40,70 @@ public enum AchievementType {
 	 * successfully evade the cops [x] times in pursuit outrun
 	 */
 	OUTLAW(9), //
-
-	// HARDCODED
+	/**
+	 * disable [x] cops in team escape
+	 */
+	HEAVY_HITTER(10), //
+	/**
+	 * dodge [x] roadblocks in team escape
+	 */
+	THREADING_THE_NEEDLE(11), //
+	/**
+	 * complete [x] team escapes with at least one teammate evading
+	 */
+	GETAWAY_DRIVER(12), //
+	/**
+	 * accumulate [x] of total airtime in events
+	 */
+	AIRTIME(13), //
+	/**
+	 * drive [x] (km/mi) in events
+	 */
+	LONG_HAUL(14), //
+	/**
+	 * install [x] aftermarket parts
+	 */
+	AFTERMARKET_SPECIALIST(15), //
+	/**
+	 * own [x] cars in your garage
+	 */
+	COLLECTOR(16), //
+	/**
+	 * earn [x] cash total
+	 */
+	PAYDAY(17), //
+	/**
+	 * install [x] performance parts (3-star or better)
+	 */
+	PRO_TUNER(18), //
+	/**
+	 * install [x] explore skill mods (3-star or better)
+	 */
+	EXPLORE_MODDER(19), //
+	/**
+	 * install [x] pursuit skill mods (3-star or better)
+	 */
+	PURSUIT_MODDER(20), //
+	/**
+	 * install [x] race skill mods (3-star or better)
+	 */
+	RACE_MODDER(21), //
+	/**
+	 * apply [x] paints
+	 */
+	FRESH_COAT(22), //
+	/**
+	 * reach driver level [x]
+	 */
+	LEVEL_UP(23), //
+	/**
+	 * reach [x] total driver score by completing achievements
+	 */
+	LEGENDARY_DRIVER(24), //
+	/**
+	 * applly [x] vinyls
+	 */
+	CAR_ARTIST(25), //
 	/**
 	 * participated in the need for speed world open beta
 	 */
@@ -151,12 +112,6 @@ public enum AchievementType {
 	 * need for speed world developer
 	 */
 	DEVELOPER(27), //
-
-	// COLLECTORS
-	/**
-	 * own [x] cars in your garage
-	 */
-	COLLECTOR(16), //
 	/**
 	 * own [x] [car-brand](s) in your garage
 	 */
@@ -310,7 +265,39 @@ public enum AchievementType {
 	 */
 	VOLKSWAGEN_COLLECTOR(65), //
 	/**
-	 * got a 100 level for another time -- unactive
+	 * activate [x] powerup(s)
+	 */
+	POWERING_UP(66), //
+	/**
+	 * play [x] multiplayer sprints & circuits
+	 */
+	WORLD_RACER(67), //
+	/**
+	 * complete [x] treasure hunts
+	 */
+	TREASURE_HUNTER(68), //
+	/**
+	 * complete [x] consecutive treasure hunts
+	 */
+	DAILY_HUNTER(69), //
+	/**
+	 * play [x] sprints & circuits in private matches
+	 */
+	CREW_RACER(70), //
+	/**
+	 * play [x] sprints & circuits in single player
+	 */
+	SOLO_RACER(71), //
+	/**
+	 * complete a treasure hunt in under [x] using the jaguar xkr
+	 */
+	XKR_SPEED_HUNTER(72), //
+	/**
+	 * reach X days from driver creation date
+	 */
+	REACH_DRIVERAGE(73), //
+	/**
+	 * ???
 	 */
 	WEV2_EXTRALVL(100), //
 	/**

@@ -1,6 +1,7 @@
 package com.soapboxrace.core.bo;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -50,6 +51,9 @@ public class UserBO {
 	
 	@EJB
 	private DiscordWebhook discordBot;
+	
+	@EJB
+	private AchievementsBO achievementsBO;
 
 	public void createXmppUser(UserInfo userInfo) {
 		String securityToken = userInfo.getUser().getSecurityToken();
@@ -130,6 +134,8 @@ public class UserBO {
 			profileData.setPersonaId(personaEntity.getPersonaId());
 			profileData.setLevel(personaEntity.getLevel());
 			arrayOfProfileData.getProfileData().add(profileData);
+			int days = (int) ChronoUnit.DAYS.between(personaEntity.getCreated(), LocalDateTime.now());
+			achievementsBO.applyDriverAgeAchievement(personaEntity, days);
 		}
 		userInfo.setPersonas(arrayOfProfileData);
 		User user = new User();

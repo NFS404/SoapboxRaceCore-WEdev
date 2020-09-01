@@ -170,7 +170,7 @@ public class TokenSessionBO {
 			if (userEntity != null) {
 				ServerInfoEntity serverInfoEntity = serverInfoDAO.findInfo();
 				int numberOfUsersOnlineNow = serverInfoEntity.getOnlineNumber();
-				int maxOlinePayers = parameterBO.getIntParam("MAX_ONLINE_PLAYERS");
+				int maxOnlinePlayers = parameterBO.getIntParam("MAX_ONLINE_PLAYERS");
 				Boolean serverMaintenance = parameterBO.getBoolParam("SERVERMAINTENANCE");
 				
 				if (userEntity.isPremium() && parameterBO.getBoolParam("PREMIUM_TIMELIMITED")) {
@@ -191,7 +191,7 @@ public class TokenSessionBO {
 				      }
 				  }
 				
-				if (numberOfUsersOnlineNow >= maxOlinePayers && !userEntity.isPremium()) {
+				if (numberOfUsersOnlineNow >= maxOnlinePlayers && !userEntity.isPremium()) {
 					loginStatusVO.setDescription("Server is full!");
 					return loginStatusVO;
 				}
