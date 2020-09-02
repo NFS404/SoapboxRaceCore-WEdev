@@ -47,5 +47,4 @@ public class UserDAO extends BaseDAO<UserEntity> {
 		createQuery.setParameter("id", userId);
 		createQuery.executeUpdate();
 	}
-
 }

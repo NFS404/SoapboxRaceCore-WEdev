@@ -19,7 +19,8 @@ import javax.persistence.Table;
 @NamedQueries({ //
 		@NamedQuery(name = "UserEntity.findAll", query = "SELECT obj FROM UserEntity obj"),
 		@NamedQuery(name = "UserEntity.findByEmail", query = "SELECT obj FROM UserEntity obj WHERE obj.email = :email"),
-		@NamedQuery(name = "UserEntity.findByUserId", query = "SELECT obj FROM UserEntity obj WHERE obj.id = :id") //
+		@NamedQuery(name = "UserEntity.findByUserId", query = "SELECT obj FROM UserEntity obj WHERE obj.id = :id"), //
+		@NamedQuery(name = "UserEntity.findByIPAddress", query = "SELECT obj FROM UserEntity obj WHERE obj.ipAddress = :ipAddress") //
 
 })
 public class UserEntity {
@@ -84,6 +85,9 @@ public class UserEntity {
 	
 	@Column(name = "ignoreHWBan")
 	private boolean ignoreHWBan;
+	
+	@Column(name = "frSyncAlt")
+	private boolean frSyncAlt;
 	
 	public void setId(Long id) {
 		this.id = id;
@@ -243,6 +247,14 @@ public class UserEntity {
 
 	public void setIgnoreHWBan(boolean ignoreHWBan) {
 		this.ignoreHWBan = ignoreHWBan;
+	}
+	
+	public boolean getFRSyncAlt() {
+		return frSyncAlt;
+	}
+
+	public void setFRSyncAlt(boolean frSyncAlt) {
+		this.frSyncAlt = frSyncAlt;
 	}
 
 }

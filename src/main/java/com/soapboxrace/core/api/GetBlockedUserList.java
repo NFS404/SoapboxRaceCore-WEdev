@@ -9,7 +9,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.soapboxrace.core.bo.SocialBO;
-import com.soapboxrace.jaxb.http.ArrayOfLong;
 
 @Path("/getblockeduserlist")
 public class GetBlockedUserList {

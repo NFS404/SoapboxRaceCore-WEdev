@@ -295,15 +295,19 @@ public class FriendBO {
 		// Applies the vinyl from DB, uses OwnedCarTrans as a blank for already existed scripts (Not the ideal way...)
 		if (displayName.contains("/VINYL ")) {
 			vinylStorageBO.vinylStorageApply(personaId, displayName);
+			return null;
 		}
 		if (displayName.contentEquals("/VINYLUPLOAD")) {
 			vinylStorageBO.vinylStorageUpload(personaId);
+			return null;
 		}
 		if (displayName.contains("/VINYLREMOVE ")) {
 			vinylStorageBO.vinylStorageRemove(personaId, displayName);
+			return null;
 		}
 		if (displayName.contains("/VINYLWIPEALL")) {
 			vinylStorageBO.vinylStorageRemoveAll(personaId);
+			return null;
 		}
 		if (displayName.contains("/MODDER")) {
 			UserEntity userEntity = personaSender.getUser();
@@ -314,14 +318,31 @@ public class FriendBO {
 			userEntity.setModder(true);
 			userDAO.update(userEntity);
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Modder access is enabled, please restart the game."), personaId);
+			return null;
 		}
 		// Send persona's money to another persona (/SENDMONEY nickName money)
 		if (displayName.contains("/SENDMONEY ")) {
 			userBO.sendMoney(personaSender, displayName);
+			return null;
 		}
 		// Get extra reserve money to current persona
 		if (displayName.contains("/GETMONEY")) {
 			userBO.getMoney(personaSender);
+			return null;
+		}
+		// Freeroam Sync module switch (experimental)
+		if (displayName.contains("/SYNCSWITCH")) {
+			UserEntity userEntity = personaSender.getUser();
+			if (userEntity.getFRSyncAlt()) {
+				userEntity.setFRSyncAlt(false);
+				userDAO.update(userEntity);
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Sync shard is Main now, go to the Garage and back."), personaId);
+				return null;
+			}
+			userEntity.setFRSyncAlt(true);
+			userDAO.update(userEntity);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Sync shard is Alternative now, go to the Garage and back."), personaId);
+			return null;
 		}
 		// default add-a-friend interaction
 		if (!teamsActionInit) {

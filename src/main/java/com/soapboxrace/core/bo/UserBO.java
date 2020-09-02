@@ -11,6 +11,7 @@ import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.dao.InviteTicketDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.ServerInfoDAO;
+import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.InviteTicketEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
@@ -54,6 +55,9 @@ public class UserBO {
 	
 	@EJB
 	private AchievementsBO achievementsBO;
+	
+	@EJB
+	private TokenSessionDAO tokenDAO;
 
 	public void createXmppUser(UserInfo userInfo) {
 		String securityToken = userInfo.getUser().getSecurityToken();
@@ -300,5 +304,14 @@ public class UserBO {
 					+ "## Please re-login into account."), personaId);
 			System.out.println("Player " + senderName + " has taken $" + (int) moneyDiff + " from his Bank account.");
 		}
+	}
+	
+	// Alternative Freeroam sync module (experimental)
+	public boolean isFRSyncAlt(String securityToken) {
+		UserEntity userEntity = userDao.findById(tokenDAO.findBySecurityToken(securityToken).getUserId());
+		if (userEntity == null) {
+			return false;
+		}
+		return userEntity.getFRSyncAlt();
 	}
 }
