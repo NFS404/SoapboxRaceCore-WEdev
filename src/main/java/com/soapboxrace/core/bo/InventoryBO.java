@@ -9,6 +9,7 @@ import javax.ejb.Stateless;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.soapboxrace.core.bo.util.CommerceOp;
+import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.OwnedCarConverter;
 import com.soapboxrace.core.dao.InventoryDAO;
 import com.soapboxrace.core.dao.InventoryItemDAO;
@@ -51,6 +52,9 @@ public class InventoryBO {
 	
 	@EJB
 	private AchievementsBO achievementsBO;
+	
+	@EJB
+	private DiscordWebhook discordBot;
 
 	public InventoryTrans getInventory(Long personaId) {
 		InventoryTrans inventoryTrans = new InventoryTrans();
@@ -236,13 +240,21 @@ public class InventoryBO {
 		return performancePartTransList;
 	}
 
-	public List<VisualPartTrans> getVisualPartsFromBasket(List<BasketItemTrans> basketItemTransList) {
+	public List<VisualPartTrans> getVisualPartsFromBasket(List<BasketItemTrans> basketItemTransList, String personaName) {
 		List<VisualPartTrans> visualPartTransList = new ArrayList<>();
 		if (basketItemTransList != null) {
 			for (BasketItemTrans basketItemTransTmp : basketItemTransList) {
 				ProductEntity productEntity = productDAO.findByProductId(basketItemTransTmp.getProductId());
 				VisualPartTrans visualPartTrans = new VisualPartTrans();
-				visualPartTrans.setPartHash(productEntity.getHash().intValue());
+				try {
+					visualPartTrans.setPartHash(productEntity.getHash().intValue());
+				}
+				catch (NullPointerException npe) {
+					String message = ":heavy_minus_sign:"
+			        		+ "\n:toolbox: **|** Nгрок **" + personaName + "** пытался поставить визуальные детали в обход магазина."
+			        		+ "\n:toolbox: **|** Player **" + personaName + "** has tried to install visual parts with hacking.";
+					discordBot.sendMessage(message);
+				}
 				visualPartTransList.add(visualPartTrans);
 			}
 		}
@@ -254,6 +266,9 @@ public class InventoryBO {
 		OwnedCarTrans ownedCarTrans = OwnedCarConverter.entity2Trans(defaultCarEntity.getOwnedCar());
 		CustomCarTrans customCarTransDB = ownedCarTrans.getCustomCar();
 		CustomCarTrans customCarTrans = commerceSessionTrans.getUpdatedCar().getCustomCar();
+		PersonaEntity personaEntity = defaultCarEntity.getPersona();
+		Long personaId = personaEntity.getPersonaId();
+		String personaName = personaEntity.getName();
 		switch (commerceOp) {
 		case PERFORMANCE:
 			List<PerformancePartTrans> performancePartTransDB = customCarTransDB.getPerformanceParts().getPerformancePartTrans();
@@ -264,7 +279,7 @@ public class InventoryBO {
 			performancePartTransListTmp.removeAll(performancePartsFromBasket);
 			for (PerformancePartTrans performancePartTransTmp : performancePartTransListTmp) {
 //				System.out.println("added from inventory: " + performancePartTransTmp.getPerformancePartAttribHash());
-				deletePart(defaultCarEntity.getPersona().getPersonaId(), performancePartTransTmp.getPerformancePartAttribHash());
+				deletePart(personaId, performancePartTransTmp.getPerformancePartAttribHash());
 			}
 			break;
 		case SKILL:
@@ -276,19 +291,19 @@ public class InventoryBO {
 			skillModPartTransListTmp.removeAll(skillModPartsFromBasket);
 			for (SkillModPartTrans skillModPartTransTmp : skillModPartTransListTmp) {
 //				System.out.println("added from inventory: " + skillModPartTransTmp.getSkillModPartAttribHash());
-				deletePart(defaultCarEntity.getPersona().getPersonaId(), skillModPartTransTmp.getSkillModPartAttribHash());
+				deletePart(personaId, skillModPartTransTmp.getSkillModPartAttribHash());
 			}
 			break;
 		case VISUAL:
 			List<VisualPartTrans> visualPartTransDB = customCarTransDB.getVisualParts().getVisualPartTrans();
 			List<VisualPartTrans> visualPartTrans = customCarTrans.getVisualParts().getVisualPartTrans();
 			ArrayList<VisualPartTrans> visualPartTransListTmp = new ArrayList<>(visualPartTrans);
-			List<VisualPartTrans> visualPartsFromBasket = getVisualPartsFromBasket(basketItemTransList);
+			List<VisualPartTrans> visualPartsFromBasket = getVisualPartsFromBasket(basketItemTransList, personaName);
 			visualPartTransListTmp.removeAll(visualPartTransDB);
 			visualPartTransListTmp.removeAll(visualPartsFromBasket);
 			for (VisualPartTrans visualPartTransTmp : visualPartTransListTmp) {
 //				System.out.println("added from inventory: " + visualPartTransTmp.getPartHash());
-				deletePart(defaultCarEntity.getPersona().getPersonaId(), visualPartTransTmp.getPartHash());
+				deletePart(personaId, visualPartTransTmp.getPartHash());
 			}
 			break;
 		default:
@@ -298,7 +313,7 @@ public class InventoryBO {
 		if (entitlementItemTransList != null && !entitlementItemTransList.isEmpty()) {
 			for (EntitlementItemTrans entitlementItemTransTmp : entitlementItemTransList) {
 				String entitlementId = entitlementItemTransTmp.getEntitlementId();
-				deletePart(defaultCarEntity.getPersona().getPersonaId(), entitlementId);
+				deletePart(personaId, entitlementId);
 			}
 		}
 	}
