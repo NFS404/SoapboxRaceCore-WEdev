@@ -225,7 +225,7 @@ public class BasketBO {
 		if (!webAction && isEconomyOn) {
 			String currencyType = productEntity.getCurrency();
 			switch (currencyType) {
-			case "cash":
+			case "CASH":
 				if (productEntity == null || personaEntity.getCash() < productEntity.getPrice()) {
 					return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
 				}
