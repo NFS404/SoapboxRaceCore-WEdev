@@ -1,17 +1,17 @@
-Топ по очкам: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/GetTopScore?onpage=10
+﻿Топ по очкам: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/GetTopScore?onpage=10
 	Параметр onpage - Указывает максимальное количество позиций на странице
 	Скорость: почти мгновенно
 
 Топ по количеству отыгранных заездов: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/GetTopRacers?onpage=10
 	Параметр onpage - Указывает максимальное количество позиций на странице
-	Скорость: -+6 секунд, можно заменить обсчёт гонок на переменную в таблице persona
+	Скорость: почти мгновенно
 
 Топ по кристаликам: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/GetTopTreasureHunt?onpage=10
 	Параметр onpage - Указывает максимальное количество позиций на странице
 	Скорость: почти мгновенно
 
 Популярные трассы: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/GetPopularRaces
-    Скорость: -+24 секунды
+    Скорость: почти мгновенно
 
 Популярные классы машин: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/GetPopularCarClasses?onpage=10
 	Параметр onpage - Указывает максимальное количество позиций на странице
@@ -28,18 +28,18 @@
 Список всех эвентов: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/Events
 	Скорость: почти мгновенно
 
-Топ трасс по времени: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/TopTimeOnEvent/?page=1&onpage=10&eventid=1
+Топ рекордов трассы по времени: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/TopTimeOnEvent/?page=1&onpage=10&eventid=1
 	Параметр page - Указывает, какую страницу отобразить
 	Параметр onpage - Указывает максимальное количество позиций на странице
 	Параметр eventid - Идентификатор заезда
-	Скорость: -+6 секунд
+	Скорость: почти мгновенно (250мс+-)
 
-Поиск трассы по имени профиля: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/TopTimeRacesByPersona/?page=1&onpage=10&eventid=1&personaName=%IM%
+Поиск рекордов трассы по имени профиля: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/TopTimeRacesByPersona/?page=1&onpage=10&eventid=1&personaName=%IM%
 	Параметр page - Указывает, какую страницу отобразить
 	Параметр onpage - Указывает максимальное количество позиций на странице
 	Параметр eventid - Идентификатор заезда
 	Параметр personaName - Указывает поиск по слову. Знак % указывает в каком месте перебирать символы, чтобы найти слово
-	Скорость: -+4 секунды
+	Скорость: почти мгновенно (250мс+-)
 
 Список профилей: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/Personas/?page=1&onpage=10
 	Параметр page - Указывает, какую страницу отобразить
@@ -48,7 +48,7 @@
 
 Инфо профиля: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/Persona/?personaName=VADIMKA
 	Параметр personaName - Имя профиля
-	Скорость: -+3 секунды
+	Скорость: -+1 секунда
 
 Инфо профиля: http://localhost:8680/soapbox-race-core/Engine.svc/RestApi/ChangePassword/?email=e&password=p&newPassword=np
 	Параметр email - Электронная почта пользователя

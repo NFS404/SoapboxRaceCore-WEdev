@@ -254,6 +254,7 @@ public class InventoryBO {
 			        		+ "\n:toolbox: **|** Nгрок **" + personaName + "** пытался поставить визуальные детали в обход магазина."
 			        		+ "\n:toolbox: **|** Player **" + personaName + "** has tried to install visual parts with hacking.";
 					discordBot.sendMessage(message);
+					return null; // Prevent installing the hacked part, however it causes the server error 500
 				}
 				visualPartTransList.add(visualPartTrans);
 			}
