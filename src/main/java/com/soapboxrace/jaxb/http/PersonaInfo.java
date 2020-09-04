@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.XmlType;
 	"ICONID",
 	"DATE_REGISTRED",
 	"DATE_REGISTRED_USER",
+	"MOTTO",
 	"SCORE",
 	"CURRENT_CAR",
 	"DIAMOND",
@@ -49,6 +50,9 @@ public class PersonaInfo {
 	
 	@XmlElement(name = "DateRegistredUser")
 	private String DATE_REGISTRED_USER;
+	
+	@XmlElement(name = "Motto")
+	private String MOTTO;
 	
 	@XmlElement(name = "Score")
 	private int SCORE;
@@ -82,6 +86,7 @@ public class PersonaInfo {
 	 * @param iconid - Иконка профиля
 	 * @param dateregistred - Дата регистрации
 	 * @param dateregistredu - Дата регистрации аккаунта
+	 * @param motto - Подпись игрока
 	 * @param score - Количество очков профиля
 	 * @param premium - Премиум активен
 	 * @param premiumtype - Тип премиума
@@ -101,6 +106,7 @@ public class PersonaInfo {
 			int iconid, 
 			LocalDateTime dateregistred, 
 			LocalDateTime dateregistredu, 
+			String motto,
 			int score, 
 			String curcar, 
 			int diamod, 
@@ -117,6 +123,7 @@ public class PersonaInfo {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		DATE_REGISTRED = dateregistred.format(formatter);
 		DATE_REGISTRED_USER = dateregistredu.format(formatter);
+		MOTTO = motto;
 		SCORE = score;
 		CURRENT_CAR = curcar;
 		DIAMOND = diamod;

@@ -84,6 +84,9 @@ public class FriendBO {
 	
 	@EJB
 	private UserBO userBO;
+	
+	@EJB
+	private AchievementsBO achievementsBO;
 
 	public PersonaFriendsList getFriendListFromUserId(Long userId) {
 		ArrayOfFriendPersona arrayOfFriendPersona = new ArrayOfFriendPersona();
@@ -123,7 +126,7 @@ public class FriendBO {
 	}
 
 	// Teams actions parser into "add a friend" window - Hypercycle
-	// FIXME for unknown reason, XMPP messages can go into timeouts there
+	// XMPP messages can go into timeouts, if ' symbol is used
 	// so i did some weird 'else' outputs for messages
 	public FriendResult sendFriendRequest(Long personaId, String displayName, String reqMessage) {
 		boolean teamsActionInit = false;
@@ -342,6 +345,12 @@ public class FriendBO {
 			userEntity.setFRSyncAlt(true);
 			userDAO.update(userEntity);
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Sync shard is Alternative now, go to the Garage and back."), personaId);
+			return null;
+		}
+		// Re-calc persona's score counter
+		if (displayName.contains("/RECALCSCORE")) {
+			achievementsBO.forceScoreCalc(personaSender);
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Score is re-calculated, re-login into persona."), personaId);
 			return null;
 		}
 		// default add-a-friend interaction

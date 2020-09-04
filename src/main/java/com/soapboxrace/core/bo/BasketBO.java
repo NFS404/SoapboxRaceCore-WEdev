@@ -462,10 +462,6 @@ public class BasketBO {
 			personaEntity.setCash(personaEntity.getCash() - productEntity.getPrice());
 		}
 		int carClassHash = customCarEntity.getCarClassHash();
-		// A, S class or rare car
-		if (carClassHash == -405837480 || carClassHash == -2142411446 || selectedCar.isRare()) {
-			achievementsBO.applyLuckyCollector(personaEntity);
-		}
 		personaDao.update(personaEntity);
 		personaBo.changeDefaultCar(personaEntity.getPersonaId(), carSlotEntity.getOwnedCar().getId());
 		
@@ -476,6 +472,10 @@ public class BasketBO {
         		+ "\n:shopping_cart: **|** Player **" + playerName + "** has bought the car container and got a **" + carName + "**!";
 		discordBot.sendMessage(message);
 
+		// A, S class or rare car
+		if (carClassHash == -405837480 || carClassHash == -2142411446 || selectedCar.isRare()) {
+			achievementsBO.applyLuckyCollector(personaEntity);
+		}
 		return CommerceResultStatus.SUCCESS;
 	}
 

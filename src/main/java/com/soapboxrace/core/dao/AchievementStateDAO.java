@@ -47,6 +47,14 @@ public class AchievementStateDAO extends BaseDAO<AchievementStateEntity> {
 		return resultList.get(resultList.size() - 1);
 	}
 
+	public List<AchievementStateEntity> findAllOfPersona(PersonaEntity personaEntity) {
+		TypedQuery<AchievementStateEntity> query = entityManager.createNamedQuery("AchievementStateEntity.findAllOfPersona",
+				AchievementStateEntity.class);
+		query.setParameter("persona", personaEntity);
+		List<AchievementStateEntity> resultList = query.getResultList();
+		return resultList;
+	}
+	
 	public void deleteByPersona(Long personaId) {
 		Query query = entityManager.createNamedQuery("AchievementStateEntity.deleteByPersona");
 		query.setParameter("personaId", personaId);

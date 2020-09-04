@@ -23,6 +23,8 @@ import com.soapboxrace.jaxb.http.AchievementState;
 @NamedQueries({ //
 		@NamedQuery(name = "AchievementStateEntity.findByPersonaAchievement", //
 				query = "SELECT obj FROM AchievementStateEntity obj where obj.persona = :persona and obj.achievementRank = :achievementRank"),
+		@NamedQuery(name = "AchievementStateEntity.findAllOfPersona", //
+		query = "SELECT obj FROM AchievementStateEntity obj where obj.persona = :persona"),
 		@NamedQuery(name = "AchievementStateEntity.findByPersonaBadge", //
 				query = "SELECT obj FROM AchievementStateEntity obj where obj.persona = :persona and obj.achievementRank.achievementDefinition.badgeDefinition.id = :badgeDefinitionId ORDER BY obj.achievementRank.id ASC"),
 		@NamedQuery(name = "AchievementStateEntity.deleteByPersona", query = "DELETE FROM AchievementStateEntity obj WHERE obj.persona.id = :personaId") //

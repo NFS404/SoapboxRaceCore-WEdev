@@ -485,7 +485,8 @@ public class AchievementsBO {
 			achievementStateEntity.setAchievementState(AchievementState.REWARD_WAITING);
 			achievementStateEntity.setPersona(personaEntity);
 			achievementStateDAO.insert(achievementStateEntity);
-			personaEntity.setScore(personaEntity.getScore() + achievementRankEntity.getPoints());
+			int curScore = personaEntity.getScore();
+			personaEntity.setScore(curScore + achievementRankEntity.getPoints());
 			personaDAO.update(personaEntity);
 			broadcastAchievement(personaEntity, achievementRankEntity);
 			processAchievementByThresholdRange(achievementPersonaEntity, AchievementType.LEGENDARY_DRIVER,
@@ -1026,5 +1027,19 @@ public class AchievementsBO {
 			return true;
 		}
 		return false;
+	}
+	
+	// Re-calculate achievement score counter for persona
+	public void forceScoreCalc (PersonaEntity personaEntity) {
+		int playerScoreNew = 0;
+		List<AchievementStateEntity> stateList = achievementStateDAO.findAllOfPersona(personaEntity);
+		for (AchievementStateEntity stateEntity : stateList) {
+			int rankPoints = stateEntity.getAchievementRank().getPoints();
+			playerScoreNew = playerScoreNew + rankPoints;
+		}
+		int oldScore = personaEntity.getScore();
+		personaEntity.setScore(playerScoreNew);
+		personaDAO.update(personaEntity);
+		System.out.println("### Score of player " + personaEntity.getName() + " is re-calculated (from " + oldScore + " to " + playerScoreNew + ")");
 	}
 }
