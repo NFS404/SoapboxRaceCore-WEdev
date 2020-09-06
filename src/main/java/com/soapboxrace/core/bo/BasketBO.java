@@ -284,26 +284,6 @@ public class BasketBO {
         if (bundleProduct == null) {
             return CommerceResultStatus.FAIL_INVALID_BASKET;
         }
-        String currencyType = bundleProduct.getCurrency(); // CASH or _NS (Boost)
-        float bundlePrice = bundleProduct.getPrice();
-        if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
-        	if (currencyType.contentEquals("CASH") && personaEntity.getCash() < bundlePrice) {
-	        	return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
-			}
-        	if (currencyType.contentEquals("_NS") && userEntity.getBoost() < bundlePrice) {
-	        	return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
-			}
-        	switch (currencyType) {
-        	case "CASH":
-        		personaEntity.setCash(personaEntity.getCash() - bundlePrice);
-        		personaDao.update(personaEntity);
-        		break;
-        	case "_NS":
-        		userEntity.setBoost(userEntity.getBoost() - bundlePrice);
-        		userDAO.update(userEntity);
-        		break;
-        	}
-		}
 		
         ArrayOfCommerceItemTrans arrayOfCommerceItemTrans = new ArrayOfCommerceItemTrans();
         commerceResultTrans.setCommerceItems(arrayOfCommerceItemTrans);
@@ -333,6 +313,27 @@ public class BasketBO {
 		boolean inventoryFull = inventoryBO.isInventoryFull(cardPackType, personaEntity);
 		if (inventoryFull) {
 			return CommerceResultStatus.FAIL_MAX_STACK_OR_RENTAL_LIMIT;
+		}
+		
+		String currencyType = bundleProduct.getCurrency(); // CASH or _NS (Boost)
+        float bundlePrice = bundleProduct.getPrice();
+        if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
+        	if (currencyType.contentEquals("CASH") && personaEntity.getCash() < bundlePrice) {
+	        	return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
+			}
+        	if (currencyType.contentEquals("_NS") && userEntity.getBoost() < bundlePrice) {
+	        	return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
+			}
+        	switch (currencyType) {
+        	case "CASH":
+        		personaEntity.setCash(personaEntity.getCash() - bundlePrice);
+        		personaDao.update(personaEntity);
+        		break;
+        	case "_NS":
+        		userEntity.setBoost(userEntity.getBoost() - bundlePrice);
+        		userDAO.update(userEntity);
+        		break;
+        	}
 		}
 		
 		int count = 0;
