@@ -135,6 +135,11 @@ public class AchievementsBO {
 	@EJB
 	private UserDAO userDAO;
 
+	/**
+	 * Get the achievements information for persona, including all available entries from DB
+	 * @param personaId - ID of player persona
+	 * @author Nilzao
+	 */
 	public AchievementsPacket loadall(Long personaId) {
 		PersonaEntity personaEntity = new PersonaEntity();
 		personaEntity.setPersonaId(personaId);
@@ -143,6 +148,7 @@ public class AchievementsBO {
 		ArrayOfBadgeDefinitionPacket arrayOfBadgeDefinitionPacket = new ArrayOfBadgeDefinitionPacket();
 		List<BadgeDefinitionPacket> badgeDefinitionPacketList = arrayOfBadgeDefinitionPacket.getBadgeDefinitionPacket();
 
+		// Prepare all available achievement badges 
 		List<BadgeDefinitionEntity> allBadges = badgeDefinitionDAO.getAll();
 		for (BadgeDefinitionEntity badgeDefinitionEntity : allBadges) {
 			BadgeDefinitionPacket badgeDefinitionPacket = new BadgeDefinitionPacket();
@@ -163,6 +169,7 @@ public class AchievementsBO {
 
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 
+		// Get the ranks & information about achievement stages
 		for (AchievementDefinitionEntity achievementDefinitionEntity : allAchievements) {
 			Long currentValue = getCurrentValue(achievementDefinitionEntity, achievementPersonaEntity);
 			AchievementDefinitionPacket achievementDefinitionPacket = new AchievementDefinitionPacket();
@@ -223,6 +230,12 @@ public class AchievementsBO {
 		return achievementsPacket;
 	}
 
+	/**
+	 * Get the current values of the requested achievement
+	 * @param achievementDefinitionEntity - achievement definition
+	 * @param achievementPersonaEntity - player persona's achievement values
+	 * @author Nilzao, Hypercycle
+	 */
 	private Long getCurrentValue(AchievementDefinitionEntity achievementDefinitionEntity, AchievementPersonaEntity achievementPersonaEntity) {
 		int intValue = achievementDefinitionEntity.getId().intValue();
 		AchievementType achievementType = AchievementType.valueOf(intValue);
@@ -418,58 +431,13 @@ public class AchievementsBO {
 		return 0l;
 	}
 
-	public void applyCommerceAchievement(PersonaEntity personaEntity) {
-		// 
-	}
-
-	public void applyEventAchievement(PersonaEntity personaEntity) {
-		//
-	}
-	
-	public void applyEventKmsAchievement(PersonaEntity personaEntity, Long eventLength) {
-		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
-		Integer metersDriven = (int) (achievementPersonaEntity.getEventMeters() + (eventLength * 1000));
-		achievementPersonaEntity.setEventMeters(metersDriven);
-		processAchievementByThresholdRange(achievementPersonaEntity, AchievementType.LONG_HAUL, metersDriven.longValue());
-	}
-	
-	public void applyDropAchievements(PersonaEntity personaEntity, AchievementType achievementType) {
-		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
-		switch (achievementType) {
-		case WEV2_EARNSKILL:
-			int skills4EarnedValue = achievementPersonaEntity.getSkills4Earned();
-			skills4EarnedValue = skills4EarnedValue + 1;
-			achievementPersonaEntity.setSkills4Earned(skills4EarnedValue);
-			processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_EARNSKILL, Integer.valueOf(skills4EarnedValue).longValue());
-			break;
-		} // More to come
-	}
-
-	public void applyPowerupAchievement(PersonaEntity personaEntity) {
-		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
-		Integer usedPowerups = achievementPersonaEntity.getUsedPowerups() + 1;
-		achievementPersonaEntity.setUsedPowerups(usedPowerups);
-		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.POWERING_UP, usedPowerups.longValue());
-	}
-
-	public void applyTreasureHuntAchievement(TreasureHuntEntity treasureHuntEntity) {
-		PersonaEntity personaEntity = personaDAO.findById(treasureHuntEntity.getPersonaId());
-		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
-		int treasureHunts = achievementPersonaEntity.getTreasureHunts() + 1;
-		achievementPersonaEntity.setTreasureHunts(treasureHunts);
-		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.TREASURE_HUNTER, Integer.valueOf(treasureHunts).longValue());
-	}
-
-	public void applyDailyTreasureHuntAchievement(TreasureHuntEntity treasureHuntEntity) {
-		PersonaEntity personaEntity = personaDAO.findById(treasureHuntEntity.getPersonaId());
-		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
-		Integer streak = treasureHuntEntity.getStreak();
-		if (treasureHuntEntity.getStreak() > achievementPersonaEntity.getDailyTreasureHunts()) {
-		   achievementPersonaEntity.setDailyTreasureHunts(streak); 
-		   processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.DAILY_HUNTER, streak.longValue());
-		}
-	}
-
+	/**
+	 * Achievement progression with integer values
+	 * @param achievementPersonaEntity - player persona's achievement values
+	 * @param achievementType - achievement type (enum)
+	 * @param thresholdValue - current achievement progress value
+	 * @author Nilzao, Hypercycle
+	 */
 	private void processAchievementByThresholdValue(AchievementPersonaEntity achievementPersonaEntity, AchievementType achievementType, Long thresholdValue) {
 		PersonaEntity personaEntity = achievementPersonaEntity.getPersona();
 		broadcastProgress(personaEntity, achievementType, thresholdValue);
@@ -499,6 +467,13 @@ public class AchievementsBO {
 		}
 	}
 
+	/**
+	 * Achievement progression with different metric values (Meters, time, etc)
+	 * @param achievementPersonaEntity - player persona's achievement values
+	 * @param achievementType - achievement type (enum)
+	 * @param thresholdValue - current achievement progress value
+	 * @author Nilzao, Hypercycle
+	 */
 	private void processAchievementByThresholdRange(AchievementPersonaEntity achievementPersonaEntity, AchievementType achievementType, Long thresholdValue) {
 		PersonaEntity personaEntity = achievementPersonaEntity.getPersona();
 		broadcastProgress(personaEntity, achievementType, thresholdValue);
@@ -526,15 +501,13 @@ public class AchievementsBO {
 		}
 	}
 
-	public void applyPayDayAchievement(PersonaEntity personaEntity, double incomeCash) {
-		if (incomeCash > 0) {
-			AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
-			int totalIncomeCash = achievementPersonaEntity.getTotalIncomeCash() + (int) incomeCash;
-			achievementPersonaEntity.setTotalIncomeCash(totalIncomeCash);
-			processAchievementByThresholdRange(achievementPersonaEntity, AchievementType.PAYDAY, Integer.valueOf(totalIncomeCash).longValue());
-		}
-	}
-
+	/**
+	 * Achievement UI progress announcements
+	 * @param personaEntity - player persona
+	 * @param achievementType - achievement type (enum)
+	 * @param currentValue - current achievement progress value
+	 * @author Nilzao
+	 */
 	public void broadcastProgress(PersonaEntity personaEntity, AchievementType achievementType, Long currentValue) {
 		AchievementsAwarded achievementsAwarded = new AchievementsAwarded();
 		AchievementProgress achievementProgress = new AchievementProgress();
@@ -546,6 +519,12 @@ public class AchievementsBO {
 		openFireSoapBoxCli.send(achievementsAwarded, personaEntity.getPersonaId());
 	}
 
+	/**
+	 * Achievement's rank completion UI announcement
+	 * @param personaEntity - player persona
+	 * @param achievementRankEntity - achievement stage data
+	 * @author Nilzao
+	 */
 	public void broadcastAchievement(PersonaEntity personaEntity, AchievementRankEntity achievementRankEntity) {
 		AchievementsAwarded achievementsAwarded = new AchievementsAwarded();
 		achievementsAwarded.setPersonaId(personaEntity.getPersonaId());
@@ -581,8 +560,14 @@ public class AchievementsBO {
 		achievementsAwarded.setScore(personaEntity.getScore());
 		openFireSoapBoxCli.send(achievementsAwarded, personaEntity.getPersonaId());
 	}
-	
-	// Test attempt in custom server HUD alerts
+
+	/**
+	 * Test attempt in custom server HUD alerts. Uses achievement's UI completion announcements as a base.
+	 * Will be deprecated in future, since it rewrites the temporal UI information about the player's score.
+	 * @param personaId - ID of player persona
+	 * @param text - main text to display
+	 * @author Hypercycle
+	 */
 	public void broadcastUICustom(Long personaId, String text) {
 		AchievementsAwarded achievementsAwarded = new AchievementsAwarded();
 		achievementsAwarded.setPersonaId(personaId);
@@ -616,19 +601,13 @@ public class AchievementsBO {
 		achievementsAwarded.setAchievements(achievements);
 		openFireSoapBoxCli.send(achievementsAwarded, personaId);
 	}
-	
-	// Test attempt in custom server HUD alerts
-	public void broadcastUICustomThin(PersonaEntity personaEntity) {
-		AchievementsAwarded achievementsAwarded = new AchievementsAwarded();
-		AchievementProgress achievementProgress = new AchievementProgress();
-		achievementProgress.setAchievementDefinitionId((long) 104);
-		achievementProgress.setCurrentValue(1337);
-		List<AchievementProgress> progressedList = new ArrayList<>();
-		progressedList.add(achievementProgress);
-		achievementsAwarded.setProgressed(progressedList);
-		openFireSoapBoxCli.send(achievementsAwarded, personaEntity.getPersonaId());
-	}
 
+	/**
+	 * Claim achievement rewards
+	 * @param personaId - ID of player persona
+	 * @param achievementRankId - ID of achievement stage entry
+	 * @author Nilzao, Hypercycle
+	 */
 	public AchievementRewards redeemReward(Long personaId, Long achievementRankId) {
 		PersonaEntity personaEntity = personaDAO.findById(personaId);
 		UserEntity userEntity = personaEntity.getUser();
@@ -670,7 +649,7 @@ public class AchievementsBO {
 			ProductEntity product = rewardDropEntity.getProduct();
 
 			RewardDestinyType rewardDestiny = rewardDropEntity.getRewardDestiny();
-			switch (rewardDestiny) {
+			switch (rewardDestiny) { // Depending on the type of reward object
 			case CASH:
 				personaEntity.setCash(personaEntity.getCash() + rewardDropEntity.getAmount().doubleValue());
 				personaDAO.update(personaEntity);
@@ -760,9 +739,113 @@ public class AchievementsBO {
 
 		return achievementRewards;
 	}
+	
+	// ---------
+	// Each achievement have it's own "call" method
+		
+	public void applyCommerceAchievement(PersonaEntity personaEntity) {
+		// 
+	}
 
+	public void applyEventAchievement(PersonaEntity personaEntity) {
+		//
+	}
+	
+	/**
+	 * Apply "Payday" achievement
+	 * @param personaEntity - player persona
+	 * @param incomeCash - last recieved reward value
+	 * @author Nilzao
+	 */
+	public void applyPayDayAchievement(PersonaEntity personaEntity, double incomeCash) {
+		if (incomeCash > 0) {
+			AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+			int totalIncomeCash = achievementPersonaEntity.getTotalIncomeCash() + (int) incomeCash;
+			achievementPersonaEntity.setTotalIncomeCash(totalIncomeCash);
+			processAchievementByThresholdRange(achievementPersonaEntity, AchievementType.PAYDAY, Integer.valueOf(totalIncomeCash).longValue());
+		}
+	}
+	
+	/**
+	 * Apply "Long Haul" achievement
+	 * @param personaEntity - player persona
+	 * @param eventLength - last event's length in meters
+	 * @author Hypercycle
+	 */
+	public void applyEventKmsAchievement(PersonaEntity personaEntity, Long eventLength) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		Integer metersDriven = (int) (achievementPersonaEntity.getEventMeters() + (eventLength * 1000));
+		achievementPersonaEntity.setEventMeters(metersDriven);
+		processAchievementByThresholdRange(achievementPersonaEntity, AchievementType.LONG_HAUL, metersDriven.longValue());
+	}
+		
+	/**
+	 * Apply achievements depending on the lucky cards content
+	 * @param personaEntity - player persona
+	 * @param achievementType - achievement type (enum)
+	 * @author Hypercycle
+	 */
+	public void applyDropAchievements(PersonaEntity personaEntity, AchievementType achievementType) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		switch (achievementType) {
+		case WEV2_EARNSKILL:
+			int skills4EarnedValue = achievementPersonaEntity.getSkills4Earned();
+			skills4EarnedValue = skills4EarnedValue + 1;
+			achievementPersonaEntity.setSkills4Earned(skills4EarnedValue);
+			processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_EARNSKILL, Integer.valueOf(skills4EarnedValue).longValue());
+		break;
+		} // More to come
+	}
+
+	/**
+	 * Apply "Powering Up" achievement
+	 * @param personaEntity - player persona
+	 * @author Nilzao
+	 */
+	public void applyPowerupAchievement(PersonaEntity personaEntity) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		Integer usedPowerups = achievementPersonaEntity.getUsedPowerups() + 1;
+		achievementPersonaEntity.setUsedPowerups(usedPowerups);
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.POWERING_UP, usedPowerups.longValue());
+	}
+
+	/**
+	 * Apply "Treasure Hunter" achievement
+	 * @param treasureHuntEntity - persona information entry of Treasure Hunt
+	 * @author Nilzao
+	 */
+	public void applyTreasureHuntAchievement(TreasureHuntEntity treasureHuntEntity) {
+		PersonaEntity personaEntity = personaDAO.findById(treasureHuntEntity.getPersonaId());
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		int treasureHunts = achievementPersonaEntity.getTreasureHunts() + 1;
+		achievementPersonaEntity.setTreasureHunts(treasureHunts);
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.TREASURE_HUNTER, Integer.valueOf(treasureHunts).longValue());
+	}
+
+	/**
+	 * Apply "Daily Hunter" achievement
+	 * @param treasureHuntEntity - persona information entry of Treasure Hunt
+	 * @author Nilzao
+	 */
+	public void applyDailyTreasureHuntAchievement(TreasureHuntEntity treasureHuntEntity) {
+		PersonaEntity personaEntity = personaDAO.findById(treasureHuntEntity.getPersonaId());
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		Integer streak = treasureHuntEntity.getStreak();
+		if (treasureHuntEntity.getStreak() > achievementPersonaEntity.getDailyTreasureHunts()) {
+		   achievementPersonaEntity.setDailyTreasureHunts(streak); 
+		   processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.DAILY_HUNTER, streak.longValue());
+		}
+	}
+
+	/**
+	 * Apply various end-race achievements
+	 * @param eventDataEntity - last event statistics
+	 * @param routeArbitrationPacket - event arbitration information
+	 * @param personaEntity - player persona
+	 * @author Nilzao
+	 */
 	public void applyRaceAchievements(EventDataEntity eventDataEntity, RouteArbitrationPacket routeArbitrationPacket, PersonaEntity personaEntity) {
-		// FIXME this code is a mess
+		// FIXME this code is a mess - Nilzao
 		TokenSessionEntity tokenSessionEntity = tokenSessionDAO.findByUserId(personaEntity.getUser().getId());
 		Long activeLobbyId = tokenSessionEntity.getActiveLobbyId();
 		Boolean isPrivate = false;
@@ -848,6 +931,11 @@ public class AchievementsBO {
 		}
 	}
 
+	/**
+	 * Apply "Outlaw" achievement
+	 * @param personaEntity - player persona
+	 * @author Nilzao
+	 */
 	public void applyOutlawAchievement(PersonaEntity personaEntity) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		int pursuitWins = achievementPersonaEntity.getPursuitWins();
@@ -856,7 +944,13 @@ public class AchievementsBO {
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.OUTLAW, Integer.valueOf(pursuitWins).longValue());
 	}
 	
-	// FIXME Hardcoded achievement stages
+	/**
+	 * Apply "Veteran Driver" achievement.
+	 * Achievement stage IDs is hardcoded, the rank-checking method might be re-done
+	 * @param personaEntity - player persona
+	 * @param driverAgeDays - days from player persona creation date
+	 * @author Hypercycle
+	 */
 	public void applyDriverAgeAchievement(PersonaEntity personaEntity, int driverAgeDays) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		achievementPersonaEntity.setDriverAgeDays(driverAgeDays);
@@ -884,6 +978,13 @@ public class AchievementsBO {
 		}
 	}
 
+	/**
+	 * Apply "Drag Racer" achievement
+	 * @param eventDataEntity - last event statistics
+	 * @param dragArbitrationPacket - drag event arbitration information
+	 * @param activePersonaId - player persona ID
+	 * @author Nilzao
+	 */
 	public void applyDragAchievement(EventDataEntity eventDataEntity, DragArbitrationPacket dragArbitrationPacket, Long activePersonaId) {
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 		TokenSessionEntity tokenSessionEntity = tokenSessionDAO.findByUserId(personaEntity.getUser().getId());
@@ -902,11 +1003,21 @@ public class AchievementsBO {
 		}
 	}
 
+	/**
+	 * Apply "Level Up" achievement
+	 * @param personaEntity - player persona
+	 * @author Nilzao
+	 */
 	public void applyLevelUpAchievement(PersonaEntity personaEntity) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.LEVEL_UP, Integer.valueOf(personaEntity.getLevel()).longValue());
 	}
 	
+	/**
+	 * Apply "Beginner's Guide" achievement
+	 * @param personaEntity - player persona
+	 * @author Hypercycle
+	 */
 	public void applyBeginnersGuideAchievement(PersonaEntity personaEntity) { // Needs level 6 to activate
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_BEGINNERSGUIDE, Integer.valueOf(6).longValue());
@@ -920,6 +1031,11 @@ public class AchievementsBO {
 //		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_EXTRALVL, Integer.valueOf(extraLVLValue).longValue());
 //	}
 	
+	/**
+	 * Apply "Most Valuable Player" achievement
+	 * @param personaEntity - player persona
+	 * @author Hypercycle
+	 */
 	public void applyTeamRacesWonAchievement(PersonaEntity personaEntity) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		int teamRacesWonValue = achievementPersonaEntity.getTeamRacesWon();
@@ -928,6 +1044,12 @@ public class AchievementsBO {
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_MVP, Integer.valueOf(teamRacesWonValue).longValue());
 	}
 
+	/**
+	 * Apply "Air Time" achievement
+	 * @param arbitrationPacket - event arbitration information
+	 * @param personaEntity - player persona
+	 * @author Nilzao
+	 */
 	public void applyAirTimeAchievement(ArbitrationPacket arbitrationPacket, PersonaEntity personaEntity) {
 		long specificJumpsDurationInMilliseconds = 0l;
 		if (arbitrationPacket instanceof PursuitArbitrationPacket) {
@@ -952,6 +1074,12 @@ public class AchievementsBO {
 		}
 	}
 
+	/**
+	 * Apply "Enemy of the State" achievement
+	 * @param arbitrationPacket - event arbitration information
+	 * @param personaEntity - player persona
+	 * @author Nilzao
+	 */
 	public void applyPursuitCostToState(ArbitrationPacket arbitrationPacket, PersonaEntity personaEntity) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		long pursuitCostToState = achievementPersonaEntity.getPursuitCostToState();
@@ -968,6 +1096,12 @@ public class AchievementsBO {
 		}
 	}
 
+	/**
+	 * Apply various Team Escape related achievements
+	 * @param teamEscapeArbitrationPacket - TE event arbitration information
+	 * @param personaEntity - player persona
+	 * @author Nilzao
+	 */
 	public void applyTeamEscape(TeamEscapeArbitrationPacket teamEscapeArbitrationPacket, PersonaEntity personaEntity) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		if (teamEscapeArbitrationPacket.getCopsDisabled() > 0) {
@@ -976,7 +1110,6 @@ public class AchievementsBO {
 			long copsDisabledLong = Integer.valueOf(copsDisabled).longValue();
 			processAchievementByThresholdRange(achievementPersonaEntity, AchievementType.HEAVY_HITTER, copsDisabledLong);
 		}
-
 		if (teamEscapeArbitrationPacket.getRoadBlocksDodged() > 0) {
 			int roadBlocksDodged = teamEscapeArbitrationPacket.getRoadBlocksDodged() + achievementPersonaEntity.getTeamScapeBlocks();
 			achievementPersonaEntity.setTeamScapeBlocks(roadBlocksDodged);
@@ -985,6 +1118,11 @@ public class AchievementsBO {
 		}
 	}
 
+	/**
+	 * Apply "Getaway Driver" achievement
+	 * @param personaEntity - player persona
+	 * @author Nilzao
+	 */
 	public void applyTeamEscapeGetAway(PersonaEntity personaEntity) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		int teamScapeWins = achievementPersonaEntity.getTeamScapeWins();
@@ -994,6 +1132,11 @@ public class AchievementsBO {
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.GETAWAY_DRIVER, teamScapeWinsLong);
 	}
 	
+	/**
+	 * Apply "Aftermarket Seller" achievement
+	 * @param personaEntity - player persona
+	 * @author Hypercycle
+	 */
 	public void applyAftermarketSold(PersonaEntity personaEntity) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		int aftermarketSoldValue = achievementPersonaEntity.getAftermarketSold();
@@ -1002,6 +1145,11 @@ public class AchievementsBO {
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_SELL_AFTERMARKET, Integer.valueOf(aftermarketSoldValue).longValue());
 	}
 	
+	/**
+	 * Apply "Lucky Collector" achievement
+	 * @param personaEntity - player persona
+	 * @author Hypercycle
+	 */
 	public void applyLuckyCollector(PersonaEntity personaEntity) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		int containerCarsValue = achievementPersonaEntity.getContainerCars();
@@ -1010,6 +1158,13 @@ public class AchievementsBO {
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_LUCKY_COLLECTOR, Integer.valueOf(containerCarsValue).longValue());
 	}
 	
+	/**
+	 * Apply specified achievement rank to player persona
+	 * @param rankId - ID of the achievement stage
+	 * @param personaEntity - player persona
+	 * @param reward - is the reward items will be given
+	 * @author Hypercycle
+	 */
 	// True - rank has been added, False - rank is already achieved
 	// Reward: True - give the reward items, False - no reward items (react alike they given already)
 	public boolean forceAchievementApply (int rankId, PersonaEntity personaEntity, boolean reward) {
@@ -1029,7 +1184,11 @@ public class AchievementsBO {
 		return false;
 	}
 	
-	// Re-calculate achievement score counter for persona
+	/**
+	 * Re-calculate achievement score counter for persona, useful for debug and in case of progress issues
+	 * @param personaEntity - player persona
+	 * @author Hypercycle
+	 */
 	public void forceScoreCalc (PersonaEntity personaEntity) {
 		int playerScoreNew = 0;
 		List<AchievementStateEntity> stateList = achievementStateDAO.findAllOfPersona(personaEntity);

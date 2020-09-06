@@ -226,24 +226,7 @@ public class EventResultRouteBO {
 			eventDataEntitySP.setIsSingle(true);
 			eventDataDao.update(eventDataEntitySP);
 		}
-		// Initiate the final team action check, only if both teams are registered for event
-		// FIXME Make a db-based system, where 1st player will save the personaId into eventSession AND trigger the team action. Other players will read this value and ignore it
-		Long isWinnerPresented = eventSessionEntity.getPersonaWinner();
-		if (isWinnerPresented == null) {
-			eventSessionEntity.setPersonaWinner(activePersonaId);
-			eventSessionDao.update(eventSessionEntity);
-			if (preRegTeams) {
-				System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, check");
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Debug - Teams finish, init, " + eventSessionId), personaId);
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, init");
-						teamsBo.teamAccoladesBasic(eventSessionId);
-					}
-				}).start();
-			}
-		}
+		
 		// Separate race stats
 		boolean raceIssues = false;
 		
@@ -271,6 +254,25 @@ public class EventResultRouteBO {
 		}
 		if (!raceIssues) {
 			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity, carClassesEntity);
+		}
+		
+		// Initiate the final team action check, only if both teams are registered for event
+		// FIXME If the players "fast enough", this sequence will be executed more than 1 time, since PersonaWinner will be null for multiple players
+		Long isWinnerPresented = eventSessionEntity.getPersonaWinner();
+		if (isWinnerPresented == null) {
+			eventSessionEntity.setPersonaWinner(activePersonaId);
+			eventSessionDao.update(eventSessionEntity);
+			if (preRegTeams) {
+				System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, check");
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Debug - Teams finish, init, " + eventSessionId), personaId);
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, init");
+						teamsBo.teamAccoladesBasic(eventSessionId);
+					}
+				}).start();
+				}
 		}
 		
 		return routeEventResult;

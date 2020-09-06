@@ -244,17 +244,22 @@ public class InventoryBO {
 		List<VisualPartTrans> visualPartTransList = new ArrayList<>();
 		if (basketItemTransList != null) {
 			for (BasketItemTrans basketItemTransTmp : basketItemTransList) {
-				ProductEntity productEntity = productDAO.findByProductId(basketItemTransTmp.getProductId());
+				String productId = basketItemTransTmp.getProductId();
+				ProductEntity productEntity = productDAO.findByProductId(productId);
 				VisualPartTrans visualPartTrans = new VisualPartTrans();
 				try {
 					visualPartTrans.setPartHash(productEntity.getHash().intValue());
 				}
 				catch (NullPointerException npe) {
-					String message = ":heavy_minus_sign:"
-			        		+ "\n:toolbox: **|** Nгрок **" + personaName + "** пытался поставить визуальные детали в обход магазина."
-			        		+ "\n:toolbox: **|** Player **" + personaName + "** has tried to install visual parts with hacking.";
-					discordBot.sendMessage(message);
-					return null; // Prevent installing the hacked part, however it causes the server error 500
+					// If the game wants to add "hidden" visual parts (traffic cars), the update basket will contains errors too
+					// But usually, empty productId means that player using Parts Manager tools
+					if (productId == null || productId.isEmpty()) { 
+						String message = ":heavy_minus_sign:"
+				        		+ "\n:toolbox: **|** Nгрок **" + personaName + "** пытался поставить визуальные детали в обход магазина."
+				        		+ "\n:toolbox: **|** Player **" + personaName + "** has tried to install visual parts with hacking.";
+						discordBot.sendMessage(message);
+						return null; // Prevent installing the hacked part, however it causes the server error 500
+					}
 				}
 				visualPartTransList.add(visualPartTrans);
 			}
