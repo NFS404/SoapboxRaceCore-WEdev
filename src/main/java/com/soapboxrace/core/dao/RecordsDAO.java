@@ -11,6 +11,7 @@ import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
 import com.soapboxrace.core.jpa.EventEntity;
+import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.RecordsEntity;
 import com.soapboxrace.core.jpa.UserEntity;
 
@@ -107,17 +108,10 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		createQuery.executeUpdate();
 	}
 	
-	// When user has deleted one of his personas (Temp)
-	public void banPersonaRecords(Long personaId) {
-		Query createQuery = entityManager.createQuery("UPDATE RecordsEntity obj SET obj.userBan = true WHERE obj.personaId = :personaId");
-		createQuery.setParameter("personaId", personaId);
-		createQuery.executeUpdate();
-	}
-	
 	// When user has deleted one of his personas
-	public void deletePersonaRecords(Long personaId) {
-		Query createQuery = entityManager.createQuery("DELETE RecordsEntity obj WHERE obj.personaId = :personaId");
-		createQuery.setParameter("personaId", personaId);
+	public void deletePersonaRecords(PersonaEntity personaEntity) {
+		Query createQuery = entityManager.createQuery("DELETE RecordsEntity obj WHERE obj.persona = :persona");
+		createQuery.setParameter("persona", personaEntity);
 		createQuery.executeUpdate();
 	}
 	

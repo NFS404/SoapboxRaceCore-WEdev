@@ -217,6 +217,7 @@ public class DriverPersonaBO {
 		for (CarSlotEntity carSlotEntity : carSlots) {
 			carSlotDAO.delete(carSlotEntity);
 		}
+		recordsDAO.deletePersonaRecords(personaEntity);
 		carSlotDAO.deleteByPersona(personaEntity);
 		lobbyEntrantDAO.deleteByPersona(personaEntity);
 		treasureHuntDAO.deleteByPersona(personaEntity.getPersonaId());
@@ -224,7 +225,6 @@ public class DriverPersonaBO {
 		inventoryDAO.deleteByPersona(personaId);
 		achievementPersonaDAO.deleteByPersona(personaId);
 		achievementStateDAO.deleteByPersona(personaId);
-		recordsDAO.deletePersonaRecords(personaId);
 		personaDao.delete(personaEntity);
 	}
 	
@@ -236,7 +236,7 @@ public class DriverPersonaBO {
 		personaEntity.setUser(userEntityTemp);
 		personaEntity.setName(personaEntity.getName() + "_TD");
 		personaEntity.setCreated(LocalDateTime.now()); // can check when driver got deleted
-		recordsDAO.banPersonaRecords(personaId);
+		recordsDAO.deletePersonaRecords(personaEntity);
 		personaDao.insert(personaEntity);
 	}
 
