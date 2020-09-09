@@ -109,6 +109,37 @@ public class EventResultBO {
 		return letter;
 	}
 	
+	public int getCarClassInt(String carClassLetter) {
+		int carClassHash = 0;
+		switch(carClassLetter) {
+		case "E":
+			carClassHash = 872416321;
+			break;
+		case "D":
+			carClassHash = 415909161;
+			break;
+		case "C":
+			carClassHash = 1866825865;
+			break;
+		case "B":
+			carClassHash = -406473455;
+			break;
+		case "A":
+			carClassHash = -405837480;
+			break;
+		case "S":
+			carClassHash = -2142411446;
+			break;
+		case "ALL":
+			carClassHash = 607077938;
+			break;
+		default:
+			carClassHash = 0;
+			break;
+		}
+		return carClassHash;
+	}
+	
 	// Drift-Spec can be modified on the client side, but we don't want to let modders participate on the events
 	// FIXME Test code
 	public boolean modCarCheck(Long personaId) {

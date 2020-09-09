@@ -1,5 +1,7 @@
 package com.soapboxrace.core.bo;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
@@ -41,6 +43,9 @@ public class EventBO {
 	
 	@EJB
 	private ParameterDAO parameterDAO;
+	
+	@EJB
+	private EventResultBO eventResultBO;
 
 	public List<EventEntity> availableAtLevel(Long personaId) {
 		PersonaEntity personaEntity = personaDao.findById(personaId);
@@ -95,9 +100,27 @@ public class EventBO {
 		parameterDAO.update(parameterEntity);
 		return "";
 	}
-
+	
+	// Change the current reward-bonus (and team-racing) class
+	// Array structure: Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday
+	@Schedule(dayOfWeek = "*", persistent = false)
+	public String bonusClassRotation() {
+		ParameterEntity parameterEntity = parameterDAO.findById("CLASSBONUS_CARCLASSHASH");
+		String bonusClassStr = parameterBO.getStrParam("CLASSBONUS_SCHEDULE");
+		String[] bonusClassArray = bonusClassStr.split(",");
+		if (bonusClassArray.length != 7) {
+			System.out.println("### BonusClassRotation is not defined or not vaild!");
+			parameterEntity.setValue("0"); // No selected car class
+			parameterDAO.update(parameterEntity);
+			return "";
+		}
+		String todayClass = bonusClassArray[new GregorianCalendar().get(Calendar.DAY_OF_WEEK)];
+		parameterEntity.setValue(String.valueOf(eventResultBO.getCarClassInt(todayClass)));
+		parameterDAO.update(parameterEntity);
+		return "";
+	}
+	
 	public EventSessionEntity findEventSessionById(Long id) {
 		return eventSessionDao.findById(id);
 	}
-
 }
