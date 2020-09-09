@@ -11,12 +11,14 @@ import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventPowerupsDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
+import com.soapboxrace.core.dao.NewsArticlesDAO;
 import com.soapboxrace.core.dao.ParameterDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventPowerupsEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
+import com.soapboxrace.core.jpa.NewsArticlesEntity;
 import com.soapboxrace.core.jpa.ParameterEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 
@@ -46,6 +48,9 @@ public class EventBO {
 	
 	@EJB
 	private EventResultBO eventResultBO;
+	
+	@EJB
+	private NewsArticlesDAO newsArticlesDAO;
 
 	public List<EventEntity> availableAtLevel(Long personaId) {
 		PersonaEntity personaEntity = personaDao.findById(personaId);
@@ -85,6 +90,7 @@ public class EventBO {
 	// Change the current events list (every week)
 	// If ROTATION_COUNT defined as 1, server will not change it (set all event's rotation ids to 1)
 	// Rotation on "0" - track is always enable, "999" - not used
+	// To display more than #3 rotation news (in-game), a new locale strings should be created
 	@Schedule(dayOfWeek = "MON", persistent = false)
 	public String eventRotation() {
 		int rotationCount = parameterBO.getIntParam("ROTATION_COUNT");
@@ -98,6 +104,11 @@ public class EventBO {
 		}
 		parameterEntity.setValue(String.valueOf(rotationCur));
 		parameterDAO.update(parameterEntity);
+		
+		NewsArticlesEntity newsRotation = newsArticlesDAO.findByName("ROTATION");
+		newsRotation.setShortTextHALId("TXT_NEWS_WEV2_ROTATION_" + rotationCur + "_SHORT");
+		newsRotation.setLongTextHALId("TXT_NEWS_WEV2_ROTATION_" + rotationCur + "_FULL");
+		newsArticlesDAO.update(newsRotation);
 		return "";
 	}
 	
@@ -114,9 +125,33 @@ public class EventBO {
 			parameterDAO.update(parameterEntity);
 			return "";
 		}
-		String todayClass = bonusClassArray[new GregorianCalendar().get(Calendar.DAY_OF_WEEK)];
+		int dayOfWeekInt = new GregorianCalendar().get(Calendar.DAY_OF_WEEK);
+		String todayClass = bonusClassArray[dayOfWeekInt];
 		parameterEntity.setValue(String.valueOf(eventResultBO.getCarClassInt(todayClass)));
 		parameterDAO.update(parameterEntity);
+		
+		if (todayClass.contentEquals("0")) {
+			// FIXME Make gameplay actions
+			NewsArticlesEntity newsWednesday = newsArticlesDAO.findByName("NOPOWERUPSDAY");
+			newsWednesday.setIsEnabled(true);
+			newsArticlesDAO.update(newsWednesday);
+			
+			NewsArticlesEntity newsBonusClass = newsArticlesDAO.findByName("BONUSCLASS");
+			newsBonusClass.setIsEnabled(false);
+			newsArticlesDAO.update(newsBonusClass);
+		}
+		else {
+			NewsArticlesEntity newsBonusClass = newsArticlesDAO.findByName("BONUSCLASS");
+			newsBonusClass.setShortTextHALId("TXT_NEWS_WEV2_BONUSCLASS_" + todayClass + "_SHORT");
+			newsBonusClass.setLongTextHALId("TXT_NEWS_WEV2_BONUSCLASS_" + todayClass + "_FULL");
+			newsBonusClass.setIsEnabled(true);
+			newsArticlesDAO.update(newsBonusClass);
+			
+			NewsArticlesEntity newsWednesday = newsArticlesDAO.findByName("NOPOWERUPSDAY");
+			newsWednesday.setIsEnabled(false);
+			newsArticlesDAO.update(newsWednesday);
+		}
+			
 		return "";
 	}
 	

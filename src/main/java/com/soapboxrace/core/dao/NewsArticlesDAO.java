@@ -22,9 +22,22 @@ public class NewsArticlesDAO extends BaseDAO<NewsArticlesEntity> {
 		return entityManager.find(NewsArticlesEntity.class, id);
 	}
 
+	public NewsArticlesEntity findByShortText(String shortTextHALId) {
+		TypedQuery<NewsArticlesEntity> query = entityManager.createNamedQuery("NewsArticlesEntity.findByShortText", NewsArticlesEntity.class);
+		query.setParameter("shortTextHALId", shortTextHALId);
+		return query.getSingleResult();
+	}
+	
 	public List<NewsArticlesEntity> loadCommon() {
 		TypedQuery<NewsArticlesEntity> query = entityManager.createNamedQuery("NewsArticlesEntity.loadCommon", NewsArticlesEntity.class);
 		return query.getResultList();
+	}
+	
+	// Custom names for persistent news articles
+	public NewsArticlesEntity findByName(String name) {
+		TypedQuery<NewsArticlesEntity> query = entityManager.createNamedQuery("NewsArticlesEntity.findByName", NewsArticlesEntity.class);
+		query.setParameter("name", name);
+		return query.getSingleResult();
 	}
 
 }

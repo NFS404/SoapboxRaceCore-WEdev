@@ -15,7 +15,11 @@ import javax.persistence.Table;
 @Table(name = "NEWS_ARTICLES")
 @NamedQueries({ //
 		@NamedQuery(name = "NewsArticlesEntity.loadCommon", //
-				query = "SELECT obj FROM NewsArticlesEntity obj WHERE obj.personaId = 0") //
+				query = "SELECT obj FROM NewsArticlesEntity obj WHERE obj.personaId = 0 AND obj.isEnabled = true ORDER BY obj.priority DESC"), //
+		@NamedQuery(name = "NewsArticlesEntity.findByShortText", //
+				query = "SELECT obj FROM NewsArticlesEntity obj WHERE obj.shortTextHALId = :shortTextHALId"), //
+		@NamedQuery(name = "NewsArticlesEntity.findByName", //
+				query = "SELECT obj FROM NewsArticlesEntity obj WHERE obj.name = :name") //
 })
 public class NewsArticlesEntity {
 	
@@ -34,6 +38,9 @@ public class NewsArticlesEntity {
 	private int sticky;
 	private LocalDateTime timeStamp;
 	private int type;
+	private int priority;
+	private boolean isEnabled;
+	private String name;
 
 	public int getId() {
 		return id;
@@ -121,6 +128,30 @@ public class NewsArticlesEntity {
 
 	public void setType(int type) {
 		this.type = type;
+	}
+	
+	public int getPriority() {
+		return priority;
+	}
+
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
+	
+	public boolean isEnabled() {
+		return isEnabled;
+	}
+
+	public void setIsEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 }
