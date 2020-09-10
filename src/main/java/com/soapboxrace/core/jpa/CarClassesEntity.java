@@ -59,6 +59,8 @@ public class CarClassesEntity implements Serializable {
 	private Integer lootboxType;
 	@Column(name = "israre")
 	private boolean isRare;
+	@Column(name = "baseprofile")
+	private String baseProfile;
 
 	public void setStoreName(String storeName) {
 		this.storeName = storeName;
@@ -243,5 +245,12 @@ public class CarClassesEntity implements Serializable {
 	public void setIsRare(boolean setIsRare) {
 		this.isRare = setIsRare;
 	}
-
+	
+	public String getBaseProfile() {
+		return baseProfile;
+	}
+	
+	public void setBaseProfile(String baseProfile) {
+		this.baseProfile = baseProfile;
+	}
 }
