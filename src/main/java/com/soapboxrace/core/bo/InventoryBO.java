@@ -56,15 +56,17 @@ public class InventoryBO {
 	@EJB
 	private DiscordWebhook discordBot;
 
+	// Get the inventory items of player persona
+	// noPUDay parameter sets all power-ups at zero while enabled
 	public InventoryTrans getInventory(Long personaId) {
 		InventoryTrans inventoryTrans = new InventoryTrans();
 		PersonaEntity personaEntity = personaDAO.findById(personaId);
 		InventoryEntity inventoryEntity = inventoryDAO.findByPersonaId(personaId);
+		boolean noPUDay = parameterBO.getBoolParam("POWERUPS_NOPUDAY");
 
 		if (personaEntity == null) {
 			return new InventoryTrans();
 		}
-
 		if (inventoryEntity == null) {
 			inventoryEntity = createInventory(personaEntity);
 		}
@@ -81,11 +83,13 @@ public class InventoryBO {
 			inventoryItemTrans.setHash(inventoryItemEntity.getHash());
 			inventoryItemTrans.setInventoryId(inventoryItemEntity.getId());
 			inventoryItemTrans.setProductId("DO NOT USE ME");
-			inventoryItemTrans.setRemainingUseCount(inventoryItemEntity.getRemainingUseCount());
 			inventoryItemTrans.setResellPrice(inventoryItemEntity.getResalePrice());
 			inventoryItemTrans.setStringHash(inventoryItemEntity.getStringHash());
 			inventoryItemTrans.setStatus(inventoryItemEntity.getStatus());
-			inventoryItemTrans.setVirtualItemType(inventoryItemEntity.getVirtualItemType());
+			String itemType = inventoryItemEntity.getVirtualItemType();
+			inventoryItemTrans.setVirtualItemType(itemType);
+			if (noPUDay && itemType.contentEquals("powerup")) {inventoryItemTrans.setRemainingUseCount(0L);}
+			else {inventoryItemTrans.setRemainingUseCount(inventoryItemEntity.getRemainingUseCount());}
 
 			arrayOfInventoryItemTrans.getInventoryItemTrans().add(inventoryItemTrans);
 		}

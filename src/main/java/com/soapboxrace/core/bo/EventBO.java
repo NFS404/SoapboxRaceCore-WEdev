@@ -114,6 +114,7 @@ public class EventBO {
 	
 	// Change the current reward-bonus (and team-racing) class
 	// Array structure: Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday
+	// "NP" class parameter means no power-ups day, "0" disables class bonus
 	@Schedule(dayOfWeek = "*", persistent = false)
 	public String bonusClassRotation() {
 		ParameterEntity parameterEntity = parameterDAO.findById("CLASSBONUS_CARCLASSHASH");
@@ -130,12 +131,29 @@ public class EventBO {
 		parameterEntity.setValue(String.valueOf(eventResultBO.getCarClassInt(todayClass)));
 		parameterDAO.update(parameterEntity);
 		
-		if (todayClass.contentEquals("0")) {
-			// FIXME Make gameplay actions
+		if (todayClass.contentEquals("NP")) {
+			ParameterEntity parameterPUEntity = parameterDAO.findById("POWERUPS_NOPUDAY");
+			parameterPUEntity.setValue("true");
+			parameterDAO.update(parameterPUEntity);
+			
 			NewsArticlesEntity newsWednesday = newsArticlesDAO.findByName("NOPOWERUPSDAY");
 			newsWednesday.setIsEnabled(true);
 			newsArticlesDAO.update(newsWednesday);
 			
+			NewsArticlesEntity newsBonusClass = newsArticlesDAO.findByName("BONUSCLASS");
+			newsBonusClass.setIsEnabled(false);
+			newsArticlesDAO.update(newsBonusClass);
+		}
+		if (!todayClass.contentEquals("NP")) {
+			ParameterEntity parameterPUEntity = parameterDAO.findById("POWERUPS_NOPUDAY");
+			parameterPUEntity.setValue("false");
+			parameterDAO.update(parameterPUEntity);
+			
+			NewsArticlesEntity newsWednesday = newsArticlesDAO.findByName("NOPOWERUPSDAY");
+			newsWednesday.setIsEnabled(false);
+			newsArticlesDAO.update(newsWednesday);
+		}
+		if (todayClass.contentEquals("0")) {
 			NewsArticlesEntity newsBonusClass = newsArticlesDAO.findByName("BONUSCLASS");
 			newsBonusClass.setIsEnabled(false);
 			newsArticlesDAO.update(newsBonusClass);
@@ -146,12 +164,7 @@ public class EventBO {
 			newsBonusClass.setLongTextHALId("TXT_NEWS_WEV2_BONUSCLASS_" + todayClass + "_FULL");
 			newsBonusClass.setIsEnabled(true);
 			newsArticlesDAO.update(newsBonusClass);
-			
-			NewsArticlesEntity newsWednesday = newsArticlesDAO.findByName("NOPOWERUPSDAY");
-			newsWednesday.setIsEnabled(false);
-			newsArticlesDAO.update(newsWednesday);
 		}
-			
 		return "";
 	}
 	
