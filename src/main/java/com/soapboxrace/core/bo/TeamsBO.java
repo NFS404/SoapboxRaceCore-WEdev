@@ -12,6 +12,7 @@ import javax.mail.Session;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.bo.util.TimeReadConverter;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
@@ -61,6 +62,9 @@ public class TeamsBO {
 	
 	@EJB
 	private AchievementsBO achievementsBO;
+	
+	@EJB
+	private TimeReadConverter timeReadConverter;
 
 	@Resource(mappedName = "java:jboss/mail/Gmail")
 	private Session mailSession;
@@ -160,7 +164,7 @@ public class TeamsBO {
 			System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, proceed");
 			EventSessionEntity eventSessionEntity = eventSessionDAO.findById(eventSessionId);
 			String message = "";
-			String messageDebug = "";
+			String messageLog = "";
 //			System.out.println("TEST teamAccoladesBasic sleep, count " + count + ", team1check: " + eventSessionEntity.getTeam1Check() + ", team2check: " + eventSessionEntity.getTeam2Check());
 			
 			if (eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check()) {
@@ -168,10 +172,12 @@ public class TeamsBO {
 				Long teamWinner = eventSessionEntity.getTeamWinner();
 				Long team1 = eventSessionEntity.getTeam1Id();
 				Long team2 = eventSessionEntity.getTeam2Id();
-				// Placeholder
+				TeamsEntity loserTeam = null;
+				// Placeholder, will be displayed in case of any information issues
 				String winnerPlayerName = "!pls fix!";
 				String winnerTeamName = "!pls fix!";
 				String loserTeamName = "!pls fix!";
+				String eventName = "!pls fix!";
 				int winnerTeamPoints = 0;
 				for (EventDataEntity racer : eventDataDao.getRacersRanked(eventSessionId)) {
 					PersonaEntity racerEntity = personaDao.findById(racer.getPersonaId());
@@ -186,22 +192,27 @@ public class TeamsBO {
 								eventSessionDao.update(eventSessionEntity);
 								winnerPlayerName = racerEntity.getName();
 								if (racerTeamEntity.getTeamId() == team1) {
-									loserTeamName = teamsDao.findById(team2).getTeamName();
+									loserTeam = teamsDao.findById(team2);
+									loserTeamName = loserTeam.getTeamName();
 								}
 								if (racerTeamEntity.getTeamId() == team2) {
-									loserTeamName = teamsDao.findById(team1).getTeamName();
+									loserTeam = teamsDao.findById(team1);
+									loserTeamName = loserTeam.getTeamName();
 								}	
 								winnerTeamName = racerTeamEntity.getTeamName();
 								racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
 								winnerTeamPoints = racerTeamEntity.getTeamPoints();
+								eventName = eventSessionEntity.getEvent().getName();
 								teamsDao.update(racerTeamEntity);
 								achievementsBO.applyTeamRacesWonAchievement(racerEntity);
 								
-								messageDebug = teamAccoladesDebugTimes(eventSessionId);
+								messageLog = teamAccoladesTimes(eventSessionId, racerTeamEntity, loserTeam);
 								message = ":heavy_minus_sign:"
-						        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде против **" + loserTeamName + "** (*итого очков: " + winnerTeamPoints + ", сессия " + eventSessionId + "*)."
-						        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" + winnerTeamName + "** during race against **" + loserTeamName + "** (*points: " + winnerTeamPoints + ", session " + eventSessionId + "*)."
-						        		+ "\n" + messageDebug;
+						        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде против **" 
+										+ loserTeamName + "** (*итого очков: " + winnerTeamPoints + ", трасса: " + eventName + ", сессия " + eventSessionId + "*)."
+						        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" 
+										+ winnerTeamName + "** during race against **" + loserTeamName + "** (*points: " + winnerTeamPoints + ", event: " + eventName + ", session " + eventSessionId + "*)."
+						        		+ "\n" + messageLog;
 								discordBot.sendMessage(message, true);
 							}
 						}
@@ -221,14 +232,25 @@ public class TeamsBO {
 		}
 	}
 	
-	private String teamAccoladesDebugTimes(Long eventSessionId) {
-		String messageDebug = "";
+	private String teamAccoladesTimes(Long eventSessionId, TeamsEntity winnerTeamEntity, TeamsEntity loserTeamEntity) {
+		String message = "";
+		String racerTime = "!pls fix!";
+		String teamIcon = "";
 		List<EventDataEntity> listOfRacers = eventDataDao.getRacersRanked(eventSessionId);
+		int rankCounter = 1; // Racers result list should be ordered
 		for (EventDataEntity racerDebug : listOfRacers) {
 			PersonaEntity racerEntityDebug = personaDao.findById(racerDebug.getPersonaId());
-			messageDebug = messageDebug.concat(racerDebug.getRank() + " - " + racerEntityDebug.getName() + " - " + racerDebug.getEventDurationInMilliseconds() + " ms \n");
+			racerTime = timeReadConverter.convertRecord(racerDebug.getServerEventDuration());
+			if (racerEntityDebug.getTeam().getTeamId() == winnerTeamEntity.getTeamId()) {
+				teamIcon = ":small_orange_diamond";
+			}
+			if (racerEntityDebug.getTeam().getTeamId() == loserTeamEntity.getTeamId()) {
+				teamIcon = ":small_blue_diamond";
+			}
+			message = message.concat(rankCounter + " - " + racerEntityDebug.getName() + " (*" + racerTime + "*) " + teamIcon + " \n");
+			rankCounter++;
 		}
-		return messageDebug;
+		return message;
 	}
 	
 	public void teamEntryIG(boolean openEntryValue, TeamsEntity teamsEntity) {

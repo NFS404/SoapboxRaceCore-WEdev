@@ -127,7 +127,7 @@ public class EventsBO {
 		if (!isBroken) {
 			PersonaEntity playerEntity = personaDao.findById(activePersonaId);
 			TeamsEntity racerTeamEntity = playerEntity.getTeam();
-			if (racerTeamEntity != null && parameterBO.getIntParam("TEAM_CURRENTSEASON") > 0) {
+			if (racerTeamEntity != null && racerTeamEntity.getActive() && parameterBO.getIntParam("TEAM_CURRENTSEASON") > 0) {
 				racerTeamEntity.setTeamPoints(racerTeamEntity.getTeamPoints() + 1);
 				int winnerTeamPointsFinal = racerTeamEntity.getTeamPoints();
 				String winnerPlayerName = playerEntity.getName();
