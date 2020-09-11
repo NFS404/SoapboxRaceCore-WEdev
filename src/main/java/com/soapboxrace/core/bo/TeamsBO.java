@@ -165,6 +165,8 @@ public class TeamsBO {
 			EventSessionEntity eventSessionEntity = eventSessionDAO.findById(eventSessionId);
 			String message = "";
 			String messageLog = "";
+			String teamNOS = "OFF";
+			if (eventSessionEntity.getTeamNOS()) {teamNOS = "ON";}
 //			System.out.println("TEST teamAccoladesBasic sleep, count " + count + ", team1check: " + eventSessionEntity.getTeam1Check() + ", team2check: " + eventSessionEntity.getTeam2Check());
 			
 			if (eventSessionEntity.getTeam1Check() && eventSessionEntity.getTeam2Check()) {
@@ -209,9 +211,9 @@ public class TeamsBO {
 								messageLog = teamAccoladesTimes(eventSessionId, racerTeamEntity, loserTeam);
 								message = ":heavy_minus_sign:"
 						        		+ "\n:trophy: **|** Nгрок **" + winnerPlayerName + "** принёс победу своей команде **" + winnerTeamName + "** в заезде против **" 
-										+ loserTeamName + "** (*итого очков: " + winnerTeamPoints + ", трасса: " + eventName + ", сессия " + eventSessionId + "*)."
+										+ loserTeamName + "** (*итого очков: " + winnerTeamPoints + ", трасса: " + eventName + ", TeamNOS " + teamNOS + ", сессия " + eventSessionId + "*)."
 						        		+ "\n:trophy: **|** Player **" + winnerPlayerName + "** brought victory to his team **" 
-										+ winnerTeamName + "** during race against **" + loserTeamName + "** (*points: " + winnerTeamPoints + ", event: " + eventName + ", session " + eventSessionId + "*)."
+										+ winnerTeamName + "** during race against **" + loserTeamName + "** (*points: " + winnerTeamPoints + ", event: " + eventName + ", TeamNOS " + teamNOS + ", session " + eventSessionId + "*)."
 						        		+ "\n" + messageLog;
 								discordBot.sendMessage(message, true);
 							}

@@ -16,7 +16,6 @@ import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.dao.VinylStorageDAO;
-import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.OwnedCarEntity;
@@ -92,13 +91,10 @@ public class VinylStorageBO {
 			int currentCarHash = defaultCarEntity.getOwnedCar().getCustomCar().getPhysicsProfileHash();
 			int vinylCarHash = vinylStorageEntity.getCarHash();
 			boolean isCompatible = true;
-			int baseProfileHash = 0; // If player is with Drift-Spec vehicle, he still will be able to apply the car model's vinyl
-			CarClassesEntity carClassesEntity = carClassesDAO.findByHash(currentCarHash);
-			if (carClassesEntity.getBaseProfile() != null) {
-				CarClassesEntity carBaseEntity = carClassesDAO.findByStoreName(carClassesEntity.getBaseProfile());
-				baseProfileHash = carBaseEntity.getHash();
-			}
-			if (baseProfileHash != vinylCarHash && vinylCarHash != currentCarHash) {
+			// If player is with Drift-Spec vehicle, he still will be able to apply the car model's vinyl and vice versa
+			String playerCarBaseModel = carClassesDAO.findByHash(currentCarHash).getBaseModel();
+			String vinylCarBaseModel = carClassesDAO.findByHash(vinylCarHash).getBaseModel();
+			if (!playerCarBaseModel.contentEquals(vinylCarBaseModel)) {
 				isCompatible = false;
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This vinyl is incompatible with your car."), personaId);
 			}

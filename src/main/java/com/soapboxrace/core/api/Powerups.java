@@ -10,6 +10,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.soapboxrace.core.bo.AchievementsBO;
+import com.soapboxrace.core.bo.EventBO;
 import com.soapboxrace.core.bo.EventPowerupsBO;
 import com.soapboxrace.core.bo.InventoryBO;
 import com.soapboxrace.core.bo.ParameterBO;
@@ -60,6 +61,9 @@ public class Powerups {
 	
 	@EJB
 	private DiscordWebhook discordBot;
+	
+	@EJB
+	private EventBO eventBO;
 
 	@POST
 	@Path("/activated/{powerupHash}")

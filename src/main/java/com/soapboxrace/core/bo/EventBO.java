@@ -126,7 +126,7 @@ public class EventBO {
 			parameterDAO.update(parameterEntity);
 			return "";
 		}
-		int dayOfWeekInt = new GregorianCalendar().get(Calendar.DAY_OF_WEEK);
+		int dayOfWeekInt = (new GregorianCalendar().get(Calendar.DAY_OF_WEEK)) - 1; // Calendar have "1 - 7" numbers, while we need "0 - 6"
 		String todayClass = bonusClassArray[dayOfWeekInt];
 		parameterEntity.setValue(String.valueOf(eventResultBO.getCarClassInt(todayClass)));
 		parameterDAO.update(parameterEntity);
@@ -158,7 +158,7 @@ public class EventBO {
 			newsBonusClass.setIsEnabled(false);
 			newsArticlesDAO.update(newsBonusClass);
 		}
-		else {
+		if (!todayClass.contentEquals("0") && !todayClass.contentEquals("NP")) {
 			NewsArticlesEntity newsBonusClass = newsArticlesDAO.findByName("BONUSCLASS");
 			newsBonusClass.setShortTextHALId("TXT_NEWS_WEV2_BONUSCLASS_" + todayClass + "_SHORT");
 			newsBonusClass.setLongTextHALId("TXT_NEWS_WEV2_BONUSCLASS_" + todayClass + "_FULL");
