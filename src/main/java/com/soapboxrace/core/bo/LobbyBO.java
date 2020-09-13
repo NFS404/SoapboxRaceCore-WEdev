@@ -329,13 +329,14 @@ public class LobbyBO {
 		lobbyInfoType.setLobbyId(lobbyInviteId);
 		
 		// 2 teams can be inside of one race - Hypercycle
-		// FIXME team 1 almost never knows it's opponent + team can't exit - no 'exit' event for team
+		// FIXME team can't exit - no 'exit' event for team
 		// carClass 0 = open races for all classes
 		boolean teamIsAssigned = false;
 		Long teamRacerPersona = personaId;
 		PersonaEntity personaEntityRacer = personaDao.findById(teamRacerPersona);
 		TeamsEntity racerTeamEntity = personaEntityRacer.getTeam();
-		if (racerTeamEntity != null && racerTeamEntity.getActive() && parameterBO.getIntParam("TEAM_CURRENTSEASON") > 0) { // 0 means there is no active team racing
+		if (racerTeamEntity != null && racerTeamEntity.getActive() && parameterBO.getIntParam("TEAM_CURRENTSEASON") > 0
+				&& !lobbyEntity.getIsPrivate()) { // 0 means there is no active team racing
 			int serverCarClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
 			OwnedCarTrans defaultCar = personaBO.getDefaultCar(personaId);
 			int playerCarClass = defaultCar.getCustomCar().getCarClassHash();
