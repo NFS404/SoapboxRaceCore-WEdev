@@ -72,6 +72,7 @@ public class ArrayOfRaceWithTime {
 			int carClassHash,
 			int raceTime,
 			int raceAltTime,
+			int srvTime,
 			int airTime,
 			int lapTime,
 			float maxSpeed,
@@ -92,7 +93,7 @@ public class ArrayOfRaceWithTime {
 			int pTeamEvade,
 			int pTeamSlingshot
 		) {
-		races.add(new Race(id, playerName, playerIconId, carName, carClassHash, raceTime, raceAltTime, airTime, lapTime, maxSpeed, perfectStart,
+		races.add(new Race(id, playerName, playerIconId, carName, carClassHash, raceTime, raceAltTime, srvTime, airTime, lapTime, maxSpeed, perfectStart,
 				isSingle, date, isCarVersionVaild, pNos, pSlingshot, pOneMoreLap, pReady, pMagnet, pShield, pEvade, pJuggernaut, pRunFlatTires, 
 				pCooldown, pTeamEvade, pTeamSlingshot));
 	}
@@ -106,6 +107,7 @@ public class ArrayOfRaceWithTime {
 		"carClass",
 		"raceTime",
 		"raceAltTime",
+		"srvTime",
 		"airTime",
 		"lapTime",
 		"maxSpeed",
@@ -141,6 +143,8 @@ public class ArrayOfRaceWithTime {
 		private int raceTime;
 		@XmlElement(name = "RaceAltTime")
 		private int raceAltTime;
+		@XmlElement(name = "SrvTime")
+		private int srvTime;
 		@XmlElement(name = "AirTime")
 		private int airTime;
 		@XmlElement(name = "LapTime")
@@ -188,6 +192,7 @@ public class ArrayOfRaceWithTime {
 				int carClassHash,
 				int raceTime,
 				int raceAltTime,
+				int srvTime,
 				int airTime,
 				int lapTime,
 				float maxSpeed,
@@ -214,6 +219,7 @@ public class ArrayOfRaceWithTime {
 			this.carName = carName;
 			this.raceTime = raceTime;
 			this.raceAltTime = raceAltTime;
+			this.srvTime = srvTime;
 			this.airTime = airTime;
 			this.lapTime = lapTime;
 			this.maxSpeed = maxSpeed;	
