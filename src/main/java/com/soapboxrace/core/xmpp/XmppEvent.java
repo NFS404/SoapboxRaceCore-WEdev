@@ -1,7 +1,9 @@
 package com.soapboxrace.core.xmpp;
 
+import com.soapboxrace.jaxb.xmpp.XMPP_EventTimedOutType;
 import com.soapboxrace.jaxb.xmpp.XMPP_EventTimingOutType;
 import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypeDragEntrantResult;
+import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypeEventTimedOut;
 import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypeEventTimingOut;
 import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypeRouteEntrantResult;
 import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypeTeamEscapeEntrantResult;
@@ -35,6 +37,14 @@ public class XmppEvent {
 		XMPP_ResponseTypeEventTimingOut eventTimingOutResponse = new XMPP_ResponseTypeEventTimingOut();
 		eventTimingOutResponse.setEventTimingOut(eventTimingOut);
 		openFireSoapBoxCli.send(eventTimingOutResponse, personaId);
+	}
+	
+	public void sendEventTimedOut(Long eventSessionId) {
+		XMPP_EventTimedOutType eventTimedOut = new XMPP_EventTimedOutType();
+		eventTimedOut.setEventSessionId(eventSessionId);
+		XMPP_ResponseTypeEventTimedOut eventTimedOutResponse = new XMPP_ResponseTypeEventTimedOut();
+		eventTimedOutResponse.setEventTimedOut(eventTimedOut);
+		openFireSoapBoxCli.send(eventTimedOutResponse, personaId);
 	}
 
 }

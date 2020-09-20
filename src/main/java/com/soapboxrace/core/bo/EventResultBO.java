@@ -2,8 +2,13 @@ package com.soapboxrace.core.bo;
 
 import java.time.LocalDateTime;
 
+import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.Timeout;
+import javax.ejb.Timer;
+import javax.ejb.TimerConfig;
+import javax.ejb.TimerService;
 
 import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.jpa.CarClassesEntity;
@@ -41,6 +46,9 @@ public class EventResultBO {
 	@EJB
 	private CarClassesDAO carClassesDAO;
 
+	@Resource
+    private TimerService timerService;
+	
 	public PursuitEventResult handlePursuitEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, PursuitArbitrationPacket pursuitArbitrationPacket,
 			Boolean isBusted, Long eventEnded) {
 		return eventResultPursuitBO.handlePursuitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, isBusted, eventEnded);
@@ -57,6 +65,18 @@ public class EventResultBO {
 	public TeamEscapeEventResult handleTeamEscapeEnd(EventSessionEntity eventSessionEntity, Long activePersonaId,
 			TeamEscapeArbitrationPacket teamEscapeArbitrationPacket, Long eventEnded) {
 		return eventResultTeamEscapeBO.handleTeamEscapeEnd(eventSessionEntity, activePersonaId, teamEscapeArbitrationPacket, eventEnded);
+	}
+	
+	public void timeLimitTimer (Long eventSessionId, Long timeLimit) {
+		TimerConfig timerConfig = new TimerConfig();
+	    timerConfig.setInfo(eventSessionId);
+	    timerService.createSingleActionTimer(timeLimit, timerConfig);
+	}
+	
+	@Timeout
+	public void timeLimitAction (Timer timer) {
+		Long eventSessionId = (long) timer.getInfo();
+		eventResultRouteBO.forceStopEvent(eventSessionId);
 	}
 	
 	// after 2 hours of playing, NFSW's time system can glitch sometimes, giving a possible player advantage

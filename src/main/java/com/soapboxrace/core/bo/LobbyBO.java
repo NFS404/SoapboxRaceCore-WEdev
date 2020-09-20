@@ -320,14 +320,53 @@ public class LobbyBO {
 			LobbyEntrantInfo.setGridIndex(lobbyEntrantEntity.getGridIndex());
 			lobbyEntrantInfo.add(LobbyEntrantInfo);
 		}
-
 		LobbyInfo lobbyInfoType = new LobbyInfo();
 		lobbyInfoType.setCountdown(lobbyCountdown);
 		lobbyInfoType.setEntrants(arrayOfLobbyEntrantInfo);
 		lobbyInfoType.setEventId(eventId);
 		lobbyInfoType.setLobbyInviteId(lobbyInviteId);
 		lobbyInfoType.setLobbyId(lobbyInviteId);
+	
+		teamRacingInit(personaId, lobbyEntity, entrants); // Team Racing actions
 		
+		return lobbyInfoType;
+	}
+
+	public void sendJoinMsg(Long personaId, List<LobbyEntrantEntity> lobbyEntrants) {
+		for (LobbyEntrantEntity lobbyEntrantEntity : lobbyEntrants) {
+			LobbyEntrantAdded lobbyEntrantAdded = new LobbyEntrantAdded();
+			if (!Objects.equals(personaId, lobbyEntrantEntity.getPersona().getPersonaId())) {
+				lobbyEntrantAdded.setHeat(1);
+				lobbyEntrantAdded.setLevel(lobbyEntrantEntity.getPersona().getLevel());
+				lobbyEntrantAdded.setPersonaId(personaId);
+				lobbyEntrantAdded.setLobbyId(lobbyEntrantEntity.getLobby().getId());
+				XmppLobby xmppLobby = new XmppLobby(lobbyEntrantEntity.getPersona().getPersonaId(), openFireSoapBoxCli);
+				xmppLobby.sendJoinMsg(lobbyEntrantAdded);
+			}
+		}
+	}
+
+	public void deleteLobbyEntrant(Long personaId, Long lobbyId) {
+		PersonaEntity personaEntity = personaDao.findById(personaId);
+		lobbyEntrantDao.deleteByPersona(personaEntity);
+		updateLobby(personaId, lobbyId);
+	}
+
+	private void updateLobby(Long personaId, Long lobbyId) {
+		LobbyEntity lobbyEntity = lobbyDao.findById(lobbyId);
+		List<LobbyEntrantEntity> listLobbyEntrantEntity = lobbyEntity.getEntrants();
+		for (LobbyEntrantEntity entity : listLobbyEntrantEntity) {
+			LobbyEntrantRemoved lobbyEntrantRemoved = new LobbyEntrantRemoved();
+			if (!Objects.equals(entity.getPersona().getPersonaId(), personaId)) {
+				lobbyEntrantRemoved.setPersonaId(personaId);
+				lobbyEntrantRemoved.setLobbyId(lobbyId);
+				XmppLobby xmppLobby = new XmppLobby(entity.getPersona().getPersonaId(), openFireSoapBoxCli);
+				xmppLobby.sendExitMsg(lobbyEntrantRemoved);
+			}
+		}
+	}
+	
+	public void teamRacingInit(Long personaId, LobbyEntity lobbyEntity, List<LobbyEntrantEntity> entrants) {
 		// 2 teams can be inside of one race - Hypercycle
 		// FIXME team can't exit - no 'exit' event for team
 		// carClass 0 = open races for all classes
@@ -364,12 +403,12 @@ public class LobbyBO {
 					team1Name = teamsDao.findById(team1id).getTeamName();
 					team2Name = racerTeamEntity.getTeamName();
 					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team joined as #2. First team is " + team1Name), teamRacerPersona);
-					
+							
 					for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
 						PersonaEntity entrantPersona = lobbyEntrantEntity.getPersona();
 						TeamsEntity teamsEntity1 = entrantPersona.getTeam();
 						if (teamsEntity1 != null && teamsEntity1.getTeamId() == team1id) {
-							System.out.println("### TEAMS: " + entrantPersona.getName() + " has got the Team2 (" + team2Name + ") message, his team: " + teamsEntity1.getTeamName());
+							// System.out.println("### TEAMS: " + entrantPersona.getName() + " has got the Team2 (" + team2Name + ") message, his team: " + teamsEntity1.getTeamName());
 							openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Second team is " + team2Name), entrantPersona.getPersonaId());
 						}
 					}
@@ -377,41 +416,6 @@ public class LobbyBO {
 				if (team1id != racerTeamId && team2id != racerTeamId && !teamIsAssigned) {
 					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team is not participate on that event."), teamRacerPersona);
 				}
-			}
-		}
-		return lobbyInfoType;
-	}
-
-	public void sendJoinMsg(Long personaId, List<LobbyEntrantEntity> lobbyEntrants) {
-		for (LobbyEntrantEntity lobbyEntrantEntity : lobbyEntrants) {
-			LobbyEntrantAdded lobbyEntrantAdded = new LobbyEntrantAdded();
-			if (!Objects.equals(personaId, lobbyEntrantEntity.getPersona().getPersonaId())) {
-				lobbyEntrantAdded.setHeat(1);
-				lobbyEntrantAdded.setLevel(lobbyEntrantEntity.getPersona().getLevel());
-				lobbyEntrantAdded.setPersonaId(personaId);
-				lobbyEntrantAdded.setLobbyId(lobbyEntrantEntity.getLobby().getId());
-				XmppLobby xmppLobby = new XmppLobby(lobbyEntrantEntity.getPersona().getPersonaId(), openFireSoapBoxCli);
-				xmppLobby.sendJoinMsg(lobbyEntrantAdded);
-			}
-		}
-	}
-
-	public void deleteLobbyEntrant(Long personaId, Long lobbyId) {
-		PersonaEntity personaEntity = personaDao.findById(personaId);
-		lobbyEntrantDao.deleteByPersona(personaEntity);
-		updateLobby(personaId, lobbyId);
-	}
-
-	private void updateLobby(Long personaId, Long lobbyId) {
-		LobbyEntity lobbyEntity = lobbyDao.findById(lobbyId);
-		List<LobbyEntrantEntity> listLobbyEntrantEntity = lobbyEntity.getEntrants();
-		for (LobbyEntrantEntity entity : listLobbyEntrantEntity) {
-			LobbyEntrantRemoved lobbyEntrantRemoved = new LobbyEntrantRemoved();
-			if (!Objects.equals(entity.getPersona().getPersonaId(), personaId)) {
-				lobbyEntrantRemoved.setPersonaId(personaId);
-				lobbyEntrantRemoved.setLobbyId(lobbyId);
-				XmppLobby xmppLobby = new XmppLobby(entity.getPersona().getPersonaId(), openFireSoapBoxCli);
-				xmppLobby.sendExitMsg(lobbyEntrantRemoved);
 			}
 		}
 	}

@@ -35,10 +35,13 @@ public class RewardRouteBO extends RewardBO {
 		if (arrayOfRouteEntrantResult.getRouteEntrantResult().size() < 2) {
 			isSingle = true;
 		}
-		if (!legitRaceBO.isLegit(activePersonaId, routeArbitrationPacket, eventSessionEntity, isSingle)) {
+		EventEntity eventEntity = eventSessionEntity.getEvent();
+		
+		// Interceptor events doesn't have a legit time checks due to force time limits
+		if (eventEntity.getEventModeId() != 100 && !legitRaceBO.isLegit(activePersonaId, routeArbitrationPacket, eventSessionEntity, isSingle)) {
 			return new Accolades();
 		}
-		EventEntity eventEntity = eventSessionEntity.getEvent();
+		
 		PersonaEntity personaEntity = personaDao.findById(activePersonaId);
 		RewardVO rewardVO = getRewardVO(personaEntity);
 		OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);

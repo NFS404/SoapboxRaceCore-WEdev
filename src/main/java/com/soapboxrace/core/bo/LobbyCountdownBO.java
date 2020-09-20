@@ -2,6 +2,7 @@ package com.soapboxrace.core.bo;
 
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -16,10 +17,15 @@ import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
 
+import com.soapboxrace.core.bo.util.PersonaListConverter;
+import com.soapboxrace.core.bo.util.TimeReadConverter;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.LobbyDAO;
+import com.soapboxrace.core.dao.OwnedCarDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
+import com.soapboxrace.core.dao.VisualPartDAO;
+import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.LobbyEntity;
 import com.soapboxrace.core.jpa.LobbyEntrantEntity;
@@ -59,6 +65,21 @@ public class LobbyCountdownBO {
 	@EJB
 	private PersonaDAO personaDAO;
 	
+	@EJB
+	private TimeReadConverter timeReadConverter;
+	
+	@EJB
+	private PersonaBO personaBO;
+	
+	@EJB
+	private OwnedCarDAO ownedCarDAO;
+	
+	@EJB
+	private VisualPartDAO visualPartDAO;
+	
+	@EJB
+	private PersonaListConverter personaListConverter;
+	
 	@Resource
     private TimerService timerService;
 
@@ -81,6 +102,8 @@ public class LobbyCountdownBO {
 			return;
 		}
 		Collections.sort(entrants);
+		EventEntity eventEntity = lobbyEntity.getEvent();
+		SecureRandom rand = new SecureRandom();
 		XMPP_LobbyLaunchedType lobbyLaunched = new XMPP_LobbyLaunchedType();
 		Entrants entrantsType = new Entrants();
 		List<LobbyEntrantInfo> lobbyEntrantInfo = entrantsType.getLobbyEntrantInfo();
@@ -90,7 +113,7 @@ public class LobbyCountdownBO {
 		byte numOfRacers = (byte) entrants.size();
 		EventSessionEntity eventSessionEntity = new EventSessionEntity();
 		eventSessionEntity.setStarted(System.currentTimeMillis());
-		eventSessionEntity.setEvent(lobbyEntity.getEvent());
+		eventSessionEntity.setEvent(eventEntity);
 		eventSessionEntity.setTeam1Id(lobbyEntity.getTeam1Id());
 		eventSessionEntity.setTeam2Id(lobbyEntity.getTeam2Id());
 		
@@ -99,15 +122,25 @@ public class LobbyCountdownBO {
 		eventSessionEntity.setTeamNOS(teamNOS); // True by default
 		// TeamNOS - if race has been randomly started without NOS, team players wouldn't be able to use it, but others will be able
 		if (team2NOSTest != null) {
-			SecureRandom randNOS = new SecureRandom();
-			teamNOS = randNOS.nextBoolean();
+			teamNOS = rand.nextBoolean();
 			eventSessionEntity.setTeamNOS(teamNOS);
 		}
 		eventSessionDao.insert(eventSessionEntity);
 		String udpRaceIp = parameterBO.getStrParam("UDP_RACE_IP");
+		
+		boolean isInterceptorEvent = eventEntity.getEventModeId() == 100 ? true : false;
+		String timeLimit = "!pls fix!";
+		List<Long> personaCops = new ArrayList<Long>();
+		List<Long> personaRacers = new ArrayList<Long>();
+		if (isInterceptorEvent) {
+			timeLimit = timeReadConverter.convertRecord(eventEntity.getTimeLimit());
+		}
+		
 		for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
 			// eventDataEntity.setIsSinglePlayer(false);
-			Long personaId = lobbyEntrantEntity.getPersona().getPersonaId();
+			PersonaEntity entrantPersona = lobbyEntrantEntity.getPersona();
+			Long personaId = entrantPersona.getPersonaId();
+			
 			// eventDataEntity.setPersonaId(personaId);
 			byte gridIndex = (byte) i;
 			byte[] helloPacket = { 10, 11, 12, 13 };
@@ -128,21 +161,50 @@ public class LobbyCountdownBO {
 
 			LobbyEntrantInfo lobbyEntrantInfoType = new LobbyEntrantInfo();
 			lobbyEntrantInfoType.setPersonaId(personaId);
-			lobbyEntrantInfoType.setLevel(lobbyEntrantEntity.getPersona().getLevel());
+			lobbyEntrantInfoType.setLevel(entrantPersona.getLevel());
 			lobbyEntrantInfoType.setHeat(1);
 			lobbyEntrantInfoType.setGridIndex(i++);
 			lobbyEntrantInfoType.setState(LobbyEntrantState.UNKNOWN);
+			if (isInterceptorEvent) {
+				// If player has a Cop Lights item - this player is a Cop
+				if (visualPartDAO.findCopLightsPart(personaBO.getDefaultCarEntity(personaId).getOwnedCar().getCustomCar()) != null) {
+					personaCops.add(personaId);
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You are the Cop - hold the racers until " + timeLimit + "!"), personaId);
+				}
+				else { // If not - player is a Racer
+					personaRacers.add(personaId);
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You are the Racer - finish until " + timeLimit + " to win!"), personaId);
+				}
+			}
 			if ("127.0.0.1".equals(udpRaceIp)) {
 				TokenSessionEntity tokenEntity = tokenDAO.findByUserId(lobbyEntrantEntity.getPersona().getUser().getId());
 				lobbyEntrantInfoType.setUdpRaceHostIp(tokenEntity.getClientHostIp());
 			}
 			lobbyEntrantInfo.add(lobbyEntrantInfoType);
 			
-			PersonaEntity personaEntityTeam = personaDAO.findById(personaId);
-			if (personaEntityTeam.getTeam() != null && team2NOSTest != null) {
+			if (entrantPersona.getTeam() != null && team2NOSTest != null) {
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Team NOS on this race: " + teamNOS), personaId);
 			}
 		}
+		if (isInterceptorEvent) {
+			if (!personaCops.isEmpty() && !personaRacers.isEmpty()) {	
+				eventSessionEntity.setPersonaCops(personaListConverter.interceptorPersonaList(personaCops));
+				eventSessionEntity.setPersonaRacers(personaListConverter.interceptorPersonaList(personaRacers));
+				eventSessionDao.update(eventSessionEntity);
+				String playersList = "### Cops: " + personaListConverter.interceptorPersonaChatList(personaCops) + "\n"
+						+ "## Racers: " + personaListConverter.interceptorPersonaChatList(personaRacers);
+				for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage(playersList), lobbyEntrantEntity.getPersona().getPersonaId());
+				}
+			}
+			else {
+				for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Not enough Cops or Racers to begin - cancelled."), lobbyEntrantEntity.getPersona().getPersonaId());
+				}
+				return; // Cancel the event
+			}
+		}
+		
 		XMPP_EventSessionType xMPP_EventSessionType = new XMPP_EventSessionType();
 		ChallengeType challengeType = new ChallengeType();
 		challengeType.setChallengeId("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
@@ -150,7 +212,7 @@ public class LobbyCountdownBO {
 		challengeType.setLeftSize(14);
 		challengeType.setRightSize(50);
 
-		xMPP_EventSessionType.setEventId(lobbyEntity.getEvent().getId());
+		xMPP_EventSessionType.setEventId(eventEntity.getId());
 		xMPP_EventSessionType.setChallenge(challengeType);
 		xMPP_EventSessionType.setSessionId(eventSessionEntity.getId());
 		lobbyLaunched.setNewRelayServer(true);
@@ -163,4 +225,5 @@ public class LobbyCountdownBO {
 		XmppLobby xmppLobby = new XmppLobby(0L, openFireSoapBoxCli);
 		xmppLobby.sendRelay(lobbyLaunched, xMPP_CryptoTicketsType);
 	}
+	
 }

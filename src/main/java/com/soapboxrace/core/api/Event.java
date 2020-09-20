@@ -2,7 +2,10 @@ package com.soapboxrace.core.api;
 
 import java.io.InputStream;
 
+import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.ejb.TimerConfig;
+import javax.ejb.TimerService;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -66,9 +69,14 @@ public class Event {
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
 		Long eventDataId = eventBO.createEventDataSession(activePersonaId, eventSessionId, eventStarted);
 		eventBO.createEventPowerupsSession(activePersonaId, eventDataId);
-		int eventModeId = eventDataDAO.findById(eventDataId).getEvent().getEventModeId();
-		
+		EventEntity eventEntity = eventDataDAO.findById(eventDataId).getEvent();
+		int eventModeId = eventEntity.getEventModeId();
+		Long timeLimit = eventEntity.getTimeLimit();
 		personaPresenceDAO.updateCurrentEvent(activePersonaId, eventDataId, eventModeId, eventSessionId);
+		
+		if (timeLimit != 0) {
+			eventResultBO.timeLimitTimer(eventSessionId, timeLimit);
+		}
 		return "";
 	}
 
@@ -87,6 +95,7 @@ public class Event {
 		switch (eventMode) {
 		case CIRCUIT:
 		case SPRINT:
+		case INTERCEPTOR_MP:
 			RouteArbitrationPacket routeArbitrationPacket = JAXBUtility.unMarshal(arbitrationXml, RouteArbitrationPacket.class);
 //			if (event.getId() == 1003 && routeArbitrationPacket.getEventDurationInMilliseconds() < 186000) { // Test
 //				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");

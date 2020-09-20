@@ -6,6 +6,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.bo.util.PersonaListConverter;
 import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
@@ -24,6 +25,7 @@ import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.core.xmpp.XmppEvent;
+import com.soapboxrace.jaxb.http.Accolades;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
 import com.soapboxrace.jaxb.http.ArrayOfRouteEntrantResult;
 import com.soapboxrace.jaxb.http.ExitPath;
@@ -93,6 +95,9 @@ public class EventResultRouteBO {
 	
 	@EJB
 	private CarClassesDAO carClassesDAO;
+	
+	@EJB
+	private PersonaListConverter personaListConverter;
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -105,6 +110,8 @@ public class EventResultRouteBO {
 		int eventClass = eventEntity.getCarClassHash();
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 		String playerName = personaEntity.getName();
+		boolean isInterceptorEvent = eventEntity.getEventModeId() == 100 ? true : false;
+		Long isWinnerPresented = eventSessionEntity.getPersonaWinner();
 		
 		Long team1id = eventSessionEntity.getTeam1Id();
 		Long team2id = eventSessionEntity.getTeam2Id();
@@ -189,7 +196,39 @@ public class EventResultRouteBO {
 		if (eventClass != 607077938 && arrayOfRouteEntrantResult.getRouteEntrantResult().size() >= 2) {
 			isDropableMode = 2;
 		}
-		routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode));
+		if (isInterceptorEvent) { // Bad code?
+			boolean isRacer = true;
+			String[] personaCopsStr = eventSessionEntity.getPersonaCops().split(",");
+			String[] personaRacersStr = eventSessionEntity.getPersonaRacers().split(",");
+			Long[] personaCopsList = personaListConverter.StrToLongList(personaCopsStr);
+			Long[] personaRacersList = personaListConverter.StrToLongList(personaRacersStr);
+			int finishReason = routeArbitrationPacket.getFinishReason();
+			for (Long personaCop : personaCopsList) {
+				// System.out.println("Cop ID " + personaCop);
+				if (personaCop.equals(activePersonaId)) {
+					System.out.println("Cop: " + playerName);
+					isRacer = false;
+				}
+			}
+			for (Long personaRacer : personaRacersList) {
+				// System.out.println("Racer ID " + personaRacer);
+				if (personaRacer.equals(activePersonaId)) {
+					System.out.println("Racer: " + playerName);
+					isRacer = true;
+				}
+			} 
+			if ((!isRacer && finishReason == 22) || (isRacer && finishReason == 16394)) {
+				System.out.println("No rewards to isRacer " + isRacer + " " + playerName);
+				routeEventResult.setAccolades(new Accolades()); // No rewards
+			}
+			if ((!isRacer && finishReason == 16394 && isWinnerPresented == null) || (isRacer && finishReason == 22)) { // Rewards will be given
+				System.out.println("Rewards given to isRacer " + isRacer + " " + playerName);
+				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode)); 
+			}
+		}
+		else {
+			routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode));
+		}
 		routeEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, routeArbitrationPacket, routeArbitrationPacket.getNumberOfCollisions()));
 		routeEventResult.setEntrants(arrayOfRouteEntrantResult);
 		int currentEventId = eventEntity.getId();
@@ -258,7 +297,6 @@ public class EventResultRouteBO {
 		
 		// Initiate the final team action check, only if both teams are registered for event
 		// FIXME If the players "fast enough", this sequence will be executed more than 1 time, since PersonaWinner will be null for multiple players
-		Long isWinnerPresented = eventSessionEntity.getPersonaWinner();
 		if (isWinnerPresented == null) {
 			eventSessionEntity.setPersonaWinner(activePersonaId);
 			eventSessionDao.update(eventSessionEntity);
@@ -309,6 +347,13 @@ public class EventResultRouteBO {
 					xmppEvent.sendEventTimingOut(eventSessionId);
 				}
 			}
+		}
+	}
+	
+	public void forceStopEvent(Long eventSessionId) {
+		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
+			XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
+			xmppEvent.sendEventTimedOut(eventSessionId);
 		}
 	}
 }

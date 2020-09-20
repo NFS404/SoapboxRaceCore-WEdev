@@ -49,6 +49,12 @@ public class EventSessionEntity {
 	
 	@Column(name = "PERSONAWINNER")
 	private Long personaWinner;
+	
+	@Column(name = "PERSONARACERS")
+	private String personaRacers;
+	
+	@Column(name = "PERSONACOPS")
+	private String personaCops;
 
 	public Long getId() {
 		return id;
@@ -136,5 +142,21 @@ public class EventSessionEntity {
 
 	public void setPersonaWinner(Long personaWinner) {
 		this.personaWinner = personaWinner;
+	}
+	
+	public String getPersonaRacers() {
+		return personaRacers;
+	}
+
+	public void setPersonaRacers(String personaRacers) {
+		this.personaRacers = personaRacers;
+	}
+	
+	public String getPersonaCops() {
+		return personaCops;
+	}
+
+	public void setPersonaCops(String personaCops) {
+		this.personaCops = personaCops;
 	}
 }

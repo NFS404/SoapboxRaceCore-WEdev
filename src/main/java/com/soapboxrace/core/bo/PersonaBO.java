@@ -17,8 +17,8 @@ import com.soapboxrace.core.dao.CarSlotDAO;
 import com.soapboxrace.core.dao.LevelRepDAO;
 import com.soapboxrace.core.dao.OwnedCarDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.VisualPartDAO;
 import com.soapboxrace.core.jpa.AchievementDefinitionEntity;
-import com.soapboxrace.core.jpa.AchievementPersonaEntity;
 import com.soapboxrace.core.jpa.AchievementRankEntity;
 import com.soapboxrace.core.jpa.AchievementStateEntity;
 import com.soapboxrace.core.jpa.BadgePersonaEntity;
@@ -30,7 +30,6 @@ import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.jaxb.http.BadgeBundle;
 import com.soapboxrace.jaxb.http.BadgeInput;
-import com.soapboxrace.jaxb.http.CommerceResultStatus;
 import com.soapboxrace.jaxb.http.OwnedCarTrans;
 
 @Stateless

@@ -124,18 +124,18 @@ public class MatchMaking {
 		sessionInfo.setSessionId(createEventSession.getId());
 		tokenSessionBO.setActiveLobbyId(securityToken, 0L);
 		
-		if (eventId == 1003) {
-			achievementsBO.broadcastUICustom(activePersonaId, "Beat the time: 3:06.00");
-		}
-		if (eventId == 1004) {
-			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st");
-		}
-		if (eventId == 1018) {
-			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st after 4:15.00");
-		}
-		if (eventId == 1005) {
-			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st");
-		}
+//		if (eventId == 1003) {
+//			achievementsBO.broadcastUICustom(activePersonaId, "Beat the time: 3:06.00");
+//		}
+//		if (eventId == 1004) {
+//			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st");
+//		}
+//		if (eventId == 1018) {
+//			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st after 4:15.00");
+//		}
+//		if (eventId == 1005) {
+//			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st");
+//		}
 		return sessionInfo;
 	}
 

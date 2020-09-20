@@ -69,6 +69,7 @@ public class EventEntity {
 	private int rotation;
 	private float trackLength;
 	private boolean statsVisible;
+	private long timeLimit;
 
 	public int getId() {
 		return id;
@@ -444,5 +445,13 @@ public class EventEntity {
 
 	public void setStatsVisible(boolean statsVisible) {
 		this.statsVisible = statsVisible;
+	}
+	
+	public long getTimeLimit() {
+		return timeLimit;
+	}
+
+	public void setTimeLimit(long timeLimit) {
+		this.timeLimit = timeLimit;
 	}
 }

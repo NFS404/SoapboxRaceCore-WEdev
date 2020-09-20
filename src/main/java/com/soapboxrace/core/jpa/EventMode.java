@@ -2,7 +2,7 @@ package com.soapboxrace.core.jpa;
 
 public enum EventMode {
 
-	SPRINT(9), CIRCUIT(4), DRAG(19), PURSUIT_SP(12), PURSUIT_MP(24), MEETINGPLACE(22);
+	SPRINT(9), CIRCUIT(4), DRAG(19), PURSUIT_SP(12), PURSUIT_MP(24), MEETINGPLACE(22), INTERCEPTOR_MP(100), INTERCEPTOR_SP(101);
 	private final int eventModeId;
 
 	public int getEventModeId() {
