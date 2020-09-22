@@ -206,23 +206,23 @@ public class EventResultRouteBO {
 			for (Long personaCop : personaCopsList) {
 				// System.out.println("Cop ID " + personaCop);
 				if (personaCop.equals(activePersonaId)) {
-					System.out.println("Cop: " + playerName);
+					// System.out.println("Cop: " + playerName);
 					isRacer = false;
 				}
 			}
 			for (Long personaRacer : personaRacersList) {
 				// System.out.println("Racer ID " + personaRacer);
 				if (personaRacer.equals(activePersonaId)) {
-					System.out.println("Racer: " + playerName);
+					// System.out.println("Racer: " + playerName);
 					isRacer = true;
 				}
 			} 
 			if ((!isRacer && finishReason == 22) || (isRacer && finishReason == 16394)) {
-				System.out.println("No rewards to isRacer " + isRacer + " " + playerName);
+				// System.out.println("No rewards to isRacer " + isRacer + " " + playerName);
 				routeEventResult.setAccolades(new Accolades()); // No rewards
 			}
 			if ((!isRacer && finishReason == 16394 && isWinnerPresented == null) || (isRacer && finishReason == 22)) { // Rewards will be given
-				System.out.println("Rewards given to isRacer " + isRacer + " " + playerName);
+				// System.out.println("Rewards given to isRacer " + isRacer + " " + playerName);
 				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode)); 
 			}
 		}
@@ -301,12 +301,12 @@ public class EventResultRouteBO {
 			eventSessionEntity.setPersonaWinner(activePersonaId);
 			eventSessionDao.update(eventSessionEntity);
 			if (preRegTeams) {
-				System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, check");
+				// System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, check");
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Debug - Teams finish, init, " + eventSessionId), personaId);
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
-						System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, init");
+						// System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, init");
 						teamsBo.teamAccoladesBasic(eventSessionId);
 					}
 				}).start();
