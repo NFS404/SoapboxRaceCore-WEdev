@@ -267,6 +267,7 @@ public class EventResultRouteBO {
 		// Initiate the final team action check, only if both teams are registered for event
 		// FIXME If the players "fast enough", this sequence will be executed more than 1 time, since PersonaWinner will be null for multiple players
 		if (isWinnerPresented == null) {
+			isWinnerPresented = activePersonaId;
 			eventSessionEntity.setPersonaWinner(activePersonaId);
 			eventSessionDao.update(eventSessionEntity);
 			if (preRegTeams) {
@@ -304,11 +305,11 @@ public class EventResultRouteBO {
 				}
 			} 
 			if ((!isRacer && finishReason == 22) || (isRacer && finishReason == 16394)) {
-				// System.out.println("No rewards to isRacer " + isRacer + " " + playerName);
+				System.out.println("No rewards to isRacer " + isRacer + " " + playerName + ", session " + eventSessionId);
 				routeEventResult.setAccolades(new Accolades()); // No rewards
 			}
 			if ((!isRacer && finishReason == 16394 && isWinnerPresented == null) || (isRacer && finishReason == 22)) { // Rewards will be given
-				// System.out.println("Rewards given to isRacer " + isRacer + " " + playerName);
+				System.out.println("Rewards given to isRacer " + isRacer + " " + playerName + ", session " + eventSessionId);
 				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode)); 
 			}
 		}
