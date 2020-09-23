@@ -196,39 +196,7 @@ public class EventResultRouteBO {
 		if (eventClass != 607077938 && arrayOfRouteEntrantResult.getRouteEntrantResult().size() >= 2) {
 			isDropableMode = 2;
 		}
-		if (isInterceptorEvent) { // Bad code?
-			boolean isRacer = true;
-			String[] personaCopsStr = eventSessionEntity.getPersonaCops().split(",");
-			String[] personaRacersStr = eventSessionEntity.getPersonaRacers().split(",");
-			Long[] personaCopsList = personaListConverter.StrToLongList(personaCopsStr);
-			Long[] personaRacersList = personaListConverter.StrToLongList(personaRacersStr);
-			int finishReason = routeArbitrationPacket.getFinishReason();
-			for (Long personaCop : personaCopsList) {
-				// System.out.println("Cop ID " + personaCop);
-				if (personaCop.equals(activePersonaId)) {
-					// System.out.println("Cop: " + playerName);
-					isRacer = false;
-				}
-			}
-			for (Long personaRacer : personaRacersList) {
-				// System.out.println("Racer ID " + personaRacer);
-				if (personaRacer.equals(activePersonaId)) {
-					// System.out.println("Racer: " + playerName);
-					isRacer = true;
-				}
-			} 
-			if ((!isRacer && finishReason == 22) || (isRacer && finishReason == 16394)) {
-				// System.out.println("No rewards to isRacer " + isRacer + " " + playerName);
-				routeEventResult.setAccolades(new Accolades()); // No rewards
-			}
-			if ((!isRacer && finishReason == 16394 && isWinnerPresented == null) || (isRacer && finishReason == 22)) { // Rewards will be given
-				// System.out.println("Rewards given to isRacer " + isRacer + " " + playerName);
-				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode)); 
-			}
-		}
-		else {
-			routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode));
-		}
+		
 		routeEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, routeArbitrationPacket, routeArbitrationPacket.getNumberOfCollisions()));
 		routeEventResult.setEntrants(arrayOfRouteEntrantResult);
 		int currentEventId = eventEntity.getId();
@@ -275,16 +243,17 @@ public class EventResultRouteBO {
 		int playerPhysicsHash = customCarEntity.getPhysicsProfileHash();
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
 		
-		if (speedBugChance || routeArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
+		if (carClassesEntity.getModelSmall() == null || isInterceptorEvent) { // If the car doesn't have a modelSmall name - we will not allow it for records
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Records cannot be saved on this car or event."), personaId);
+		}
+		if (!raceIssues && (speedBugChance || routeArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
 				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 
-				|| (eventClass != 607077938 && eventClass != customCarEntity.getCarClassHash())) {
+				|| (eventClass != 607077938 && eventClass != customCarEntity.getCarClassHash()))) {
 			raceIssues = true;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
 		}
-		if (carClassesEntity.getModelSmall() == null) { // If the car doesn't have a modelSmall name - we will not allow it for records
-			raceIssues = true;
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Records cannot be saved on this car."), personaId);
-		}
+		
 		// If some server admin did a manual player unban via DB, and forgot to uncheck the userBan field for him, this player should know about it
 		BigInteger zeroCheck = new BigInteger("0");
 		if (!recordsDAO.countBannedRecords(personaEntity.getUser().getId()).equals(zeroCheck)) {
@@ -311,6 +280,40 @@ public class EventResultRouteBO {
 					}
 				}).start();
 				}
+		}
+		
+		if (isInterceptorEvent) { // Bad code?
+			boolean isRacer = true;
+			String[] personaCopsStr = eventSessionEntity.getPersonaCops().split(",");
+			String[] personaRacersStr = eventSessionEntity.getPersonaRacers().split(",");
+			Long[] personaCopsList = personaListConverter.StrToLongList(personaCopsStr);
+			Long[] personaRacersList = personaListConverter.StrToLongList(personaRacersStr);
+			int finishReason = routeArbitrationPacket.getFinishReason();
+			for (Long personaCop : personaCopsList) {
+				// System.out.println("Cop ID " + personaCop);
+				if (personaCop.equals(activePersonaId)) {
+					// System.out.println("Cop: " + playerName);
+					isRacer = false;
+				}
+			}
+			for (Long personaRacer : personaRacersList) {
+				// System.out.println("Racer ID " + personaRacer);
+				if (personaRacer.equals(activePersonaId)) {
+					// System.out.println("Racer: " + playerName);
+					isRacer = true;
+				}
+			} 
+			if ((!isRacer && finishReason == 22) || (isRacer && finishReason == 16394)) {
+				// System.out.println("No rewards to isRacer " + isRacer + " " + playerName);
+				routeEventResult.setAccolades(new Accolades()); // No rewards
+			}
+			if ((!isRacer && finishReason == 16394 && isWinnerPresented == null) || (isRacer && finishReason == 22)) { // Rewards will be given
+				// System.out.println("Rewards given to isRacer " + isRacer + " " + playerName);
+				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode)); 
+			}
+		}
+		else {
+			routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode));
 		}
 		
 		return routeEventResult;
