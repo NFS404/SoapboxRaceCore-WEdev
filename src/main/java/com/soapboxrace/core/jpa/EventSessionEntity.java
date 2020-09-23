@@ -55,6 +55,9 @@ public class EventSessionEntity {
 	
 	@Column(name = "PERSONACOPS")
 	private String personaCops;
+	
+	@Column(name = "ISCOPSFAILED")
+	private boolean isCopsFailed;
 
 	public Long getId() {
 		return id;
@@ -158,5 +161,13 @@ public class EventSessionEntity {
 
 	public void setPersonaCops(String personaCops) {
 		this.personaCops = personaCops;
+	}
+	
+	public boolean isCopsFailed() {
+		return isCopsFailed;
+	}
+
+	public void setIsCopsFailed(boolean isCopsFailed) {
+		this.isCopsFailed = isCopsFailed;
 	}
 }

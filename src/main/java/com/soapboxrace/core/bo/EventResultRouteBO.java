@@ -97,6 +97,9 @@ public class EventResultRouteBO {
 	private CarClassesDAO carClassesDAO;
 	
 	@EJB
+	private EventBO eventBO;
+	
+	@EJB
 	private PersonaListConverter personaListConverter;
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, Long eventEnded) {
@@ -112,6 +115,7 @@ public class EventResultRouteBO {
 		String playerName = personaEntity.getName();
 		boolean isInterceptorEvent = eventEntity.getEventModeId() == 100 ? true : false;
 		Long isWinnerPresented = eventSessionEntity.getPersonaWinner();
+		boolean isCopsFailed = eventSessionEntity.isCopsFailed(); // Interceptor events only
 		
 		Long team1id = eventSessionEntity.getTeam1Id();
 		Long team2id = eventSessionEntity.getTeam2Id();
@@ -269,7 +273,6 @@ public class EventResultRouteBO {
 		if (isWinnerPresented == null) {
 			isWinnerPresented = activePersonaId;
 			eventSessionEntity.setPersonaWinner(activePersonaId);
-			eventSessionDao.update(eventSessionEntity);
 			if (preRegTeams) {
 				// System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, check");
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Debug - Teams finish, init, " + eventSessionId), personaId);
@@ -306,9 +309,17 @@ public class EventResultRouteBO {
 			} 
 			if ((!isRacer && finishReason == 22) || (isRacer && finishReason == 16394)) {
 				System.out.println("No rewards to isRacer " + isRacer + " " + playerName + ", session " + eventSessionId);
-				routeEventResult.setAccolades(new Accolades()); // No rewards
+				routeEventResult.setAccolades(new Accolades()); // No rewards (Cop on finish or Racer on timeout)
 			}
-			if ((!isRacer && finishReason == 16394 && isWinnerPresented == null) || (isRacer && finishReason == 22)) { // Rewards will be given
+			if (isRacer && finishReason == 22) { // Rewards will be given to racers
+				if (!isCopsFailed) { // If any racer has completed the route, cops has failed
+					isCopsFailed = true;
+					eventSessionEntity.setIsCopsFailed(isCopsFailed);
+				}
+				System.out.println("Rewards given to isRacer " + isRacer + " " + playerName + ", session " + eventSessionId);
+				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode)); 
+			}
+			if (!isRacer && finishReason == 16394 && !isCopsFailed) { // Rewards will be given to cops
 				System.out.println("Rewards given to isRacer " + isRacer + " " + playerName + ", session " + eventSessionId);
 				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode)); 
 			}
@@ -316,7 +327,7 @@ public class EventResultRouteBO {
 		else {
 			routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode));
 		}
-		
+		eventSessionDao.update(eventSessionEntity);
 		return routeEventResult;
 	}
 
