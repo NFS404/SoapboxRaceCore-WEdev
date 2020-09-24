@@ -563,15 +563,16 @@ public class AchievementsBO {
 
 	/**
 	 * Test attempt in custom server HUD alerts. Uses achievement's UI completion announcements as a base.
-	 * Will be deprecated in future, since it rewrites the temporal UI information about the player's score.
+	 * It rewrites the temporal UI information about the player's score, so we need to take the score from the player's persona.
 	 * @param personaId - ID of player persona
 	 * @param text - main text to display
 	 * @author Hypercycle
 	 */
 	public void broadcastUICustom(Long personaId, String text) {
+		PersonaEntity personaEntity = personaDAO.findById(personaId);
 		AchievementsAwarded achievementsAwarded = new AchievementsAwarded();
 		achievementsAwarded.setPersonaId(personaId);
-		achievementsAwarded.setScore(1337);
+		achievementsAwarded.setScore(personaEntity.getScore()); // Take the value from persona, since this messages is not achievements
 		AchievementAwarded achievementAwarded = new AchievementAwarded();
 
 		String achievedOnStr = "0001-01-01T00:00:00";
@@ -584,6 +585,7 @@ public class AchievementsBO {
 		} catch (Exception e) {
 			System.err.println("xml calendar str error");
 		}
+		// FIXME Add the DB-based message system, why not
 		achievementAwarded.setAchievedOn(achievedOnStr);
 		achievementAwarded.setAchievementDefinitionId((long) 104);
 		achievementAwarded.setClip("AchievementFlasherBase");
@@ -591,7 +593,7 @@ public class AchievementsBO {
 		achievementAwarded.setDescription("LOL");
 		achievementAwarded.setIcon("BADGE18");
 		achievementAwarded.setName(text);
-		achievementAwarded.setPoints(404);
+		achievementAwarded.setPoints(0);
 		achievementAwarded.setRare(false);
 		achievementAwarded.setRarity(0);
 
