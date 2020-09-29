@@ -17,9 +17,11 @@ import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.bo.util.PersonaListConverter;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
+import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.PersonaPresenceEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
@@ -64,6 +66,9 @@ public class Powerups {
 	
 	@EJB
 	private EventBO eventBO;
+	
+	@EJB
+	private PersonaListConverter personaListConverter;
 
 	@POST
 	@Path("/activated/{powerupHash}")
@@ -84,12 +89,7 @@ public class Powerups {
 					return "";
 				}
 			}
-			XMPP_ResponseTypePowerupActivated powerupActivatedResponse = new XMPP_ResponseTypePowerupActivated();
-			XMPP_PowerupActivatedType powerupActivated = new XMPP_PowerupActivatedType();
-			powerupActivated.setId(Long.valueOf(powerupHash));
-			powerupActivated.setTargetPersonaId(targetId);
-			powerupActivated.setPersonaId(activePersonaId);
-			powerupActivatedResponse.setPowerupActivated(powerupActivated);
+			XMPP_ResponseTypePowerupActivated powerupActivatedResponse = eventPowerupsBO.powerupResponce(powerupHash, targetId, activePersonaId);
 			// Experimental access timeout fix
 			new Thread(new Runnable() {
 				@Override
@@ -103,6 +103,7 @@ public class Powerups {
 					openFireSoapBoxCli.send(powerupActivatedResponse, receiverPersonaId);
 				}
 		    }
+			
             // If player has played on any of events, game will never set the eventSession to 0 again until the restart
 			// So we check it on the server-side
 			Long eventDataId = personaPresenceEntity.getCurrentEventDataId();

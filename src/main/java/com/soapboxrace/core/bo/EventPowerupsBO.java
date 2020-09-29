@@ -7,6 +7,8 @@ import com.soapboxrace.core.dao.EventPowerupsDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.EventPowerupsEntity;
+import com.soapboxrace.jaxb.xmpp.XMPP_PowerupActivatedType;
+import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypePowerupActivated;
 
 @Stateless
 public class EventPowerupsBO {
@@ -79,6 +81,16 @@ public class EventPowerupsBO {
 			isPowerupsUsed = true;
 		}
 		return isPowerupsUsed;
+	}
+	
+	public XMPP_ResponseTypePowerupActivated powerupResponce(Integer powerupHash, Long targetId, Long activePersonaId) {
+		XMPP_ResponseTypePowerupActivated powerupActivatedResponse = new XMPP_ResponseTypePowerupActivated();
+		XMPP_PowerupActivatedType powerupActivated = new XMPP_PowerupActivatedType();
+		powerupActivated.setId(Long.valueOf(powerupHash));
+		powerupActivated.setTargetPersonaId(targetId);
+		powerupActivated.setPersonaId(activePersonaId);
+		powerupActivatedResponse.setPowerupActivated(powerupActivated);
+		return powerupActivatedResponse;
 	}
 	
 }

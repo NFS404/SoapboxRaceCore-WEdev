@@ -238,27 +238,6 @@ public class OwnedCarConverter {
 			visualPartEntity.setCustomCar(customCarEntity);
 			visualPartEntity.setPartHash(visualPartTransTmp.getPartHash());
 			visualPartEntity.setSlotHash(visualPartTransTmp.getSlotHash());
-			// Hidden items placement system. Dirty, but it works!
-			// Dark black tint
-            if (visualPartEntity.getPartHash() == -463692545) {
-            	visualPartEntity.setPartHash(-340654404);
-            	visualPartEntity.setSlotHash(453545749);
-			   }
-            // License plate removal
-            if (visualPartEntity.getPartHash() == 1248338813) {
-            	visualPartEntity.setPartHash(357200846);
-            	visualPartEntity.setSlotHash(2106784967);
-			   }
-            // Custom exhaust model / removal
-            if (visualPartEntity.getPartHash() == -1755160514) {
-            	visualPartEntity.setPartHash(-1098970150);
-            	visualPartEntity.setSlotHash(-1515028479);
-			   }
-            // Hidden items reset tool - needs to be redone
-//          if (visualPartEntity.getPartHash() == -463692545) {
-//            	VisualPartDAO visualPartDAO = new VisualPartDAO();
-//            	visualPartDAO.deleteHiddenItems(customCarEntity);
-//			   }
 			visualPartEntityList.add(visualPartEntity);
 		}
 		customCarEntity.setVisualParts(visualPartEntityList);
