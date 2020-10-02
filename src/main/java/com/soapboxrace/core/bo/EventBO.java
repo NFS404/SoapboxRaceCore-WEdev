@@ -14,6 +14,7 @@ import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.NewsArticlesDAO;
 import com.soapboxrace.core.dao.ParameterDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventPowerupsEntity;
@@ -51,6 +52,9 @@ public class EventBO {
 	
 	@EJB
 	private NewsArticlesDAO newsArticlesDAO;
+	
+	@EJB
+	private UserDAO userDao;
 
 	public List<EventEntity> availableAtLevel(Long personaId) {
 		PersonaEntity personaEntity = personaDao.findById(personaId);
@@ -109,6 +113,9 @@ public class EventBO {
 		newsRotation.setShortTextHALId("TXT_NEWS_WEV2_ROTATION_" + rotationCur + "_SHORT");
 		newsRotation.setLongTextHALId("TXT_NEWS_WEV2_ROTATION_" + rotationCur + "_FULL");
 		newsArticlesDAO.update(newsRotation);
+		
+		// Reset money send limits
+		userDao.resetMoneySendLimit();
 		return "";
 	}
 	

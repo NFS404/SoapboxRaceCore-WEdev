@@ -47,4 +47,9 @@ public class UserDAO extends BaseDAO<UserEntity> {
 		createQuery.setParameter("id", userId);
 		createQuery.executeUpdate();
 	}
+	
+	public void resetMoneySendLimit() {
+		Query createQuery = entityManager.createQuery("UPDATE UserEntity obj SET obj.moneyGiven = 0");
+		createQuery.executeUpdate();
+	}
 }
