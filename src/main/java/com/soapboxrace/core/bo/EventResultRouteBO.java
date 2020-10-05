@@ -275,7 +275,7 @@ public class EventResultRouteBO {
 			eventSessionEntity.setPersonaWinner(activePersonaId);
 			if (preRegTeams) {
 				// System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, check");
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Debug - Teams finish, init, " + eventSessionId), personaId);
+				// openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Debug - Teams finish, init, " + eventSessionId), personaId);
 				new Thread(new Runnable() {
 					@Override
 					public void run() {

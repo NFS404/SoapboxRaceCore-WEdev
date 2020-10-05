@@ -161,7 +161,7 @@ public class TeamsBO {
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
 			}
-			System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, proceed");
+			// System.out.println("### TEAMS: EventSession " + eventSessionId + "has been completed, proceed");
 			EventSessionEntity eventSessionEntity = eventSessionDAO.findById(eventSessionId);
 			String message = "";
 			String messageLog = "";
@@ -244,10 +244,10 @@ public class TeamsBO {
 			PersonaEntity racerEntityDebug = personaDao.findById(racerDebug.getPersonaId());
 			racerTime = timeReadConverter.convertRecord(racerDebug.getServerEventDuration());
 			if (racerEntityDebug.getTeam().getTeamId() == winnerTeamEntity.getTeamId()) {
-				teamIcon = ":small_orange_diamond";
+				teamIcon = ":small_orange_diamond:";
 			}
 			if (racerEntityDebug.getTeam().getTeamId() == loserTeamEntity.getTeamId()) {
-				teamIcon = ":small_blue_diamond";
+				teamIcon = ":small_blue_diamond:";
 			}
 			message = message.concat(rankCounter + " - " + racerEntityDebug.getName() + " (*" + racerTime + "*) " + teamIcon + " \n");
 			rankCounter++;
