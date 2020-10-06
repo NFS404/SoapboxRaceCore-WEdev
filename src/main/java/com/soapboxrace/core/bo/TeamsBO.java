@@ -243,11 +243,14 @@ public class TeamsBO {
 		for (EventDataEntity racerDebug : listOfRacers) {
 			PersonaEntity racerEntityDebug = personaDao.findById(racerDebug.getPersonaId());
 			racerTime = timeReadConverter.convertRecord(racerDebug.getServerEventDuration());
-			if (racerEntityDebug.getTeam().getTeamId() == winnerTeamEntity.getTeamId()) {
-				teamIcon = ":small_orange_diamond:";
-			}
-			if (racerEntityDebug.getTeam().getTeamId() == loserTeamEntity.getTeamId()) {
-				teamIcon = ":small_blue_diamond:";
+			TeamsEntity racerTeam = racerEntityDebug.getTeam();
+			if (racerTeam != null) {
+				if (racerTeam.getTeamId() == winnerTeamEntity.getTeamId()) {
+					teamIcon = ":small_orange_diamond:";
+				}
+				if (racerTeam.getTeamId() == loserTeamEntity.getTeamId()) {
+					teamIcon = ":small_blue_diamond:";
+				}
 			}
 			message = message.concat(rankCounter + " - " + racerEntityDebug.getName() + " (*" + racerTime + "*) " + teamIcon + " \n");
 			rankCounter++;
