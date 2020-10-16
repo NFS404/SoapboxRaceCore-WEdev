@@ -120,7 +120,8 @@ public class PersonaBO {
 		CustomCarEntity customCarEntityVer = ownedCarEntity.getCustomCar();
 		
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCarEntityVer.getPhysicsProfileHash());
-		if (ownedCarEntity.getCarVersion() != carClassesEntity.getCarVersion()) {
+		// Re-calc class & rating
+		if (ownedCarEntity.getCarVersion() != carClassesEntity.getCarVersion() || customCarEntityVer.getRating() == 0) {
 			ownedCarEntity.setCarVersion(carClassesEntity.getCarVersion());
 			commerceBO.calcNewCarClass(customCarEntityVer);
 		}

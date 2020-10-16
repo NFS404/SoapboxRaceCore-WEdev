@@ -68,6 +68,9 @@ public class EventResultDragBO {
 	
 	@EJB
 	private CarClassesDAO carClassesDAO;
+	
+	@EJB
+	private EventBO eventBO;
 
 	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -132,6 +135,7 @@ public class EventResultDragBO {
 	        		+ "\n:japanese_goblin: **|** Player **" + playerName + "** was finished the event on **modder vehicle**, finish him.";
 			discordBot.sendMessage(message);
 		}
+		eventBO.updateEventCarInfo(activePersonaId, eventDataEntity.getId(), customCarEntity);
 		
 		ArrayOfDragEntrantResult arrayOfDragEntrantResult = new ArrayOfDragEntrantResult();
 		// +1 to play count for this track, MP

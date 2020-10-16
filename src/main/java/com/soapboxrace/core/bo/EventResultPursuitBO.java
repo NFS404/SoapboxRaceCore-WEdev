@@ -4,11 +4,13 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.OwnedCarDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
@@ -56,6 +58,12 @@ public class EventResultPursuitBO {
     
     @EJB
 	private ParameterBO parameterBO;
+    
+    @EJB
+	private EventBO eventBO;
+    
+    @EJB
+	private CustomCarDAO customCarDAO;
 
 	public PursuitEventResult handlePursuitEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, PursuitArbitrationPacket pursuitArbitrationPacket,
 			Boolean isBusted, Long eventEnded) {
@@ -65,6 +73,7 @@ public class EventResultPursuitBO {
 		eventSessionEntity.setEnded(System.currentTimeMillis());
 
 		eventSessionDao.update(eventSessionEntity);
+		String playerName = personaEntity.getName();
 
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 		// XKAYA's arbitration exploit fix
@@ -114,6 +123,18 @@ public class EventResultPursuitBO {
 			achievementsBO.applyPursuitCostToState(pursuitArbitrationPacket, personaEntity);
 			achievementsBO.applyAirTimeAchievement(pursuitArbitrationPacket, personaEntity);
 		}
+		
+		CustomCarEntity customCarEntity = customCarDAO.findById(eventDataEntity.getCarId());
+		int carPhysicsHash = customCarEntity.getPhysicsProfileHash();
+		if (carPhysicsHash == 202813212 || carPhysicsHash == -840317713 || carPhysicsHash == -845093474 || carPhysicsHash == -133221572 || carPhysicsHash == -409661256) {
+			// Player on ModCar cannot finish any event (since he is restricted from), but if he somehow was finished it, we should know
+			System.out.println("Player " + playerName + "has illegally finished the event on ModCar.");
+			String message = ":heavy_minus_sign:"
+	        		+ "\n:japanese_goblin: **|** Nгрок **" + playerName + "** участвовал в гонках на **моддерском слоте**, покончите с ним."
+	        		+ "\n:japanese_goblin: **|** Player **" + playerName + "** was finished the event on **modder vehicle**, finish him.";
+			discordBot.sendMessage(message);
+		}
+		eventBO.updateEventCarInfo(activePersonaId, eventDataEntity.getId(), customCarEntity);
 		
 		// Discord detailed report - Hypercycle
 		long reportHacks = pursuitArbitrationPacket.getHacksDetected();

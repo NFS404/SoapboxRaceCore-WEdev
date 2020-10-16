@@ -568,7 +568,7 @@ public class AchievementsBO {
 	 * @param text - main text to display
 	 * @author Hypercycle
 	 */
-	public void broadcastUICustom(Long personaId, String text) {
+	public void broadcastUICustom(Long personaId, String text, int seconds) {
 		PersonaEntity personaEntity = personaDAO.findById(personaId);
 		AchievementsAwarded achievementsAwarded = new AchievementsAwarded();
 		achievementsAwarded.setPersonaId(personaId);
@@ -589,7 +589,7 @@ public class AchievementsBO {
 		achievementAwarded.setAchievedOn(achievedOnStr);
 		achievementAwarded.setAchievementDefinitionId((long) 104);
 		achievementAwarded.setClip("AchievementFlasherBase");
-		achievementAwarded.setClipLengthInSeconds(10);
+		achievementAwarded.setClipLengthInSeconds(seconds);
 		achievementAwarded.setDescription("LOL");
 		achievementAwarded.setIcon("BADGE18");
 		achievementAwarded.setName(text);

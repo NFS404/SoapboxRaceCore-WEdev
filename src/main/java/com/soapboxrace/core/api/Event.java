@@ -69,12 +69,13 @@ public class Event {
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
 		Long eventDataId = eventBO.createEventDataSession(activePersonaId, eventSessionId, eventStarted);
 		eventBO.createEventPowerupsSession(activePersonaId, eventDataId);
+		eventBO.createEventCarInfo(activePersonaId, eventDataId);
 		EventEntity eventEntity = eventDataDAO.findById(eventDataId).getEvent();
 		int eventModeId = eventEntity.getEventModeId();
 		Long timeLimit = eventEntity.getTimeLimit();
 		personaPresenceDAO.updateCurrentEvent(activePersonaId, eventDataId, eventModeId, eventSessionId);
 		
-		if (timeLimit != 0) {
+		if (timeLimit != 0 && eventModeId != 24) { // Team Escape have it's own timeout action
 			eventResultBO.timeLimitTimer(eventSessionId, timeLimit);
 		}
 		return "";

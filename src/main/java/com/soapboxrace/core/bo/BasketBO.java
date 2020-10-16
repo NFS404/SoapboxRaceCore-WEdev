@@ -264,7 +264,7 @@ public class BasketBO {
 		if (carClassesEntity == null) {
 			return CommerceResultStatus.FAIL_INVALID_BASKET;
 		}
-		commerceBO.calcNewCarClass(customCarEntityVer);
+		commerceBO.calcNewCarClass(customCarEntityVer); // Calc car class and new rating value
 		ownedCarEntity.setCarVersion(carClassesEntity.getCarVersion());
 		carSlotDAO.insert(carSlotEntity);
 		

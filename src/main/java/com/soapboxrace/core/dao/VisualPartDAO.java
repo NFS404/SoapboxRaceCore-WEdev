@@ -40,5 +40,29 @@ public class VisualPartDAO extends BaseDAO<VisualPartEntity> {
 		List<VisualPartEntity> resultList = query.getResultList();
 		return !resultList.isEmpty() ? resultList.get(0) : null;
 	}
+	
+	public boolean isBodykitInstalled(CustomCarEntity customCarEntity) {
+		TypedQuery<VisualPartEntity> query = entityManager.createNamedQuery("VisualPartEntity.isBodykitInstalled", VisualPartEntity.class);
+		query.setParameter("customCar", customCarEntity);
+
+		List<VisualPartEntity> resultList = query.getResultList();
+		return !resultList.isEmpty() ? true : false;
+	}
+	
+	public boolean isSpoilerInstalled(CustomCarEntity customCarEntity) {
+		TypedQuery<VisualPartEntity> query = entityManager.createNamedQuery("VisualPartEntity.isSpoilerInstalled", VisualPartEntity.class);
+		query.setParameter("customCar", customCarEntity);
+
+		List<VisualPartEntity> resultList = query.getResultList();
+		return !resultList.isEmpty() ? true : false;
+	}
+	
+	public boolean isLowkitInstalled(CustomCarEntity customCarEntity) {
+		TypedQuery<VisualPartEntity> query = entityManager.createNamedQuery("VisualPartEntity.isLowkitInstalled", VisualPartEntity.class);
+		query.setParameter("customCar", customCarEntity);
+
+		List<VisualPartEntity> resultList = query.getResultList();
+		return !resultList.isEmpty() ? true : false;
+	}
 
 }

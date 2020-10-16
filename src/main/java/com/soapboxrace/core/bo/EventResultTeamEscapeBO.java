@@ -7,15 +7,18 @@ import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
+import com.soapboxrace.core.dao.EventMissionsDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
+import com.soapboxrace.core.jpa.EventMissionsEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppEvent;
+import com.soapboxrace.jaxb.http.Accolades;
 import com.soapboxrace.jaxb.http.ArrayOfTeamEscapeEntrantResult;
 import com.soapboxrace.jaxb.http.ExitPath;
 import com.soapboxrace.jaxb.http.TeamEscapeArbitrationPacket;
@@ -59,6 +62,15 @@ public class EventResultTeamEscapeBO {
 	
 	@EJB
 	private CustomCarDAO customCarDAO;
+	
+	@EJB
+	private EventMissionsDAO eventMissionsDAO;
+	
+	@EJB
+	private EventMissionsBO eventMissionsBO;
+	
+	@EJB
+	private EventBO eventBO;
 
 	public TeamEscapeEventResult handleTeamEscapeEnd(EventSessionEntity eventSessionEntity, Long activePersonaId,
 			TeamEscapeArbitrationPacket teamEscapeArbitrationPacket, Long eventEnded) {
@@ -78,13 +90,23 @@ public class EventResultTeamEscapeBO {
 
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 		String playerName = personaEntity.getName();
+		EventMissionsEntity eventMissionsEntity = eventMissionsDAO.getEventMission(eventSessionEntity.getEvent());
+		boolean isMission = eventMissionsEntity != null ? true : false;
+		// System.out.println("### TEST Acceleration Average: " + (teamEscapeArbitrationPacket.getPhysicsMetrics().getAccelerationAverage() * 3.6));
+		// System.out.println("### TEST Acceleration Max: " + (teamEscapeArbitrationPacket.getPhysicsMetrics().getAccelerationMaximum() * 3.6));
+		// System.out.println("### TEST Acceleration Median: " + (teamEscapeArbitrationPacket.getPhysicsMetrics().getAccelerationMedian() * 3.6));
+		// System.out.println("### TEST Speed Average: " + (teamEscapeArbitrationPacket.getPhysicsMetrics().getSpeedAverage() * 3.6));
+		// System.out.println("### TEST Speed Max: " + (teamEscapeArbitrationPacket.getPhysicsMetrics().getSpeedMaximum() * 3.6));
+		// System.out.println("### TEST Speed Median: " + (teamEscapeArbitrationPacket.getPhysicsMetrics().getSpeedMedian() * 3.6));
 
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 		// XKAYA's arbitration exploit fix
-		if (eventDataEntity.getArbitration()) {
-			System.out.println("WARINING - XKAYA's arbitration exploit attempt, driver: " + personaEntity.getName());
+		boolean arbitStatus = eventDataEntity.getArbitration();
+		if (arbitStatus) {
+			System.out.println("WARINING - XKAYA's arbitration exploit attempt, driver: " + playerName);
 			return null;
 		}
+		eventDataEntity.setArbitration(arbitStatus ? false : true);
 		int currentEventId = eventDataEntity.getEvent().getId();
 		achievementsBO.applyAirTimeAchievement(teamEscapeArbitrationPacket, personaEntity);
 		achievementsBO.applyPursuitCostToState(teamEscapeArbitrationPacket, personaEntity);
@@ -130,11 +152,12 @@ public class EventResultTeamEscapeBO {
 	        		+ "\n:japanese_goblin: **|** Player **" + playerName + "** was finished the event on **modder vehicle**, finish him.";
 			discordBot.sendMessage(message);
 		}
+		eventBO.updateEventCarInfo(activePersonaId, eventDataEntity.getId(), customCarEntity);
 		
 		ArrayOfTeamEscapeEntrantResult arrayOfTeamEscapeEntrantResult = new ArrayOfTeamEscapeEntrantResult();
+		EventEntity eventEntity = eventDAO.findById(currentEventId);
 		// +1 to play count for this track, MP
 		if (eventDataEntity.getRank() == 1 && arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() > 1) {
-			EventEntity eventEntity = eventDAO.findById(currentEventId);
 			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
 			personaEntity.setRacesCount(personaEntity.getRacesCount() + 1);
 			eventDAO.update(eventEntity);
@@ -142,7 +165,6 @@ public class EventResultTeamEscapeBO {
 		}
 		// +1 to play count for this track, SP (No default SP TEs)
 		if (arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() < 2) {
-			EventEntity eventEntity = eventDAO.findById(currentEventId);
 			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
 			personaEntity.setRacesCount(personaEntity.getRacesCount() + 1);
 			eventDAO.update(eventEntity);
@@ -183,7 +205,17 @@ public class EventResultTeamEscapeBO {
 		}
 
 		TeamEscapeEventResult teamEscapeEventResult = new TeamEscapeEventResult();
-		if (arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() < 2) {
+		int finishReason = teamEscapeArbitrationPacket.getFinishReason();
+		if (isMission) {
+			boolean isDone = eventMissionsBO.getEventMissionAccolades(eventEntity, eventMissionsEntity, activePersonaId, teamEscapeArbitrationPacket, finishReason);
+			if (isDone) {
+				// Continue
+			}
+			else {
+				teamEscapeEventResult.setAccolades(new Accolades());
+			}
+		}
+		if (!isMission && arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() < 2) {
 			// For now, you can't get the rewards on SP team escapes ;)
 			System.out.println("Player " + personaEntity.getName() + " has tried to finish Team Escape on SP mode.");
 		}

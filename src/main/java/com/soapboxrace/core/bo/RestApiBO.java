@@ -2,17 +2,21 @@ package com.soapboxrace.core.bo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.StringListConverter;
 import com.soapboxrace.core.dao.BanDAO;
 import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
+import com.soapboxrace.core.dao.EventCarInfoDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.ProductDAO;
 import com.soapboxrace.core.dao.RecordsDAO;
 import com.soapboxrace.core.dao.ReportDAO;
 import com.soapboxrace.core.dao.TreasureHuntDAO;
@@ -21,12 +25,14 @@ import com.soapboxrace.core.jpa.BanEntity;
 import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CarNameEntity;
 import com.soapboxrace.core.jpa.ClassCountEntity;
+import com.soapboxrace.core.jpa.EventCarInfoEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventPowerupsEntity;
 import com.soapboxrace.core.jpa.MostPopularEventEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.PersonaTopRaceEntity;
 import com.soapboxrace.core.jpa.PersonaTopTreasureHunt;
+import com.soapboxrace.core.jpa.ProductEntity;
 import com.soapboxrace.core.jpa.ProfileIconEntity;
 import com.soapboxrace.core.jpa.RecordsEntity;
 import com.soapboxrace.core.jpa.TreasureHuntEntity;
@@ -114,6 +120,26 @@ public class RestApiBO {
 	 */
 	@EJB
 	private CarClassesDAO carClassesDAO;
+	/**
+	 * Объект запросов в базу для получения информации об автомобилях в заезде
+	 */
+	@EJB
+	private EventCarInfoDAO eventCarInfoDAO;
+	/**
+	 * Объект запросов в базу для получения информации об автомобилях в заезде
+	 */
+	@EJB
+	private StringListConverter stringListConverter;
+	/**
+	 * Объект запросов в базу для получения предметов магазина
+	 */
+	@EJB
+	private ProductDAO productDAO;
+	/**
+	 * Объект запросов в базу для выполнения действии по части событии
+	 */
+	@EJB
+	private EventBO eventBO;
 	
 	
 	// ================= Функции выборки ================
@@ -304,6 +330,10 @@ public class RestApiBO {
 				final boolean isCarVersionVaild;
 				CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
 				EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
+				EventCarInfoEntity eventCarInfoEntity = eventCarInfoDAO.findByEventData(race.getEventDataId());
+				if (eventCarInfoEntity == null) {
+					eventCarInfoEntity = eventBO.createDummyEventCarInfo();
+				}
 				int serverCarVersionValue = carClassesEntity.getCarVersion();
 				if (serverCarVersionValue == race.getCarVersion()) {
 					isCarVersionVaild = true;
@@ -311,7 +341,8 @@ public class RestApiBO {
 				else {
 					isCarVersionVaild = false;
 				}
-				list.add(
+				
+				ArrayOfRaceWithTime.Race raceXml = list.add(
 						race.getId().intValue(), 
 						race.getPlayerName(),
 						race.getPersona().getIconIndex(),
@@ -338,8 +369,35 @@ public class RestApiBO {
 						eventPowerupsEntity.getRunFlatTires(),
 						eventPowerupsEntity.getInstantCooldown(),
 						eventPowerupsEntity.getTeamEmergencyEvade(),
-						eventPowerupsEntity.getTeamSlingshot()
+						eventPowerupsEntity.getTeamSlingshot(),
+						eventCarInfoEntity.getRating(),
+						eventCarInfoEntity.getBodykit(),
+						eventCarInfoEntity.getSpoiler(),
+						eventCarInfoEntity.getLowkit()
 					);
+
+				String perfStrArray = eventCarInfoEntity.getPerfParts();
+				if (!perfStrArray.contentEquals("")) {
+					Integer[] perfArray = stringListConverter.StrToIntList(perfStrArray.split(","));
+					for (int hash : perfArray) {
+						ProductEntity perf = productDAO.findByHash(hash);
+						raceXml.addPerfArray(
+		                        perf.getProductTitle(), // name
+		                        perf.getIcon() // icon
+		                        );
+					}
+				}
+				String skillStrArray = eventCarInfoEntity.getSkillParts();
+				if (!skillStrArray.contentEquals("")) {
+					Integer[] skillArray = stringListConverter.StrToIntList(skillStrArray.split(","));
+					for (int hash : skillArray) {
+						ProductEntity perf = productDAO.findByHash(hash);
+						raceXml.addSkillArray(
+		                        perf.getProductTitle(), // name
+		                        perf.getIcon() // icon
+		                        );
+					}
+				}
 			}
 		}
 		else {
@@ -347,6 +405,10 @@ public class RestApiBO {
 				final boolean isCarVersionVaild;
 				CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
 				EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
+				EventCarInfoEntity eventCarInfoEntity = eventCarInfoDAO.findByEventData(race.getEventDataId());
+				if (eventCarInfoEntity == null) {
+					eventCarInfoEntity = eventBO.createDummyEventCarInfo();
+				}
 				int serverCarVersionValue = carClassesEntity.getCarVersion();
 				if (serverCarVersionValue == race.getCarVersion()) {
 					isCarVersionVaild = true;
@@ -354,7 +416,7 @@ public class RestApiBO {
 				else {
 					isCarVersionVaild = false;
 				}
-				list.add(
+				ArrayOfRaceWithTime.Race raceXml = list.add(
 						race.getId().intValue(), 
 						race.getPlayerName(),
 						race.getPersona().getIconIndex(),
@@ -381,8 +443,35 @@ public class RestApiBO {
 						eventPowerupsEntity.getRunFlatTires(),
 						eventPowerupsEntity.getInstantCooldown(),
 						eventPowerupsEntity.getTeamEmergencyEvade(),
-						eventPowerupsEntity.getTeamSlingshot()
+						eventPowerupsEntity.getTeamSlingshot(),
+						eventCarInfoEntity.getRating(),
+						eventCarInfoEntity.getBodykit(),
+						eventCarInfoEntity.getSpoiler(),
+						eventCarInfoEntity.getLowkit()
 					);
+
+				String perfStrArray = eventCarInfoEntity.getPerfParts();
+				if (!perfStrArray.contentEquals("")) {
+					Integer[] perfArray = stringListConverter.StrToIntList(perfStrArray.split(","));
+					for (int hash : perfArray) {
+						ProductEntity perf = productDAO.findByHash(hash);
+						raceXml.addPerfArray(
+		                        perf.getProductTitle(), // name
+		                        perf.getIcon() // icon
+		                        );
+					}
+				}
+				String skillStrArray = eventCarInfoEntity.getSkillParts();
+				if (!skillStrArray.contentEquals("")) {
+					Integer[] skillArray = stringListConverter.StrToIntList(skillStrArray.split(","));
+					for (int hash : skillArray) {
+						ProductEntity perf = productDAO.findByHash(hash);
+						raceXml.addSkillArray(
+		                        perf.getProductTitle(), // name
+		                        perf.getIcon() // icon
+		                        );
+					}
+				}
 			}
 		}
 		return list;
@@ -419,6 +508,10 @@ public class RestApiBO {
 			final boolean isCarVersionVaild;
 			CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
 			EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
+			EventCarInfoEntity eventCarInfoEntity = eventCarInfoDAO.findByEventData(race.getEventDataId());
+			if (eventCarInfoEntity == null) {
+				eventCarInfoEntity = eventBO.createDummyEventCarInfo();
+			}
 			int serverCarVersionValue = carClassesEntity.getCarVersion();
 			if (serverCarVersionValue == race.getCarVersion()) {
 				isCarVersionVaild = true;
@@ -426,7 +519,7 @@ public class RestApiBO {
 			else {
 				isCarVersionVaild = false;
 			}
-			list.add(
+			ArrayOfRaceWithTime.Race raceXml = list.add(
 					race.getId().intValue(), 
 					race.getPlayerName(),
 					race.getPersona().getIconIndex(),
@@ -453,8 +546,35 @@ public class RestApiBO {
 					eventPowerupsEntity.getRunFlatTires(),
 					eventPowerupsEntity.getInstantCooldown(),
 					eventPowerupsEntity.getTeamEmergencyEvade(),
-					eventPowerupsEntity.getTeamSlingshot()
+					eventPowerupsEntity.getTeamSlingshot(),
+					eventCarInfoEntity.getRating(),
+					eventCarInfoEntity.getBodykit(),
+					eventCarInfoEntity.getSpoiler(),
+					eventCarInfoEntity.getLowkit()
 				);
+
+			String perfStrArray = eventCarInfoEntity.getPerfParts();
+			if (!perfStrArray.contentEquals("")) {
+				Integer[] perfArray = stringListConverter.StrToIntList(perfStrArray.split(","));
+				for (int hash : perfArray) {
+					ProductEntity perf = productDAO.findByHash(hash);
+					raceXml.addPerfArray(
+	                        perf.getProductTitle(), // name
+	                        perf.getIcon() // icon
+	                        );
+				}
+			}
+			String skillStrArray = eventCarInfoEntity.getSkillParts();
+			if (!skillStrArray.contentEquals("")) {
+				Integer[] skillArray = stringListConverter.StrToIntList(skillStrArray.split(","));
+				for (int hash : skillArray) {
+					ProductEntity perf = productDAO.findByHash(hash);
+					raceXml.addSkillArray(
+	                        perf.getProductTitle(), // name
+	                        perf.getIcon() // icon
+	                        );
+				}
+			}
 		}
 		return list;
 	}
@@ -528,7 +648,7 @@ public class RestApiBO {
 			banEnds = ban.getEndsAt();
 		}
 		
-		// =============== Diamods ===============
+		// =============== Diamonds ===============
 		int countDiamondsDay = 0;
 		TreasureHuntEntity diamond = diamondDAO.findById(persona.getPersonaId());
 		if (diamond != null && !diamond.getIsStreakBroken()) {

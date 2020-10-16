@@ -51,7 +51,7 @@ public class ChatAnnouncementsBO {
 						// FIXME Kinda broken - rewrites the temp value of player's score after announcement
 						if (announceType.contentEquals("achievement")) {
 							String messageAchievement = announcementEntity.getMessage();
-							achievementsBO.broadcastUICustom(member, messageAchievement);
+							achievementsBO.broadcastUICustom(member, messageAchievement, 10);
 						}
 					}
 				}

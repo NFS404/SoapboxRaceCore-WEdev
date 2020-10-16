@@ -64,7 +64,7 @@ public class ArrayOfRaceWithTime {
 		this.raceClass = raceClass;
 		this.eventClass = eventClass;
 	}
-	public void add(
+	public Race add(
 			int id,
 			String playerName,
 			int playerIconId,
@@ -91,11 +91,17 @@ public class ArrayOfRaceWithTime {
 			int pRunFlatTires,
 			int pCooldown,
 			int pTeamEvade,
-			int pTeamSlingshot
+			int pTeamSlingshot,
+			int rating,
+			boolean hasBodykit,
+			boolean hasSpoiler,
+			boolean hasLowkit
 		) {
-		races.add(new Race(id, playerName, playerIconId, carName, carClassHash, raceTime, raceAltTime, srvTime, airTime, lapTime, maxSpeed, perfectStart,
-				isSingle, date, isCarVersionVaild, pNos, pSlingshot, pOneMoreLap, pReady, pMagnet, pShield, pEvade, pJuggernaut, pRunFlatTires, 
-				pCooldown, pTeamEvade, pTeamSlingshot));
+		 Race race = new Race(id, playerName, playerIconId, carName, carClassHash, raceTime, raceAltTime, srvTime, airTime, lapTime, maxSpeed, perfectStart,
+	                isSingle, date, isCarVersionVaild, pNos, pSlingshot, pOneMoreLap, pReady, pMagnet, pShield, pEvade, pJuggernaut, pRunFlatTires, 
+	                pCooldown, pTeamEvade, pTeamSlingshot, rating, hasBodykit, hasSpoiler, hasLowkit);
+	     races.add(race);
+	     return race;
 	}
 	
 	@XmlAccessorType(XmlAccessType.FIELD)
@@ -126,7 +132,13 @@ public class ArrayOfRaceWithTime {
 		"pRunFlatTires",
 		"pCooldown",
 		"pTeamEvade",
-		"pTeamSlingshot"
+		"pTeamSlingshot",
+		"rating",
+		"perfArray",
+		"skillArray",
+		"hasBodykit",
+		"hasSpoiler",
+		"hasLowkit",
 	})
 	public static class Race {
 		@XmlElement(name = "id")
@@ -183,6 +195,32 @@ public class ArrayOfRaceWithTime {
 		private int pTeamEvade;
 		@XmlElement(name = "PTeamSlingshot")
 		private int pTeamSlingshot;
+		@XmlElement(name = "CarRating")
+		private int rating;
+		@XmlElement(name = "PerfArray")
+        private List<PerfItem> perfArray = new ArrayList<PerfItem>();
+        public void addPerfArray(String name, String icon) {
+            perfArray.add(new PerfItem(name,icon));
+        }
+        public List<PerfItem> getPerfArray() {
+            return perfArray;
+        }
+        
+        @XmlElement(name = "SkillArray")
+        private List<SkillItem> skillArray = new ArrayList<SkillItem>();
+        public void addSkillArray(String name, String icon) {
+            skillArray.add(new SkillItem(name,icon));
+        }
+        public List<SkillItem> getSkillArray() {
+            return skillArray;
+        }
+        
+		@XmlElement(name = "HasBodykit")
+		private boolean hasBodykit;
+		@XmlElement(name = "HasSpoiler")
+		private boolean hasSpoiler;
+		@XmlElement(name = "HasLowkit")
+		private boolean hasLowkit;
 		
 		protected Race(
 				int id,
@@ -211,7 +249,11 @@ public class ArrayOfRaceWithTime {
 				int pRunFlatTires,
 				int pCooldown,
 				int pTeamEvade,
-				int pTeamSlingshot
+				int pTeamSlingshot,
+				int rating,
+				boolean hasBodykit,
+				boolean hasSpoiler,
+				boolean hasLowkit
 			) {
 			this.id = id;
 			this.playerName = playerName;
@@ -239,6 +281,10 @@ public class ArrayOfRaceWithTime {
 			this.pCooldown = pCooldown;
 			this.pTeamEvade = pTeamEvade;
 			this.pTeamSlingshot = pTeamSlingshot;
+			this.rating = rating;
+			this.hasBodykit = hasBodykit;
+			this.hasSpoiler = hasSpoiler;
+			this.hasLowkit = hasLowkit;
 			
 			switch(carClassHash) {
 			case 872416321:
@@ -271,5 +317,44 @@ public class ArrayOfRaceWithTime {
 			}
 		}
 	}
-	
+    
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "PerfItem", propOrder = {
+        "name",
+        "icon",
+    })
+    public static class PerfItem {
+        @XmlElement(name = "name")
+        private String name;
+        @XmlElement(name = "icon")
+        private String icon;
+        
+        protected PerfItem(
+                String name,
+                String icon
+            ) {
+            this.name = name;
+            this.icon = icon; 
+        }
+    }
+    
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "SkillItem", propOrder = {
+        "name",
+        "icon",
+    })
+    public static class SkillItem {
+        @XmlElement(name = "name")
+        private String name;
+        @XmlElement(name = "icon")
+        private String icon;
+        
+        protected SkillItem(
+                String name,
+                String icon
+            ) {
+            this.name = name;
+            this.icon = icon;
+        }
+    }
 }

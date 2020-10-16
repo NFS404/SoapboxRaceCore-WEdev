@@ -6,11 +6,12 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
-import com.soapboxrace.core.bo.util.PersonaListConverter;
+import com.soapboxrace.core.bo.util.StringListConverter;
 import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
+import com.soapboxrace.core.dao.EventMissionsDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.RecordsDAO;
@@ -19,6 +20,7 @@ import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
+import com.soapboxrace.core.jpa.EventMissionsEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.TeamsEntity;
@@ -100,7 +102,13 @@ public class EventResultRouteBO {
 	private EventBO eventBO;
 	
 	@EJB
-	private PersonaListConverter personaListConverter;
+	private EventMissionsDAO eventMissionsDAO;
+	
+	@EJB
+	private EventMissionsBO eventMissionsBO;
+	
+	@EJB
+	private StringListConverter stringListConverter;
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -113,6 +121,10 @@ public class EventResultRouteBO {
 		int eventClass = eventEntity.getCarClassHash();
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 		String playerName = personaEntity.getName();
+		
+		EventMissionsEntity eventMissionsEntity = eventMissionsDAO.getEventMission(eventEntity);
+		boolean isMission = eventMissionsEntity != null ? true : false;
+		
 		boolean isInterceptorEvent = eventEntity.getEventModeId() == 100 ? true : false;
 		Long isWinnerPresented = eventSessionEntity.getPersonaWinner();
 		boolean isCopsFailed = eventSessionEntity.isCopsFailed(); // Interceptor events only
@@ -164,6 +176,7 @@ public class EventResultRouteBO {
 	        		+ "\n:japanese_goblin: **|** Player **" + playerName + "** was finished the event on **modder vehicle**, finish him.";
 			discordBot.sendMessage(message);
 		}
+		eventBO.updateEventCarInfo(activePersonaId, eventDataEntity.getId(), customCarEntity);
 
 		ArrayOfRouteEntrantResult arrayOfRouteEntrantResult = new ArrayOfRouteEntrantResult();
 		
@@ -286,13 +299,13 @@ public class EventResultRouteBO {
 				}
 		}
 		
+		int finishReason = routeArbitrationPacket.getFinishReason();
 		if (isInterceptorEvent) { // Bad code?
 			boolean isRacer = true;
 			String[] personaCopsStr = eventSessionEntity.getPersonaCops().split(",");
 			String[] personaRacersStr = eventSessionEntity.getPersonaRacers().split(",");
-			Long[] personaCopsList = personaListConverter.StrToLongList(personaCopsStr);
-			Long[] personaRacersList = personaListConverter.StrToLongList(personaRacersStr);
-			int finishReason = routeArbitrationPacket.getFinishReason();
+			Long[] personaCopsList = stringListConverter.StrToLongList(personaCopsStr);
+			Long[] personaRacersList = stringListConverter.StrToLongList(personaRacersStr);
 			for (Long personaCop : personaCopsList) {
 				// System.out.println("Cop ID " + personaCop);
 				if (personaCop.equals(activePersonaId)) {
@@ -322,6 +335,15 @@ public class EventResultRouteBO {
 			if (!isRacer && finishReason == 16394 && !isCopsFailed) { // Rewards will be given to cops
 				System.out.println("Rewards given to isRacer " + isRacer + " " + playerName + ", session " + eventSessionId);
 				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode)); 
+			}
+		}
+		if (isMission) {
+			boolean isDone = eventMissionsBO.getEventMissionAccolades(eventEntity, eventMissionsEntity, activePersonaId, routeArbitrationPacket, finishReason);
+			if (isDone) {
+				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode));
+			}
+			else {
+				routeEventResult.setAccolades(new Accolades());
 			}
 		}
 		else {

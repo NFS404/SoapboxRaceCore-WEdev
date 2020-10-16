@@ -17,7 +17,7 @@ import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
 
-import com.soapboxrace.core.bo.util.PersonaListConverter;
+import com.soapboxrace.core.bo.util.StringListConverter;
 import com.soapboxrace.core.bo.util.TimeReadConverter;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.LobbyDAO;
@@ -78,7 +78,7 @@ public class LobbyCountdownBO {
 	private VisualPartDAO visualPartDAO;
 	
 	@EJB
-	private PersonaListConverter personaListConverter;
+	private StringListConverter stringListConverter;
 	
 	@Resource
     private TimerService timerService;
@@ -188,11 +188,11 @@ public class LobbyCountdownBO {
 		}
 		if (isInterceptorEvent) {
 			if (!personaCops.isEmpty() && !personaRacers.isEmpty()) {	
-				eventSessionEntity.setPersonaCops(personaListConverter.interceptorPersonaList(personaCops));
-				eventSessionEntity.setPersonaRacers(personaListConverter.interceptorPersonaList(personaRacers));
+				eventSessionEntity.setPersonaCops(stringListConverter.interceptorPersonaList(personaCops));
+				eventSessionEntity.setPersonaRacers(stringListConverter.interceptorPersonaList(personaRacers));
 				eventSessionDao.update(eventSessionEntity);
-				String playersList = "### Cops: " + personaListConverter.interceptorPersonaChatList(personaCops) + "\n"
-						+ "## Racers: " + personaListConverter.interceptorPersonaChatList(personaRacers);
+				String playersList = "### Cops: " + stringListConverter.interceptorPersonaChatList(personaCops) + "\n"
+						+ "## Racers: " + stringListConverter.interceptorPersonaChatList(personaRacers);
 				for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
 					openFireSoapBoxCli.send(XmppChat.createSystemMessage(playersList), lobbyEntrantEntity.getPersona().getPersonaId());
 				}

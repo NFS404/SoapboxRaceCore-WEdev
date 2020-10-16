@@ -7,6 +7,8 @@ import javax.ejb.EJB;
 import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.StringListConverter;
+import com.soapboxrace.core.dao.EventCarInfoDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventPowerupsDAO;
@@ -15,13 +17,19 @@ import com.soapboxrace.core.dao.NewsArticlesDAO;
 import com.soapboxrace.core.dao.ParameterDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.UserDAO;
+import com.soapboxrace.core.dao.VisualPartDAO;
+import com.soapboxrace.core.jpa.CustomCarEntity;
+import com.soapboxrace.core.jpa.EventCarInfoEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventPowerupsEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.NewsArticlesEntity;
 import com.soapboxrace.core.jpa.ParameterEntity;
+import com.soapboxrace.core.jpa.PerformancePartEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
+import com.soapboxrace.core.jpa.SkillModPartEntity;
+import com.soapboxrace.core.jpa.VisualPartEntity;
 
 @Stateless
 public class EventBO {
@@ -55,6 +63,15 @@ public class EventBO {
 	
 	@EJB
 	private UserDAO userDao;
+	
+	@EJB
+	private EventCarInfoDAO eventCarInfoDao;
+	
+	@EJB
+	private VisualPartDAO visualPartDao;
+	
+	@EJB
+	private StringListConverter stringListConverter;
 
 	public List<EventEntity> availableAtLevel(Long personaId) {
 		PersonaEntity personaEntity = personaDao.findById(personaId);
@@ -77,6 +94,25 @@ public class EventBO {
 		eventPowerupsEntity.setEventData(eventDataId);
 		eventPowerupsDao.insert(eventPowerupsEntity);
 	}
+	
+	public void createEventCarInfo(Long personaId, Long eventDataId) {
+		EventCarInfoEntity eventCarInfoEntity = new EventCarInfoEntity();
+		eventCarInfoEntity.setEventData(eventDataId);
+		eventCarInfoEntity.setPersonaId(personaId);
+		eventCarInfoDao.insert(eventCarInfoEntity);
+	}
+	
+	// For old records without EventCarInfo data
+	public EventCarInfoEntity createDummyEventCarInfo() {
+		EventCarInfoEntity eventCarInfoEntity = new EventCarInfoEntity();
+		eventCarInfoEntity.setBodykit(false);
+		eventCarInfoEntity.setSpoiler(false);
+		eventCarInfoEntity.setLowkit(false);
+		eventCarInfoEntity.setRating(0);
+		eventCarInfoEntity.setPerfParts("");
+		eventCarInfoEntity.setSkillParts("");
+		return eventCarInfoEntity;
+	}
 
 	public EventSessionEntity createEventSession(int eventId) {
 		EventEntity eventEntity = eventDao.findById(eventId);
@@ -89,6 +125,25 @@ public class EventBO {
 		eventSessionEntity.setTeamNOS(true); // Temporal value
 		eventSessionDao.insert(eventSessionEntity);
 		return eventSessionEntity;
+	}
+	
+	public void updateEventCarInfo(Long personaId, Long eventDataId, CustomCarEntity customCarEntity) {
+		EventCarInfoEntity eventCarInfoEntity = eventCarInfoDao.findByEventData(eventDataId);
+		List<SkillModPartEntity> skillModsArray = customCarEntity.getSkillModParts();
+		List<PerformancePartEntity> perfArray = customCarEntity.getPerformanceParts();
+		
+		eventCarInfoEntity.setSkillParts(stringListConverter.skillModsStrArray(skillModsArray));
+		eventCarInfoEntity.setPerfParts(stringListConverter.perfPartsStrArray(perfArray));
+		
+		boolean hasBodykit = visualPartDao.isBodykitInstalled(customCarEntity);
+		boolean hasSpoiler = visualPartDao.isSpoilerInstalled(customCarEntity);
+		boolean hasLowkit = visualPartDao.isLowkitInstalled(customCarEntity);
+		
+		eventCarInfoEntity.setBodykit(hasBodykit);
+		eventCarInfoEntity.setSpoiler(hasSpoiler);
+		eventCarInfoEntity.setLowkit(hasLowkit);
+		eventCarInfoEntity.setRating(customCarEntity.getRating());
+		eventCarInfoDao.insert(eventCarInfoEntity);
 	}
 	
 	// Change the current events list (every week)

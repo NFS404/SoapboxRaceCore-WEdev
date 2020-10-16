@@ -267,6 +267,7 @@ public class CommerceBO {
 		}
 
 		customCarEntity.setCarClassHash(carclassHash);
+		customCarEntity.setRating(finalClassInt);
 	}
 
 	private void disableItem(ProductEntity productEntity) {

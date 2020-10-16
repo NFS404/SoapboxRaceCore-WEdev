@@ -18,7 +18,13 @@ import javax.persistence.Table;
                 @NamedQuery(name = "VisualPartEntity.deleteHiddenItems", //
         query = "DELETE FROM VisualPartEntity obj WHERE obj.customCar = :customCar AND (obj.slotHash = 1398141924 OR obj.slotHash = -1909727572 OR obj.slotHash = -1649588878 OR obj.slotHash = 1469703691 OR obj.slotHash = -1515028479)"), //
                 @NamedQuery(name = "VisualPartEntity.findCopLightsPart", //
-                query = "SELECT obj FROM VisualPartEntity obj WHERE obj.customCar = :customCar AND obj.partHash = 1672122654") //
+        query = "SELECT obj FROM VisualPartEntity obj WHERE obj.customCar = :customCar AND obj.partHash = 1672122654"), //
+                @NamedQuery(name = "VisualPartEntity.isBodykitInstalled", //
+        query = "SELECT obj FROM VisualPartEntity obj WHERE obj.customCar = :customCar AND obj.slotHash = -966088147"), //
+                @NamedQuery(name = "VisualPartEntity.isSpoilerInstalled", //
+        query = "SELECT obj FROM VisualPartEntity obj WHERE obj.customCar = :customCar AND obj.slotHash = -918850563"), //
+                @NamedQuery(name = "VisualPartEntity.isLowkitInstalled", //
+        query = "SELECT obj FROM VisualPartEntity obj WHERE obj.customCar = :customCar AND obj.slotHash = -2126743923"), //
 })
 public class VisualPartEntity {
 

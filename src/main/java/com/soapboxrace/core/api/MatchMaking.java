@@ -11,18 +11,18 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.soapboxrace.core.api.util.Secured;
-import com.soapboxrace.core.bo.AchievementsBO;
 import com.soapboxrace.core.bo.EventBO;
+import com.soapboxrace.core.bo.EventMissionsBO;
 import com.soapboxrace.core.bo.EventResultBO;
 import com.soapboxrace.core.bo.LobbyBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.dao.CarClassesDAO;
+import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.LobbyDAO;
-import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.jpa.CarClassesEntity;
+import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
-import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.jaxb.http.CustomCarTrans;
 import com.soapboxrace.jaxb.http.LobbyInfo;
 import com.soapboxrace.jaxb.http.SecurityChallenge;
@@ -44,22 +44,19 @@ public class MatchMaking {
 	private PersonaBO personaBO;
 	
 	@EJB
-	private PersonaDAO personaDao;
-	
-	@EJB
     private LobbyDAO lobbyDAO;
-	
-	@EJB
-	private AchievementsBO achievementsBO;
 	
 	@EJB
 	private EventResultBO eventResultBO;
 	
 	@EJB
-	private OpenFireSoapBoxCli openFireSoapBoxCli;
+	private CarClassesDAO carClassesDAO;
 	
 	@EJB
-	private CarClassesDAO carClassesDAO;
+	private EventMissionsBO eventMissionsBO;
+	
+	@EJB
+	private EventDAO eventDAO;
 
 	@PUT
 	@Secured
@@ -123,19 +120,10 @@ public class MatchMaking {
 		EventSessionEntity createEventSession = eventBO.createEventSession(eventId);
 		sessionInfo.setSessionId(createEventSession.getId());
 		tokenSessionBO.setActiveLobbyId(securityToken, 0L);
-		
-//		if (eventId == 1003) {
-//			achievementsBO.broadcastUICustom(activePersonaId, "Beat the time: 3:06.00");
-//		}
-//		if (eventId == 1004) {
-//			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st");
-//		}
-//		if (eventId == 1018) {
-//			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st after 4:15.00");
-//		}
-//		if (eventId == 1005) {
-//			achievementsBO.broadcastUICustom(activePersonaId, "Finish 1st");
-//		}
+	
+		EventEntity eventEntity = eventDAO.findById(eventId);
+		eventMissionsBO.getEventMissionInfo(eventEntity, activePersonaId);
+
 		return sessionInfo;
 	}
 

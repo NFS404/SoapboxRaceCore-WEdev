@@ -1,6 +1,7 @@
 
 package com.soapboxrace.core.jpa;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class PersonaEntity {
 	private int curCarIndex = 0;
 	private int carSlots = 6;
 	private int racesCount;
+	private LocalDate dailyRaceDate;
 
 	@ManyToOne
 	@JoinColumn(name = "USERID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "FK_PERSONA_USER"))
@@ -200,6 +202,14 @@ public class PersonaEntity {
 
 	public void setRacesCount(int racesCount) {
 		this.racesCount = racesCount;
+	}
+	
+	public LocalDate getDailyRaceDate() {
+		return dailyRaceDate;
+	}
+
+	public void setDailyRaceDate(LocalDate dailyRaceDate) {
+		this.dailyRaceDate = dailyRaceDate;
 	}
 
 }

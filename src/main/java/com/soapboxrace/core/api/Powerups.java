@@ -17,15 +17,13 @@ import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.bo.util.DiscordWebhook;
-import com.soapboxrace.core.bo.util.PersonaListConverter;
+import com.soapboxrace.core.bo.util.StringListConverter;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
-import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.PersonaPresenceEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
-import com.soapboxrace.jaxb.xmpp.XMPP_PowerupActivatedType;
 import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypePowerupActivated;
 
 @Path("/powerups")
@@ -68,7 +66,7 @@ public class Powerups {
 	private EventBO eventBO;
 	
 	@EJB
-	private PersonaListConverter personaListConverter;
+	private StringListConverter stringListConverter;
 
 	@POST
 	@Path("/activated/{powerupHash}")
