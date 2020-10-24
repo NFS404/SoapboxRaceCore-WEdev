@@ -377,7 +377,7 @@ public class RestApiBO {
 					);
 
 				String perfStrArray = eventCarInfoEntity.getPerfParts();
-				if (!perfStrArray.contentEquals("")) {
+				if (perfStrArray != null) {
 					Integer[] perfArray = stringListConverter.StrToIntList(perfStrArray.split(","));
 					for (int hash : perfArray) {
 						ProductEntity perf = productDAO.findByHash(hash);
@@ -388,7 +388,7 @@ public class RestApiBO {
 					}
 				}
 				String skillStrArray = eventCarInfoEntity.getSkillParts();
-				if (!skillStrArray.contentEquals("")) {
+				if (skillStrArray != null) {
 					Integer[] skillArray = stringListConverter.StrToIntList(skillStrArray.split(","));
 					for (int hash : skillArray) {
 						ProductEntity perf = productDAO.findByHash(hash);
@@ -451,7 +451,7 @@ public class RestApiBO {
 					);
 
 				String perfStrArray = eventCarInfoEntity.getPerfParts();
-				if (!perfStrArray.contentEquals("")) {
+				if (perfStrArray != null) {
 					Integer[] perfArray = stringListConverter.StrToIntList(perfStrArray.split(","));
 					for (int hash : perfArray) {
 						ProductEntity perf = productDAO.findByHash(hash);
@@ -462,7 +462,7 @@ public class RestApiBO {
 					}
 				}
 				String skillStrArray = eventCarInfoEntity.getSkillParts();
-				if (!skillStrArray.contentEquals("")) {
+				if (skillStrArray != null) {
 					Integer[] skillArray = stringListConverter.StrToIntList(skillStrArray.split(","));
 					for (int hash : skillArray) {
 						ProductEntity perf = productDAO.findByHash(hash);
