@@ -64,6 +64,7 @@
 			A_V12_VANTAGE<br />
 			A_VIPER_ACR<br />
 			A_XKR<br />
+			A_VIPER<br />
 			A_Z4_GT3<br />
 			A_ZONDA_F<br />
 			A_ZONDA_F_RDSTR<br /><br />
@@ -98,8 +99,7 @@
 			B_PANAMERA<br />
 			B_R8<br />
 			B_ROADRUNNER<br />
-			B_SHELBYTERLINGUA<br />
-			B_VIPER<br /><br />
+			B_SHELBYTERLINGUA<br /><br />
 
 			C_30CSL<br />
 			C_370Z<br />
