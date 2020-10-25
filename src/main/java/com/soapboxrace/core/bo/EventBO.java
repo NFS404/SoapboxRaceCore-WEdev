@@ -109,8 +109,8 @@ public class EventBO {
 		eventCarInfoEntity.setSpoiler(false);
 		eventCarInfoEntity.setLowkit(false);
 		eventCarInfoEntity.setRating(0);
-		eventCarInfoEntity.setPerfParts("");
-		eventCarInfoEntity.setSkillParts("");
+		eventCarInfoEntity.setPerfParts(null);
+		eventCarInfoEntity.setSkillParts(null);
 		return eventCarInfoEntity;
 	}
 
