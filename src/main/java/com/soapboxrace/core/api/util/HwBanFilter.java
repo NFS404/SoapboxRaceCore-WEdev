@@ -10,6 +10,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
+import com.soapboxrace.core.bo.AuthenticationBO;
 import com.soapboxrace.core.bo.HardwareInfoBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.jpa.UserEntity;
@@ -24,6 +25,9 @@ public class HwBanFilter implements ContainerRequestFilter {
 
 	@EJB
 	private TokenSessionBO tokenBO;
+	
+	@EJB
+	private AuthenticationBO authenticationBO;
 
 	@Context
 	private HttpServletRequest sr;
@@ -33,7 +37,9 @@ public class HwBanFilter implements ContainerRequestFilter {
 		String securityToken = requestContext.getHeaderString("securityToken");
 		UserEntity user = tokenBO.getUser(securityToken);
 		String gameHardwareHash = user.getGameHardwareHash();
-		if (hardwareInfoBO.isHardwareHashBanned(gameHardwareHash) && !user.getIgnoreHWBan()) {
+		// FIXME Another ban-check layer, might increase the data loading time
+		if ((hardwareInfoBO.isHardwareHashBanned(gameHardwareHash) && !user.getIgnoreHWBan()) 
+				|| authenticationBO.checkIsBannedAccount(user.getEmail()) != null) {
 			requestContext.abortWith(Response.status(Response.Status.GONE).build());
 		}
 	}
