@@ -29,7 +29,6 @@ import com.soapboxrace.core.jpa.ParameterEntity;
 import com.soapboxrace.core.jpa.PerformancePartEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.SkillModPartEntity;
-import com.soapboxrace.core.jpa.VisualPartEntity;
 
 @Stateless
 public class EventBO {
@@ -131,6 +130,7 @@ public class EventBO {
 		EventCarInfoEntity eventCarInfoEntity = eventCarInfoDao.findByEventData(eventDataId);
 		List<SkillModPartEntity> skillModsArray = customCarEntity.getSkillModParts();
 		List<PerformancePartEntity> perfArray = customCarEntity.getPerformanceParts();
+		int carRating = customCarEntity.getRating();
 		
 		eventCarInfoEntity.setSkillParts(stringListConverter.skillModsStrArray(skillModsArray));
 		eventCarInfoEntity.setPerfParts(stringListConverter.perfPartsStrArray(perfArray));
@@ -142,8 +142,9 @@ public class EventBO {
 		eventCarInfoEntity.setBodykit(hasBodykit);
 		eventCarInfoEntity.setSpoiler(hasSpoiler);
 		eventCarInfoEntity.setLowkit(hasLowkit);
-		eventCarInfoEntity.setRating(customCarEntity.getRating());
-		eventCarInfoDao.insert(eventCarInfoEntity);
+		eventCarInfoEntity.setRating(carRating);
+		eventCarInfoEntity.setEventEnded(true);
+		eventCarInfoDao.update(eventCarInfoEntity);
 	}
 	
 	// Change the current events list (every week)

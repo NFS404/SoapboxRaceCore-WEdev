@@ -4,20 +4,17 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
-import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
-import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
-import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.core.xmpp.XmppEvent;
 import com.soapboxrace.jaxb.http.ArrayOfDragEntrantResult;
 import com.soapboxrace.jaxb.http.DragArbitrationPacket;
@@ -58,19 +55,16 @@ public class EventResultDragBO {
 	private EventResultBO eventResultBO;
 	
 	@EJB
-	private RecordsBO recordsBO;
-	
-	@EJB
 	private CustomCarDAO customCarDAO;
 	
 	@EJB
 	private DiscordWebhook discordBot;
 	
 	@EJB
-	private CarClassesDAO carClassesDAO;
+	private EventBO eventBO;
 	
 	@EJB
-	private EventBO eventBO;
+	private LegitRaceBO legitRaceBO;
 
 	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -135,7 +129,8 @@ public class EventResultDragBO {
 	        		+ "\n:japanese_goblin: **|** Player **" + playerName + "** was finished the event on **modder vehicle**, finish him.";
 			discordBot.sendMessage(message);
 		}
-		eventBO.updateEventCarInfo(activePersonaId, eventDataEntity.getId(), customCarEntity);
+		Long eventDataId = eventDataEntity.getId();
+		eventBO.updateEventCarInfo(activePersonaId, eventDataId, customCarEntity);
 		
 		ArrayOfDragEntrantResult arrayOfDragEntrantResult = new ArrayOfDragEntrantResult();
 		// +1 to play count for this track, MP
@@ -190,26 +185,8 @@ public class EventResultDragBO {
 		dragEventResult.setLobbyInviteId(0);
 		dragEventResult.setPersonaId(activePersonaId);
 		
-		// Separate race stats
-		boolean raceIssues = false;
-		Long raceHacks = dragArbitrationPacket.getHacksDetected();
-		Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
-		Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
-		int playerPhysicsHash = customCarEntity.getPhysicsProfileHash();
-		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
-		
-		if (speedBugChance || dragArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
-				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 || customCarEntity.getCarClassHash() == 0) {
-			raceIssues = true;
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), activePersonaId);
-		}
-		if (carClassesEntity.getModelSmall() == null) { // If the car doesn't have a modelSmall name - we will not allow it for records
-			raceIssues = true;
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Records cannot be saved on this car."), activePersonaId);
-		}
-		if (!raceIssues) {
-			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity, carClassesEntity);
-		}
+		// Check race record
+		legitRaceBO.isRecordVaildDrag(dragArbitrationPacket, eventDataEntity, customCarEntity, speedBugChance, personaEntity, eventEntity);
 		
 		return dragEventResult;
 	}

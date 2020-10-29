@@ -134,13 +134,14 @@ public class EventResultPursuitBO {
 	        		+ "\n:japanese_goblin: **|** Player **" + playerName + "** was finished the event on **modder vehicle**, finish him.";
 			discordBot.sendMessage(message);
 		}
-		eventBO.updateEventCarInfo(activePersonaId, eventDataEntity.getId(), customCarEntity);
+		Long eventDataId = eventDataEntity.getId();
+		eventBO.updateEventCarInfo(activePersonaId, eventDataId, customCarEntity);
 		
 		// Discord detailed report - Hypercycle
 		long reportHacks = pursuitArbitrationPacket.getHacksDetected();
 		int reportDisabled = pursuitArbitrationPacket.getCopsDisabled();
 		int reportRammed = pursuitArbitrationPacket.getCopsRammed();
-		if ((reportHacks != 0 && reportHacks != 32) || (reportDisabled >= 15 && reportRammed <= 5)) {
+		if ((reportHacks != 0 && reportHacks != 32) || (reportDisabled >= 15 && reportRammed <= 5) || reportDisabled >= 999) {
 			float reportSpeed = pursuitArbitrationPacket.getTopSpeed();
 			float reportHeat = pursuitArbitrationPacket.getHeat();
 			int reportCOS = pursuitArbitrationPacket.getCostToState();

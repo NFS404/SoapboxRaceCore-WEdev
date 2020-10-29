@@ -30,6 +30,8 @@ public class EventCarInfoEntity {
 	private boolean spoiler;
 	private boolean lowkit;
 	
+	private boolean eventEnded;
+	
 	public Long getId() {
 		return id;
 	}
@@ -100,6 +102,14 @@ public class EventCarInfoEntity {
 
 	public void setLowkit(boolean lowkit) {
 		this.lowkit = lowkit;
+	}
+	
+	public boolean isEventEnded() {
+		return eventEnded;
+	}
+
+	public void setEventEnded(boolean eventEnded) {
+		this.eventEnded = eventEnded;
 	}
 	
 }

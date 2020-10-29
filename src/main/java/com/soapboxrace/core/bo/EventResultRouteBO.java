@@ -1,22 +1,17 @@
 package com.soapboxrace.core.bo;
 
-import java.math.BigInteger;
-
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.StringListConverter;
-import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventMissionsDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
-import com.soapboxrace.core.dao.RecordsDAO;
 import com.soapboxrace.core.dao.TeamsDAO;
-import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
@@ -36,10 +31,6 @@ import com.soapboxrace.jaxb.http.RouteEntrantResult;
 import com.soapboxrace.jaxb.http.RouteEventResult;
 import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypeRouteEntrantResult;
 import com.soapboxrace.jaxb.xmpp.XMPP_RouteEntrantResultType;
-
-// import com.soapboxrace.core.jpa.TeamsEntity;
-// import com.soapboxrace.core.xmpp.XmppChat;
-// import com.soapboxrace.jaxb.http.OwnedCarTrans;
 
 @Stateless
 public class EventResultRouteBO {
@@ -87,16 +78,7 @@ public class EventResultRouteBO {
 	private EventResultBO eventResultBO;
 	
 	@EJB
-	private RecordsBO recordsBO;
-	
-	@EJB
 	private CustomCarDAO customCarDAO;
-	
-	@EJB
-	private RecordsDAO recordsDAO;
-	
-	@EJB
-	private CarClassesDAO carClassesDAO;
 	
 	@EJB
 	private EventBO eventBO;
@@ -106,6 +88,9 @@ public class EventResultRouteBO {
 	
 	@EJB
 	private EventMissionsBO eventMissionsBO;
+	
+	@EJB
+	private LegitRaceBO legitRaceBO;
 	
 	@EJB
 	private StringListConverter stringListConverter;
@@ -176,7 +161,8 @@ public class EventResultRouteBO {
 	        		+ "\n:japanese_goblin: **|** Player **" + playerName + "** was finished the event on **modder vehicle**, finish him.";
 			discordBot.sendMessage(message);
 		}
-		eventBO.updateEventCarInfo(activePersonaId, eventDataEntity.getId(), customCarEntity);
+		Long eventDataId = eventDataEntity.getId();
+		eventBO.updateEventCarInfo(activePersonaId, eventDataId, customCarEntity);
 
 		ArrayOfRouteEntrantResult arrayOfRouteEntrantResult = new ArrayOfRouteEntrantResult();
 		
@@ -250,36 +236,8 @@ public class EventResultRouteBO {
 			eventDataEntitySP.setIsSingle(true);
 			eventDataDao.update(eventDataEntitySP);
 		}
-		
-		// Separate race stats
-		boolean raceIssues = false;
-		
-		Long raceHacks = routeArbitrationPacket.getHacksDetected();
-		Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
-		Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
-		int playerPhysicsHash = customCarEntity.getPhysicsProfileHash();
-		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
-		
-		if (carClassesEntity.getModelSmall() == null || isInterceptorEvent) { // If the car doesn't have a modelSmall name - we will not allow it for records
-			raceIssues = true;
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Records cannot be saved on this car or event."), personaId);
-		}
-		if (!raceIssues && (speedBugChance || routeArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
-				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 
-				|| (eventClass != 607077938 && eventClass != customCarEntity.getCarClassHash()))) {
-			raceIssues = true;
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
-		}
-		
-		// If some server admin did a manual player unban via DB, and forgot to uncheck the userBan field for him, this player should know about it
-		BigInteger zeroCheck = new BigInteger("0");
-		if (!recordsDAO.countBannedRecords(personaEntity.getUser().getId()).equals(zeroCheck)) {
-			raceIssues = true;
-			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Some records on this account is still banned, contact to server staff."), personaId);
-		}
-		if (!raceIssues) {
-			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity, carClassesEntity);
-		}
+		// Check race record
+		legitRaceBO.isRecordVaildRoute(routeArbitrationPacket, eventDataEntity, customCarEntity, isInterceptorEvent, speedBugChance, personaEntity, eventEntity);
 		
 		// Initiate the final team action check, only if both teams are registered for event
 		// FIXME If the players "fast enough", this sequence will be executed more than 1 time, since PersonaWinner will be null for multiple players

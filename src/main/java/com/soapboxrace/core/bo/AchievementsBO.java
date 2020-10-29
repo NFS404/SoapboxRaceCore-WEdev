@@ -424,6 +424,9 @@ public class AchievementsBO {
 		case WEV2_LUCKY_COLLECTOR:
 			int containerCars = achievementPersonaEntity.getContainerCars();
 			return Integer.valueOf(containerCars).longValue();
+		case WEV2_DISCORDBOOST:
+			int dBoostAmount = achievementPersonaEntity.getDBoostAmount();
+			return Integer.valueOf(dBoostAmount).longValue();
 		default:
 			break;
 		}
@@ -1158,6 +1161,19 @@ public class AchievementsBO {
 		containerCarsValue = containerCarsValue + 1;
 		achievementPersonaEntity.setContainerCars(containerCarsValue);
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_LUCKY_COLLECTOR, Integer.valueOf(containerCarsValue).longValue());
+	}
+	
+	/**
+	 * Apply "Our Supporter" achievement
+	 * @param personaEntity - player persona
+	 * @author Hypercycle
+	 */
+	public void applyDiscordBoost(PersonaEntity personaEntity) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		int dBoostValue = achievementPersonaEntity.getDBoostAmount();
+		dBoostValue = dBoostValue + 1;
+		achievementPersonaEntity.setDBoostAmount(dBoostValue);
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_DISCORDBOOST, Integer.valueOf(dBoostValue).longValue());
 	}
 	
 	/**

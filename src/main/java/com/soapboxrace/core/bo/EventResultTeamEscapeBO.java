@@ -152,7 +152,8 @@ public class EventResultTeamEscapeBO {
 	        		+ "\n:japanese_goblin: **|** Player **" + playerName + "** was finished the event on **modder vehicle**, finish him.";
 			discordBot.sendMessage(message);
 		}
-		eventBO.updateEventCarInfo(activePersonaId, eventDataEntity.getId(), customCarEntity);
+		Long eventDataId = eventDataEntity.getId();
+		eventBO.updateEventCarInfo(activePersonaId, eventDataId, customCarEntity);
 		
 		ArrayOfTeamEscapeEntrantResult arrayOfTeamEscapeEntrantResult = new ArrayOfTeamEscapeEntrantResult();
 		EventEntity eventEntity = eventDAO.findById(currentEventId);

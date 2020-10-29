@@ -1,9 +1,18 @@
 package com.soapboxrace.core.bo;
 
+import java.math.BigInteger;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.dao.CarClassesDAO;
+import com.soapboxrace.core.dao.RecordsDAO;
+import com.soapboxrace.core.jpa.CarClassesEntity;
+import com.soapboxrace.core.jpa.CustomCarEntity;
+import com.soapboxrace.core.jpa.EventDataEntity;
+import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
+import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
@@ -23,6 +32,15 @@ public class LegitRaceBO {
 	
 	@EJB
     private OpenFireSoapBoxCli openFireSoapBoxCli;
+	
+	@EJB
+	private CarClassesDAO carClassesDAO;
+	
+	@EJB
+	private RecordsDAO recordsDAO;
+	
+	@EJB
+	private RecordsBO recordsBO;
 
 	public boolean isLegit(Long activePersonaId, ArbitrationPacket arbitrationPacket, EventSessionEntity sessionEntity, boolean isSingle) {
 		int minimumTime = 0;
@@ -77,5 +95,74 @@ public class LegitRaceBO {
 					arbitrationPacket.getHacksDetected());
 		}
 		return legit;
+	}
+	
+	public void isRecordVaildRoute(RouteArbitrationPacket routeArbitrationPacket, EventDataEntity eventDataEntity, 
+			CustomCarEntity customCarEntity, boolean isInterceptorEvent, boolean speedBugChance, PersonaEntity personaEntity,
+			EventEntity eventEntity) {
+		boolean raceIssues = false;
+		int eventClass = eventEntity.getCarClassHash();
+		Long personaId = personaEntity.getPersonaId();
+				
+		Long raceHacks = routeArbitrationPacket.getHacksDetected();
+		Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
+		Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
+		int playerPhysicsHash = customCarEntity.getPhysicsProfileHash();
+		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
+				
+		if (carClassesEntity.getModelSmall() == null || isInterceptorEvent) { // If the car doesn't have a modelSmall name - we will not allow it for records
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Records cannot be saved on this car or event."), personaId);
+		}
+		if (speedBugChance) { // Prevent possibly speed-bugged time to be saved
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You game session is too long to save a record, restart the game."), personaId);
+		}
+		if (!raceIssues && (routeArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
+				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 
+				|| (eventClass != 607077938 && eventClass != customCarEntity.getCarClassHash()))) {
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
+		}
+				
+		// If some server admin did a manual player unban via DB, and forgot to uncheck the userBan field for him, this player should know about it
+		BigInteger zeroCheck = new BigInteger("0");
+		if (!recordsDAO.countBannedRecords(personaEntity.getUser().getId()).equals(zeroCheck)) {
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Some records on this account is still banned, contact to server staff."), personaId);
+		}
+		if (!raceIssues) {
+			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity, carClassesEntity);
+		}
+	}
+	
+	public void isRecordVaildDrag(DragArbitrationPacket dragArbitrationPacket, EventDataEntity eventDataEntity, 
+			CustomCarEntity customCarEntity, boolean speedBugChance, PersonaEntity personaEntity,
+			EventEntity eventEntity) {
+		boolean raceIssues = false;
+		Long personaId = personaEntity.getPersonaId();
+		
+		Long raceHacks = dragArbitrationPacket.getHacksDetected();
+		Long raceTime = eventDataEntity.getEventDurationInMilliseconds();
+		Long timeDiff = raceTime - eventDataEntity.getAlternateEventDurationInMilliseconds(); // If the time & altTime is differs so much, the player's data might be wrong
+		int playerPhysicsHash = customCarEntity.getPhysicsProfileHash();
+		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(playerPhysicsHash);
+				
+		if (speedBugChance) { // Prevent possibly speed-bugged time to be saved
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your game session is too long to save a record, restart the game."), personaId);
+		}
+		if (carClassesEntity.getModelSmall() == null || customCarEntity.getCarClassHash() == 0) { // If the car doesn't have a modelSmall name - we will not allow it for records
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Records cannot be saved on this car."), personaId);
+		}
+		if (dragArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
+				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000) {
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
+		}
+		if (!raceIssues) {
+			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity, carClassesEntity);
+		}
 	}
 }

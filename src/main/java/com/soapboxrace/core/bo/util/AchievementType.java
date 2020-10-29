@@ -327,7 +327,11 @@ public enum AchievementType {
 	/**
 	 * install 4-star skills on all slots for X cars
 	 */
-	WEV2_SKILL_MASTER(107); //
+	WEV2_SKILL_MASTER(107), //
+	/**
+	 * donate for Discord Boosts
+	 */
+	WEV2_DISCORDBOOST(108); //
 
 	private int id;
 
