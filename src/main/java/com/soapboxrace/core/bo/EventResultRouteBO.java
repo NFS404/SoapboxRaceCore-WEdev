@@ -3,6 +3,7 @@ package com.soapboxrace.core.bo;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.CarBrandsList;
 import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.StringListConverter;
 import com.soapboxrace.core.dao.CustomCarDAO;
@@ -93,6 +94,9 @@ public class EventResultRouteBO {
 	private LegitRaceBO legitRaceBO;
 	
 	@EJB
+	private CarBrandsList carBrandsList;
+	
+	@EJB
 	private StringListConverter stringListConverter;
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, Long eventEnded) {
@@ -106,6 +110,7 @@ public class EventResultRouteBO {
 		int eventClass = eventEntity.getCarClassHash();
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
 		String playerName = personaEntity.getName();
+		int playerRank = routeArbitrationPacket.getRank();
 		
 		EventMissionsEntity eventMissionsEntity = eventMissionsDAO.getEventMission(eventEntity);
 		boolean isMission = eventMissionsEntity != null ? true : false;
@@ -163,6 +168,7 @@ public class EventResultRouteBO {
 		}
 		Long eventDataId = eventDataEntity.getId();
 		eventBO.updateEventCarInfo(activePersonaId, eventDataId, customCarEntity);
+		achievementsBO.applyBrandsAchievements(personaEntity, carBrandsList.getBrandInfo(carPhysicsHash, activePersonaId));
 
 		ArrayOfRouteEntrantResult arrayOfRouteEntrantResult = new ArrayOfRouteEntrantResult();
 		
@@ -217,8 +223,9 @@ public class EventResultRouteBO {
 		routeEventResult.setInviteLifetimeInMilliseconds(0);
 		routeEventResult.setLobbyInviteId(0);
 		routeEventResult.setPersonaId(activePersonaId);
-		sendXmppPacket(eventSessionId, activePersonaId, routeArbitrationPacket);
+		sendXmppPacket(eventSessionId, activePersonaId, routeArbitrationPacket, playerRank);
 		EventEntity eventEntity2 = eventDAO.findById(currentEventId);
+		boolean isSingle = false;
 		// +1 to play count for this track, MP
 		if (eventDataEntity.getRank() == 1 && arrayOfRouteEntrantResult.getRouteEntrantResult().size() > 1) {
 			eventEntity2.setFinishCount(eventEntity2.getFinishCount() + 1);
@@ -233,8 +240,12 @@ public class EventResultRouteBO {
 			eventDAO.update(eventEntity2);
 			personaDAO.update(personaEntity);
 			EventDataEntity eventDataEntitySP = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
-			eventDataEntitySP.setIsSingle(true);
+			isSingle = true;
+			eventDataEntitySP.setIsSingle(isSingle);
 			eventDataDao.update(eventDataEntitySP);
+		}
+		if (playerRank < 4 && !isSingle) {
+			achievementsBO.applyBrandsAchievements(personaEntity, carBrandsList.getBrandInfo(carPhysicsHash, activePersonaId));
 		}
 		// Check race record
 		legitRaceBO.isRecordVaildRoute(routeArbitrationPacket, eventDataEntity, customCarEntity, isInterceptorEvent, speedBugChance, personaEntity, eventEntity);
@@ -304,7 +315,7 @@ public class EventResultRouteBO {
 				routeEventResult.setAccolades(new Accolades());
 			}
 		}
-		else {
+		if (!isInterceptorEvent) {
 			routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode));
 		}
 		eventSessionDao.update(eventSessionEntity);
@@ -320,14 +331,13 @@ public class EventResultRouteBO {
 		eventDataEntity.setRank(arbitrationPacket.getRank());
 	}
 
-	private void sendXmppPacket(Long eventSessionId, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket) {
+	private void sendXmppPacket(Long eventSessionId, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, int playerRank) {
 		XMPP_RouteEntrantResultType xmppRouteResult = new XMPP_RouteEntrantResultType();
 		xmppRouteResult.setBestLapDurationInMilliseconds(routeArbitrationPacket.getBestLapDurationInMilliseconds());
 		xmppRouteResult.setEventDurationInMilliseconds(routeArbitrationPacket.getEventDurationInMilliseconds());
 		xmppRouteResult.setEventSessionId(eventSessionId);
 		xmppRouteResult.setFinishReason(routeArbitrationPacket.getFinishReason());
 		xmppRouteResult.setPersonaId(activePersonaId);
-		int playerRank = routeArbitrationPacket.getRank();
 		xmppRouteResult.setRanking(playerRank);
 		xmppRouteResult.setTopSpeed(routeArbitrationPacket.getTopSpeed());
 

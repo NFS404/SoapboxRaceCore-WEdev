@@ -114,12 +114,16 @@ public class LegitRaceBO {
 			raceIssues = true;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Records cannot be saved on this car or event."), personaId);
 		}
-		if (speedBugChance) { // Prevent possibly speed-bugged time to be saved
+		if (!raceIssues && speedBugChance) { // Prevent possibly speed-bugged time to be saved
 			raceIssues = true;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You game session is too long to save a record, restart the game."), personaId);
 		}
+		if (!raceIssues && eventEntity.getMinTime() >= raceTime) { // Race minimal time-limit
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Minimal race time limit, record will be not saved."), personaId);
+		}
 		if (!raceIssues && (routeArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
-				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 
+				|| (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000 
 				|| (eventClass != 607077938 && eventClass != customCarEntity.getCarClassHash()))) {
 			raceIssues = true;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
@@ -152,12 +156,16 @@ public class LegitRaceBO {
 			raceIssues = true;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your game session is too long to save a record, restart the game."), personaId);
 		}
-		if (carClassesEntity.getModelSmall() == null || customCarEntity.getCarClassHash() == 0) { // If the car doesn't have a modelSmall name - we will not allow it for records
+		if (!raceIssues && (carClassesEntity.getModelSmall() == null || customCarEntity.getCarClassHash() == 0)) { // If the car doesn't have a modelSmall name - we will not allow it for records
 			raceIssues = true;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Records cannot be saved on this car."), personaId);
 		}
-		if (dragArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
-				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000) {
+		if (!raceIssues && eventEntity.getMinTime() >= raceTime) { // Race minimal time-limit
+			raceIssues = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Minimal race time limit, record will be not saved."), personaId);
+		}
+		if (!raceIssues && (dragArbitrationPacket.getFinishReason() != 22 || (raceHacks != 0 && raceHacks != 32) 
+				|| eventEntity.getMinTime() >= raceTime || (timeDiff > 1000 || timeDiff < -1000) || raceTime > 2000000)) {
 			raceIssues = true;
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild race session, restart the game and try again."), personaId);
 		}

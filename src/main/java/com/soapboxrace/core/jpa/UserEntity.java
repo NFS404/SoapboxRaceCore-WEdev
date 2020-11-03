@@ -89,6 +89,9 @@ public class UserEntity {
 	@Column(name = "frSyncAlt")
 	private boolean frSyncAlt;
 	
+	@Column(name = "dBoostAmount")
+	private int dBoostAmount;
+	
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -255,6 +258,14 @@ public class UserEntity {
 
 	public void setFRSyncAlt(boolean frSyncAlt) {
 		this.frSyncAlt = frSyncAlt;
+	}
+	
+	public int getDBoostAmount() {
+		return dBoostAmount;
+	}
+
+	public void setDBoostAmount(int dBoostAmount) {
+		this.dBoostAmount = dBoostAmount;
 	}
 
 }

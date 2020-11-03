@@ -71,7 +71,6 @@ public class AchievementPersonaEntity {
 	private int containerCars;
 	private int driverAgeDays;
 	private int sbAgeTaken;
-	private int dBoostAmount;
 
 	public int getId() {
 		return id;
@@ -369,11 +368,4 @@ public class AchievementPersonaEntity {
 		this.sbAgeTaken = sbAgeTaken;
 	}
 	
-	public int getDBoostAmount() {
-		return dBoostAmount;
-	}
-
-	public void setDBoostAmount(int dBoostAmount) {
-		this.dBoostAmount = dBoostAmount;
-	}
 }

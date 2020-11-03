@@ -3,6 +3,7 @@ package com.soapboxrace.core.bo;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.CarBrandsList;
 import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
@@ -65,19 +66,23 @@ public class EventResultDragBO {
 	
 	@EJB
 	private LegitRaceBO legitRaceBO;
+	
+	@EJB
+	private CarBrandsList carBrandsList;
 
 	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
 		eventSessionEntity.setEnded(System.currentTimeMillis());
 
 		eventSessionDao.update(eventSessionEntity);
+		int playerRank = dragArbitrationPacket.getRank();
 		
 		XMPP_DragEntrantResultType xmppDragResult = new XMPP_DragEntrantResultType();
 		xmppDragResult.setEventDurationInMilliseconds(dragArbitrationPacket.getEventDurationInMilliseconds());
 		xmppDragResult.setEventSessionId(eventSessionId);
 		xmppDragResult.setFinishReason(dragArbitrationPacket.getFinishReason());
 		xmppDragResult.setPersonaId(activePersonaId);
-		xmppDragResult.setRanking(dragArbitrationPacket.getRank());
+		xmppDragResult.setRanking(playerRank);
 		xmppDragResult.setTopSpeed(dragArbitrationPacket.getTopSpeed());
 
 		XMPP_ResponseTypeDragEntrantResult dragEntrantResultResponse = new XMPP_ResponseTypeDragEntrantResult();
@@ -109,7 +114,7 @@ public class EventResultDragBO {
 		eventDataEntity.setNumberOfCollisions(dragArbitrationPacket.getNumberOfCollisions());
 		eventDataEntity.setPerfectStart(dragArbitrationPacket.getPerfectStart());
 		eventDataEntity.setPersonaId(activePersonaId);
-		eventDataEntity.setRank(dragArbitrationPacket.getRank());
+		eventDataEntity.setRank(playerRank);
 		eventDataEntity.setSumOfJumpsDurationInMilliseconds(dragArbitrationPacket.getSumOfJumpsDurationInMilliseconds());
 		eventDataEntity.setTopSpeed(dragArbitrationPacket.getTopSpeed());
 		boolean speedBugChance = eventResultBO.speedBugChance(personaEntity.getUser().getLastLogin());
@@ -133,8 +138,9 @@ public class EventResultDragBO {
 		eventBO.updateEventCarInfo(activePersonaId, eventDataId, customCarEntity);
 		
 		ArrayOfDragEntrantResult arrayOfDragEntrantResult = new ArrayOfDragEntrantResult();
+		boolean isSingle = false;
 		// +1 to play count for this track, MP
-		if (eventDataEntity.getRank() == 1 && arrayOfDragEntrantResult.getDragEntrantResult().size() > 1) {
+		if (playerRank == 1 && arrayOfDragEntrantResult.getDragEntrantResult().size() > 1) {
 			eventEntity.setFinishCount(eventEntity.getFinishCount() + 1);
 			personaEntity.setRacesCount(personaEntity.getRacesCount() + 1);
 			eventDAO.update(eventEntity);
@@ -147,8 +153,12 @@ public class EventResultDragBO {
 			eventDAO.update(eventEntity);
 			personaDAO.update(personaEntity);
 			EventDataEntity eventDataEntitySP = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
-			eventDataEntitySP.setIsSingle(true);
+			isSingle = true;
+			eventDataEntitySP.setIsSingle(isSingle);
 			eventDataDao.update(eventDataEntitySP);
+		}
+		if (playerRank < 4 && !isSingle) {
+			achievementsBO.applyBrandsAchievements(personaEntity, carBrandsList.getBrandInfo(carPhysicsHash, activePersonaId));
 		}
 		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
 			DragEntrantResult dragEntrantResult = new DragEntrantResult();
@@ -163,7 +173,7 @@ public class EventResultDragBO {
 			if (!racer.getPersonaId().equals(activePersonaId)) {
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendDragEnd(dragEntrantResultResponse);
-				if (dragArbitrationPacket.getRank() == 1) {
+				if (playerRank == 1) {
 					xmppEvent.sendEventTimingOut(eventSessionId);
 				}
 			}
