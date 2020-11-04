@@ -2,10 +2,14 @@ package com.soapboxrace.core.jpa;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "ACHIEVEMENT_BRANDS")
+@NamedQueries({ //
+	@NamedQuery(name = "AchievementBrandsEntity.findByPersonaId", query = "SELECT obj FROM AchievementBrandsEntity obj where obj.personaId = :personaId") })
 
 public class AchievementBrandsEntity {
 

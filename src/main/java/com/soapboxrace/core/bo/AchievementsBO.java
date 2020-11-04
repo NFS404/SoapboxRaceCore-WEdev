@@ -177,7 +177,7 @@ public class AchievementsBO {
 		List<AchievementDefinitionEntity> allAchievements = achievementDAO.getAll();
 
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
-		AchievementBrandsEntity achievementBrandsEntity = achievementBrandsDAO.findById(personaId);
+		AchievementBrandsEntity achievementBrandsEntity = achievementBrandsDAO.findByPersona(personaId);
 
 		// Get the ranks & information about achievement stages
 		for (AchievementDefinitionEntity achievementDefinitionEntity : allAchievements) {
@@ -270,28 +270,22 @@ public class AchievementsBO {
 			int restrictedClassAWins = achievementPersonaEntity.getRestrictedClassAWins();
 			return Integer.valueOf(restrictedClassAWins).longValue();
 		case BENTLEY_COLLECTOR:
-			int brandBentleyWins = brandsWinsArray[3];
-			return Integer.valueOf(brandBentleyWins).longValue();
+			return 0l;
 		case BMW_COLLECTOR:
-			int brandBMWWins = brandsWinsArray[4];
-			return Integer.valueOf(brandBMWWins).longValue();
+			return 0l;
 		case B_CLASS_CHAMPION:
 			int restrictedClassBWins = achievementPersonaEntity.getRestrictedClassBWins();
 			return Integer.valueOf(restrictedClassBWins).longValue();
 		case CADILLAC_COLLECTOR:
-			int brandCadillacWins = brandsWinsArray[5];
-			return Integer.valueOf(brandCadillacWins).longValue();
+			return 0l;
 		case CAR_ARTIST:
 			return 0l;
 		case CATERHAM_COLLECTOR:
-			int brandCaterhamWins = brandsWinsArray[6];
-			return Integer.valueOf(brandCaterhamWins).longValue();
+			return 0l;
 		case CHEVROLET_COLLECTOR:
-			int brandChevroletWins = brandsWinsArray[7];
-			return Integer.valueOf(brandChevroletWins).longValue();
+			return 0l;
 		case CHRYSLER_COLLECTOR:
-			int brandChryslerWins = brandsWinsArray[8];
-			return Integer.valueOf(brandChryslerWins).longValue();
+			return 0l;
 		case COLLECTOR:
 			return 0l; // FIXME Work on it
 		case CREW_RACER:
@@ -306,8 +300,7 @@ public class AchievementsBO {
 		case DEVELOPER:
 			return 0l;
 		case DODGE_COLLECTOR:
-			int brandDodgeWins = brandsWinsArray[9];
-			return Integer.valueOf(brandDodgeWins).longValue();
+			return 0l;
 		case DRAG_RACER:
 			int mpDragWins = achievementPersonaEntity.getMpDragWins();
 			return Integer.valueOf(mpDragWins).longValue();
@@ -322,11 +315,9 @@ public class AchievementsBO {
 			int restrictedClassEWins = achievementPersonaEntity.getRestrictedClassEWins();
 			return Integer.valueOf(restrictedClassEWins).longValue();
 		case FORD_COLLECTOR:
-			int brandFordWins = brandsWinsArray[10];
-			return Integer.valueOf(brandFordWins).longValue();
+			return 0l;
 		case FORD_SHELBY_COLLECTOR:
-			int brandFordShelbyWins = brandsWinsArray[11];
-			return Integer.valueOf(brandFordShelbyWins).longValue();
+			return 0l;
 		case FRESH_COAT:
 			return 0l;
 		case GETAWAY_DRIVER:
@@ -336,26 +327,19 @@ public class AchievementsBO {
 			int teamScapePoliceDown = achievementPersonaEntity.getTeamScapePoliceDown();
 			return Integer.valueOf(teamScapePoliceDown).longValue();
 		case HUMMER_COLLECTOR:
-			int brandHummerWins = brandsWinsArray[12];
-			return Integer.valueOf(brandHummerWins).longValue();
+			return 0l;
 		case INFINITI_COLLECTOR:
-			int brandInfinitiWins = brandsWinsArray[13];
-			return Integer.valueOf(brandInfinitiWins).longValue();
+			return 0l;
 		case JAGUAR_COLLECTOR:
-			int brandJaguarWins = brandsWinsArray[14];
-			return Integer.valueOf(brandJaguarWins).longValue();
+			return 0l;
 		case JEEP_COLLECTOR:
-			int brandJeepWins = brandsWinsArray[15];
-			return Integer.valueOf(brandJeepWins).longValue();
+			return 0l;
 		case KOENIGSEGG_COLLECTOR:
-			int brandKoenigseggWins = brandsWinsArray[16];
-			return Integer.valueOf(brandKoenigseggWins).longValue();
+			return 0l;
 		case LAMBORGHINI_COLLECTOR:
-			int brandLamborghiniWins = brandsWinsArray[17];
-			return Integer.valueOf(brandLamborghiniWins).longValue();
+			return 0l;
 		case LANCIA_COLLECTOR:
-			int brandLanciaWins = brandsWinsArray[18];
-			return Integer.valueOf(brandLanciaWins).longValue();
+			return 0l;
 		case LEGENDARY_DRIVER:
 			int score = achievementPersonaEntity.getPersona().getScore();
 			return Integer.valueOf(score).longValue();
@@ -363,51 +347,39 @@ public class AchievementsBO {
 			int level = achievementPersonaEntity.getPersona().getLevel();
 			return Integer.valueOf(level).longValue();
 		case LEXUS_COLLECTOR:
-			int brandLexusWins = brandsWinsArray[19];
-			return Integer.valueOf(brandLexusWins).longValue();
+			return 0l;
 		case LONG_HAUL:
 			return achievementPersonaEntity.getEventMeters();
 		case LOTUS_COLLECTOR:
-			int brandLotusWins = brandsWinsArray[20];
-			return Integer.valueOf(brandLotusWins).longValue();
+			return 0l;
 		case MARUSSIA_COLLECTOR:
-			int brandMarussiaWins = brandsWinsArray[21];
-			return Integer.valueOf(brandMarussiaWins).longValue();
+			return 0l;
 		case MAZDA_COLLECTOR:
-			int brandMazdaWins = brandsWinsArray[22];
-			return Integer.valueOf(brandMazdaWins).longValue();
+			return 0l;
 		case MCLAREN_COLLECTOR:
-			int brandMcLarenWins = brandsWinsArray[23];
-			return Integer.valueOf(brandMcLarenWins).longValue();
+			return 0l;
 		case MERCEDES_BENZ_COLLECTOR:
-			int brandMercedesBenzWins = brandsWinsArray[24];
-			return Integer.valueOf(brandMercedesBenzWins).longValue();
+			return 0l;
 		case MITSUBISHI_COLLECTOR:
-			int brandMitsubishiWins = brandsWinsArray[25];
-			return Integer.valueOf(brandMitsubishiWins).longValue();
+			return 0l;
 		case NISSAN_COLLECTOR:
-			int brandNissanWins = brandsWinsArray[26];
-			return Integer.valueOf(brandNissanWins).longValue();
+			return 0l;
 		case OPEN_BETA:
 			return 0l;
 		case OUTLAW:
 			int pursuitWins = achievementPersonaEntity.getPursuitWins();
 			return Integer.valueOf(pursuitWins).longValue();
 		case PAGANI_COLLECTOR:
-			int brandPaganiWins = brandsWinsArray[27];
-			return Integer.valueOf(brandPaganiWins).longValue();
+			return 0l;
 		case PAYDAY:
 			int totalIncomeCash = achievementPersonaEntity.getTotalIncomeCash();
 			return Integer.valueOf(totalIncomeCash).longValue();
 		case PLYMOUTH_COLLECTOR:
-			int brandPlymouthWins = brandsWinsArray[28];
-			return Integer.valueOf(brandPlymouthWins).longValue();
+			return 0l;
 		case PONTIAC_COLLECTOR:
-			int brandPontiacWins = brandsWinsArray[29];
-			return Integer.valueOf(brandPontiacWins).longValue();
+			return 0l;
 		case PORSCHE_COLLECTOR:
-			int brandPorscheWins = brandsWinsArray[30];
-			return Integer.valueOf(brandPorscheWins).longValue();
+			return 0l;
 		case POWERING_UP:
 			return Integer.valueOf(achievementPersonaEntity.getUsedPowerups()).longValue();
 		case PRO_TUNER:
@@ -417,20 +389,16 @@ public class AchievementsBO {
 		case RACE_MODDER:
 			return 0l;
 		case RENAULT_COLLECTOR:
-			int brandRenaultWins = brandsWinsArray[31];
-			return Integer.valueOf(brandRenaultWins).longValue();
+			return 0l;
 		case SCION_COLLECTOR:
-			int brandScionWins = brandsWinsArray[32];
-			return Integer.valueOf(brandScionWins).longValue();
+			return 0l;
 		case SHELBY_COLLECTOR:
-			int brandShelbyWins = brandsWinsArray[33];
-			return Integer.valueOf(brandShelbyWins).longValue();
+			return 0l;
 		case SOLO_RACER:
 			int spRaces = achievementPersonaEntity.getSpRaces();
 			return Integer.valueOf(spRaces).longValue();
 		case SUBARU_COLLECTOR:
-			int brandSubaruWins = brandsWinsArray[34];
-			return Integer.valueOf(brandSubaruWins).longValue();
+			return 0l;
 		case S_CLASS_CHAMPION:
 			int restrictedClassSWins = achievementPersonaEntity.getRestrictedClassSWins();
 			return Integer.valueOf(restrictedClassSWins).longValue();
@@ -438,17 +406,14 @@ public class AchievementsBO {
 			int teamScapeBlocks = achievementPersonaEntity.getTeamScapeBlocks();
 			return Integer.valueOf(teamScapeBlocks).longValue();
 		case TOYOTA_COLLECTOR:
-			int brandToyotaWins = brandsWinsArray[35];
-			return Integer.valueOf(brandToyotaWins).longValue();
+			return 0l;
 		case TREASURE_HUNTER:
 			int treasureHunts = achievementPersonaEntity.getTreasureHunts();
 			return Integer.valueOf(treasureHunts).longValue();
 		case VAUXHALL_COLLECTOR:
-			int brandVauxhallWins = brandsWinsArray[36];
-			return Integer.valueOf(brandVauxhallWins).longValue();
+			return 0l;
 		case VOLKSWAGEN_COLLECTOR:
-			int brandVolkswagenWins = brandsWinsArray[37];
-			return Integer.valueOf(brandVolkswagenWins).longValue();
+			return 0l;
 		case WORLD_RACER:
 			int mpRaces = achievementPersonaEntity.getMpRaces();
 			return Integer.valueOf(mpRaces).longValue();
