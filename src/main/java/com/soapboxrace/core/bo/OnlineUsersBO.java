@@ -57,8 +57,7 @@ public class OnlineUsersBO {
 			ServerInfoEntity serverInfoEntity = serverInfoDAO.findInfo();
 			int onlineCount = serverInfoEntity.getOnlineNumber();
 			String message = ":heavy_minus_sign:"
-	        		+ "\n:cityscape: **|** Сейчас игроков на сервере: **" + onlineCount + "**"
-	        		+ "\n:cityscape: **|** Players online now on server: **" + onlineCount + "**"
+	        		+ "\n:cityscape: **|** Сейчас игроков на сервере / Players online now on server: **" + onlineCount + "**"
 			        + "\n:cityscape: **|** Текущая ротация трасс / Track Rotation: **#" + parameterBO.getIntParam("ROTATIONID") + "**";
 			discordBot.sendMessage(message);
 		}

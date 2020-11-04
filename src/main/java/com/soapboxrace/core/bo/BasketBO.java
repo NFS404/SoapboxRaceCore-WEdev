@@ -273,6 +273,7 @@ public class BasketBO {
 			productEntity.setEnabled(false);
 			productDao.update(productEntity);
 		}
+		achievementsBO.applyCollector(personaEntity);
 		return CommerceResultStatus.SUCCESS;
 	}
 	
@@ -477,6 +478,7 @@ public class BasketBO {
 		if (carClassHash == -405837480 || carClassHash == -2142411446 || selectedCar.isRare()) {
 			achievementsBO.applyLuckyCollector(personaEntity);
 		}
+		achievementsBO.applyCollector(personaEntity);
 		return CommerceResultStatus.SUCCESS;
 	}
 

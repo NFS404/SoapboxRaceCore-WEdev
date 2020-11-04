@@ -178,10 +178,13 @@ public class AchievementsBO {
 
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		AchievementBrandsEntity achievementBrandsEntity = achievementBrandsDAO.findByPersona(personaId);
+		int carsAmount = carSlotDAO.countPersonaCars(personaEntity.getPersonaId()).intValue();
+		forceApplyCollector(carsAmount, personaEntity);
 
 		// Get the ranks & information about achievement stages
 		for (AchievementDefinitionEntity achievementDefinitionEntity : allAchievements) {
-			Long currentValue = getCurrentValue(achievementDefinitionEntity, achievementPersonaEntity, personaEntity, achievementBrandsEntity);
+			Long currentValue = getCurrentValue(achievementDefinitionEntity, achievementPersonaEntity, personaEntity, achievementBrandsEntity,
+					carsAmount);
 			AchievementDefinitionPacket achievementDefinitionPacket = new AchievementDefinitionPacket();
 			achievementDefinitionPacket.setAchievementDefinitionId(achievementDefinitionEntity.getId().intValue());
 
@@ -247,7 +250,7 @@ public class AchievementsBO {
 	 * @author Nilzao, Hypercycle
 	 */
 	private Long getCurrentValue(AchievementDefinitionEntity achievementDefinitionEntity, AchievementPersonaEntity achievementPersonaEntity,
-			PersonaEntity personaEntity, AchievementBrandsEntity achievementBrandsEntity) {
+			PersonaEntity personaEntity, AchievementBrandsEntity achievementBrandsEntity, int carsAmount) {
 		int intValue = achievementDefinitionEntity.getId().intValue();
 		AchievementType achievementType = AchievementType.valueOf(intValue);
 		
@@ -287,7 +290,7 @@ public class AchievementsBO {
 		case CHRYSLER_COLLECTOR:
 			return 0l;
 		case COLLECTOR:
-			return 0l; // FIXME Work on it
+			return Integer.valueOf(carsAmount).longValue();
 		case CREW_RACER:
 			int privateRaces = achievementPersonaEntity.getPrivateRaces();
 			return Integer.valueOf(privateRaces).longValue();
@@ -432,7 +435,7 @@ public class AchievementsBO {
 			int Skills4Earned = achievementPersonaEntity.getSkills4Earned();
 			return Integer.valueOf(Skills4Earned).longValue();
 		case WEV2_BEGINNERSGUIDE:
-			int levelBG = achievementPersonaEntity.getPersona().getLevel();
+			int levelBG = personaEntity.getLevel();
 			return Integer.valueOf(levelBG).longValue();
 		case WEV2_SELL_AFTERMARKET:
 			int AftermarketSold = achievementPersonaEntity.getAftermarketSold();
@@ -1229,6 +1232,38 @@ public class AchievementsBO {
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Apply "Collector" achievement
+	 * @param personaEntity - player persona
+	 * @author Hypercycle
+	 */
+	public void applyCollector(PersonaEntity personaEntity) {
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		int carsAmount = carSlotDAO.countPersonaCars(personaEntity.getPersonaId()).intValue();
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.COLLECTOR, Integer.valueOf(carsAmount).longValue());
+	}
+	
+	/**
+	 * Force-apply the Collector achievement stages (if player don't got it before)
+	 * @param carsAmount - current car amount in persona's garage
+	 * @param personaEntity - player persona
+	 * @author Hypercycle
+	 */
+	// Checking each achievement stage there
+	// Maybe it can be improved?
+	public void forceApplyCollector (int carsAmount, PersonaEntity personaEntity) {
+		Integer[] ranksArray = new Integer[] {76,77,78,79,80};
+		Integer[] collectorStages = new Integer[] {10,25,50,75,100};
+		List<AchievementRankEntity> achievementRankEntityList = achievementRankDAO.findMultipleRanksByPersona(ranksArray, personaEntity);
+		int i = 0;
+		for (AchievementRankEntity collectorRank : achievementRankEntityList) {
+			if (carsAmount > (collectorStages[i] - 1) && achievementStateDAO.findByPersonaAchievementRank(personaEntity, collectorRank) == null) {
+				forceAchievementApply(ranksArray[i], personaEntity, true);
+			}
+			i++;
+		}
 	}
 	
 	/**

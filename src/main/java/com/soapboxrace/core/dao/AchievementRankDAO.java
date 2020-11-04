@@ -8,6 +8,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
+import com.soapboxrace.core.jpa.AchievementDefinitionEntity;
 import com.soapboxrace.core.jpa.AchievementRankEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 
@@ -68,5 +69,23 @@ public class AchievementRankDAO extends BaseDAO<AchievementRankEntity> {
 		query.setParameter("rewardDescription", rewardDescription);
 		List<AchievementRankEntity> results = query.getResultList();
 		return results.isEmpty() ? null : results.get(0);
+	}
+	
+	public List<AchievementRankEntity> findMultipleRanksByPersona(Integer[] ranksArray, PersonaEntity personaEntity) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT obj FROM AchievementRankEntity obj ");
+		sql.append("WHERE obj.persona = :persona AND (");
+		int count = ranksArray.length;
+		for (int i = 0; i < count; i++) {
+		  if (i == 0) {
+		    sql.append("obj.id = :"+ranksArray[i]);
+		  } else {
+		    sql.append("OR obj.id = :"+ranksArray[i]);
+		  }
+		}
+		TypedQuery<AchievementRankEntity> query = entityManager.createQuery(sql.toString(), AchievementRankEntity.class);
+		query.setParameter("persona", personaEntity);
+		List<AchievementRankEntity> results = query.getResultList();
+		return results.isEmpty() ? null : results;
 	}
 }
