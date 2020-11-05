@@ -150,8 +150,8 @@ public class AchievementsBO {
 	 * @author Nilzao
 	 */
 	public AchievementsPacket loadall(Long personaId) {
-		PersonaEntity personaEntity = new PersonaEntity();
-		personaEntity.setPersonaId(personaId);
+		PersonaEntity newPersonaEntity = new PersonaEntity();
+		newPersonaEntity.setPersonaId(personaId);
 		AchievementsPacket achievementsPacket = new AchievementsPacket();
 
 		ArrayOfBadgeDefinitionPacket arrayOfBadgeDefinitionPacket = new ArrayOfBadgeDefinitionPacket();
@@ -176,14 +176,15 @@ public class AchievementsBO {
 		List<AchievementDefinitionPacket> achievementDefinitionPacketList = arrayOfAchievementDefinitionPacket.getAchievementDefinitionPacket();
 		List<AchievementDefinitionEntity> allAchievements = achievementDAO.getAll();
 
+		PersonaEntity personaEntity = personaDAO.findById(personaId);
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		AchievementBrandsEntity achievementBrandsEntity = achievementBrandsDAO.findByPersona(personaId);
-		int carsAmount = carSlotDAO.countPersonaCars(personaEntity.getPersonaId()).intValue();
+		int carsAmount = carSlotDAO.countPersonaCars(personaId).intValue();
 		forceApplyCollector(carsAmount, personaEntity);
 
 		// Get the ranks & information about achievement stages
 		for (AchievementDefinitionEntity achievementDefinitionEntity : allAchievements) {
-			Long currentValue = getCurrentValue(achievementDefinitionEntity, achievementPersonaEntity, personaEntity, achievementBrandsEntity,
+			Long currentValue = getCurrentValue(achievementDefinitionEntity, achievementPersonaEntity, newPersonaEntity, achievementBrandsEntity,
 					carsAmount);
 			AchievementDefinitionPacket achievementDefinitionPacket = new AchievementDefinitionPacket();
 			achievementDefinitionPacket.setAchievementDefinitionId(achievementDefinitionEntity.getId().intValue());
@@ -207,7 +208,7 @@ public class AchievementsBO {
 				achievementRankPacket.setRewardVisualStyle(achievementRankEntity.getRewardVisualStyle());
 				achievementRankPacket.setThresholdValue(achievementRankEntity.getThresholdValue());
 
-				AchievementStateEntity personaAchievementRankState = achievementStateDAO.findByPersonaAchievementRank(personaEntity, achievementRankEntity);
+				AchievementStateEntity personaAchievementRankState = achievementStateDAO.findByPersonaAchievementRank(newPersonaEntity, achievementRankEntity);
 				if (personaAchievementRankState != null) {
 					try {
 						LocalDateTime achievedOn = personaAchievementRankState.getAchievedOn();
@@ -1252,14 +1253,13 @@ public class AchievementsBO {
 	 * @author Hypercycle
 	 */
 	// Checking each achievement stage there
-	// Maybe it can be improved?
+	// A bit unoptimized - makes separate DB request for every achievement stage in persona
 	public void forceApplyCollector (int carsAmount, PersonaEntity personaEntity) {
 		Integer[] ranksArray = new Integer[] {76,77,78,79,80};
-		Integer[] collectorStages = new Integer[] {10,25,50,75,100};
-		List<AchievementRankEntity> achievementRankEntityList = achievementRankDAO.findMultipleRanksByPersona(ranksArray, personaEntity);
+		List<AchievementRankEntity> getRanksList = achievementRankDAO.findMultipleRanksById(ranksArray);
 		int i = 0;
-		for (AchievementRankEntity collectorRank : achievementRankEntityList) {
-			if (carsAmount > (collectorStages[i] - 1) && achievementStateDAO.findByPersonaAchievementRank(personaEntity, collectorRank) == null) {
+		for (AchievementRankEntity collectorRank : getRanksList) {
+			if (carsAmount > (collectorRank.getThresholdValue() - 1) && achievementStateDAO.findByPersonaAchievementRank(personaEntity, collectorRank) == null) {
 				forceAchievementApply(ranksArray[i], personaEntity, true);
 			}
 			i++;

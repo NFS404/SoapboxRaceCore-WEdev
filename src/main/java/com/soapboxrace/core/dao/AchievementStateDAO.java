@@ -55,6 +55,26 @@ public class AchievementStateDAO extends BaseDAO<AchievementStateEntity> {
 		return resultList;
 	}
 	
+	// Unused
+	public List<AchievementStateEntity> findMultipleRanksByPersona(List<AchievementRankEntity> ranksList, PersonaEntity personaEntity) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT obj FROM AchievementStateEntity obj ");
+		sql.append("WHERE obj.persona = :persona AND (");
+		int count = ranksList.size();
+		for (int i = 0; i < count; i++) {
+		  if (i == 0) {
+		    sql.append("obj.achievementRank = "+ranksList.get(i));
+		  } else {
+		    sql.append(" OR obj.achievementRank = "+ranksList.get(i));
+		  }
+		}
+		sql.append(")");
+		TypedQuery<AchievementStateEntity> query = entityManager.createQuery(sql.toString(), AchievementStateEntity.class);
+		query.setParameter("persona", personaEntity);
+		List<AchievementStateEntity> results = query.getResultList();
+		return results.isEmpty() ? null : results;
+	}
+	
 	public void deleteByPersona(Long personaId) {
 		Query query = entityManager.createNamedQuery("AchievementStateEntity.deleteByPersona");
 		query.setParameter("personaId", personaId);
