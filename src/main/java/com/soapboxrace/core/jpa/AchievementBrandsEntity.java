@@ -19,6 +19,41 @@ public class AchievementBrandsEntity {
 	private int alfaRomeoWins;
 	private int astonMartinWins;
 	private int audiWins;
+	private int bentleyWins;
+	private int bmwWins;
+	private int cadillacWins;
+	private int caterhamWins;
+	private int chevroletWins;
+	private int chryslerWins;
+	private int dodgeWins;
+	private int fordWins;
+	private int fordShelbyWins;
+	private int hummerWins;
+	private int infinitiWins;
+	private int jaguarWins;
+	private int jeepWins;
+	private int koenigseggWins;
+	private int lamborghiniWins;
+	private int lanciaWins;
+	private int lexusWins;
+	private int lotusWins;
+	private int marussiaWins;
+	private int mazdaWins;
+	private int mclarenWins;
+	private int mercedesBenzWins;
+	private int mitsubishiWins;
+	private int nissanWins;
+	private int paganiWins;
+	private int plymouthWins;
+	private int pontiacWins;
+	private int porscheWins;
+	private int renaultWins;
+	private int scionWins;
+	private int shelbyWins;
+	private int subaruWins;
+	private int toyotaWins;
+	private int vauxhallWins;
+	private int volkswagenWins;
 
 	public Long getPersonaId() {
 		return personaId;
@@ -50,6 +85,286 @@ public class AchievementBrandsEntity {
 
 	public void setAudiWins(int audiWins) {
 		this.audiWins = audiWins;
+	}
+	
+	public int getBentleyWins() {
+		return bentleyWins;
+	}
+
+	public void setBentleyWins(int bentleyWins) {
+		this.bentleyWins = bentleyWins;
+	}
+	
+	public int getBMWWins() {
+		return bmwWins;
+	}
+
+	public void setBMWWins(int bmwWins) {
+		this.bmwWins = bmwWins;
+	}
+	
+	public int getCadillacWins() {
+		return cadillacWins;
+	}
+
+	public void setCadillacWins(int cadillacWins) {
+		this.cadillacWins = cadillacWins;
+	}
+	
+	public int getCaterhamWins() {
+		return caterhamWins;
+	}
+
+	public void setCaterhamWins(int caterhamWins) {
+		this.caterhamWins = caterhamWins;
+	}
+	
+	public int getChevroletWins() {
+		return chevroletWins;
+	}
+
+	public void setChevroletWins(int chevroletWins) {
+		this.chevroletWins = chevroletWins;
+	}
+	
+	public int getChryslerWins() {
+		return chryslerWins;
+	}
+
+	public void setChryslerWins(int chryslerWins) {
+		this.chryslerWins = chryslerWins;
+	}
+	
+	public int getDodgeWins() {
+		return dodgeWins;
+	}
+
+	public void setDodgeWins(int dodgeWins) {
+		this.dodgeWins = dodgeWins;
+	}
+	
+	public int getFordWins() {
+		return fordWins;
+	}
+
+	public void setFordWins(int fordWins) {
+		this.fordWins = fordWins;
+	}
+	
+	public int getFordShelbyWins() {
+		return fordShelbyWins;
+	}
+
+	public void setFordShelbyWins(int fordShelbyWins) {
+		this.fordShelbyWins = fordShelbyWins;
+	}
+	
+	public int getHummerWins() {
+		return hummerWins;
+	}
+
+	public void setHummerWins(int hummerWins) {
+		this.hummerWins = hummerWins;
+	}
+	
+	public int getInfinitiWins() {
+		return infinitiWins;
+	}
+
+	public void setInfinitiWins(int infinitiWins) {
+		this.infinitiWins = infinitiWins;
+	}
+	
+	public int getJaguarWins() {
+		return jaguarWins;
+	}
+
+	public void setJaguarWins(int jaguarWins) {
+		this.jaguarWins = jaguarWins;
+	}
+	
+	public int getJeepWins() {
+		return jeepWins;
+	}
+
+	public void setJeepWins(int jeepWins) {
+		this.jeepWins = jeepWins;
+	}
+	
+	public int getKoenigseggWins() {
+		return koenigseggWins;
+	}
+
+	public void setKoenigseggWins(int koenigseggWins) {
+		this.koenigseggWins = koenigseggWins;
+	}
+	
+	public int getLamborghiniWins() {
+		return lamborghiniWins;
+	}
+
+	public void setLamborghiniWins(int lamborghiniWins) {
+		this.lamborghiniWins = lamborghiniWins;
+	}
+	
+	public int getLanciaWins() {
+		return lanciaWins;
+	}
+
+	public void setLanciaWins(int lanciaWins) {
+		this.lanciaWins = lanciaWins;
+	}
+	
+	public int getLexusWins() {
+		return lexusWins;
+	}
+
+	public void setLexusWins(int lexusWins) {
+		this.lexusWins = lexusWins;
+	}
+	
+	public int getLotusWins() {
+		return lotusWins;
+	}
+
+	public void setLotusWins(int lotusWins) {
+		this.lotusWins = lotusWins;
+	}
+	
+	public int getMarussiaWins() {
+		return marussiaWins;
+	}
+
+	public void setMarussiaWins(int marussiaWins) {
+		this.marussiaWins = marussiaWins;
+	}
+	
+	public int getMazdaWins() {
+		return mazdaWins;
+	}
+
+	public void setMazdaWins(int mazdaWins) {
+		this.mazdaWins = mazdaWins;
+	}
+	
+	public int getMclarenWins() {
+		return mclarenWins;
+	}
+
+	public void setMclarenWins(int mclarenWins) {
+		this.mclarenWins = mclarenWins;
+	}
+	
+	public int getMercedesBenzWins() {
+		return mercedesBenzWins;
+	}
+
+	public void setMercedesBenzWins(int mercedesBenzWins) {
+		this.mercedesBenzWins = mercedesBenzWins;
+	}
+	
+	public int getMitsubishiWins() {
+		return mitsubishiWins;
+	}
+
+	public void setMitsubishiWins(int mitsubishiWins) {
+		this.mitsubishiWins = mitsubishiWins;
+	}
+	
+	public int getNissanWins() {
+		return nissanWins;
+	}
+
+	public void setNissanWins(int nissanWins) {
+		this.nissanWins = nissanWins;
+	}
+	
+	public int getPaganiWins() {
+		return paganiWins;
+	}
+
+	public void setPaganiWins(int paganiWins) {
+		this.paganiWins = paganiWins;
+	}
+	
+	public int getPlymouthWins() {
+		return plymouthWins;
+	}
+
+	public void setPlymouthWins(int plymouthWins) {
+		this.plymouthWins = plymouthWins;
+	}
+	
+	public int getPontiacWins() {
+		return pontiacWins;
+	}
+
+	public void setPontiacWins(int pontiacWins) {
+		this.pontiacWins = pontiacWins;
+	}
+	
+	public int getPorscheWins() {
+		return porscheWins;
+	}
+
+	public void setPorscheWins(int porscheWins) {
+		this.porscheWins = porscheWins;
+	}
+	
+	public int getRenaultWins() {
+		return renaultWins;
+	}
+
+	public void setRenaultWins(int renaultWins) {
+		this.renaultWins = renaultWins;
+	}
+	
+	public int getScionWins() {
+		return scionWins;
+	}
+
+	public void setScionWins(int scionWins) {
+		this.scionWins = scionWins;
+	}
+	
+	public int getShelbyWins() {
+		return shelbyWins;
+	}
+
+	public void setShelbyWins(int shelbyWins) {
+		this.shelbyWins = shelbyWins;
+	}
+	
+	public int getSubaruWins() {
+		return subaruWins;
+	}
+
+	public void setSubaruWins(int subaruWins) {
+		this.subaruWins = subaruWins;
+	}
+	
+	public int getToyotaWins() {
+		return toyotaWins;
+	}
+
+	public void setToyotaWins(int toyotaWins) {
+		this.toyotaWins = toyotaWins;
+	}
+	
+	public int getVauxhallWins() {
+		return vauxhallWins;
+	}
+
+	public void setVauxhallWins(int vauxhallWins) {
+		this.vauxhallWins = vauxhallWins;
+	}
+	
+	public int getVolkswagenWins() {
+		return volkswagenWins;
+	}
+
+	public void setVolkswagenWins(int volkswagenWins) {
+		this.volkswagenWins = volkswagenWins;
 	}
 	
 }
