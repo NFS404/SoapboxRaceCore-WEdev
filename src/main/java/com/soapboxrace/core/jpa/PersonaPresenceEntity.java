@@ -18,7 +18,13 @@ import javax.persistence.Table;
 						+ "SET obj.personaPresence = :personaPresence WHERE obj.activePersonaId = :personaId"), //
 		@NamedQuery(name = "PersonaPresenceEntity.updateCurrentEvent", //
 		query = "UPDATE PersonaPresenceEntity obj " // 
-				+ "SET obj.currentEventDataId = :currentEventDataId, currentEventModeId = :currentEventModeId, currentEventSessionId = :currentEventSessionId WHERE obj.activePersonaId = :personaId") //
+				+ "SET obj.currentEventDataId = :currentEventDataId, currentEventModeId = :currentEventModeId, currentEventSessionId = :currentEventSessionId WHERE obj.activePersonaId = :personaId"), //
+		@NamedQuery(name = "PersonaPresenceEntity.updateCurrentEventPost", //
+		query = "UPDATE PersonaPresenceEntity obj " // 
+				+ "SET obj.currentEventDataId = :currentEventDataId, currentEventModeId = :currentEventModeId, currentEventSessionId = :currentEventSessionId, icRacer = :icRacer WHERE obj.activePersonaId = :personaId"), //
+		@NamedQuery(name = "PersonaPresenceEntity.updateICRacer", //
+		query = "UPDATE PersonaPresenceEntity obj " // 
+				+ "SET icRacer = :icRacer WHERE obj.activePersonaId = :personaId") //
 })
 public class PersonaPresenceEntity {
 
@@ -33,6 +39,7 @@ public class PersonaPresenceEntity {
 	private Long currentEventDataId;
 	private Long currentEventModeId;
 	private Long currentEventSessionId;
+	private boolean icRacer;
 
 	public Long getUserId() {
 		return userId;
@@ -88,6 +95,14 @@ public class PersonaPresenceEntity {
 
 	public void setCurrentEventSessionId(Long currentEventSessionId) {
 		this.currentEventSessionId = currentEventSessionId;
+	}
+	
+	public boolean getICRacer() {
+		return icRacer;
+	}
+
+	public void setICRacer(boolean icRacer) {
+		this.icRacer = icRacer;
 	}
 
 }

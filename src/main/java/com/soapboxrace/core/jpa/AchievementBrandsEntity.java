@@ -16,6 +16,7 @@ public class AchievementBrandsEntity {
 	@Id
 	private Long personaId;
 	
+	// Original achievement set
 	private int alfaRomeoWins;
 	private int astonMartinWins;
 	private int audiWins;
@@ -54,7 +55,17 @@ public class AchievementBrandsEntity {
 	private int toyotaWins;
 	private int vauxhallWins;
 	private int volkswagenWins;
-
+	
+	// Additional brands
+	private int bugattiWins;
+	private int ferrariWins;
+	private int fiatWins;
+	private int hondaWins;
+	private int maseratiWins;
+	private int nfsWins;
+	private int smartWins;
+	private int teslaWins;
+	
 	public Long getPersonaId() {
 		return personaId;
 	}
@@ -365,6 +376,72 @@ public class AchievementBrandsEntity {
 
 	public void setVolkswagenWins(int volkswagenWins) {
 		this.volkswagenWins = volkswagenWins;
+	}
+	
+	//
+	
+	public int getBugattiWins() {
+		return bugattiWins;
+	}
+
+	public void setBugattiWins(int bugattiWins) {
+		this.bugattiWins = bugattiWins;
+	}
+	
+	public int getFerrariWins() {
+		return ferrariWins;
+	}
+
+	public void setFerrariWins(int ferrariWins) {
+		this.ferrariWins = ferrariWins;
+	}
+	
+	public int getFiatWins() {
+		return fiatWins;
+	}
+
+	public void setFiatWins(int fiatWins) {
+		this.fiatWins = fiatWins;
+	}
+	
+	public int getHondaWins() {
+		return hondaWins;
+	}
+
+	public void setHondaWins(int hondaWins) {
+		this.hondaWins = hondaWins;
+	}
+	
+	public int getMaseratiWins() {
+		return maseratiWins;
+	}
+
+	public void setMaseratiWins(int maseratiWins) {
+		this.maseratiWins = maseratiWins;
+	}
+	
+	public int getNFSWins() {
+		return nfsWins;
+	}
+
+	public void setNFSWins(int nfsWins) {
+		this.nfsWins = nfsWins;
+	}
+	
+	public int getSmartWins() {
+		return smartWins;
+	}
+
+	public void setSmartWins(int smartWins) {
+		this.smartWins = nfsWins;
+	}
+	
+	public int getTeslaWins() {
+		return teslaWins;
+	}
+
+	public void setTeslaWins(int teslaWins) {
+		this.teslaWins = teslaWins;
 	}
 	
 }

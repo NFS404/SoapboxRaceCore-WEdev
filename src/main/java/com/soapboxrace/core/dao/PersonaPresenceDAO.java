@@ -44,5 +44,22 @@ public class PersonaPresenceDAO extends BaseDAO<PersonaPresenceEntity> {
 		query.setParameter("currentEventSessionId", eventSessionId);
 		query.executeUpdate();
 	}
+	
+	public void updateCurrentEventPost(Long personaId, Long eventDataId, int eventModeId, Long eventSessionId, boolean icRacer) {
+		Query query = entityManager.createNamedQuery("PersonaPresenceEntity.updateCurrentEventPost");
+		query.setParameter("personaId", personaId);
+		query.setParameter("currentEventDataId", eventDataId);
+		query.setParameter("currentEventModeId", (long) eventModeId);
+		query.setParameter("currentEventSessionId", eventSessionId);
+		query.setParameter("icRacer", icRacer);
+		query.executeUpdate();
+	}
+	
+	public void updateICRacer(Long personaId, boolean icRacer) {
+		Query query = entityManager.createNamedQuery("PersonaPresenceEntity.updateICRacer");
+		query.setParameter("personaId", personaId);
+		query.setParameter("icRacer", icRacer);
+		query.executeUpdate();
+	}
 
 }

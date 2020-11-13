@@ -23,6 +23,7 @@ import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.LobbyDAO;
 import com.soapboxrace.core.dao.OwnedCarDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.VisualPartDAO;
 import com.soapboxrace.core.jpa.EventEntity;
@@ -79,6 +80,9 @@ public class LobbyCountdownBO {
 	
 	@EJB
 	private StringListConverter stringListConverter;
+	
+	@EJB
+	private PersonaPresenceDAO personaPresenceDAO;
 	
 	@Resource
     private TimerService timerService;
@@ -194,7 +198,11 @@ public class LobbyCountdownBO {
 				String playersList = "### Cops: " + stringListConverter.interceptorPersonaChatList(personaCops) + "\n"
 						+ "## Racers: " + stringListConverter.interceptorPersonaChatList(personaRacers);
 				for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
-					openFireSoapBoxCli.send(XmppChat.createSystemMessage(playersList), lobbyEntrantEntity.getPersona().getPersonaId());
+					Long entrantId = lobbyEntrantEntity.getPersona().getPersonaId();
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage(playersList), entrantId);
+					if (personaRacers.contains(entrantId)) { // Give a "racer" tag to presence, so racer wouldn't be able to use NOS
+						personaPresenceDAO.updateICRacer(entrantId, true);
+					}
 				}
 			}
 			else {

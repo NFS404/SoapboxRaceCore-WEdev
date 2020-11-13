@@ -137,7 +137,7 @@ public class Event {
 		default:
 			break;
 		}
-		personaPresenceDAO.updateCurrentEvent(activePersonaId, null, 0, null);
+		personaPresenceDAO.updateCurrentEventPost(activePersonaId, null, 0, null, false);
 		return "";
 	}
 
@@ -152,7 +152,7 @@ public class Event {
 		PursuitEventResult pursuitEventResult = new PursuitEventResult();
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
 		pursuitEventResult = eventResultBO.handlePursuitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, true, eventEnded);
-		personaPresenceDAO.updateCurrentEvent(activePersonaId, null, 0, null);
+		personaPresenceDAO.updateCurrentEventPost(activePersonaId, null, 0, null, false);
 		return pursuitEventResult;
 	}
 }

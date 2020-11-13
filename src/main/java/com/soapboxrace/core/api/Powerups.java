@@ -79,6 +79,7 @@ public class Powerups {
 		Long teamId = infoPackage[2].longValue();
 		PersonaPresenceEntity personaPresenceEntity = personaPresenceDAO.findByUserId(userId);
 		Long serverEventSessionId = personaPresenceEntity.getCurrentEventSessionId();
+		Long serverEventModeId = personaPresenceEntity.getCurrentEventModeId();
 
 		if (parameterBO.getBoolParam("POWERUPS_ENABLED")) {
 			// TeamNOS - if race has been randomly started without NOS, team players wouldn't be able to use it, but others will be able
@@ -87,7 +88,11 @@ public class Powerups {
 					return "";
 				}
 			}
-			XMPP_ResponseTypePowerupActivated powerupActivatedResponse = eventPowerupsBO.powerupResponce(powerupHash, targetId, activePersonaId);
+			// Interceptor - racers can't use NOS
+			if (serverEventModeId == 100 && personaPresenceEntity.getICRacer()) {
+				return "";
+			}
+			XMPP_ResponseTypePowerupActivated powerupActivatedResponse = eventPowerupsBO.powerupResponse(powerupHash, targetId, activePersonaId);
 			// Experimental access timeout fix
 			new Thread(new Runnable() {
 				@Override

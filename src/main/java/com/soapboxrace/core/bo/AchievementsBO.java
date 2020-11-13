@@ -150,10 +150,7 @@ public class AchievementsBO {
 	 * @author Nilzao
 	 */
 	public AchievementsPacket loadall(Long personaId) {
-		PersonaEntity newPersonaEntity = new PersonaEntity();
-		newPersonaEntity.setPersonaId(personaId);
 		AchievementsPacket achievementsPacket = new AchievementsPacket();
-
 		ArrayOfBadgeDefinitionPacket arrayOfBadgeDefinitionPacket = new ArrayOfBadgeDefinitionPacket();
 		List<BadgeDefinitionPacket> badgeDefinitionPacketList = arrayOfBadgeDefinitionPacket.getBadgeDefinitionPacket();
 
@@ -184,8 +181,8 @@ public class AchievementsBO {
 
 		// Get the ranks & information about achievement stages
 		for (AchievementDefinitionEntity achievementDefinitionEntity : allAchievements) {
-			Long currentValue = getCurrentValue(achievementDefinitionEntity, achievementPersonaEntity, newPersonaEntity, achievementBrandsEntity,
-					carsAmount);
+			Long currentValue = getCurrentValue(achievementDefinitionEntity, achievementPersonaEntity, achievementBrandsEntity,
+					carsAmount, personaEntity);
 			AchievementDefinitionPacket achievementDefinitionPacket = new AchievementDefinitionPacket();
 			achievementDefinitionPacket.setAchievementDefinitionId(achievementDefinitionEntity.getId().intValue());
 
@@ -208,7 +205,7 @@ public class AchievementsBO {
 				achievementRankPacket.setRewardVisualStyle(achievementRankEntity.getRewardVisualStyle());
 				achievementRankPacket.setThresholdValue(achievementRankEntity.getThresholdValue());
 
-				AchievementStateEntity personaAchievementRankState = achievementStateDAO.findByPersonaAchievementRank(newPersonaEntity, achievementRankEntity);
+				AchievementStateEntity personaAchievementRankState = achievementStateDAO.findByPersonaAchievementRank(personaEntity, achievementRankEntity);
 				if (personaAchievementRankState != null) {
 					try {
 						LocalDateTime achievedOn = personaAchievementRankState.getAchievedOn();
@@ -250,8 +247,8 @@ public class AchievementsBO {
 	 * @param achievementPersonaEntity - player persona's achievement values
 	 * @author Nilzao, Hypercycle
 	 */
-	private Long getCurrentValue(AchievementDefinitionEntity achievementDefinitionEntity, AchievementPersonaEntity achievementPersonaEntity,
-			PersonaEntity personaEntity, AchievementBrandsEntity achievementBrandsEntity, int carsAmount) {
+	private Long getCurrentValue(AchievementDefinitionEntity achievementDefinitionEntity, AchievementPersonaEntity achievementPersonaEntity, 
+			AchievementBrandsEntity achievementBrandsEntity, int carsAmount, PersonaEntity personaEntity) {
 		int intValue = achievementDefinitionEntity.getId().intValue();
 		AchievementType achievementType = AchievementType.valueOf(intValue);
 		
@@ -445,6 +442,22 @@ public class AchievementsBO {
 			UserEntity userEntity = personaEntity.getUser();
 			int dBoostAmount = userEntity.getDBoostAmount();
 			return Integer.valueOf(dBoostAmount).longValue();
+		case BUGATTI_COLLECTOR:
+			return Integer.valueOf(achievementBrandsEntity.getBugattiWins()).longValue();
+		case FERRARI_COLLECTOR:
+			return Integer.valueOf(achievementBrandsEntity.getFerrariWins()).longValue();
+		case FIAT_COLLECTOR:
+			return Integer.valueOf(achievementBrandsEntity.getFiatWins()).longValue();
+		case HONDA_COLLECTOR:
+			return Integer.valueOf(achievementBrandsEntity.getHondaWins()).longValue();
+		case MASERATI_COLLECTOR:
+			return Integer.valueOf(achievementBrandsEntity.getMaseratiWins()).longValue();
+		case NFS_BRAND_COLLECTOR:
+			return Integer.valueOf(achievementBrandsEntity.getNFSWins()).longValue();
+		case SMART_COLLECTOR:
+			return Integer.valueOf(achievementBrandsEntity.getSmartWins()).longValue();
+		case TESLA_COLLECTOR:
+			return Integer.valueOf(achievementBrandsEntity.getTeslaWins()).longValue();
 		default:
 			break;
 		}
@@ -656,7 +669,8 @@ public class AchievementsBO {
 		AchievementRewards achievementRewards = new AchievementRewards();
 		List<CommerceItemTrans> commerceItems = new ArrayList<>();
 
-		List<RewardDropEntity> rewardDrops = rewardDropDAO.getRewardDrops(achievementRankEntity, isCardPack);
+		List<RewardDropEntity> rewardDrops = rewardDropDAO.getRewardDrops(achievementRankEntity.getRewardDropId(), 
+				achievementRankEntity.getNumberOfRewards(), isCardPack);
 		if (isCardPack && rewardDrops.size() < 5) {
 			for (int i = 0; i < 5; i++) {
 				RewardDropEntity rewardDropEntity = new RewardDropEntity();
@@ -712,7 +726,7 @@ public class AchievementsBO {
 
 				// FIXME get better icon hash, like gift
 				item.setHash(product.getHash());
-				item.setTitle(rewardDropEntity.getAchievementRank().getRewardText());
+				item.setTitle(achievementRankEntity.getRewardText());
 				break;
 			case INVENTORY:
 				String productTitle = product.getProductTitle();

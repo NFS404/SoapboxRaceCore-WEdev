@@ -331,7 +331,39 @@ public enum AchievementType {
 	/**
 	 * donate for Discord Boosts
 	 */
-	WEV2_DISCORDBOOST(108); //
+	WEV2_DISCORDBOOST(108), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	BUGATTI_COLLECTOR(109), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	FERRARI_COLLECTOR(110), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	FIAT_COLLECTOR(111), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	HONDA_COLLECTOR(112), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	MASERATI_COLLECTOR(113), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	NFS_BRAND_COLLECTOR(114), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	SMART_COLLECTOR(115), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	TESLA_COLLECTOR(116); //
 
 	private int id;
 

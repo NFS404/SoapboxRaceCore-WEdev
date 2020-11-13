@@ -23,6 +23,7 @@ public class CarBrandsList {
 		int winsCount = 0;
 		Integer[] brandInfo = new Integer[2];
 		switch (brandName) {
+		// Default achievement brands set
 		case "ALFA ROMEO":
 			brandAchievementDefId = 28;
 			winsCount = achievementBrandsEntity.getAlfaRomeoWins() + 1;
@@ -212,6 +213,47 @@ public class CarBrandsList {
 			brandAchievementDefId = 65;
 			winsCount = achievementBrandsEntity.getVolkswagenWins() + 1;
 			achievementBrandsEntity.setVolkswagenWins(winsCount);
+			break;
+		// Additional brands
+		case "BUGATTI":
+			brandAchievementDefId = 107;
+			winsCount = achievementBrandsEntity.getBugattiWins() + 1;
+			achievementBrandsEntity.setBugattiWins(winsCount);
+			break;
+		case "FERRARI":
+			brandAchievementDefId = 108;
+			winsCount = achievementBrandsEntity.getFerrariWins() + 1;
+			achievementBrandsEntity.setFerrariWins(winsCount);
+			break;
+		case "FIAT":
+			brandAchievementDefId = 109;
+			winsCount = achievementBrandsEntity.getFiatWins() + 1;
+			achievementBrandsEntity.setFiatWins(winsCount);
+			break;
+		case "HONDA":
+			brandAchievementDefId = 110;
+			winsCount = achievementBrandsEntity.getHondaWins() + 1;
+			achievementBrandsEntity.setHondaWins(winsCount);
+			break;
+		case "MASERATI":
+			brandAchievementDefId = 111;
+			winsCount = achievementBrandsEntity.getMaseratiWins() + 1;
+			achievementBrandsEntity.setMaseratiWins(winsCount);
+			break;
+		case "NFS":
+			brandAchievementDefId = 112;
+			winsCount = achievementBrandsEntity.getNFSWins() + 1;
+			achievementBrandsEntity.setNFSWins(winsCount);
+			break;
+		case "SMART":
+			brandAchievementDefId = 113;
+			winsCount = achievementBrandsEntity.getSmartWins() + 1;
+			achievementBrandsEntity.setSmartWins(winsCount);
+			break;
+		case "TESLA":
+			brandAchievementDefId = 114;
+			winsCount = achievementBrandsEntity.getTeslaWins() + 1;
+			achievementBrandsEntity.setTeslaWins(winsCount);
 			break;
 		}
 		achievementBrandsDAO.update(achievementBrandsEntity);

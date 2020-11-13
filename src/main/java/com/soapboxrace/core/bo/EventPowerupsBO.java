@@ -83,7 +83,7 @@ public class EventPowerupsBO {
 		return isPowerupsUsed;
 	}
 	
-	public XMPP_ResponseTypePowerupActivated powerupResponce(Integer powerupHash, Long targetId, Long activePersonaId) {
+	public XMPP_ResponseTypePowerupActivated powerupResponse(Integer powerupHash, Long targetId, Long activePersonaId) {
 		XMPP_ResponseTypePowerupActivated powerupActivatedResponse = new XMPP_ResponseTypePowerupActivated();
 		XMPP_PowerupActivatedType powerupActivated = new XMPP_PowerupActivatedType();
 		powerupActivated.setId(Long.valueOf(powerupHash));

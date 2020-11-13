@@ -17,7 +17,6 @@ import com.soapboxrace.core.dao.CarSlotDAO;
 import com.soapboxrace.core.dao.LevelRepDAO;
 import com.soapboxrace.core.dao.OwnedCarDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
-import com.soapboxrace.core.dao.VisualPartDAO;
 import com.soapboxrace.core.jpa.AchievementDefinitionEntity;
 import com.soapboxrace.core.jpa.AchievementRankEntity;
 import com.soapboxrace.core.jpa.AchievementStateEntity;
@@ -125,7 +124,8 @@ public class PersonaBO {
 			ownedCarEntity.setCarVersion(carClassesEntity.getCarVersion());
 			commerceBO.calcNewCarClass(customCarEntityVer);
 		}
-		OwnedCarTrans ownedCarTrans = OwnedCarConverter.entity2Trans(ownedCarEntity);
+        OwnedCarTrans ownedCarTrans = OwnedCarConverter.entity2Trans(carSlotEntity.getOwnedCar());
+
 		return ownedCarTrans;
 	}
 

@@ -27,17 +27,17 @@ public class RewardDropDAO extends BaseDAO<RewardDropEntity> {
 		return entityManager.find(RewardDropEntity.class, id);
 	}
 
-	public List<RewardDropEntity> getRewardDrops(AchievementRankEntity achievementRank, boolean isCardPack) {
+	public List<RewardDropEntity> getRewardDrops(Long dropGroupId, short numberOfRewards, boolean isCardPack) {
 		List<RewardDropEntity> rewardDropList = new ArrayList<>();
 		StringBuilder sqlWhere = new StringBuilder();
-		sqlWhere.append(" WHERE obj.achievementRank = :achievementRank ");
+		sqlWhere.append(" WHERE obj.dropGroupId = :dropGroupId ");
 
 		StringBuilder sqlCount = new StringBuilder();
 		sqlCount.append("SELECT COUNT(*) FROM RewardDropEntity obj ");
 		sqlCount.append(sqlWhere.toString());
 
 		Query countQuery = entityManager.createQuery(sqlCount.toString());
-		countQuery.setParameter("achievementRank", achievementRank);
+		countQuery.setParameter("dropGroupId", dropGroupId);
 		Long count = (Long) countQuery.getSingleResult();
 
 		StringBuilder sqlProduct = new StringBuilder();
@@ -45,13 +45,13 @@ public class RewardDropDAO extends BaseDAO<RewardDropEntity> {
 		sqlProduct.append(sqlWhere.toString());
 
 		TypedQuery<RewardDropEntity> rewardDropQuery = entityManager.createQuery(sqlProduct.toString(), RewardDropEntity.class);
-		rewardDropQuery.setParameter("achievementRank", achievementRank);
+		rewardDropQuery.setParameter("dropGroupId", dropGroupId);
 
 		int number = count.intValue();
 		Random random = new Random();
 		rewardDropQuery.setMaxResults(1);
 		if (isCardPack) {
-			int max = Math.max(1, achievementRank.getNumberOfRewards());
+			int max = Math.max(1, numberOfRewards);
 			for (int i = 0; i < max; i++) {
 				number = random.nextInt(count.intValue());
 				rewardDropQuery.setFirstResult(number);

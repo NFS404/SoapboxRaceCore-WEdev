@@ -53,6 +53,8 @@ public class AchievementRankEntity {
 	
 	@Column(name = "sort")
 	private Long sort;
+	
+	private Long rewardDropId;
 
 	private String rewardText;
 
@@ -156,6 +158,14 @@ public class AchievementRankEntity {
 
 	public void setSort(Long sort) {
 		this.sort = sort;
+	}
+	
+	public Long getRewardDropId() {
+		return rewardDropId;
+	}
+
+	public void setRewardDropId(Long rewardDropId) {
+		this.rewardDropId = rewardDropId;
 	}
 
 	public AchievementDefinitionEntity getAchievementDefinition() {

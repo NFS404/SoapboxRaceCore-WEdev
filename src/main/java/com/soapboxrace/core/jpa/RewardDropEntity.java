@@ -25,11 +25,8 @@ public class RewardDropEntity {
 	@JoinColumn(name = "productId", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "FK_REWARDDROP_PRODUCT"))
 	private ProductEntity product;
 
-	@OneToOne
-	@JoinColumn(name = "achievementRankId", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "FK_REWARDDROP_ACHRANK"))
-	private AchievementRankEntity achievementRank;
-
 	private Integer amount;
+	private Long dropGroupId;
 
 	@Enumerated(EnumType.STRING)
 	private RewardDestinyType rewardDestiny;
@@ -50,12 +47,12 @@ public class RewardDropEntity {
 		this.product = product;
 	}
 
-	public AchievementRankEntity getAchievementRank() {
-		return achievementRank;
+	public Long getDropGroupId() {
+		return dropGroupId;
 	}
 
-	public void setAchievementRank(AchievementRankEntity achievementRank) {
-		this.achievementRank = achievementRank;
+	public void setDropGroupId(Long dropGroupId) {
+		this.dropGroupId = dropGroupId;
 	}
 
 	public RewardDestinyType getRewardDestiny() {

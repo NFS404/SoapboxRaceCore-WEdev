@@ -168,7 +168,6 @@ public class EventResultRouteBO {
 		}
 		Long eventDataId = eventDataEntity.getId();
 		eventBO.updateEventCarInfo(activePersonaId, eventDataId, customCarEntity);
-		achievementsBO.applyBrandsAchievements(personaEntity, carBrandsList.getBrandInfo(carPhysicsHash, activePersonaId));
 
 		ArrayOfRouteEntrantResult arrayOfRouteEntrantResult = new ArrayOfRouteEntrantResult();
 		
