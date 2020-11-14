@@ -5,6 +5,7 @@ import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.CarBrandsList;
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
@@ -69,6 +70,9 @@ public class EventResultDragBO {
 	
 	@EJB
 	private CarBrandsList carBrandsList;
+	
+	@EJB
+	private CarClassesDAO carClassesDAO;
 
 	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -158,7 +162,10 @@ public class EventResultDragBO {
 			eventDataDao.update(eventDataEntitySP);
 		}
 		if (playerRank < 4 && !isSingle) {
-			achievementsBO.applyBrandsAchievements(personaEntity, carBrandsList.getBrandInfo(carPhysicsHash, activePersonaId));
+			String brandName = carClassesDAO.findByHash(carPhysicsHash).getManufactor();
+			if (!brandName.contentEquals("AI") && !brandName.contentEquals("TRAFFIC")) {
+				achievementsBO.applyBrandsAchievements(personaEntity, carBrandsList.getBrandInfo(carPhysicsHash, activePersonaId));
+			}
 		}
 		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
 			DragEntrantResult dragEntrantResult = new DragEntrantResult();

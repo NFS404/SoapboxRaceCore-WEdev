@@ -177,7 +177,8 @@ public class LobbyCountdownBO {
 				}
 				else { // If not - player is a Racer
 					personaRacers.add(personaId);
-					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You are the Racer - finish until " + timeLimit + " to win!"), personaId);
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You are the Racer - finish until " + timeLimit + " to win!\n" +
+					"## NOS is disabled for Racers."), personaId);
 				}
 			}
 			if ("127.0.0.1".equals(udpRaceIp)) {

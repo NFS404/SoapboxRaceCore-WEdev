@@ -176,13 +176,14 @@ public class AchievementsBO {
 		PersonaEntity personaEntity = personaDAO.findById(personaId);
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		AchievementBrandsEntity achievementBrandsEntity = achievementBrandsDAO.findByPersona(personaId);
-		int carsAmount = carSlotDAO.countPersonaCars(personaId).intValue();
-		forceApplyCollector(carsAmount, personaEntity);
+		if (achievementPersonaEntity.getCollectorCars() == 0) { // Re-calc car count if player login for first time with enabled Collector achievement
+			int carsAmount = carSlotDAO.countPersonaCars(personaId).intValue();
+			forceApplyCollector(carsAmount, personaEntity);
+		}
 
 		// Get the ranks & information about achievement stages
 		for (AchievementDefinitionEntity achievementDefinitionEntity : allAchievements) {
-			Long currentValue = getCurrentValue(achievementDefinitionEntity, achievementPersonaEntity, achievementBrandsEntity,
-					carsAmount, personaEntity);
+			Long currentValue = getCurrentValue(achievementDefinitionEntity, achievementPersonaEntity, achievementBrandsEntity, personaEntity);
 			AchievementDefinitionPacket achievementDefinitionPacket = new AchievementDefinitionPacket();
 			achievementDefinitionPacket.setAchievementDefinitionId(achievementDefinitionEntity.getId().intValue());
 
@@ -248,7 +249,7 @@ public class AchievementsBO {
 	 * @author Nilzao, Hypercycle
 	 */
 	private Long getCurrentValue(AchievementDefinitionEntity achievementDefinitionEntity, AchievementPersonaEntity achievementPersonaEntity, 
-			AchievementBrandsEntity achievementBrandsEntity, int carsAmount, PersonaEntity personaEntity) {
+			AchievementBrandsEntity achievementBrandsEntity, PersonaEntity personaEntity) {
 		int intValue = achievementDefinitionEntity.getId().intValue();
 		AchievementType achievementType = AchievementType.valueOf(intValue);
 		
@@ -285,7 +286,8 @@ public class AchievementsBO {
 		case CHRYSLER_COLLECTOR:
 			return Integer.valueOf(achievementBrandsEntity.getChryslerWins()).longValue();
 		case COLLECTOR:
-			return Integer.valueOf(carsAmount).longValue();
+			int collectorCars = achievementPersonaEntity.getCollectorCars();
+			return Integer.valueOf(collectorCars).longValue();
 		case CREW_RACER:
 			int privateRaces = achievementPersonaEntity.getPrivateRaces();
 			return Integer.valueOf(privateRaces).longValue();
@@ -868,7 +870,7 @@ public class AchievementsBO {
 		PersonaEntity personaEntity = personaDAO.findById(treasureHuntEntity.getPersonaId());
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		Integer streak = treasureHuntEntity.getStreak();
-		if (treasureHuntEntity.getStreak() > achievementPersonaEntity.getDailyTreasureHunts()) {
+		if (streak > achievementPersonaEntity.getDailyTreasureHunts()) {
 		   achievementPersonaEntity.setDailyTreasureHunts(streak); 
 		   processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.DAILY_HUNTER, streak.longValue());
 		}
@@ -1253,8 +1255,14 @@ public class AchievementsBO {
 	 */
 	public void applyCollector(PersonaEntity personaEntity) {
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		int collectorCarsValue = achievementPersonaEntity.getCollectorCars();
 		int carsAmount = carSlotDAO.countPersonaCars(personaEntity.getPersonaId()).intValue();
-		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.COLLECTOR, Integer.valueOf(carsAmount).longValue());
+		// Check out the last rank goal of Collector achievement
+		if (carsAmount <= achievementRankDAO.findLastStage((long) 16).getThresholdValue() && carsAmount > collectorCarsValue) { 
+			collectorCarsValue = collectorCarsValue + 1;
+			achievementPersonaEntity.setCollectorCars(collectorCarsValue);
+			processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.COLLECTOR, Integer.valueOf(carsAmount).longValue());
+		}
 	}
 	
 	/**
@@ -1268,10 +1276,18 @@ public class AchievementsBO {
 	public void forceApplyCollector (int carsAmount, PersonaEntity personaEntity) {
 		Integer[] ranksArray = new Integer[] {76,77,78,79,80};
 		List<AchievementRankEntity> getRanksList = achievementRankDAO.findMultipleRanksById(ranksArray);
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		if (carsAmount > achievementPersonaEntity.getCollectorCars()) {
+			Long carsLimit = achievementRankDAO.findLastStage((long) 16).getThresholdValue();
+			if (carsAmount > carsLimit) {achievementPersonaEntity.setCollectorCars(carsLimit.intValue());}
+			else {achievementPersonaEntity.setCollectorCars(carsAmount);}
+			achievementPersonaDAO.update(achievementPersonaEntity);
+		}
 		int i = 0;
 		for (AchievementRankEntity collectorRank : getRanksList) {
 			if (carsAmount > (collectorRank.getThresholdValue() - 1) && achievementStateDAO.findByPersonaAchievementRank(personaEntity, collectorRank) == null) {
 				forceAchievementApply(ranksArray[i], personaEntity, true);
+				processAchievementByThresholdRange(achievementPersonaEntity, AchievementType.LEGENDARY_DRIVER, Integer.valueOf(personaEntity.getScore()).longValue());
 			}
 			i++;
 		}

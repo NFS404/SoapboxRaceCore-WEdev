@@ -64,8 +64,6 @@ public class Events {
 		int carClassHash = customCarTrans.getCarClassHash();
 		int carPhysicsHash = customCarTrans.getPhysicsProfileHash();
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(carPhysicsHash);
-		int curBonusClass = parameterBO.getIntParam("CLASSBONUS_CARCLASSHASH");
-		boolean isTEDynamicClass = parameterBO.getBoolParam("TESCAPE_DYNAMICCLASS");
 		boolean isModCar = false;
 		if (!carClassesEntity.getQuickRaceAllowed()) {
 			isModCar = true;
@@ -78,14 +76,6 @@ public class Events {
 			String carModel = eventEntity.getCarModel();
 			int eventClassHash = eventEntity.getCarClassHash();
 			boolean isLockedAlready = false;
-			// Changes the car class of all class-restricted Team Escapes, to the current Bonus Class
-			if (eventEntity.getEventModeId() == 24 && isTEDynamicClass && eventClassHash != 607077938) {
-				if (curBonusClass == 0) {
-					eventEntity.setCarClassHash(607077938); // Open class if no Bonus Class
-				}
-				eventEntity.setCarClassHash(curBonusClass);
-				eventClassHash = eventEntity.getCarClassHash(); // Save the value again
-			}
 			// Event car model restriction (if present)
 			if ((eventClassHash != 607077938 && carClassHash != eventClassHash) || (carModel != null && !defaultCar.getCustomCar().getName().equalsIgnoreCase(carModel))) {
 				isLockedAlready = true;

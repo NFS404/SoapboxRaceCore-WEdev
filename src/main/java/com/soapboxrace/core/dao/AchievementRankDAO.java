@@ -70,6 +70,16 @@ public class AchievementRankDAO extends BaseDAO<AchievementRankEntity> {
 		return results.isEmpty() ? null : results.get(0);
 	}
 	
+	public AchievementRankEntity findLastStage(Long achievementDefinitionId) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT obj FROM AchievementRankEntity obj ");
+		sql.append("WHERE obj.achievementDefinitionId = :achievementDefinitionId ORDER BY obj.rank DESC");
+		TypedQuery<AchievementRankEntity> query = entityManager.createQuery(sql.toString(), AchievementRankEntity.class);
+		query.setParameter("achievementDefinitionId", achievementDefinitionId);
+		List<AchievementRankEntity> results = query.getResultList();
+		return results.isEmpty() ? null : results.get(0);
+	}
+	
 	public List<AchievementRankEntity> findMultipleRanksById(Integer[] idsArray) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT obj FROM AchievementRankEntity obj ");

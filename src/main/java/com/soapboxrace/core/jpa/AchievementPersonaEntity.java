@@ -71,6 +71,7 @@ public class AchievementPersonaEntity {
 	private int containerCars;
 	private int driverAgeDays;
 	private int sbAgeTaken;
+	private int collectorCars;
 
 	public int getId() {
 		return id;
@@ -366,6 +367,14 @@ public class AchievementPersonaEntity {
 
 	public void setSBAgeTaken(int sbAgeTaken) {
 		this.sbAgeTaken = sbAgeTaken;
+	}
+	
+	public int getCollectorCars() {
+		return collectorCars;
+	}
+
+	public void setCollectorCars(int collectorCars) {
+		this.collectorCars = collectorCars;
 	}
 	
 }

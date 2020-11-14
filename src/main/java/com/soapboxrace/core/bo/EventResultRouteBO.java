@@ -6,6 +6,7 @@ import javax.ejb.Stateless;
 import com.soapboxrace.core.bo.util.CarBrandsList;
 import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.StringListConverter;
+import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
@@ -98,6 +99,9 @@ public class EventResultRouteBO {
 	
 	@EJB
 	private StringListConverter stringListConverter;
+	
+	@EJB
+	private CarClassesDAO carClassesDAO;
 
 	public RouteEventResult handleRaceEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -244,7 +248,10 @@ public class EventResultRouteBO {
 			eventDataDao.update(eventDataEntitySP);
 		}
 		if (playerRank < 4 && !isSingle) {
-			achievementsBO.applyBrandsAchievements(personaEntity, carBrandsList.getBrandInfo(carPhysicsHash, activePersonaId));
+			String brandName = carClassesDAO.findByHash(carPhysicsHash).getManufactor();
+			if (!brandName.contentEquals("AI") && !brandName.contentEquals("TRAFFIC")) {
+				achievementsBO.applyBrandsAchievements(personaEntity, carBrandsList.getBrandInfo(carPhysicsHash, activePersonaId));
+			}
 		}
 		// Check race record
 		legitRaceBO.isRecordVaildRoute(routeArbitrationPacket, eventDataEntity, customCarEntity, isInterceptorEvent, speedBugChance, personaEntity, eventEntity);
