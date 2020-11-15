@@ -736,13 +736,16 @@ public class AchievementsBO {
 			case INVENTORY:
 				String productTitle = product.getProductTitle();
 				String title = productTitle.replace(" x15", "");
-				if (rewardDropEntity.getAmount().intValue() > 1) {
+				int itemAmount = rewardDropEntity.getAmount();
+				if (itemAmount > 1) {
 					title = title + " x" + rewardDropEntity.getAmount().toString();
 				}
 				item.setHash(product.getHash());
 				item.setTitle(title);
-				product.setUseCount(rewardDropEntity.getAmount().intValue());
-				inventoryBO.addDroppedItem(product, personaEntity);
+				// product.setUseCount(rewardDropEntity.getAmount().intValue());
+				for (int i = 0; i < itemAmount; i++) {
+					inventoryBO.addDroppedItem(product, personaEntity);
+				}
 				break;
 			default:
 				break;
