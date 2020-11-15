@@ -8,6 +8,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
+import com.soapboxrace.core.jpa.AchievementDefinitionEntity;
 import com.soapboxrace.core.jpa.AchievementRankEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 
@@ -70,12 +71,12 @@ public class AchievementRankDAO extends BaseDAO<AchievementRankEntity> {
 		return results.isEmpty() ? null : results.get(0);
 	}
 	
-	public AchievementRankEntity findLastStage(Long achievementDefinitionId) {
+	public AchievementRankEntity findLastStage(AchievementDefinitionEntity achievementDefinitionEntity) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT obj FROM AchievementRankEntity obj ");
-		sql.append("WHERE obj.achievementDefinitionId = :achievementDefinitionId ORDER BY obj.rank DESC");
+		sql.append("WHERE obj.achievementDefinition = :achievementDefinition ORDER BY obj.rank DESC");
 		TypedQuery<AchievementRankEntity> query = entityManager.createQuery(sql.toString(), AchievementRankEntity.class);
-		query.setParameter("achievementDefinitionId", achievementDefinitionId);
+		query.setParameter("achievementDefinition", achievementDefinitionEntity);
 		List<AchievementRankEntity> results = query.getResultList();
 		return results.isEmpty() ? null : results.get(0);
 	}

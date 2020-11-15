@@ -673,15 +673,18 @@ public class AchievementsBO {
 
 		List<RewardDropEntity> rewardDrops = rewardDropDAO.getRewardDrops(achievementRankEntity.getRewardDropId(), 
 				achievementRankEntity.getNumberOfRewards(), isCardPack);
-		if (isCardPack && rewardDrops.size() < 5) {
-			for (int i = 0; i < 5; i++) {
-				RewardDropEntity rewardDropEntity = new RewardDropEntity();
-				rewardDropEntity.setAmount(1);
-				rewardDropEntity.setProduct(dropBO.getRandomProductItem(null, 2, false));
-				rewardDropEntity.setRewardDestiny(RewardDestinyType.INVENTORY);
-				rewardDrops.add(rewardDropEntity);
-			}
-		}
+		
+//      Originally, that code did increase the card packs with less than 5 defined cards amount, by adding a random items, up to 5.
+//      But in fact, it only adds a mess to the less-than-5-cards rewards.		
+//		if (isCardPack && rewardDrops.size() < 5) {
+//			for (int i = 0; i < 5; i++) {
+//				RewardDropEntity rewardDropEntity = new RewardDropEntity();
+//				rewardDropEntity.setAmount(1);
+//				rewardDropEntity.setProduct(dropBO.getRandomProductItem(null, 2, false));
+//				rewardDropEntity.setRewardDestiny(RewardDestinyType.INVENTORY);
+//				rewardDrops.add(rewardDropEntity);
+//			}
+//		}
 		Collections.shuffle(rewardDrops);
 		for (RewardDropEntity rewardDropEntity : rewardDrops) {
 			CommerceItemTrans item = new CommerceItemTrans();
@@ -1258,7 +1261,7 @@ public class AchievementsBO {
 		int collectorCarsValue = achievementPersonaEntity.getCollectorCars();
 		int carsAmount = carSlotDAO.countPersonaCars(personaEntity.getPersonaId()).intValue();
 		// Check out the last rank goal of Collector achievement
-		if (carsAmount <= achievementRankDAO.findLastStage((long) 16).getThresholdValue() && carsAmount > collectorCarsValue) { 
+		if (carsAmount <= achievementRankDAO.findLastStage(achievementDAO.findById((long) 16)).getThresholdValue() && carsAmount > collectorCarsValue) { 
 			collectorCarsValue = collectorCarsValue + 1;
 			achievementPersonaEntity.setCollectorCars(collectorCarsValue);
 			processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.COLLECTOR, Integer.valueOf(carsAmount).longValue());
@@ -1278,19 +1281,21 @@ public class AchievementsBO {
 		List<AchievementRankEntity> getRanksList = achievementRankDAO.findMultipleRanksById(ranksArray);
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		if (carsAmount > achievementPersonaEntity.getCollectorCars()) {
-			Long carsLimit = achievementRankDAO.findLastStage((long) 16).getThresholdValue();
+			Long carsLimit = achievementRankDAO.findLastStage(achievementDAO.findById((long) 16)).getThresholdValue();
 			if (carsAmount > carsLimit) {achievementPersonaEntity.setCollectorCars(carsLimit.intValue());}
 			else {achievementPersonaEntity.setCollectorCars(carsAmount);}
-			achievementPersonaDAO.update(achievementPersonaEntity);
 		}
 		int i = 0;
 		for (AchievementRankEntity collectorRank : getRanksList) {
-			if (carsAmount > (collectorRank.getThresholdValue() - 1) && achievementStateDAO.findByPersonaAchievementRank(personaEntity, collectorRank) == null) {
+			Long carsGoal = collectorRank.getThresholdValue();
+			if (carsAmount > (carsGoal - 1) && achievementStateDAO.findByPersonaAchievementRank(personaEntity, collectorRank) == null) {
 				forceAchievementApply(ranksArray[i], personaEntity, true);
 				processAchievementByThresholdRange(achievementPersonaEntity, AchievementType.LEGENDARY_DRIVER, Integer.valueOf(personaEntity.getScore()).longValue());
+				achievementPersonaEntity.setCollectorCars(carsGoal.intValue());
 			}
 			i++;
 		}
+		achievementPersonaDAO.update(achievementPersonaEntity);
 	}
 	
 	/**

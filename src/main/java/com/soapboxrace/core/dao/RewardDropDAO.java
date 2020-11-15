@@ -51,10 +51,12 @@ public class RewardDropDAO extends BaseDAO<RewardDropEntity> {
 		rewardDropQuery.setMaxResults(1);
 		if (isCardPack) {
 			int max = Math.max(1, numberOfRewards);
+			System.out.println("Max is " + max);
 			for (int i = 0; i < max; i++) {
 				number = random.nextInt(count.intValue());
 				rewardDropQuery.setFirstResult(number);
 				rewardDropList.add(rewardDropQuery.getSingleResult());
+				System.out.println("Card number " + i);
 			}
 		} else {
 			number = random.nextInt(count.intValue());
