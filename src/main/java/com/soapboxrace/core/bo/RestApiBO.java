@@ -316,7 +316,6 @@ public class RestApiBO {
 					carclasshash,
 					eventResultBO.getCarClassLetter(event.getCarClassHash())
 				);
-		// FIXME Do something with that mess
 		if (carclasshash == 0) {
 //			ArrayList<Long> userIdList = new ArrayList<>();
 			for (RecordsEntity race : recordsDAO.statsEventAll(event, powerups, page, onPage)) {
@@ -327,155 +326,76 @@ public class RestApiBO {
 //				else {
 //					continue;
 //				}
-				final boolean isCarVersionVaild;
-				CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
-				EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
-				EventCarInfoEntity eventCarInfoEntity = eventCarInfoDAO.findByEventData(race.getEventDataId());
-				if (eventCarInfoEntity == null) {
-					eventCarInfoEntity = eventBO.createDummyEventCarInfo();
-				}
-				int serverCarVersionValue = carClassesEntity.getCarVersion();
-				if (serverCarVersionValue == race.getCarVersion()) {
-					isCarVersionVaild = true;
-				}
-				else {
-					isCarVersionVaild = false;
-				}
-				
-				ArrayOfRaceWithTime.Race raceXml = list.add(
-						race.getId().intValue(), 
-						race.getPlayerName(),
-						race.getPersona().getIconIndex(),
-						carClassesEntity.getFullName(),
-						race.getCarClassHash(), 
-						race.getTimeMS().intValue(), 
-						race.getTimeMSAlt().intValue(), 
-						race.getTimeMSSrv().intValue(),
-						race.getAirTimeMS().intValue(), 
-						race.getBestLapTimeMS().intValue(), 
-						(float)(race.getTopSpeed() * 3.6), 
-						race.getPerfectStart(),
-						race.getIsSingle(),
-						race.getDate().toString(),
-						isCarVersionVaild,
-						eventPowerupsEntity.getNosShot(),
-						eventPowerupsEntity.getSlingshot(),
-						eventPowerupsEntity.getOneMoreLap(),
-						eventPowerupsEntity.getReady(),
-						eventPowerupsEntity.getTrafficMagnet(),
-						eventPowerupsEntity.getShield(),
-						eventPowerupsEntity.getEmergencyEvade(),
-						eventPowerupsEntity.getJuggernaut(),
-						eventPowerupsEntity.getRunFlatTires(),
-						eventPowerupsEntity.getInstantCooldown(),
-						eventPowerupsEntity.getTeamEmergencyEvade(),
-						eventPowerupsEntity.getTeamSlingshot(),
-						eventCarInfoEntity.getRating(),
-						eventCarInfoEntity.getBodykit(),
-						eventCarInfoEntity.getSpoiler(),
-						eventCarInfoEntity.getLowkit()
-					);
-
-				String perfStrArray = eventCarInfoEntity.getPerfParts();
-				if (perfStrArray != null) {
-					Integer[] perfArray = stringListConverter.StrToIntList(perfStrArray.split(","));
-					for (int hash : perfArray) {
-						ProductEntity perf = productDAO.findByHash(hash);
-						raceXml.addPerfArray(
-								perf.getProductTitle() + " (" + perf.getStars() + "*, T" + perf.getTopSpeed() + "-A" + perf.getAccel() + "-H" + perf.getHandling() + ")", // name with part details
-		                        perf.getIcon() // icon
-		                        );
-					}
-				}
-				String skillStrArray = eventCarInfoEntity.getSkillParts();
-				if (skillStrArray != null) {
-					Integer[] skillArray = stringListConverter.StrToIntList(skillStrArray.split(","));
-					for (int hash : skillArray) {
-						ProductEntity skill = productDAO.findByHash(hash);
-						raceXml.addSkillArray(
-								skill.getProductTitle() + " (" + skill.getStars() + "*, " + skill.getSkillValue() + "%)", // name with skill details
-		                        skill.getIcon() // icon
-		                        );
-					}
-				}
+				prepareWebRecordEntry(race, list);
 			}
 		}
 		else {
 			for (RecordsEntity race : recordsDAO.statsEventClass(event, powerups, carclasshash, page, onPage)) {
-				final boolean isCarVersionVaild;
-				CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
-				EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
-				EventCarInfoEntity eventCarInfoEntity = eventCarInfoDAO.findByEventData(race.getEventDataId());
-				if (eventCarInfoEntity == null) {
-					eventCarInfoEntity = eventBO.createDummyEventCarInfo();
-				}
-				int serverCarVersionValue = carClassesEntity.getCarVersion();
-				if (serverCarVersionValue == race.getCarVersion()) {
-					isCarVersionVaild = true;
-				}
-				else {
-					isCarVersionVaild = false;
-				}
-				ArrayOfRaceWithTime.Race raceXml = list.add(
-						race.getId().intValue(), 
-						race.getPlayerName(),
-						race.getPersona().getIconIndex(),
-						carClassesEntity.getFullName(),
-						race.getCarClassHash(), 
-						race.getTimeMS().intValue(), 
-						race.getTimeMSAlt().intValue(), 
-						race.getTimeMSSrv().intValue(),
-						race.getAirTimeMS().intValue(), 
-						race.getBestLapTimeMS().intValue(), 
-						(float)(race.getTopSpeed() * 3.6), 
-						race.getPerfectStart(),
-						race.getIsSingle(),
-						race.getDate().toString(),
-						isCarVersionVaild,
-						eventPowerupsEntity.getNosShot(),
-						eventPowerupsEntity.getSlingshot(),
-						eventPowerupsEntity.getOneMoreLap(),
-						eventPowerupsEntity.getReady(),
-						eventPowerupsEntity.getTrafficMagnet(),
-						eventPowerupsEntity.getShield(),
-						eventPowerupsEntity.getEmergencyEvade(),
-						eventPowerupsEntity.getJuggernaut(),
-						eventPowerupsEntity.getRunFlatTires(),
-						eventPowerupsEntity.getInstantCooldown(),
-						eventPowerupsEntity.getTeamEmergencyEvade(),
-						eventPowerupsEntity.getTeamSlingshot(),
-						eventCarInfoEntity.getRating(),
-						eventCarInfoEntity.getBodykit(),
-						eventCarInfoEntity.getSpoiler(),
-						eventCarInfoEntity.getLowkit()
-					);
-
-				String perfStrArray = eventCarInfoEntity.getPerfParts();
-				if (perfStrArray != null) {
-					Integer[] perfArray = stringListConverter.StrToIntList(perfStrArray.split(","));
-					for (int hash : perfArray) {
-						ProductEntity perf = productDAO.findByHash(hash);
-						raceXml.addPerfArray(
-								perf.getProductTitle() + " (" + perf.getStars() + "*, T" + perf.getTopSpeed() + "-A" + perf.getAccel() + "-H" + perf.getHandling() + ")", // name with part details
-		                        perf.getIcon() // icon
-		                        );
-					}
-				}
-				String skillStrArray = eventCarInfoEntity.getSkillParts();
-				if (skillStrArray != null) {
-					Integer[] skillArray = stringListConverter.StrToIntList(skillStrArray.split(","));
-					for (int hash : skillArray) {
-						ProductEntity skill = productDAO.findByHash(hash);
-						raceXml.addSkillArray(
-								skill.getProductTitle() + " (" + skill.getStars() + "*, " + skill.getSkillValue() + "%)", // name with skill details
-		                        skill.getIcon() // icon
-		                        );
-					}
-				}
+				prepareWebRecordEntry(race, list);
 			}
 		}
 		return list;
 	}
+	
+	public ArrayOfRaceWithTime.Race prepareWebRecordEntry (RecordsEntity race, ArrayOfRaceWithTime list) {
+		final boolean isCarVersionVaild;
+		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
+		EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
+		EventCarInfoEntity eventCarInfoEntity = eventCarInfoDAO.findByEventData(race.getEventDataId());
+		if (eventCarInfoEntity == null) {
+			eventCarInfoEntity = eventBO.createDummyEventCarInfo();
+		}
+		int serverCarVersionValue = carClassesEntity.getCarVersion();
+		if (serverCarVersionValue == race.getCarVersion()) {
+			isCarVersionVaild = true;
+		}
+		else {
+			isCarVersionVaild = false;
+		}
+		
+		ArrayOfRaceWithTime.Race raceXml = list.add(
+				race.getId().intValue(), race.getPlayerName(), race.getPersona().getIconIndex(),
+				carClassesEntity.getFullName(), race.getCarClassHash(), race.getTimeMS().intValue(), 
+				race.getTimeMSAlt().intValue(), race.getTimeMSSrv().intValue(), race.getAirTimeMS().intValue(), 
+				race.getBestLapTimeMS().intValue(), (float)(race.getTopSpeed() * 3.6), race.getPerfectStart(),
+				race.getIsSingle(), race.getDate().toString(), isCarVersionVaild, 
+				// Power-ups info
+				eventPowerupsEntity.getNosShot(), eventPowerupsEntity.getSlingshot(), eventPowerupsEntity.getOneMoreLap(), 
+				eventPowerupsEntity.getReady(), eventPowerupsEntity.getTrafficMagnet(), eventPowerupsEntity.getShield(),
+				eventPowerupsEntity.getEmergencyEvade(), eventPowerupsEntity.getJuggernaut(), eventPowerupsEntity.getRunFlatTires(),
+				eventPowerupsEntity.getInstantCooldown(), eventPowerupsEntity.getTeamEmergencyEvade(), eventPowerupsEntity.getTeamSlingshot(),
+				// CarInfo
+				eventCarInfoEntity.getRating(), eventCarInfoEntity.getBodykit(), eventCarInfoEntity.getSpoiler(), eventCarInfoEntity.getLowkit()
+			);
+
+		String perfStrArray = eventCarInfoEntity.getPerfParts();
+		if (perfStrArray != null) {
+			Integer[] perfArray = stringListConverter.StrToIntList(perfStrArray.split(","));
+			for (int hash : perfArray) {
+				ProductEntity perf = productDAO.findByHash(hash);
+				if (!perf.getProductId().contains("SRV-PERF-RF")) { // Don't include race filter items
+					raceXml.addPerfArray(
+							perf.getProductTitle() + " (" + perf.getStars() + "*, T" + perf.getTopSpeed() + "-A" + perf.getAccel() + "-H" + perf.getHandling() + ")", // name with part details
+	                        perf.getIcon() // icon
+	                        );
+				}
+			}
+		}
+		String skillStrArray = eventCarInfoEntity.getSkillParts();
+		if (skillStrArray != null) {
+			Integer[] skillArray = stringListConverter.StrToIntList(skillStrArray.split(","));
+			for (int hash : skillArray) {
+				ProductEntity skill = productDAO.findByHash(hash);
+				raceXml.addSkillArray(
+						skill.getProductTitle() + " (" + skill.getStars() + "*, " + skill.getSkillValue() + "%)", // name with skill details
+                        skill.getIcon() // icon
+                        );
+			}
+		}
+		return raceXml;
+	}
+	
+	
 	/**
 	 * Получить список лучших заездов по времени
 	 * Фильтрация по имени профиля
@@ -505,76 +425,7 @@ public class RestApiBO {
 					"all"
 				);
 		for (RecordsEntity race : recordsDAO.statsEventPersona(event, powerups, userEntity)) {
-			final boolean isCarVersionVaild;
-			CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
-			EventPowerupsEntity eventPowerupsEntity = race.getEventPowerups();
-			EventCarInfoEntity eventCarInfoEntity = eventCarInfoDAO.findByEventData(race.getEventDataId());
-			if (eventCarInfoEntity == null) {
-				eventCarInfoEntity = eventBO.createDummyEventCarInfo();
-			}
-			int serverCarVersionValue = carClassesEntity.getCarVersion();
-			if (serverCarVersionValue == race.getCarVersion()) {
-				isCarVersionVaild = true;
-			}
-			else {
-				isCarVersionVaild = false;
-			}
-			ArrayOfRaceWithTime.Race raceXml = list.add(
-					race.getId().intValue(), 
-					race.getPlayerName(),
-					race.getPersona().getIconIndex(),
-					carClassesEntity.getFullName(),
-					race.getCarClassHash(), 
-					race.getTimeMS().intValue(), 
-					race.getTimeMSAlt().intValue(), 
-					race.getTimeMSSrv().intValue(),
-					race.getAirTimeMS().intValue(), 
-					race.getBestLapTimeMS().intValue(), 
-					(float)(race.getTopSpeed() * 3.6), 
-					race.getPerfectStart(),
-					race.getIsSingle(),
-					race.getDate().toString(),
-					isCarVersionVaild,
-					eventPowerupsEntity.getNosShot(),
-					eventPowerupsEntity.getSlingshot(),
-					eventPowerupsEntity.getOneMoreLap(),
-					eventPowerupsEntity.getReady(),
-					eventPowerupsEntity.getTrafficMagnet(),
-					eventPowerupsEntity.getShield(),
-					eventPowerupsEntity.getEmergencyEvade(),
-					eventPowerupsEntity.getJuggernaut(),
-					eventPowerupsEntity.getRunFlatTires(),
-					eventPowerupsEntity.getInstantCooldown(),
-					eventPowerupsEntity.getTeamEmergencyEvade(),
-					eventPowerupsEntity.getTeamSlingshot(),
-					eventCarInfoEntity.getRating(),
-					eventCarInfoEntity.getBodykit(),
-					eventCarInfoEntity.getSpoiler(),
-					eventCarInfoEntity.getLowkit()
-				);
-
-			String perfStrArray = eventCarInfoEntity.getPerfParts();
-			if (perfStrArray != null) {
-				Integer[] perfArray = stringListConverter.StrToIntList(perfStrArray.split(","));
-				for (int hash : perfArray) {
-					ProductEntity perf = productDAO.findByHash(hash);
-					raceXml.addPerfArray(
-	                        perf.getProductTitle() + " (" + perf.getStars() + "*, T" + perf.getTopSpeed() + "-A" + perf.getAccel() + "-H" + perf.getHandling() + ")", // name with part details
-	                        perf.getIcon() // icon
-	                        );
-				}
-			}
-			String skillStrArray = eventCarInfoEntity.getSkillParts();
-			if (skillStrArray != null) {
-				Integer[] skillArray = stringListConverter.StrToIntList(skillStrArray.split(","));
-				for (int hash : skillArray) {
-					ProductEntity skill = productDAO.findByHash(hash);
-					raceXml.addSkillArray(
-							skill.getProductTitle() + " (" + skill.getStars() + "*, " + skill.getSkillValue() + "%)", // name with skill details
-							skill.getIcon() // icon
-	                        );
-				}
-			}
+			prepareWebRecordEntry(race, list);
 		}
 		return list;
 	}
