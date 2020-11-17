@@ -1265,6 +1265,10 @@ public class AchievementsBO {
 		int carsAmount = carSlotDAO.countPersonaCars(personaEntity.getPersonaId()).intValue();
 		// Check out the last rank goal of Collector achievement
 		if (carsAmount <= achievementRankDAO.findLastStage(achievementDAO.findById((long) 16)).getThresholdValue() && carsAmount > collectorCarsValue) { 
+			int diff = carsAmount - collectorCarsValue;
+			if (diff > 1) {
+				System.out.println("Collector Bug: " + diff + ", personaId: " + personaEntity.getPersonaId());
+			}
 			collectorCarsValue = collectorCarsValue + 1;
 			achievementPersonaEntity.setCollectorCars(collectorCarsValue);
 			processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.COLLECTOR, Integer.valueOf(carsAmount).longValue());
@@ -1278,7 +1282,7 @@ public class AchievementsBO {
 	 * @author Hypercycle
 	 */
 	// Checking each achievement stage there
-	// A bit unoptimized - makes separate DB request for every achievement stage in persona
+	// Unoptimized - makes separate DB request for every achievement stage in persona, both times
 	public void forceApplyCollector (int carsAmount, PersonaEntity personaEntity) {
 		Integer[] ranksArray = new Integer[] {76,77,78,79,80};
 		List<AchievementRankEntity> getRanksList = achievementRankDAO.findMultipleRanksById(ranksArray);
@@ -1288,7 +1292,15 @@ public class AchievementsBO {
 			if (carsAmount > carsLimit) {achievementPersonaEntity.setCollectorCars(carsLimit.intValue());}
 			else {achievementPersonaEntity.setCollectorCars(carsAmount);}
 		}
-		int i = 0;
+	    // Does the persona have achievement ranks already? Get the car value then
+		for (AchievementRankEntity collectorRank : getRanksList) {
+			Long carsGoal = collectorRank.getThresholdValue();
+			if (achievementStateDAO.findByPersonaAchievementRank(personaEntity, collectorRank) != null) {
+				achievementPersonaEntity.setCollectorCars(carsGoal.intValue());
+				// System.out.println("stage2 value: " + carsGoal.intValue());
+			}
+		}
+		int i = 0; // First time and no ranks? Let's give them
 		for (AchievementRankEntity collectorRank : getRanksList) {
 			Long carsGoal = collectorRank.getThresholdValue();
 			if (carsAmount > (carsGoal - 1) && achievementStateDAO.findByPersonaAchievementRank(personaEntity, collectorRank) == null) {
@@ -1298,6 +1310,7 @@ public class AchievementsBO {
 			}
 			i++;
 		}
+		// System.out.println("final value: " + achievementPersonaEntity.getCollectorCars());
 		achievementPersonaDAO.update(achievementPersonaEntity);
 	}
 	

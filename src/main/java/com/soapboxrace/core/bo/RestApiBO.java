@@ -382,7 +382,7 @@ public class RestApiBO {
 					for (int hash : perfArray) {
 						ProductEntity perf = productDAO.findByHash(hash);
 						raceXml.addPerfArray(
-		                        perf.getProductTitle(), // name
+								perf.getProductTitle() + " (" + perf.getStars() + "*, T" + perf.getTopSpeed() + "-A" + perf.getAccel() + "-H" + perf.getHandling() + ")", // name with part details
 		                        perf.getIcon() // icon
 		                        );
 					}
@@ -391,10 +391,10 @@ public class RestApiBO {
 				if (skillStrArray != null) {
 					Integer[] skillArray = stringListConverter.StrToIntList(skillStrArray.split(","));
 					for (int hash : skillArray) {
-						ProductEntity perf = productDAO.findByHash(hash);
+						ProductEntity skill = productDAO.findByHash(hash);
 						raceXml.addSkillArray(
-		                        perf.getProductTitle(), // name
-		                        perf.getIcon() // icon
+								skill.getProductTitle() + " (" + skill.getStars() + "*, " + skill.getSkillValue() + "%)", // name with skill details
+		                        skill.getIcon() // icon
 		                        );
 					}
 				}
@@ -456,7 +456,7 @@ public class RestApiBO {
 					for (int hash : perfArray) {
 						ProductEntity perf = productDAO.findByHash(hash);
 						raceXml.addPerfArray(
-		                        perf.getProductTitle(), // name
+								perf.getProductTitle() + " (" + perf.getStars() + "*, T" + perf.getTopSpeed() + "-A" + perf.getAccel() + "-H" + perf.getHandling() + ")", // name with part details
 		                        perf.getIcon() // icon
 		                        );
 					}
@@ -465,10 +465,10 @@ public class RestApiBO {
 				if (skillStrArray != null) {
 					Integer[] skillArray = stringListConverter.StrToIntList(skillStrArray.split(","));
 					for (int hash : skillArray) {
-						ProductEntity perf = productDAO.findByHash(hash);
+						ProductEntity skill = productDAO.findByHash(hash);
 						raceXml.addSkillArray(
-		                        perf.getProductTitle(), // name
-		                        perf.getIcon() // icon
+								skill.getProductTitle() + " (" + skill.getStars() + "*, " + skill.getSkillValue() + "%)", // name with skill details
+		                        skill.getIcon() // icon
 		                        );
 					}
 				}
@@ -559,7 +559,7 @@ public class RestApiBO {
 				for (int hash : perfArray) {
 					ProductEntity perf = productDAO.findByHash(hash);
 					raceXml.addPerfArray(
-	                        perf.getProductTitle(), // name
+	                        perf.getProductTitle() + " (" + perf.getStars() + "*, T" + perf.getTopSpeed() + "-A" + perf.getAccel() + "-H" + perf.getHandling() + ")", // name with part details
 	                        perf.getIcon() // icon
 	                        );
 				}
@@ -568,10 +568,10 @@ public class RestApiBO {
 			if (skillStrArray != null) {
 				Integer[] skillArray = stringListConverter.StrToIntList(skillStrArray.split(","));
 				for (int hash : skillArray) {
-					ProductEntity perf = productDAO.findByHash(hash);
+					ProductEntity skill = productDAO.findByHash(hash);
 					raceXml.addSkillArray(
-	                        perf.getProductTitle(), // name
-	                        perf.getIcon() // icon
+							skill.getProductTitle() + " (" + skill.getStars() + "*, " + skill.getSkillValue() + "%)", // name with skill details
+							skill.getIcon() // icon
 	                        );
 				}
 			}
