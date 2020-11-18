@@ -2,7 +2,6 @@ package com.soapboxrace.core.bo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -336,7 +335,11 @@ public class RestApiBO {
 		}
 		return list;
 	}
-	
+	/**
+	 * Заполнение информации о рекорде
+	 * @param RecordsEntity - объект с рекордом трассы
+	 * @param ArrayOfRaceWithTime - лист с рекордами трассы для веб-статистики
+	 */
 	public ArrayOfRaceWithTime.Race prepareWebRecordEntry (RecordsEntity race, ArrayOfRaceWithTime list) {
 		final boolean isCarVersionVaild;
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
@@ -394,7 +397,6 @@ public class RestApiBO {
 		}
 		return raceXml;
 	}
-	
 	
 	/**
 	 * Получить список лучших заездов по времени

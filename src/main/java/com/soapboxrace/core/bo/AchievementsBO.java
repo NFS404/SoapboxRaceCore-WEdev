@@ -1287,11 +1287,6 @@ public class AchievementsBO {
 		Integer[] ranksArray = new Integer[] {76,77,78,79,80};
 		List<AchievementRankEntity> getRanksList = achievementRankDAO.findMultipleRanksById(ranksArray);
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
-		if (carsAmount > achievementPersonaEntity.getCollectorCars()) {
-			Long carsLimit = achievementRankDAO.findLastStage(achievementDAO.findById((long) 16)).getThresholdValue();
-			if (carsAmount > carsLimit) {achievementPersonaEntity.setCollectorCars(carsLimit.intValue());}
-			else {achievementPersonaEntity.setCollectorCars(carsAmount);}
-		}
 	    // Does the persona have achievement ranks already? Get the car value then
 		for (AchievementRankEntity collectorRank : getRanksList) {
 			Long carsGoal = collectorRank.getThresholdValue();
@@ -1309,6 +1304,12 @@ public class AchievementsBO {
 				achievementPersonaEntity.setCollectorCars(carsGoal.intValue());
 			}
 			i++;
+		}
+		// After all of this, let's save the real player cars amount
+		if (carsAmount > achievementPersonaEntity.getCollectorCars()) {
+			Long carsLimit = achievementRankDAO.findLastStage(achievementDAO.findById((long) 16)).getThresholdValue();
+			if (carsAmount > carsLimit) {achievementPersonaEntity.setCollectorCars(carsLimit.intValue());}
+			else {achievementPersonaEntity.setCollectorCars(carsAmount);}
 		}
 		// System.out.println("final value: " + achievementPersonaEntity.getCollectorCars());
 		achievementPersonaDAO.update(achievementPersonaEntity);
