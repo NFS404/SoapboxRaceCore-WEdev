@@ -28,7 +28,7 @@ import javax.persistence.Table;
 						+ "obj.isDropableMode = :isDropableMode AND " //
 						+ "obj.productType = :productType"), //
 		@NamedQuery(name = "ProductEntity.findByProductId", query = "SELECT obj FROM ProductEntity obj WHERE obj.productId = :productId"), //
-		@NamedQuery(name = "ProductEntity.findByLongDesc", query = "SELECT obj FROM ProductEntity obj WHERE obj.longDescription = :longDescription"), //
+		@NamedQuery(name = "ProductEntity.findByCarName", query = "SELECT obj FROM ProductEntity obj WHERE obj.carName = :carName"), //
 		@NamedQuery(name = "ProductEntity.findByHash", query = "SELECT obj FROM ProductEntity obj WHERE obj.hash = :hash") //
 })
 public class ProductEntity {
@@ -69,6 +69,7 @@ public class ProductEntity {
 	private Integer stars = 0;
 	private boolean pFull = false;
 	private boolean modder = false;
+	private String carName;
 
 	public Long getId() {
 		return id;
@@ -332,6 +333,14 @@ public class ProductEntity {
 
 	public void setModder(boolean modder) {
 		this.modder = modder;
+	}
+	
+	public String getCarName() {
+		return carName;
+	}
+
+	public void setCarName(String carName) {
+		this.carName = carName;
 	}
 
 }

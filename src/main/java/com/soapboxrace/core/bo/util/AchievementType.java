@@ -321,49 +321,49 @@ public enum AchievementType {
 	 */
 	WEV2_LUCKY_COLLECTOR(105), //
 	/**
+	 * donate for Discord Boosts
+	 */
+	WEV2_DISCORDBOOST(106), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	BUGATTI_COLLECTOR(107), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	FERRARI_COLLECTOR(108), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	FIAT_COLLECTOR(109), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	HONDA_COLLECTOR(110), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	MASERATI_COLLECTOR(111), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	NFS_BRAND_COLLECTOR(112), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	SMART_COLLECTOR(113), //
+	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	TESLA_COLLECTOR(114), //
+	/**
 	 * drive in all events
 	 */
-	WEV2_TRAVELLER(106), //
+	WEV2_TRAVELLER(115), //
 	/**
 	 * install 4-star skills on all slots for X cars
 	 */
-	WEV2_SKILL_MASTER(107), //
-	/**
-	 * donate for Discord Boosts
-	 */
-	WEV2_DISCORDBOOST(108), //
-	/**
-	 * own [x] [car-brand](s) in your garage
-	 */
-	BUGATTI_COLLECTOR(109), //
-	/**
-	 * own [x] [car-brand](s) in your garage
-	 */
-	FERRARI_COLLECTOR(110), //
-	/**
-	 * own [x] [car-brand](s) in your garage
-	 */
-	FIAT_COLLECTOR(111), //
-	/**
-	 * own [x] [car-brand](s) in your garage
-	 */
-	HONDA_COLLECTOR(112), //
-	/**
-	 * own [x] [car-brand](s) in your garage
-	 */
-	MASERATI_COLLECTOR(113), //
-	/**
-	 * own [x] [car-brand](s) in your garage
-	 */
-	NFS_BRAND_COLLECTOR(114), //
-	/**
-	 * own [x] [car-brand](s) in your garage
-	 */
-	SMART_COLLECTOR(115), //
-	/**
-	 * own [x] [car-brand](s) in your garage
-	 */
-	TESLA_COLLECTOR(116); //
+	WEV2_SKILL_MASTER(116); //
 
 	private int id;
 

@@ -58,7 +58,7 @@ public class SalesBO {
 		if (saleCar4.contentEquals("")) {
 			saleCar4 = null;
 		}
-		ProductEntity saleCar1Prod = productDAO.findByLongDesc(saleCar1);
+		ProductEntity saleCar1Prod = productDAO.findByCarName(saleCar1);
 		float prod1Price = saleCar1Prod.getPrice();
 		
 		salesEntity.setCar1(saleCar1); // Take the original car's price and level-requirement
@@ -75,7 +75,7 @@ public class SalesBO {
 		
 		if (saleCar2 != null) {
 			// System.out.println("saleCar2");
-			ProductEntity saleCar2Prod = productDAO.findByLongDesc(saleCar2);
+			ProductEntity saleCar2Prod = productDAO.findByCarName(saleCar2);
 			float prod2Price = saleCar2Prod.getPrice();
 			salesEntity.setCar2(saleCar2); // Take the original car's price and level-requirement
 			salesEntity.setCar2Cost(prod2Price);
@@ -88,7 +88,7 @@ public class SalesBO {
 		
         if (saleCar3 != null) {
         	// System.out.println("saleCar3");
-        	ProductEntity saleCar3Prod = productDAO.findByLongDesc(saleCar3);
+        	ProductEntity saleCar3Prod = productDAO.findByCarName(saleCar3);
         	float prod3Price = saleCar3Prod.getPrice();
 			salesEntity.setCar3(saleCar3); // Take the original car's price and level-requirement
 			salesEntity.setCar3Cost(prod3Price);
@@ -101,7 +101,7 @@ public class SalesBO {
         
         if (saleCar4 != null) {
         	// System.out.println("saleCar4");
-        	ProductEntity saleCar4Prod = productDAO.findByLongDesc(saleCar4);
+        	ProductEntity saleCar4Prod = productDAO.findByCarName(saleCar4);
         	float prod4Price = saleCar4Prod.getPrice();
 			salesEntity.setCar4(saleCar4); // Take the original car's price and level-requirement
 			salesEntity.setCar4Cost(prod4Price);
@@ -121,28 +121,28 @@ public class SalesBO {
 		if (salesEntity == null) {
 			return "";
 		}
-		ProductEntity saleCar1Prod = productDAO.findByLongDesc(salesEntity.getCar1());
+		ProductEntity saleCar1Prod = productDAO.findByCarName(salesEntity.getCar1());
 		saleCar1Prod.setLevel(salesEntity.getCar1Lvl());
 		saleCar1Prod.setPrice(salesEntity.getCar1Cost());
 		saleCar1Prod.setSecondaryIcon("");
 		productDAO.update(saleCar1Prod);
 		
 		if (salesEntity.getCar2() != null) {
-			ProductEntity saleCar2Prod = productDAO.findByLongDesc(salesEntity.getCar2());
+			ProductEntity saleCar2Prod = productDAO.findByCarName(salesEntity.getCar2());
 			saleCar2Prod.setLevel(salesEntity.getCar2Lvl());
 			saleCar2Prod.setPrice(salesEntity.getCar2Cost());
 			saleCar2Prod.setSecondaryIcon("");
 			productDAO.update(saleCar2Prod);
 		}
         if (salesEntity.getCar3() != null) {
-        	ProductEntity saleCar3Prod = productDAO.findByLongDesc(salesEntity.getCar3());
+        	ProductEntity saleCar3Prod = productDAO.findByCarName(salesEntity.getCar3());
 			saleCar3Prod.setLevel(salesEntity.getCar3Lvl());
 			saleCar3Prod.setPrice(salesEntity.getCar3Cost());
 			saleCar3Prod.setSecondaryIcon("");
 			productDAO.update(saleCar3Prod);
 		}
         if (salesEntity.getCar4() != null) {
-        	ProductEntity saleCar4Prod = productDAO.findByLongDesc(salesEntity.getCar4());
+        	ProductEntity saleCar4Prod = productDAO.findByCarName(salesEntity.getCar4());
 			saleCar4Prod.setLevel(salesEntity.getCar4Lvl());
 			saleCar4Prod.setPrice(salesEntity.getCar4Cost());
 			saleCar4Prod.setSecondaryIcon("");

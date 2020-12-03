@@ -433,7 +433,7 @@ public class AchievementBrandsEntity {
 	}
 
 	public void setSmartWins(int smartWins) {
-		this.smartWins = nfsWins;
+		this.smartWins = smartWins;
 	}
 	
 	public int getTeslaWins() {
