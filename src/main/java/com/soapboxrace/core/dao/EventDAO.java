@@ -46,10 +46,11 @@ public class EventDAO extends BaseDAO<EventEntity> {
 	 * Количество всех эвентов
 	 * @author Vadimka
 	 */
-	public BigInteger countAll(boolean all) {
-        String sqlQ = "SELECT Count(*) cout FROM event";
+	// Deprecated
+	public BigInteger countAll(boolean all, int rotation) {
+        String sqlQ = "SELECT Count(*) cout FROM event WHERE isenabled = true AND rotation <> 999 AND statsVisible = true";
         if (!all)
-            sqlQ += " WHERE isenabled = true";
+            sqlQ += " AND rotation = "+rotation;
         Query query = entityManager.createNativeQuery(sqlQ);
         query.setMaxResults(1);
         @SuppressWarnings("unchecked")

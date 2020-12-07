@@ -1,5 +1,6 @@
 package com.soapboxrace.core.bo;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -139,6 +140,11 @@ public class RestApiBO {
 	 */
 	@EJB
 	private EventBO eventBO;
+	/**
+	 * Объект запросов в базу для получения параметров ядра
+	 */
+	@EJB
+	private ParameterBO parameterBO;
 	
 	
 	// ================= Функции выборки ================
@@ -437,7 +443,7 @@ public class RestApiBO {
 	 */
 	public ArrayOfEvents getRaces(boolean all) {
 		ArrayOfEvents list = new ArrayOfEvents();
-		list.setCount(eventDAO.countAll(all));
+		// list.setCount(eventDAO.countAll(all, parameterBO.getIntParam("ROTATIONID")));
 		List<EventEntity> races = null;
 		if (all)
 			races = eventDAO.findAllStats();
@@ -446,6 +452,7 @@ public class RestApiBO {
 		for (EventEntity race : races) {
 			list.add(race.getId(), race.getName(), race.getCarClassHash(), String.valueOf(race.getEventModeId()));
 		}
+		list.setCount(BigInteger.valueOf(races.size()));
 		return list;
 	}
 	/**
