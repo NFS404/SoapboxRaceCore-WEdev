@@ -20,7 +20,9 @@ import javax.xml.bind.annotation.XmlType;
 	"raceName",
 	"raceType",
 	"raceClass",
-	"eventClass"
+	"eventClass",
+	"trainingId",
+	"baseEvent"
 })
 public class ArrayOfRaceWithTime {
 
@@ -38,6 +40,12 @@ public class ArrayOfRaceWithTime {
 	
 	@XmlElement(name = "EventClass")
 	private String eventClass;
+	
+	@XmlElement(name = "TrainingId")
+	private int trainingId;
+	
+	@XmlElement(name = "BaseEvent")
+	private int baseEvent;
 
 	@XmlElement(name = "Race")
 	private List<Race> races;
@@ -48,6 +56,8 @@ public class ArrayOfRaceWithTime {
 		raceType = 0;
 		raceClass = 0;
 		eventClass = "all";
+		trainingId = 0;
+		baseEvent = 0;
 	}
 	
 	public void setCount(BigInteger count) {
@@ -57,12 +67,16 @@ public class ArrayOfRaceWithTime {
 			String raceName,
 			int raceType,
 			int raceClass,
-			String eventClass
+			String eventClass,
+			int trainingId,
+			int baseEvent
 			) {
 		this.raceName = raceName;
 		this.raceType = raceType;
 		this.raceClass = raceClass;
 		this.eventClass = eventClass;
+		this.trainingId = trainingId;
+		this.baseEvent = baseEvent;
 	}
 	public Race add(
 			int id,

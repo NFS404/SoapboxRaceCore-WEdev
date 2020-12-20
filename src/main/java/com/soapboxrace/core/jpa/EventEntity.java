@@ -13,7 +13,7 @@ import javax.persistence.Table;
 @Table(name = "EVENT")
 @NamedQueries({ //
 		@NamedQuery(name = "EventEntity.findAllStats", query = "SELECT obj FROM EventEntity obj WHERE obj.statsVisible = true AND isEnabled = true ORDER BY obj.name"), //
-		@NamedQuery(name = "EventEntity.findAllEnabledStats", query = "SELECT obj FROM EventEntity obj WHERE rotation = :rotation OR rotation = 0 AND obj.statsVisible = true AND isEnabled = true ORDER BY obj.name"), //
+		@NamedQuery(name = "EventEntity.findAllEnabledStats", query = "SELECT obj FROM EventEntity obj WHERE (rotation = :rotation OR rotation = 0) AND obj.statsVisible = true AND isEnabled = true ORDER BY obj.name"), //
 		@NamedQuery(name = "EventEntity.findByLevel", query = "SELECT obj FROM EventEntity obj WHERE :level >= obj.minLevel AND :level <= obj.maxLevel AND isEnabled = true"), //
 		@NamedQuery(name = "EventEntity.findByRotation", query = "SELECT obj FROM EventEntity obj WHERE :level >= obj.minLevel AND :level <= obj.maxLevel AND isEnabled = true AND (rotation = :rotation OR rotation = 0)") //
 })
@@ -70,6 +70,8 @@ public class EventEntity {
 	private float trackLength;
 	private boolean statsVisible;
 	private long timeLimit;
+	private int baseEvent;
+	private int trainingId;
 
 	public int getId() {
 		return id;
@@ -453,5 +455,21 @@ public class EventEntity {
 
 	public void setTimeLimit(long timeLimit) {
 		this.timeLimit = timeLimit;
+	}
+	
+	public int getBaseEvent() {
+		return baseEvent;
+	}
+
+	public void setBaseEvent(int baseEvent) {
+		this.baseEvent = baseEvent;
+	}
+	
+	public int getTrainingId() {
+		return trainingId;
+	}
+
+	public void setTrainingId(int trainingId) {
+		this.trainingId = trainingId;
 	}
 }

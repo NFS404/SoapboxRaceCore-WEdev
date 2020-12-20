@@ -39,8 +39,8 @@ public class ArrayOfEvents {
 	 * @param id - Идентификатор трассы
 	 * @param name - Имя трассы
 	 */
-	public void add(int id, String name, int carClass, String race_type) {
-		races.add(new Race(id, name, carClass, race_type));
+	public void add(int id, String name, int carClass, String race_type, boolean isTrainingEnabled) {
+		races.add(new Race(id, name, carClass, race_type, isTrainingEnabled));
 	}
 	
 	@XmlAccessorType(XmlAccessType.FIELD)
@@ -48,7 +48,8 @@ public class ArrayOfEvents {
 		"ID",
 		"NAME",
 		"CAR_CLASS",
-		"TYPE"
+		"TYPE",
+		"TRAINING"
 	})
 	public static class Race {
 
@@ -60,8 +61,10 @@ public class ArrayOfEvents {
 		private String CAR_CLASS;
 		@XmlElement(name = "Type")
 		private String TYPE;
+		@XmlElement(name = "Training")
+		private boolean TRAINING;
 		
-		protected Race (int id, String name, int carClass, String race_type) {
+		protected Race (int id, String name, int carClass, String race_type, boolean isTrainingEnabled) {
 			ID = id;
 			NAME = name;
 			switch(carClass) {
@@ -94,6 +97,7 @@ public class ArrayOfEvents {
 				break;
 			}
 			TYPE = race_type;
+			TRAINING = isTrainingEnabled;
 		}
 	}
 	

@@ -604,7 +604,7 @@ public class AchievementsBO {
 	 * @param text - main text to display
 	 * @author Hypercycle
 	 */
-	public void broadcastUICustom(Long personaId, String text, int seconds) {
+	public void broadcastUICustom(Long personaId, String text, String description, int seconds) {
 		PersonaEntity personaEntity = personaDAO.findById(personaId);
 		AchievementsAwarded achievementsAwarded = new AchievementsAwarded();
 		achievementsAwarded.setPersonaId(personaId);
@@ -626,9 +626,10 @@ public class AchievementsBO {
 		achievementAwarded.setAchievementDefinitionId((long) 104);
 		achievementAwarded.setClip("AchievementFlasherBase");
 		achievementAwarded.setClipLengthInSeconds(seconds);
-		achievementAwarded.setDescription("LOL");
+		// MISSIONMODE, MAINTENANCEMODE
+		achievementAwarded.setDescription(description); // Not used by the game, but used by us as the message type
 		achievementAwarded.setIcon("BADGE18");
-		achievementAwarded.setName(text);
+		achievementAwarded.setName(text); // Limited by 18 symbols
 		achievementAwarded.setPoints(0);
 		achievementAwarded.setRare(false);
 		achievementAwarded.setRarity(0);

@@ -319,7 +319,9 @@ public class RestApiBO {
 					event.getName(),
 					event.getEventModeId(),
 					carclasshash,
-					eventResultBO.getCarClassLetter(event.getCarClassHash())
+					eventResultBO.getCarClassLetter(event.getCarClassHash()),
+					event.getTrainingId(),
+					event.getBaseEvent()
 				);
 		if (carclasshash == 0) {
 //			ArrayList<Long> userIdList = new ArrayList<>();
@@ -430,7 +432,9 @@ public class RestApiBO {
 					event.getName(),
 					event.getEventModeId(),
 					0,
-					"all"
+					"all",
+					event.getTrainingId(),
+					event.getBaseEvent()
 				);
 		for (RecordsEntity race : recordsDAO.statsEventPersona(event, powerups, userEntity)) {
 			prepareWebRecordEntry(race, list);
@@ -450,7 +454,9 @@ public class RestApiBO {
 		else
 			races = eventDAO.findAllEnabledStats();
 		for (EventEntity race : races) {
-			list.add(race.getId(), race.getName(), race.getCarClassHash(), String.valueOf(race.getEventModeId()));
+			boolean isTrainingEnabled = false;
+			if (race.getTrainingId() != 0) {isTrainingEnabled = true;}
+			list.add(race.getId(), race.getName(), race.getCarClassHash(), String.valueOf(race.getEventModeId()), isTrainingEnabled);
 		}
 		list.setCount(BigInteger.valueOf(races.size()));
 		return list;

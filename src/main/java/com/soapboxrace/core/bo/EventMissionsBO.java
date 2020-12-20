@@ -14,7 +14,6 @@ import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventMissionsEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
-import com.soapboxrace.jaxb.http.RouteArbitrationPacket;
 
 @Stateless
 public class EventMissionsBO {
@@ -49,21 +48,20 @@ public class EventMissionsBO {
 			switch (eventType) {
 			case "TimeAttack":
 				timeTarget = timeReadConverter.convertRecord(timeLimit);
-				message = "Beat the time: " + timeTarget;
+				message = timeTarget;
 				break;
 			case "Race":
-				message = "Finish 1st";
+				message = "TXT_WEV3_BASEANNOUNCER_RACE_GOAL";
 				break;
 			case "Escort":
-				timeTarget = timeReadConverter.convertRecord(timeLimit);
-				message = "Finish 2nd, but before " + timeTarget;
+				message = "TXT_WEV3_BASEANNOUNCER_ESCORT_GOAL";
 				break;
 			}
-			achievementsBO.broadcastUICustom(activePersonaId, message, 5);
+			achievementsBO.broadcastUICustom(activePersonaId, message, "MISSIONMODE", 5);
 			// Daily Race's reward can be given only once per day
 			if (dailyRaceDate != null && dailyRaceDate.equals(curDate)) { 
 				String messageNoReward = "Replay, no rewards";
-				achievementsBO.broadcastUICustom(activePersonaId, messageNoReward, 3);
+				achievementsBO.broadcastUICustom(activePersonaId, messageNoReward, "MISSIONMODE", 3);
 			}
 		}
 	}
@@ -106,7 +104,7 @@ public class EventMissionsBO {
 		else {
 			isDone = false; // No Rewards, since it's a replay
 		}
-		achievementsBO.broadcastUICustom(activePersonaId, message, 5);
+		achievementsBO.broadcastUICustom(activePersonaId, message, "MISSIONMODE", 5);
 		return isDone;
 	}
 	
