@@ -59,7 +59,9 @@ public class RewardRouteBO extends RewardBO {
 		if (eventSessionEntity.getTeam2Check() && parameterBO.getIntParam("TEAM_CURRENTSEASON") != 0) {
 			isTeamRace = true;
 		}
-		return getAccolades(personaEntity, routeArbitrationPacket, rewardVO, isDropableMode, isTeamRace);
+		boolean noLuckyDraw = false;
+		if (eventEntity.getBaseEvent() != 0) {noLuckyDraw = true;} // Event with BaseEvent value is the Training mode event
+		return getAccolades(personaEntity, routeArbitrationPacket, rewardVO, isDropableMode, isTeamRace, noLuckyDraw);
 	}
 
 }

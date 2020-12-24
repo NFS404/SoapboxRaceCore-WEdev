@@ -210,7 +210,7 @@ public class EventResultTeamEscapeBO {
 		if (isMission) {
 			boolean isDone = eventMissionsBO.getEventMissionAccolades(eventEntity, eventMissionsEntity, activePersonaId, teamEscapeArbitrationPacket, finishReason);
 			if (isDone) {
-				// Continue
+				teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity, 2));
 			}
 			else {
 				teamEscapeEventResult.setAccolades(new Accolades());
@@ -221,7 +221,7 @@ public class EventResultTeamEscapeBO {
 			System.out.println("Player " + personaEntity.getName() + " has tried to finish Team Escape on SP mode.");
 		}
 		else {
-			teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity));
+			teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity, 1));
 		}
 		teamEscapeEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, teamEscapeArbitrationPacket, teamEscapeArbitrationPacket.getNumberOfCollisions()));
 		teamEscapeEventResult.setEntrants(arrayOfTeamEscapeEntrantResult);

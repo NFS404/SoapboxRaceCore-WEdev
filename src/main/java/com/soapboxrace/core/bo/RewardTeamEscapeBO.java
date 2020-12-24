@@ -33,7 +33,7 @@ public class RewardTeamEscapeBO extends RewardBO {
 	private PersonaBO personaBO;
 
 	public Accolades getTeamEscapeAccolades(Long activePersonaId, TeamEscapeArbitrationPacket teamEscapeArbitrationPacket,
-			EventSessionEntity eventSessionEntity) {
+			EventSessionEntity eventSessionEntity, int isDropableMode) {
 		int finishReason = teamEscapeArbitrationPacket.getFinishReason();
 		if (!legitRaceBO.isLegit(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity, false) || finishReason != 22) {
 			return new Accolades();
@@ -74,6 +74,6 @@ public class RewardTeamEscapeBO extends RewardBO {
 		Random random = new Random();
 		teamEscapeArbitrationPacket.setRank(random.nextInt(4));
 		applyRaceReward(rewardVO.getRep(), rewardVO.getCash(), personaEntity);
-		return getAccolades(personaEntity, teamEscapeArbitrationPacket, rewardVO, 1, false);
+		return getAccolades(personaEntity, teamEscapeArbitrationPacket, rewardVO, isDropableMode, false, true);
 	}
 }

@@ -232,11 +232,13 @@ public class RewardBO {
 		rewardVO.add(0, finalCash.intValue(), EnumRewardCategory.SKILL_MOD, EnumRewardType.TOKEN_AMPLIFIER);
 	}
 
-	public Accolades getAccolades(PersonaEntity personaEntity, ArbitrationPacket arbitrationPacket, RewardVO rewardVO, int isDropableMode, boolean isTeamRace) {
+	public Accolades getAccolades(PersonaEntity personaEntity, ArbitrationPacket arbitrationPacket, RewardVO rewardVO, int isDropableMode, boolean isTeamRace, boolean noLuckyDraw) {
 		Accolades accolades = new Accolades();
 		accolades.setFinalRewards(getFinalReward(rewardVO.getRep(), rewardVO.getCash()));
 		accolades.setHasLeveledUp(isLeveledUp(personaEntity, rewardVO.getRep()));
-		accolades.setLuckyDrawInfo(getLuckyDrawInfo(arbitrationPacket.getRank(), personaEntity.getLevel(), personaEntity, isDropableMode, isTeamRace));
+		if (!noLuckyDraw) {
+			accolades.setLuckyDrawInfo(getLuckyDrawInfo(arbitrationPacket.getRank(), personaEntity.getLevel(), personaEntity, isDropableMode, isTeamRace));
+		}
 		accolades.setOriginalRewards(getFinalReward(rewardVO.getRep(), rewardVO.getCash()));
 		accolades.setRewardInfo(rewardVO.getArrayOfRewardPart());
 		return accolades;

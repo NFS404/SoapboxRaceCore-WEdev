@@ -60,7 +60,7 @@ public class EventMissionsBO {
 			achievementsBO.broadcastUICustom(activePersonaId, message, "MISSIONMODE", 5);
 			// Daily Race's reward can be given only once per day
 			if (dailyRaceDate != null && dailyRaceDate.equals(curDate)) { 
-				String messageNoReward = "Replay, no rewards";
+				String messageNoReward = "TXT_WEV3_BASEANNOUNCER_MISSION_REPLAY";
 				achievementsBO.broadcastUICustom(activePersonaId, messageNoReward, "MISSIONMODE", 3);
 			}
 		}
@@ -71,7 +71,7 @@ public class EventMissionsBO {
 		PersonaEntity personaEntity = personaDao.findById(activePersonaId);
 		LocalDate dailyRaceDate = personaEntity.getDailyRaceDate();
 		String eventType = eventMissionsEntity.getEventType();
-		String message = "Challenge Failed";
+		String message = "TXT_WEV3_BASEANNOUNCER_MISSIONRESULT_FAIL";
 		Long playerTime = arbitrationPacket.getEventDurationInMilliseconds();
 		int playerRank = arbitrationPacket.getRank();
 		Long timeLimit = eventEntity.getTimeLimit();
@@ -81,19 +81,19 @@ public class EventMissionsBO {
 		case "TimeAttack":
 			if (finishReason == 22 && playerTime < timeLimit) {
 				isDone = true;
-				message = "Challenge Completed";
+				message = "TXT_WEV3_BASEANNOUNCER_MISSIONRESULT_WIN";
 			}
 			break;
 		case "Race":
 			if (playerRank == 1) {
 				isDone = true;
-				message = "Challenge Completed";
+				message = "TXT_WEV3_BASEANNOUNCER_MISSIONRESULT_WIN";
 			}
 			break;
 		case "Escort":
 			if (finishReason == 22 && playerRank == 2 && playerTime < timeLimit) {
 				isDone = true;
-				message = "Challenge Completed";
+				message = "TXT_WEV3_BASEANNOUNCER_MISSIONRESULT_WIN";
 			}
 			break;
 		}
@@ -104,7 +104,7 @@ public class EventMissionsBO {
 		else {
 			isDone = false; // No Rewards, since it's a replay
 		}
-		achievementsBO.broadcastUICustom(activePersonaId, message, "MISSIONMODE", 5);
+		achievementsBO.broadcastUICustom(activePersonaId, message, "MISSIONRESULTMODE", 5);
 		return isDone;
 	}
 	
