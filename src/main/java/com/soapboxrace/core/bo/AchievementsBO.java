@@ -460,6 +460,8 @@ public class AchievementsBO {
 			return Integer.valueOf(achievementBrandsEntity.getSmartWins()).longValue();
 		case TESLA_COLLECTOR:
 			return Integer.valueOf(achievementBrandsEntity.getTeslaWins()).longValue();
+		case FLANKER_COLLECTOR:
+			return Integer.valueOf(achievementBrandsEntity.getFlankerWins()).longValue();
 		default:
 			break;
 		}

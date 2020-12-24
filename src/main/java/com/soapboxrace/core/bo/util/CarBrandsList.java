@@ -255,6 +255,11 @@ public class CarBrandsList {
 			winsCount = achievementBrandsEntity.getTeslaWins() + 1;
 			achievementBrandsEntity.setTeslaWins(winsCount);
 			break;
+		case "FLANKER":
+			brandAchievementDefId = 115;
+			winsCount = achievementBrandsEntity.getFlankerWins() + 1;
+			achievementBrandsEntity.setFlankerWins(winsCount);
+			break;
 		}
 		achievementBrandsDAO.update(achievementBrandsEntity);
 		brandInfo[0] = brandAchievementDefId;

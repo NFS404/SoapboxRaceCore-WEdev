@@ -357,13 +357,18 @@ public enum AchievementType {
 	 */
 	TESLA_COLLECTOR(114), //
 	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	FLANKER_COLLECTOR(115), //
+	/**
 	 * drive in all events
 	 */
-	WEV2_TRAVELLER(115), //
+	WEV2_TRAVELLER(116), //
 	/**
 	 * install 4-star skills on all slots for X cars
 	 */
-	WEV2_SKILL_MASTER(116); //
+	WEV2_SKILL_MASTER(117); //
+	
 
 	private int id;
 
