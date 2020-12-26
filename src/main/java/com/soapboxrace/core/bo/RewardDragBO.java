@@ -49,6 +49,6 @@ public class RewardDragBO extends RewardBO {
 		setMultiplierReward(eventEntity, rewardVO);
 
 		applyRaceReward(rewardVO.getRep(), rewardVO.getCash(), personaEntity);
-		return getAccolades(personaEntity, dragArbitrationPacket, rewardVO, isDropableMode, false, true);
+		return getAccolades(personaEntity, dragArbitrationPacket, rewardVO, isDropableMode, false, false);
 	}
 }
