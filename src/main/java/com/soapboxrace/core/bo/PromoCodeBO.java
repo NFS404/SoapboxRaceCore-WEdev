@@ -51,6 +51,12 @@ public class PromoCodeBO {
 	
 	@EJB
 	private ParameterBO parameterBO;
+	
+	@EJB
+	private AchievementRankDAO achievementRankDAO;
+	
+	@EJB
+	private AchievementsBO achievementsBO;
 
 	@Resource(mappedName = "java:jboss/mail/Gmail")
 	private Session mailSession;
@@ -135,6 +141,9 @@ public class PromoCodeBO {
 		    		if (playerInitialLevel < 25) {
 		    			personaEntity.setLevel(25);
 		    		}
+		    		Integer[] level20RanksArray = new Integer[] {111};
+		    		premiumAchievementLevelRankApply(level20RanksArray, personaEntity);
+		    		
 		    		personaDao.update(personaEntity);
 		    		userEntity.setPremiumType(premiumCodeType);
 		    		userDao.update(userEntity);
@@ -176,9 +185,13 @@ public class PromoCodeBO {
 	    			userEntity.setExtraMoney(userEntity.getExtraMoney() + extraMoneyTransit);
 	    		}
 	    		personaEntity.setCash(finalValue);
+	    		
 	    		if (playerInitialLevel < 40) {
 	    			personaEntity.setLevel(40);
 	    		}
+	    		Integer[] level40RanksArray = new Integer[] {111,112};
+	    		premiumAchievementLevelRankApply(level40RanksArray, personaEntity);
+	    		
 	    		personaDao.update(personaEntity);
 		    	
 		    	userEntity.setPremium(true);
@@ -210,6 +223,9 @@ public class PromoCodeBO {
 	    		if (playerInitialLevel < 75) {
 	    			personaEntity.setLevel(75);
 	    		}
+	    		Integer[] level75RanksArray = new Integer[] {111,112,113};
+	    		premiumAchievementLevelRankApply(level75RanksArray, personaEntity);
+	    		
 		    	personaDao.update(personaEntity);
 		    	
 		    	userEntity.setPremium(true);
@@ -348,6 +364,17 @@ public class PromoCodeBO {
 			achievementStateEntity.setAchievementState(AchievementState.COMPLETED);
 			achievementStateEntity.setPersona(personaEntity);
 			achievementStateDao.insert(achievementStateEntity);
+		}
+	}
+	
+	private void premiumAchievementLevelRankApply (Integer[] ranksArray, PersonaEntity personaEntity) {
+		List<AchievementRankEntity> getLevelRanksList = achievementRankDAO.findMultipleRanksById(ranksArray);
+		int i = 0;
+		for (AchievementRankEntity collectorRank : getLevelRanksList) {
+			if (achievementStateDao.findByPersonaAchievementRank(personaEntity, collectorRank) == null) {
+				achievementsBO.forceAchievementApply(ranksArray[i], personaEntity, true);
+			}
+			i++;
 		}
 	}
 	
