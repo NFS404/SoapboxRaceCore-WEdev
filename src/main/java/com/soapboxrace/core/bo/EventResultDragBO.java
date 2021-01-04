@@ -179,9 +179,10 @@ public class EventResultDragBO {
 
 			if (!racer.getPersonaId().equals(activePersonaId)) {
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
-				xmppEvent.sendDragEnd(dragEntrantResultResponse);
+				xmppEvent.sendDragEntrantInfo(dragEntrantResultResponse);
 				if (playerRank == 1) {
 					xmppEvent.sendEventTimingOut(eventSessionId);
+					eventResultBO.timeLimitTimer(eventSessionId, (long) 60000); // Default timeout time is 60 seconds
 				}
 			}
 		}

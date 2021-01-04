@@ -18,6 +18,7 @@ import javax.persistence.Table;
 		@NamedQuery(name = "EventDataEntity.findByPersona", query = "SELECT obj FROM EventDataEntity obj WHERE obj.personaId = :personaId"), //
 		@NamedQuery(name = "EventDataEntity.getRacers", query = "SELECT obj FROM EventDataEntity obj WHERE obj.eventSessionId = :eventSessionId"), //
 		@NamedQuery(name = "EventDataEntity.getRacersRanked", query = "SELECT obj FROM EventDataEntity obj WHERE obj.eventSessionId = :eventSessionId AND obj.finishReason <> 0 AND obj.rank <> 0 ORDER BY obj.serverEventDuration ASC"), //
+		@NamedQuery(name = "EventDataEntity.getRacersTEFinished", query = "SELECT obj FROM EventDataEntity obj WHERE obj.eventSessionId = :eventSessionId AND obj.finishReason = 22 AND obj.rank <> 0"), //
 		@NamedQuery(name = "EventDataEntity.findByPersonaAndType", query = "SELECT obj FROM EventDataEntity obj WHERE obj.personaId = :personaId AND obj.eventModeId = :eventModeId"), //
 		@NamedQuery(name = "EventDataEntity.findByPersonaAndEventSessionId", query = "SELECT obj FROM EventDataEntity obj WHERE obj.personaId = :personaId AND obj.eventSessionId = :eventSessionId") //
 })

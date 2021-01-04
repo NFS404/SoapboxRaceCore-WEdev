@@ -376,47 +376,54 @@ public class RewardBO {
 	public void setRankReward(EventEntity eventEntity, ArbitrationPacket routeArbitrationPacket, RewardVO rewardVO) {
 		float rankRepMultiplier = 0f;
 		float rankCashMultiplier = 0f;
-		switch (routeArbitrationPacket.getRank()) {
-		case 1:
+		if (eventEntity.getEventModeId() == 24) { // All Team Escape finishers will get highest reward
 			rankRepMultiplier = eventEntity.getRank1RepMultiplier();
 			rankCashMultiplier = eventEntity.getRank1CashMultiplier();
-			break;
-		case 2:
-			rankRepMultiplier = eventEntity.getRank2RepMultiplier();
-			rankCashMultiplier = eventEntity.getRank2CashMultiplier();
-			break;
-		case 3:
-			rankRepMultiplier = eventEntity.getRank3RepMultiplier();
-			rankCashMultiplier = eventEntity.getRank3CashMultiplier();
-			break;
-		case 4:
-			rankRepMultiplier = eventEntity.getRank4RepMultiplier();
-			rankCashMultiplier = eventEntity.getRank4CashMultiplier();
-			break;
-		case 5:
-			rankRepMultiplier = eventEntity.getRank5RepMultiplier();
-			rankCashMultiplier = eventEntity.getRank5CashMultiplier();
-			break;
-		case 6:
-			rankRepMultiplier = eventEntity.getRank6RepMultiplier();
-			rankCashMultiplier = eventEntity.getRank6CashMultiplier();
-			break;
-		case 7:
-			rankRepMultiplier = eventEntity.getRank7RepMultiplier();
-			rankCashMultiplier = eventEntity.getRank7CashMultiplier();
-			break;
-		case 8:
-			rankRepMultiplier = eventEntity.getRank8RepMultiplier();
-			rankCashMultiplier = eventEntity.getRank8CashMultiplier();
-			break;
-		default:
-			break;
 		}
+		else {
+			switch (routeArbitrationPacket.getRank()) {
+			case 1:
+				rankRepMultiplier = eventEntity.getRank1RepMultiplier();
+				rankCashMultiplier = eventEntity.getRank1CashMultiplier();
+				break;
+			case 2:
+				rankRepMultiplier = eventEntity.getRank2RepMultiplier();
+				rankCashMultiplier = eventEntity.getRank2CashMultiplier();
+				break;
+			case 3:
+				rankRepMultiplier = eventEntity.getRank3RepMultiplier();
+				rankCashMultiplier = eventEntity.getRank3CashMultiplier();
+				break;
+			case 4:
+				rankRepMultiplier = eventEntity.getRank4RepMultiplier();
+				rankCashMultiplier = eventEntity.getRank4CashMultiplier();
+				break;
+			case 5:
+				rankRepMultiplier = eventEntity.getRank5RepMultiplier();
+				rankCashMultiplier = eventEntity.getRank5CashMultiplier();
+				break;
+			case 6:
+				rankRepMultiplier = eventEntity.getRank6RepMultiplier();
+				rankCashMultiplier = eventEntity.getRank6CashMultiplier();
+				break;
+			case 7:
+				rankRepMultiplier = eventEntity.getRank7RepMultiplier();
+				rankCashMultiplier = eventEntity.getRank7CashMultiplier();
+				break;
+			case 8:
+				rankRepMultiplier = eventEntity.getRank8RepMultiplier();
+				rankCashMultiplier = eventEntity.getRank8CashMultiplier();
+				break;
+			default:
+				break;
+			}
+		}
+		
 		float baseRep = rewardVO.getBaseRep();
 		float baseCash = rewardVO.getBaseCash();
 		Float rankRepResult = baseRep * rankRepMultiplier;
-		Float cashRepRestul = baseCash * rankCashMultiplier;
-		rewardVO.add(rankRepResult.intValue(), cashRepRestul.intValue(), EnumRewardCategory.BONUS, EnumRewardType.NONE);
+		Float cashRepResult = baseCash * rankCashMultiplier;
+		rewardVO.add(rankRepResult.intValue(), cashRepResult.intValue(), EnumRewardCategory.BONUS, EnumRewardType.NONE);
 	}
 
 	public RewardVO getRewardVO(PersonaEntity personaEntity) {
@@ -433,7 +440,7 @@ public class RewardBO {
 		return new RewardVO(enableEconomy, enableReputation);
 	}
 
-	public void setPursitParamReward(float rewardValue, EnumRewardType enumRewardType, RewardVO rewardVO) {
+	public void setPursuitParamReward(float rewardValue, EnumRewardType enumRewardType, RewardVO rewardVO) {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("PURSUIT_");
 		stringBuilder.append(enumRewardType.toString());

@@ -23,7 +23,6 @@ import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
-import com.soapboxrace.core.xmpp.XmppEvent;
 import com.soapboxrace.jaxb.http.Accolades;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
 import com.soapboxrace.jaxb.http.ArrayOfRouteEntrantResult;
@@ -31,8 +30,6 @@ import com.soapboxrace.jaxb.http.ExitPath;
 import com.soapboxrace.jaxb.http.RouteArbitrationPacket;
 import com.soapboxrace.jaxb.http.RouteEntrantResult;
 import com.soapboxrace.jaxb.http.RouteEventResult;
-import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypeRouteEntrantResult;
-import com.soapboxrace.jaxb.xmpp.XMPP_RouteEntrantResultType;
 
 @Stateless
 public class EventResultRouteBO {
@@ -226,7 +223,7 @@ public class EventResultRouteBO {
 		routeEventResult.setInviteLifetimeInMilliseconds(0);
 		routeEventResult.setLobbyInviteId(0);
 		routeEventResult.setPersonaId(activePersonaId);
-		sendXmppPacket(eventSessionId, activePersonaId, routeArbitrationPacket, playerRank);
+		eventBO.sendXmppPacketRoute(eventSessionId, activePersonaId, routeArbitrationPacket, playerRank, true);
 		EventEntity eventEntity2 = eventDAO.findById(currentEventId);
 		boolean isSingle = false;
 		// +1 to play count for this track, MP
@@ -336,35 +333,5 @@ public class EventResultRouteBO {
 		eventDataEntity.setHacksDetected(arbitrationPacket.getHacksDetected());
 		eventDataEntity.setRank(arbitrationPacket.getRank());
 	}
-
-	private void sendXmppPacket(Long eventSessionId, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, int playerRank) {
-		XMPP_RouteEntrantResultType xmppRouteResult = new XMPP_RouteEntrantResultType();
-		xmppRouteResult.setBestLapDurationInMilliseconds(routeArbitrationPacket.getBestLapDurationInMilliseconds());
-		xmppRouteResult.setEventDurationInMilliseconds(routeArbitrationPacket.getEventDurationInMilliseconds());
-		xmppRouteResult.setEventSessionId(eventSessionId);
-		xmppRouteResult.setFinishReason(routeArbitrationPacket.getFinishReason());
-		xmppRouteResult.setPersonaId(activePersonaId);
-		xmppRouteResult.setRanking(playerRank);
-		xmppRouteResult.setTopSpeed(routeArbitrationPacket.getTopSpeed());
-
-		XMPP_ResponseTypeRouteEntrantResult routeEntrantResultResponse = new XMPP_ResponseTypeRouteEntrantResult();
-		routeEntrantResultResponse.setRouteEntrantResult(xmppRouteResult);
-
-		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
-			if (!racer.getPersonaId().equals(activePersonaId)) {
-				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
-				xmppEvent.sendRaceEnd(routeEntrantResultResponse);
-				if (playerRank == 1) {
-					xmppEvent.sendEventTimingOut(eventSessionId);
-				}
-			}
-		}
-	}
 	
-	public void forceStopEvent(Long eventSessionId) {
-		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
-			XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
-			xmppEvent.sendEventTimedOut(eventSessionId);
-		}
-	}
 }

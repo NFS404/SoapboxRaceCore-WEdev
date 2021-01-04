@@ -11,11 +11,15 @@ import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
 
 import com.soapboxrace.core.dao.CarClassesDAO;
+import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
+import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.OwnedCarEntity;
+import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppEvent;
 import com.soapboxrace.jaxb.http.DragArbitrationPacket;
 import com.soapboxrace.jaxb.http.DragEventResult;
 import com.soapboxrace.jaxb.http.PursuitArbitrationPacket;
@@ -45,6 +49,12 @@ public class EventResultBO {
 	
 	@EJB
 	private CarClassesDAO carClassesDAO;
+	
+	@EJB
+	private EventDataDAO eventDataDao;
+	
+	@EJB
+	private OpenFireSoapBoxCli openFireSoapBoxCli;
 
 	@Resource
     private TimerService timerService;
@@ -76,7 +86,16 @@ public class EventResultBO {
 	@Timeout
 	public void timeLimitAction (Timer timer) {
 		Long eventSessionId = (long) timer.getInfo();
-		eventResultRouteBO.forceStopEvent(eventSessionId);
+		forceStopEvent(eventSessionId);
+	}
+	
+	public void forceStopEvent(Long eventSessionId) {
+		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
+			if (racer.getFinishReason() == 0) { // Racer has not finished yet
+				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
+				xmppEvent.sendEventTimedOut(eventSessionId);
+			}
+		}
 	}
 	
 	// after 2 hours of playing, NFSW's time system can glitch sometimes, giving a possible player advantage

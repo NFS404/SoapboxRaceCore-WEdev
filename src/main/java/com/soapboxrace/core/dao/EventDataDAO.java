@@ -50,6 +50,18 @@ public class EventDataDAO extends BaseDAO<EventDataEntity> {
 		query.setParameter("eventSessionId", eventSessionId);
 		return query.getResultList();
 	}
+	
+	public BigInteger countTEFinishers(Long eventSessionId) {
+		Query query = entityManager.createNativeQuery("SELECT COUNT(*) " + 
+				"FROM event_data " + 
+				"WHERE eventSessionId = "+eventSessionId+" AND finishReason = 22 AND rank <> 0");
+		query.setMaxResults(1);
+		@SuppressWarnings("unchecked")
+		List<BigInteger> list = query.getResultList();
+		BigInteger count = new BigInteger("0");
+		if (!list.isEmpty()) count = list.get(0);
+		return count;
+	}
 		
 	public EventDataEntity findByPersonaAndEventSessionId(Long personaId, Long eventSessionId) {
 		TypedQuery<EventDataEntity> query = entityManager.createNamedQuery("EventDataEntity.findByPersonaAndEventSessionId", EventDataEntity.class);

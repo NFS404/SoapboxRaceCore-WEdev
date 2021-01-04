@@ -255,6 +255,23 @@ public class PromoCodeBO {
 				promoCodeDao.update(promoCodeEntity);
 				System.out.println("Player " + nickname + " got the Promo Code (Money amount BEFORE: " + cashPreValue + ")");
 				return "Money Drop is activated (restart the game), thank you! ;)";
+		    case "moneydropx10":
+		    	cashPreValue = personaEntity.getCash();
+		    	premiumMoneyValue = 100000000;
+		    	finalValue = playerInitialCash + premiumMoneyValue;
+		    	if (finalValue > maxCashPremiumAcc) {
+		    		extraMoneyTransit = (finalValue - maxCashPremiumAcc);
+		    		finalValue = maxCashPremiumAcc;
+		    		userEntity.setExtraMoney(userEntity.getExtraMoney() + extraMoneyTransit);
+		    	}
+		    	personaEntity.setCash(finalValue);
+		    	personaDao.update(personaEntity);
+		    	
+		    	promoCodeEntity.setIsUsed(true);
+				promoCodeEntity.setUser(userEntity);
+				promoCodeDao.update(promoCodeEntity);
+				System.out.println("Player " + nickname + " got the Promo Code (Money amount BEFORE: " + cashPreValue + ")");
+				return "Money Drop is activated (restart the game), thank you! ;)";
 		    case "garage50":
 		    	premiumCarSlots(250, userEntity);
 		    	

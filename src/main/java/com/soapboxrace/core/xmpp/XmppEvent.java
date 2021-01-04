@@ -19,15 +19,15 @@ public class XmppEvent {
 		this.openFireSoapBoxCli = openFireSoapBoxCli;
 	}
 
-	public void sendRaceEnd(XMPP_ResponseTypeRouteEntrantResult routeEntrantResultResponse) {
+	public void sendRaceEntrantInfo(XMPP_ResponseTypeRouteEntrantResult routeEntrantResultResponse) {
 		openFireSoapBoxCli.send(routeEntrantResultResponse, personaId);
 	}
 
-	public void sendTeamEscapeEnd(XMPP_ResponseTypeTeamEscapeEntrantResult teamEscapeEntrantResultResponse) {
+	public void sendTeamEscapeEntrantInfo(XMPP_ResponseTypeTeamEscapeEntrantResult teamEscapeEntrantResultResponse) {
 		openFireSoapBoxCli.send(teamEscapeEntrantResultResponse, personaId);
 	}
 
-	public void sendDragEnd(XMPP_ResponseTypeDragEntrantResult dragEntrantResultResponse) {
+	public void sendDragEntrantInfo(XMPP_ResponseTypeDragEntrantResult dragEntrantResultResponse) {
 		openFireSoapBoxCli.send(dragEntrantResultResponse, personaId);
 	}
 

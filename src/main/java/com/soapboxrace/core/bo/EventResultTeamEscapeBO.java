@@ -191,9 +191,10 @@ public class EventResultTeamEscapeBO {
 
 			if (!racer.getPersonaId().equals(activePersonaId)) {
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
-				xmppEvent.sendTeamEscapeEnd(teamEscapeEntrantResultResponse);
+				xmppEvent.sendTeamEscapeEntrantInfo(teamEscapeEntrantResultResponse); // Restart the Team Escape timeout timer
 				if (teamEscapeArbitrationPacket.getRank() == 1) {
 					xmppEvent.sendEventTimingOut(eventSessionId);
+					eventResultBO.timeLimitTimer(eventSessionId, (long) 60000); // Default timeout time is 60 seconds
 				}
 			}
 		}

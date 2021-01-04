@@ -29,6 +29,15 @@ import com.soapboxrace.core.jpa.ParameterEntity;
 import com.soapboxrace.core.jpa.PerformancePartEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.SkillModPartEntity;
+import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppEvent;
+import com.soapboxrace.jaxb.http.RouteArbitrationPacket;
+import com.soapboxrace.jaxb.xmpp.XMPP_DragEntrantResultType;
+import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypeDragEntrantResult;
+import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypeRouteEntrantResult;
+import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypeTeamEscapeEntrantResult;
+import com.soapboxrace.jaxb.xmpp.XMPP_RouteEntrantResultType;
+import com.soapboxrace.jaxb.xmpp.XMPP_TeamEscapeEntrantResultType;
 
 @Stateless
 public class EventBO {
@@ -68,6 +77,9 @@ public class EventBO {
 	
 	@EJB
 	private VisualPartDAO visualPartDao;
+	
+	@EJB
+	private OpenFireSoapBoxCli openFireSoapBoxCli;
 	
 	@EJB
 	private StringListConverter stringListConverter;
@@ -145,6 +157,80 @@ public class EventBO {
 		eventCarInfoEntity.setRating(carRating);
 		eventCarInfoEntity.setEventEnded(true);
 		eventCarInfoDao.update(eventCarInfoEntity);
+	}
+	
+	// XMPP player result packet - can be used as the finish signal, or as a race abort signal to other players
+	public void sendXmppPacketRoute(Long eventSessionId, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, 
+			int playerRank, boolean isRaceEnd) {
+		XMPP_RouteEntrantResultType xmppRouteResult = new XMPP_RouteEntrantResultType();
+		if (!isRaceEnd) { // Abort
+			xmppRouteResult.setBestLapDurationInMilliseconds((long) 0);
+			xmppRouteResult.setEventDurationInMilliseconds((long) 0);
+			xmppRouteResult.setEventSessionId(eventSessionId);
+			xmppRouteResult.setFinishReason(8202);
+			xmppRouteResult.setPersonaId(activePersonaId);
+			xmppRouteResult.setRanking(playerRank);
+		}
+		else { // Race end
+			xmppRouteResult.setBestLapDurationInMilliseconds(routeArbitrationPacket.getBestLapDurationInMilliseconds());
+			xmppRouteResult.setEventDurationInMilliseconds(routeArbitrationPacket.getEventDurationInMilliseconds());
+			xmppRouteResult.setEventSessionId(eventSessionId);
+			xmppRouteResult.setFinishReason(routeArbitrationPacket.getFinishReason());
+			xmppRouteResult.setPersonaId(activePersonaId);
+			xmppRouteResult.setRanking(playerRank);
+			xmppRouteResult.setTopSpeed(routeArbitrationPacket.getTopSpeed());
+		}
+		XMPP_ResponseTypeRouteEntrantResult routeEntrantResultResponse = new XMPP_ResponseTypeRouteEntrantResult();
+		routeEntrantResultResponse.setRouteEntrantResult(xmppRouteResult);
+
+		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
+			if (!racer.getPersonaId().equals(activePersonaId)) {
+				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
+				xmppEvent.sendRaceEntrantInfo(routeEntrantResultResponse);
+				if (isRaceEnd && playerRank == 1) {
+					xmppEvent.sendEventTimingOut(eventSessionId);
+					eventResultBO.timeLimitTimer(eventSessionId, (long) 60000); // Default timeout time is 60 seconds
+				}
+			}
+		}
+	}
+	
+	public void sendXmppPacketTEAbort(Long eventSessionId, Long activePersonaId) {
+		XMPP_TeamEscapeEntrantResultType xmppTeamEscapeResult = new XMPP_TeamEscapeEntrantResultType();
+		xmppTeamEscapeResult.setEventDurationInMilliseconds((long) 0);
+		xmppTeamEscapeResult.setEventSessionId(eventSessionId);
+		xmppTeamEscapeResult.setFinishReason(8202);
+		xmppTeamEscapeResult.setRanking((short) 0); 
+		xmppTeamEscapeResult.setPersonaId(activePersonaId);
+
+		XMPP_ResponseTypeTeamEscapeEntrantResult teamEscapeEntrantResultResponse = new XMPP_ResponseTypeTeamEscapeEntrantResult();
+		teamEscapeEntrantResultResponse.setTeamEscapeEntrantResult(xmppTeamEscapeResult);
+		
+		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
+			if (!racer.getPersonaId().equals(activePersonaId)) {
+				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
+				xmppEvent.sendTeamEscapeEntrantInfo(teamEscapeEntrantResultResponse);
+			}
+		}
+	}
+	
+	public void sendXmppPacketDragAbort(Long eventSessionId, Long activePersonaId) {
+		XMPP_DragEntrantResultType xmppDragResult = new XMPP_DragEntrantResultType();
+		xmppDragResult.setEventDurationInMilliseconds((long) 0);
+		xmppDragResult.setEventSessionId(eventSessionId);
+		xmppDragResult.setFinishReason(8202);
+		xmppDragResult.setPersonaId(activePersonaId);
+		xmppDragResult.setRanking(0);
+
+		XMPP_ResponseTypeDragEntrantResult dragEntrantResultResponse = new XMPP_ResponseTypeDragEntrantResult();
+		dragEntrantResultResponse.setDragEntrantResult(xmppDragResult);
+		
+		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
+			if (!racer.getPersonaId().equals(activePersonaId)) {
+				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
+				xmppEvent.sendDragEntrantInfo(dragEntrantResultResponse);
+			}
+		}
 	}
 	
 	// Change the current events list (every week)

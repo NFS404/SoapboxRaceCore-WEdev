@@ -173,4 +173,25 @@ public class LegitRaceBO {
 			recordsBO.submitRecord(eventEntity, personaEntity, eventDataEntity, customCarEntity, carClassesEntity);
 		}
 	}
+	
+	// FINISHREASON_Unknown = 0;
+	// FINISHREASON_Completed = 2;
+	// FINISHREASON_Succeeded = 6;
+	// FINISHREASON_DidNotFinish = 10;
+	// FINISHREASON_CrossedFinish = 22;
+	// FINISHREASON_KnockedOut = 42;
+	// FINISHREASON_Totalled = 74;
+	// FINISHREASON_EngineBlown = 138;
+	// FINISHREASON_Busted = 266;
+	// FINISHREASON_Evaded = 518;
+	// FINISHREASON_ChallengeCompleted = 1030;
+	// FINISHREASON_Disconnected = 2058;
+	// FINISHREASON_FalseStart = 4106;
+	// FINISHREASON_Aborted = 8202;
+	// FINISHREASON_TimedOut = 16394;
+	// FINISHREASON_TimeLimitExpired = 32774;
+	// FINISHREASON_PauseDetected = 65546;
+	// FINISHREASON_SpeedHacking = 131082;
+	// FINISHREASON_CodePatchDetected = 262154;
+	// FINISHREASON_BadVerifierResponse = 524298;
 }

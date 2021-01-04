@@ -9,6 +9,7 @@
 		    <input type="radio" name="codeType" value="plus"/> Premium+<br />
 		    <input type="radio" name="codeType" value="full"/> Premium Full<br /><br />
 		    <input type="radio" name="codeType" value="moneydrop"/> Money Drop<br />
+		    <input type="radio" name="codeType" value="moneydropx10"/> Money Drop x10<br />
 		    <input type="radio" name="codeType" value="garage50"/> Garage50+<br />
 		    <input type="radio" name="codeType" value="garage150"/> Garage150+<br />
 		    <input type="radio" name="codeType" value="levelup"/> Level-Up<br />
