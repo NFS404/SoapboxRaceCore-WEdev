@@ -121,6 +121,8 @@ public class EventResultDragBO {
 		eventDataEntity.setRank(playerRank);
 		eventDataEntity.setSumOfJumpsDurationInMilliseconds(dragArbitrationPacket.getSumOfJumpsDurationInMilliseconds());
 		eventDataEntity.setTopSpeed(dragArbitrationPacket.getTopSpeed());
+		eventDataEntity.setAvgSpeed(dragArbitrationPacket.getPhysicsMetrics().getSpeedAverage());
+		
 		boolean speedBugChance = eventResultBO.speedBugChance(personaEntity.getUser().getLastLogin());
 		eventDataEntity.setSpeedBugChance(speedBugChance);
 		int carVersion = eventResultBO.carVersionCheck(activePersonaId);
@@ -140,6 +142,7 @@ public class EventResultDragBO {
 		}
 		Long eventDataId = eventDataEntity.getId();
 		eventBO.updateEventCarInfo(activePersonaId, eventDataId, customCarEntity);
+		eventResultBO.physicsMetricsInfoDebug(dragArbitrationPacket);
 		
 		ArrayOfDragEntrantResult arrayOfDragEntrantResult = new ArrayOfDragEntrantResult();
 		boolean isSingle = false;

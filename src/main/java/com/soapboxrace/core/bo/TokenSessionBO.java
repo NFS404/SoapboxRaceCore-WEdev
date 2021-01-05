@@ -319,8 +319,5 @@ public class TokenSessionBO {
 	public UserEntity getUser(String securityToken) {
 		return userDAO.findById(tokenDAO.findBySecurityToken(securityToken).getUserId());
 	}
-
-	public void updatePersonaPresence(Long personaId, Integer personaPresence) {
-		personaPresenceDAO.updatePersonaPresence(personaId, personaPresence);
-	}
+	
 }

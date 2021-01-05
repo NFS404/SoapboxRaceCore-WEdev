@@ -81,7 +81,7 @@ public class Event {
 		eventDataEntity.setServerEventDuration(0);
 		eventDataDAO.update(eventDataEntity);
 		
-		if (eventMode == 4 || eventMode == 9) { // Circuit & Sprint
+		if (eventMode == 4 || eventMode == 9 || eventMode == 100) { // Circuit & Sprint, and Interceptor
 			RouteArbitrationPacket routeArbitrationPacket = new RouteArbitrationPacket();
 			eventBO.sendXmppPacketRoute(eventSessionId, activePersonaId, routeArbitrationPacket, 0, false);
 		}
@@ -132,30 +132,6 @@ public class Event {
 		case SPRINT:
 		case INTERCEPTOR_MP:
 			RouteArbitrationPacket routeArbitrationPacket = JAXBUtility.unMarshal(arbitrationXml, RouteArbitrationPacket.class);
-//			if (event.getId() == 1003 && routeArbitrationPacket.getEventDurationInMilliseconds() < 186000) { // Test
-//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
-//			}
-//			if (event.getId() == 1003 && routeArbitrationPacket.getEventDurationInMilliseconds() > 186000) { // Test
-//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
-//			}
-//			if (event.getId() == 1004 && routeArbitrationPacket.getRank() == 1) { // Test
-//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
-//			}
-//			if (event.getId() == 1004 && routeArbitrationPacket.getRank() > 1) { // Test
-//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
-//			}
-//			if (event.getId() == 1018 && routeArbitrationPacket.getRank() == 1 && routeArbitrationPacket.getEventDurationInMilliseconds() > 255000) { // Test
-//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
-//			}
-//			if (event.getId() == 1018 && (routeArbitrationPacket.getEventDurationInMilliseconds() <= 255000 || routeArbitrationPacket.getRank() > 1)) { // Test
-//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
-//			}
-//			if (event.getId() == 1005 && routeArbitrationPacket.getRank() == 1) { // Test
-//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Completed");
-//			}
-//			if (event.getId() == 1005 && routeArbitrationPacket.getRank() > 1) { // Test
-//				achievementsBO.broadcastUICustom(activePersonaId, "Challenge Failed");
-//			}
 			return eventResultBO.handleRaceEnd(eventSessionEntity, activePersonaId, routeArbitrationPacket, eventEnded);
 		case DRAG:
 			DragArbitrationPacket dragArbitrationPacket = JAXBUtility.unMarshal(arbitrationXml, DragArbitrationPacket.class);

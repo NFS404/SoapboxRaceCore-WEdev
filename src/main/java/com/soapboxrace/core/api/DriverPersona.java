@@ -22,7 +22,9 @@ import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.bo.UserBO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.PersonaEntity;
+import com.soapboxrace.core.jpa.PersonaPresenceEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.jaxb.http.ArrayOfInt;
 import com.soapboxrace.jaxb.http.ArrayOfLong;
@@ -59,6 +61,9 @@ public class DriverPersona {
 
 	@EJB
 	private ParameterBO parameterBO;
+	
+	@EJB
+	private PersonaPresenceDAO personaPresenceDAO;
 
 	// Level calc - summary amount of EXP for all levels, consider a DB's level_rep values to sum for every level stage
 	// DB's level exp calc by Metonator's EXP generator
@@ -269,7 +274,7 @@ public class DriverPersona {
 			return "";
 		}
 		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
-		tokenSessionBo.updatePersonaPresence(activePersonaId, presence);
+		personaPresenceDAO.updatePersonaPresence(activePersonaId, presence);
 		friendBO.sendXmppPresenceToAllFriends(personaEntity, presence);
 		return "";
 	}
@@ -279,7 +284,21 @@ public class DriverPersona {
 	@Path("/GetPersonaPresenceByName")
 	@Produces(MediaType.APPLICATION_XML)
 	public String getPersonaPresenceByName(@QueryParam("displayName") String displayName) {
-		PersonaPresence personaPresenceByName = bo.getPersonaPresenceByName(displayName);
+		PersonaEntity personaEntity = personaDAO.findByName(displayName);
+		if (personaEntity == null) {
+			return "";
+		}
+		Long personaId = personaEntity.getPersonaId();
+		Long userId = personaEntity.getUser().getId();
+		
+		PersonaPresence personaPresenceByName = new PersonaPresence();
+		personaPresenceByName.setPersonaId(personaId);
+		personaPresenceByName.setPresence(0); // Offline by default
+		personaPresenceByName.setUserId(userId);
+		PersonaPresenceEntity personaPresenceEntity = personaPresenceDAO.findByUserId(userId);
+		if (personaPresenceEntity != null) {
+			personaPresenceByName.setPresence(personaPresenceEntity.getPersonaPresence());
+		}
 		if (personaPresenceByName.getPersonaId() == 0) {
 			return "";
 		}

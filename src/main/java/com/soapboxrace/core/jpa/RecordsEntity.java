@@ -64,6 +64,7 @@ public class RecordsEntity {
 	private boolean perfectStart;
 	private boolean isSingle;
 	private float topSpeed;
+	private float avgSpeed;
 	private long airTimeMS;
 	
 	private int carClassHash;
@@ -172,6 +173,14 @@ public class RecordsEntity {
 
 	public void setTopSpeed(float topSpeed) {
 		this.topSpeed = topSpeed;
+	}
+	
+	public float getAvgSpeed() {
+		return avgSpeed;
+	}
+
+	public void setAvgSpeed(float avgSpeed) {
+		this.avgSpeed = avgSpeed;
 	}
 	
 	public Long getAirTimeMS() {

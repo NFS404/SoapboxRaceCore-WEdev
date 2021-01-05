@@ -92,12 +92,6 @@ public class EventResultTeamEscapeBO {
 		String playerName = personaEntity.getName();
 		EventMissionsEntity eventMissionsEntity = eventMissionsDAO.getEventMission(eventSessionEntity.getEvent());
 		boolean isMission = eventMissionsEntity != null ? true : false;
-		// System.out.println("### TEST Acceleration Average: " + (teamEscapeArbitrationPacket.getPhysicsMetrics().getAccelerationAverage() * 3.6));
-		// System.out.println("### TEST Acceleration Max: " + (teamEscapeArbitrationPacket.getPhysicsMetrics().getAccelerationMaximum() * 3.6));
-		// System.out.println("### TEST Acceleration Median: " + (teamEscapeArbitrationPacket.getPhysicsMetrics().getAccelerationMedian() * 3.6));
-		// System.out.println("### TEST Speed Average: " + (teamEscapeArbitrationPacket.getPhysicsMetrics().getSpeedAverage() * 3.6));
-		// System.out.println("### TEST Speed Max: " + (teamEscapeArbitrationPacket.getPhysicsMetrics().getSpeedMaximum() * 3.6));
-		// System.out.println("### TEST Speed Median: " + (teamEscapeArbitrationPacket.getPhysicsMetrics().getSpeedMedian() * 3.6));
 
 		EventDataEntity eventDataEntity = eventDataDao.findByPersonaAndEventSessionId(activePersonaId, eventSessionId);
 		// XKAYA's arbitration exploit fix
@@ -136,6 +130,8 @@ public class EventResultTeamEscapeBO {
 		eventDataEntity.setSpikeStripsDodged(teamEscapeArbitrationPacket.getSpikeStripsDodged());
 		eventDataEntity.setSumOfJumpsDurationInMilliseconds(teamEscapeArbitrationPacket.getSumOfJumpsDurationInMilliseconds());
 		eventDataEntity.setTopSpeed(teamEscapeArbitrationPacket.getTopSpeed());
+		eventDataEntity.setAvgSpeed(teamEscapeArbitrationPacket.getPhysicsMetrics().getSpeedAverage());
+		
 		boolean speedBugChance = eventResultBO.speedBugChance(personaEntity.getUser().getLastLogin());
 		eventDataEntity.setSpeedBugChance(speedBugChance);
 		int carVersion = eventResultBO.carVersionCheck(activePersonaId);

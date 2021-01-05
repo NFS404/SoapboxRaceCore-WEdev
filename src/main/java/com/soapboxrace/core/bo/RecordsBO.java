@@ -117,6 +117,7 @@ public class RecordsBO {
 			else {recordsEntityNew.setPerfectStart(false); }
 			recordsEntityNew.setIsSingle(eventDataEntity.getIsSingle());
 			recordsEntityNew.setTopSpeed(eventDataEntity.getTopSpeed());
+			recordsEntityNew.setAvgSpeed(eventDataEntity.getAvgSpeed());
 			recordsEntityNew.setAirTimeMS(eventDataEntity.getSumOfJumpsDurationInMilliseconds());
 				
 			recordsEntityNew.setCarClassHash(carClassHash);
@@ -168,6 +169,7 @@ public class RecordsBO {
 			else {recordsEntity.setPerfectStart(false); }
 			recordsEntity.setIsSingle(eventDataEntity.getIsSingle());
 			recordsEntity.setTopSpeed(eventDataEntity.getTopSpeed());
+			recordsEntity.setAvgSpeed(eventDataEntity.getAvgSpeed());
 			recordsEntity.setAirTimeMS(eventDataEntity.getSumOfJumpsDurationInMilliseconds());
 				
 			recordsEntity.setCarClassHash(carClassHash);

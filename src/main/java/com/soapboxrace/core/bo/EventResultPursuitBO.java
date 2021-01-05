@@ -103,6 +103,8 @@ public class EventResultPursuitBO {
 		eventDataEntity.setSpikeStripsDodged(pursuitArbitrationPacket.getSpikeStripsDodged());
 		eventDataEntity.setSumOfJumpsDurationInMilliseconds(pursuitArbitrationPacket.getSumOfJumpsDurationInMilliseconds());
 		eventDataEntity.setTopSpeed(pursuitArbitrationPacket.getTopSpeed());
+		eventDataEntity.setAvgSpeed(pursuitArbitrationPacket.getPhysicsMetrics().getSpeedAverage());
+		
 		eventDataEntity.setIsSingle(true);
 		boolean speedBugChance = eventResultBO.speedBugChance(personaEntity.getUser().getLastLogin());
 		eventDataEntity.setSpeedBugChance(speedBugChance);

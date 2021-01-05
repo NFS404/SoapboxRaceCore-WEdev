@@ -23,11 +23,11 @@ public class ResolveFriendsRequest {
 	@Produces(MediaType.APPLICATION_XML)
 	public String resolvefriendsrequest(@QueryParam("personaId") Long personaId, @QueryParam("friendPersonaId") Long friendPersonaId,
 			@QueryParam("resolution") int resolution) {
-		PersonaBase presonaResult = bo.sendResponseFriendRequest(personaId, friendPersonaId, resolution);
-		if (presonaResult == null) {
+		PersonaBase personaResult = bo.sendResponseFriendRequest(personaId, friendPersonaId, resolution);
+		if (personaResult == null) {
 			return "";
 		}
-		return JAXBUtility.marshal(presonaResult);
+		return JAXBUtility.marshal(personaResult);
 //		StringBuilder stringBuilder = new StringBuilder();
 //		stringBuilder.append("<PersonaBase xmlns=\"http://schemas.datacontract.org/2004/07/Victory.Service.Objects\" ");
 //		stringBuilder.append("xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\">");

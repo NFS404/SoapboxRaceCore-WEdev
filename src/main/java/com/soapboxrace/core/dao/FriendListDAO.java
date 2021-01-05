@@ -24,6 +24,12 @@ public class FriendListDAO extends BaseDAO<FriendListEntity> {
 		return query.getResultList();
 	}
 	
+	public List<FriendListEntity> findAcceptedByOwnerId(Long ownerId) {
+		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.findAcceptedByOwnerId", FriendListEntity.class);
+		query.setParameter("userOwnerId", ownerId);
+		return query.getResultList();
+	}
+	
 	public FriendListEntity findByOwnerIdAndFriendPersona(Long ownerId, Long friendPersona) {
 		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.findByOwnerIdAndFriendPersona", FriendListEntity.class);
 		query.setParameter("userOwnerId", ownerId);

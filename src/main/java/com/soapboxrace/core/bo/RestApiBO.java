@@ -368,7 +368,7 @@ public class RestApiBO {
 				race.getId().intValue(), race.getPlayerName(), race.getPersona().getIconIndex(),
 				carClassesEntity.getFullName(), race.getCarClassHash(), race.getTimeMS().intValue(), 
 				race.getTimeMSAlt().intValue(), race.getTimeMSSrv().intValue(), race.getAirTimeMS().intValue(), 
-				race.getBestLapTimeMS().intValue(), (float)(race.getTopSpeed() * 3.6), race.getPerfectStart(),
+				race.getBestLapTimeMS().intValue(), (float)(race.getTopSpeed() * 3.6), (float)(race.getAvgSpeed() * 3.6), race.getPerfectStart(),
 				race.getIsSingle(), race.getDate().toString(), isCarVersionVaild, 
 				// Power-ups info
 				eventPowerupsEntity.getNosShot(), eventPowerupsEntity.getSlingshot(), eventPowerupsEntity.getOneMoreLap(), 

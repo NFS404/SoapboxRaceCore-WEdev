@@ -12,6 +12,7 @@ import javax.persistence.Table;
 @Table(name = "FRIEND_LIST")
 @NamedQueries({ //
 	@NamedQuery(name = "FriendListEntity.findByOwnerId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId"), //
+	@NamedQuery(name = "FriendListEntity.findAcceptedByOwnerId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId AND obj.isAccepted = true"), //
 	@NamedQuery(name = "FriendListEntity.findByOwnerIdAndFriendPersona", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId AND obj.personaId = :personaId") //
 })
 public class FriendListEntity {
@@ -23,7 +24,7 @@ public class FriendListEntity {
 	private Long userOwnerId;
 	private Long personaId;
 	private Long userId;
-	private Boolean  isAccepted;
+	private Boolean isAccepted;
 	
 	public Long getId() {
 		return id;

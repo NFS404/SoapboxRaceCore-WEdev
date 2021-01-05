@@ -20,6 +20,7 @@ import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppEvent;
+import com.soapboxrace.jaxb.http.ArbitrationPacket;
 import com.soapboxrace.jaxb.http.DragArbitrationPacket;
 import com.soapboxrace.jaxb.http.DragEventResult;
 import com.soapboxrace.jaxb.http.PursuitArbitrationPacket;
@@ -115,6 +116,15 @@ public class EventResultBO {
 		
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCarEntityVer.getPhysicsProfileHash());
 		return carClassesEntity.getCarVersion();
+	}
+	
+	public void physicsMetricsInfoDebug(ArbitrationPacket arbitrationPacket) {
+		System.out.println("### TEST Acceleration Average: " + (arbitrationPacket.getPhysicsMetrics().getAccelerationAverage() * 3.6));
+		System.out.println("### TEST Acceleration Max: " + (arbitrationPacket.getPhysicsMetrics().getAccelerationMaximum() * 3.6));
+		System.out.println("### TEST Acceleration Median: " + (arbitrationPacket.getPhysicsMetrics().getAccelerationMedian() * 3.6));
+	    System.out.println("### TEST Speed Average: " + (arbitrationPacket.getPhysicsMetrics().getSpeedAverage() * 3.6));
+		System.out.println("### TEST Speed Max: " + (arbitrationPacket.getPhysicsMetrics().getSpeedMaximum() * 3.6));
+		System.out.println("### TEST Speed Median: " + (arbitrationPacket.getPhysicsMetrics().getSpeedMedian() * 3.6));
 	}
 	
 	public String getCarClassLetter(int carClassHash) {

@@ -15,20 +15,14 @@ import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.dao.VinylStorageDAO;
 import com.soapboxrace.core.jpa.FriendListEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
-import com.soapboxrace.core.jpa.ReportEntity;
-import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.jpa.TokenSessionEntity;
-import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.core.xmpp.OpenFireRestApiCli;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
-import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.ArrayOfBadgePacket;
 import com.soapboxrace.jaxb.http.ArrayOfFriendPersona;
 import com.soapboxrace.jaxb.http.FriendPersona;
-import com.soapboxrace.jaxb.http.FriendResult;
 import com.soapboxrace.jaxb.http.PersonaBase;
 import com.soapboxrace.jaxb.http.PersonaFriendsList;
-import com.soapboxrace.jaxb.xmpp.XMPP_FriendPersonaType;
 import com.soapboxrace.jaxb.xmpp.XMPP_FriendResultType;
 import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypeFriendResult;
 import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypePersonaBase;
@@ -88,6 +82,8 @@ public class FriendBO {
 	@EJB
 	private AchievementsBO achievementsBO;
 
+	// FIXME Players who sent the friend request can teleport to the player, no matter which request status is
+	// Loading the player friend-list
 	public PersonaFriendsList getFriendListFromUserId(Long userId) {
 		ArrayOfFriendPersona arrayOfFriendPersona = new ArrayOfFriendPersona();
 		List<FriendPersona> friendPersonaList = arrayOfFriendPersona.getFriendPersona();
@@ -100,9 +96,9 @@ public class FriendBO {
 				continue;
 			}
 
-			int presence = 3;
+			int presence = 3; // 0 - offline, 1 - freeroam, 2 - racing or safehouse, 3 - friend request
 			if (entity.getIsAccepted()) {
-				presence = driverPersonaBO.getPersonaPresenceByName(personaEntity.getName()).getPresence();
+				presence = personaPresenceDAO.findByUserId(userId).getPersonaPresence();
 			}
 			addPersonaToFriendList(friendPersonaList, personaEntity, presence);
 		}
@@ -125,6 +121,7 @@ public class FriendBO {
 		friendPersonaList.add(friendPersona);
 	}
 
+	// Accept or decline the friend request
 	public PersonaBase sendResponseFriendRequest(Long personaId, Long friendPersonaId, int resolution) {
 		// Execute some DB things
 		PersonaEntity personaInvited = personaDAO.findById(personaId);
@@ -224,14 +221,12 @@ public class FriendBO {
 		openFireSoapBoxCli.send(personaPacket, to);
 	}
 
+	// Update the player status for his friend-list
 	public void sendXmppPresenceToAllFriends(PersonaEntity personaEntity, int presence) {
-//		if (!openFireRestApiCli.isRestApiEnabled()) {
-//			return;
-//		}
-		List<FriendListEntity> friends = friendListDAO.findByOwnerId(personaEntity.getUser().getId());
+		List<FriendListEntity> friends = friendListDAO.findAcceptedByOwnerId(personaEntity.getUser().getId());
 		if (friends != null) {
 			for (FriendListEntity friend : friends) {
-				if (friend.getIsAccepted() && !tokenSessionDAO.isUserNotOnline(friend.getUserId())) {
+				if (!personaPresenceDAO.isUserNotOnline(friend.getUserId())) {
 					sendXmppPresence(personaEntity, presence, friend.getPersonaId());
 				}
 			}

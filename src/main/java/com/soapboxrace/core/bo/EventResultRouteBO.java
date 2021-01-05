@@ -148,6 +148,7 @@ public class EventResultRouteBO {
 		eventDataEntity.setPerfectStart(routeArbitrationPacket.getPerfectStart());
 		eventDataEntity.setSumOfJumpsDurationInMilliseconds(routeArbitrationPacket.getSumOfJumpsDurationInMilliseconds());
 		eventDataEntity.setTopSpeed(routeArbitrationPacket.getTopSpeed());
+		eventDataEntity.setAvgSpeed(routeArbitrationPacket.getPhysicsMetrics().getSpeedAverage());
 
 		eventDataEntity.setEventModeId(eventEntity.getEventModeId());
 		eventDataEntity.setPersonaId(activePersonaId);
@@ -223,7 +224,10 @@ public class EventResultRouteBO {
 		routeEventResult.setInviteLifetimeInMilliseconds(0);
 		routeEventResult.setLobbyInviteId(0);
 		routeEventResult.setPersonaId(activePersonaId);
+		
+		eventResultBO.physicsMetricsInfoDebug(routeArbitrationPacket);
 		eventBO.sendXmppPacketRoute(eventSessionId, activePersonaId, routeArbitrationPacket, playerRank, true);
+		
 		EventEntity eventEntity2 = eventDAO.findById(currentEventId);
 		boolean isSingle = false;
 		// +1 to play count for this track, MP

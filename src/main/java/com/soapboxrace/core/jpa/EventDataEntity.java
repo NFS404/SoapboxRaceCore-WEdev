@@ -46,10 +46,11 @@ public class EventDataEntity {
 	private long hacksDetected;
 	private int rank;
 
-	// OtherArbitrationPacket Global variables
+	// Other ArbitrationPacket Global variables
 	protected long longestJumpDurationInMilliseconds;
 	protected long sumOfJumpsDurationInMilliseconds;
 	protected float topSpeed;
+	protected float avgSpeed;
 
 	// RouteArbitrationPacket variables
 	protected long bestLapDurationInMilliseconds;
@@ -200,6 +201,14 @@ public class EventDataEntity {
 
 	public void setTopSpeed(float value) {
 		this.topSpeed = value;
+	}
+	
+	public float getAvgSpeed() {
+		return avgSpeed;
+	}
+
+	public void setAvgSpeed(float value) {
+		this.avgSpeed = value;
 	}
 
 	// RouteArbitrationPacket functions

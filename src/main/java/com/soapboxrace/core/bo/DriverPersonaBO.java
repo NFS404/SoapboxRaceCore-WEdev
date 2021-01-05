@@ -14,6 +14,7 @@ import com.soapboxrace.core.dao.InventoryDAO;
 import com.soapboxrace.core.dao.InventoryItemDAO;
 import com.soapboxrace.core.dao.LobbyEntrantDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.dao.RecordsDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.TreasureHuntDAO;
@@ -32,7 +33,6 @@ import com.soapboxrace.jaxb.http.ArrayOfPersonaBase;
 import com.soapboxrace.jaxb.http.ArrayOfString;
 import com.soapboxrace.jaxb.http.BadgePacket;
 import com.soapboxrace.jaxb.http.PersonaBase;
-import com.soapboxrace.jaxb.http.PersonaPresence;
 import com.soapboxrace.jaxb.http.ProfileData;
 
 @Stateless
@@ -79,6 +79,9 @@ public class DriverPersonaBO {
 	
 	@EJB
 	private RecordsDAO recordsDAO;
+	
+	@EJB
+	private PersonaPresenceDAO personaPresenceDAO;
 
 	public ProfileData createPersona(Long userId, PersonaEntity personaEntity) {
 		UserEntity userEntity = userDao.findById(userId);
@@ -238,27 +241,6 @@ public class DriverPersonaBO {
 		personaEntity.setCreated(LocalDateTime.now()); // can check when driver got deleted
 		recordsDAO.deletePersonaRecords(personaEntity);
 		personaDao.insert(personaEntity);
-	}
-
-	public PersonaPresence getPersonaPresenceByName(String name) {
-		PersonaEntity personaEntity = personaDao.findByName(name);
-		if (personaEntity != null) {
-			Long personaId = personaEntity.getPersonaId();
-			PersonaPresence personaPresence = new PersonaPresence();
-			personaPresence.setPersonaId(personaId);
-			if (openFireRestApiCli.isOnline(personaId)) {
-				personaPresence.setPresence(1);
-			} else {
-				personaPresence.setPresence(0);
-			}
-			personaPresence.setUserId(personaEntity.getUser().getId());
-			return personaPresence;
-		}
-		PersonaPresence personaPresence = new PersonaPresence();
-		personaPresence.setPersonaId(0);
-		personaPresence.setPresence(0);
-		personaPresence.setUserId(0);
-		return personaPresence;
 	}
 
 	public void updateStatusMessage(String message, Long personaId) {

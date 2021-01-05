@@ -28,6 +28,12 @@ public class PersonaPresenceDAO extends BaseDAO<PersonaPresenceEntity> {
 		}
 		return resultList.get(0);
 	}
+	
+	public boolean isUserNotOnline(Long userId) {
+		TypedQuery<PersonaPresenceEntity> query = entityManager.createNamedQuery("PersonaPresenceEntity.isUserOnline", PersonaPresenceEntity.class);
+		query.setParameter("userId", userId);
+		return query.getResultList().isEmpty();
+	}
 
 	public void updatePersonaPresence(Long personaId, Integer personaPresence) {
 		Query query = entityManager.createNamedQuery("PersonaPresenceEntity.updatePersonaPresence");
