@@ -28,14 +28,14 @@ public class HardwareInfoDAO extends BaseDAO<HardwareInfoEntity> {
 		return resultList.get(0);
 	}
 
-	public HardwareInfoEntity findByUserId(Long userId) {
+	public List<HardwareInfoEntity> findByUserId(Long userId) {
 		TypedQuery<HardwareInfoEntity> query = entityManager.createNamedQuery("HardwareInfoEntity.findByUserId", HardwareInfoEntity.class);
 		query.setParameter("userId", userId);
 		List<HardwareInfoEntity> resultList = query.getResultList();
 		if (resultList == null || resultList.isEmpty()) {
 			return null;
 		}
-		return resultList.get(0);
+		return resultList;
 	}
 
 }

@@ -102,6 +102,13 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		return count; 
 	}
 	
+	public void changeRecordsNickname(PersonaEntity personaEntity) {
+		Query createQuery = entityManager.createQuery("UPDATE RecordsEntity obj SET obj.playerName = :playerName WHERE obj.persona = :persona");
+		createQuery.setParameter("persona", personaEntity);
+		createQuery.setParameter("playerName", personaEntity.getName());
+		createQuery.executeUpdate();
+	}
+	
 	public void banRecords(UserEntity user) {
 		Query createQuery = entityManager.createQuery("UPDATE RecordsEntity obj SET obj.userBan = true WHERE obj.user = :user");
 		createQuery.setParameter("user", user);

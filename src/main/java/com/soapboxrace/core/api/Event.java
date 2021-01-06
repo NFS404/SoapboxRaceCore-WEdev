@@ -26,15 +26,12 @@ import com.soapboxrace.core.jpa.EventMode;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaPresenceEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
-import com.soapboxrace.core.xmpp.XmppEvent;
 import com.soapboxrace.jaxb.http.DragArbitrationPacket;
 import com.soapboxrace.jaxb.http.PursuitArbitrationPacket;
 import com.soapboxrace.jaxb.http.PursuitEventResult;
 import com.soapboxrace.jaxb.http.RouteArbitrationPacket;
 import com.soapboxrace.jaxb.http.TeamEscapeArbitrationPacket;
 import com.soapboxrace.jaxb.util.JAXBUtility;
-import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypeRouteEntrantResult;
-import com.soapboxrace.jaxb.xmpp.XMPP_RouteEntrantResultType;
 
 @Path("/event")
 public class Event {

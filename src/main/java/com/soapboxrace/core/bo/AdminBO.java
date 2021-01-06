@@ -18,6 +18,7 @@ import com.soapboxrace.core.bo.util.DiscordWebhook;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Stateless
 public class AdminBO {
@@ -100,23 +101,34 @@ public class AdminBO {
             case UNBAN:
             	banDAO.unbanUser(userEntity);
             	recordsDAO.unbanRecords(userEntity);
-				HardwareInfoEntity hardwareInfoEntity = hardwareInfoDAO.findByUserId(userEntity.getId());
-				if (hardwareInfoEntity == null) {
-                	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Unable to find HW entry for user - maybe user created a new account?"), personaId);
+            	// User can have a lot of HW entries
+				List<HardwareInfoEntity> hardwareInfoList = hardwareInfoDAO.findByUserId(userEntity.getId());
+				int i = 0; // HW entries total counter
+				if (hardwareInfoList == null) { // If the player tried to create new accounts, or if other player have the same HW config
+                	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Unable to find HW entry for user, checking his original HW..."), personaId);
                 	HardwareInfoEntity hardwareInfoEntityCheck = hardwareInfoDAO.findByHardwareHash(userEntity.getGameHardwareHash());
-                	UserEntity bannedGuyEntity = userDao.findById(hardwareInfoEntityCheck.getUserId());
+                	if (hardwareInfoEntityCheck != null) {
+                		hardwareInfoEntityCheck.setBanned(false);
+    					hardwareInfoDAO.update(hardwareInfoEntityCheck);
+    					i++;
+                	}
+                	UserEntity bannedGuyEntity = userDao.findById(hardwareInfoEntityCheck.getUserId()); // Detect if the other account is a double-account
                 	if (bannedGuyEntity.getPassword().equals(userEntity.getPassword()) || bannedGuyEntity.getIpAddress().equals(userEntity.getIpAddress())) {
-                		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This guy have other accounts (password or IP is the same)."), personaId);
+                		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This guy have other accounts, password hash or IP is the same."), personaId);
                 	}
 				}
-				if (!hardwareInfoEntity.isBanned()) {
-					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Some of user HW entrys was not banned at all."), personaId);
+				else {
+					i = hardwareInfoList.size();
+					for (HardwareInfoEntity hwEntry : hardwareInfoList) {
+						hwEntry.setBanned(false);
+						hardwareInfoDAO.update(hwEntry);
+					}
 				}
-				if (hardwareInfoEntity != null) {
-					hardwareInfoEntity.setBanned(false);
-					hardwareInfoDAO.update(hardwareInfoEntity);
-				}
-                openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is unbanned."), personaId);
+                openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is unbanned, HW entries: " + i + "."), personaId);
+                String messageU = ":heavy_minus_sign:"
+                		+ "\n:hammer: **|** Nгрок **" + bannedPlayer + "** был разбанен модератором **" + adminPlayer + "**. С возвращением."
+                		+ "\n:hammer: **|** Player **" + bannedPlayer + "** was unbanned by moderator **" + adminPlayer + "**. Welcome back.";
+        		discordBot.sendMessage(messageU);
                 break;
             default:
                 break;
@@ -124,7 +136,7 @@ public class AdminBO {
     }
 
     // How to use: player report > /ban [time] <reason> (example: /ban 28d14h Any Reason With Spaces)
-    // Taken from Apex sources, by HeyItsLeo
+    // Base code taken from SBRW Apex sources, by HeyItsLeo
     private void sendBan(PersonaEntity personaEntity, LocalDateTime endsOn, String reason) {
         UserEntity userEntity = personaEntity.getUser();
         BanEntity banEntity = new BanEntity();
@@ -137,11 +149,12 @@ public class AdminBO {
         userDao.update(userEntity);
         sendKick(personaEntity.getPersonaId());
 
-        HardwareInfoEntity hardwareInfoEntity = hardwareInfoDAO.findByUserId(userEntity.getId());
-
-        if (hardwareInfoEntity != null) {
-            hardwareInfoEntity.setBanned(true);
-            hardwareInfoDAO.update(hardwareInfoEntity);
+        List<HardwareInfoEntity> hardwareInfoList = hardwareInfoDAO.findByUserId(userEntity.getId());
+        for (HardwareInfoEntity hwEntry : hardwareInfoList) {
+        	if (hwEntry != null && (hwEntry.getUserIdOld() == null || hwEntry.getUserIdOld() == hwEntry.getUserId())) { // Don't ban the HWs which is used on 2 or more accounts
+        		hwEntry.setBanned(true);
+                hardwareInfoDAO.update(hwEntry);
+            }
         }
     }
 
@@ -160,6 +173,7 @@ public class AdminBO {
     	}
     	personaEntity.setName(newNickname);
     	personaDao.update(personaEntity);
+    	recordsDAO.changeRecordsNickname(personaEntity);
     	
     	sendKick(personaEntity.getPersonaId());
     	System.out.println("### Player nickname of "+ nickname +" has been changed to "+ newNickname +".");
