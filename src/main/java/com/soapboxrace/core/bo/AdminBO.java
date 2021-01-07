@@ -60,34 +60,26 @@ public class AdminBO {
 
         switch (commandInfo.action) {
             case BAN:
-                if (banDAO.findByUser(userEntity) != null) {
+            case BAN_F:
+            	BanEntity earlierBanEntity = banDAO.findByUser(userEntity);
+                if (earlierBanEntity != null && !earlierBanEntity.getType().contentEquals("CHAT_BAN")) {
                     openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is already banned."), personaId);
                     break;
                 }
+                if (earlierBanEntity == null) {
+                	sendBan(personaEntity, commandInfo.timeEnd, commandInfo.reason, commandInfo.type);
+                }
+                if (earlierBanEntity != null && earlierBanEntity.getType().contentEquals("CHAT_BAN")) {
+                	changeChatBan(earlierBanEntity, personaEntity, commandInfo.timeEnd, commandInfo.reason, commandInfo.type);
+                }
+                
                 recordsDAO.banRecords(userEntity);
-                sendBan(personaEntity, commandInfo.timeEnd, commandInfo.reason);
                 userDao.ignoreHWBanDisable(userEntity.getId());
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is banned."), personaId);
                 String message = ":heavy_minus_sign:"
                 		+ "\n:hammer: **|** Nгрок **" + bannedPlayer + "** был забанен модератором **" + adminPlayer + "**. Помянем его."
                 		+ "\n:hammer: **|** Player **" + bannedPlayer + "** was banned by moderator **" + adminPlayer + "**. Remember him.";
         		discordBot.sendMessage(message);
-        		
-                break;
-            case BAN_F:
-                if (banDAO.findByUser(userEntity) != null) {
-                    openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is already banned."), personaId);
-                    break;
-                }
-                recordsDAO.banRecords(userEntity);
-                sendBan(personaEntity, commandInfo.timeEnd, commandInfo.reason);
-                userDao.ignoreHWBanDisable(userEntity.getId());
-                openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is banned forever."), personaId);
-                String messageF = ":heavy_minus_sign:"
-                		+ "\n:hammer: **|** Nгрок **" + bannedPlayer + "** был забанен модератором **" + adminPlayer + "**. Помянем его."
-                		+ "\n:hammer: **|** Player **" + bannedPlayer + "** was banned by moderator **" + adminPlayer + "**. Remember him.";
-        		discordBot.sendMessage(messageF);
-        		
                 break;
             case KICK:
                 sendKick(personaEntity.getPersonaId());
@@ -97,6 +89,22 @@ public class AdminBO {
             case IGNORE_HW:
                 userDao.ignoreHWBan(userEntity.getId());
                 openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This user is allowed to play with banned HW entrys."), personaId);
+                break;
+            case CHAT_BAN:
+            	BanEntity earlierBannedEntity = banDAO.findByUser(userEntity);
+                if (earlierBannedEntity != null) {
+                    openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is already banned or chat-banned."), personaId);
+                    break;
+                }
+                if (earlierBannedEntity == null) {
+                	sendBan(personaEntity, commandInfo.timeEnd, commandInfo.reason, commandInfo.type);
+                }
+                
+                openFireSoapBoxCli.send(XmppChat.createSystemMessage("### User is chat-banned."), personaId);
+                String messageCB = ":heavy_minus_sign:"
+                		+ "\n:hammer: **|** Nгроку **" + bannedPlayer + "** был отключён чат модератором **" + adminPlayer + "**."
+                		+ "\n:hammer: **|** Player **" + bannedPlayer + "** was chat-banned by moderator **" + adminPlayer + "**.";
+        		discordBot.sendMessage(messageCB);
                 break;
             case UNBAN:
             	banDAO.unbanUser(userEntity);
@@ -137,22 +145,43 @@ public class AdminBO {
 
     // How to use: player report > /ban [time] <reason> (example: /ban 28d14h Any Reason With Spaces)
     // Base code taken from SBRW Apex sources, by HeyItsLeo
-    private void sendBan(PersonaEntity personaEntity, LocalDateTime endsOn, String reason) {
+    private void sendBan(PersonaEntity personaEntity, LocalDateTime endsOn, String reason, String type) {
         UserEntity userEntity = personaEntity.getUser();
         BanEntity banEntity = new BanEntity();
         banEntity.setUserEntity(userEntity);
         banEntity.setEndsAt(endsOn);
         banEntity.setReason(reason);
-        banEntity.setType("EMAIL_BAN");
+        banEntity.setType(type);
         banEntity.setData(userEntity.getEmail());
         banDAO.insert(banEntity);
         userDao.update(userEntity);
         sendKick(personaEntity.getPersonaId());
 
+        if (!type.contentEquals("CHAT_BAN")) {
+        	List<HardwareInfoEntity> hardwareInfoList = hardwareInfoDAO.findByUserId(userEntity.getId());
+            for (HardwareInfoEntity hwEntry : hardwareInfoList) {
+            	if (hwEntry != null && (hwEntry.getUserIdOld() == null || hwEntry.getUserIdOld() == hwEntry.getUserId())) { // Don't ban the HWs which is used on 2 or more accounts
+            		hwEntry.setBanned(true);
+                    hardwareInfoDAO.update(hwEntry);
+                }
+            }
+        }
+    }
+    
+    // If user already got a Chat-Ban, and the full ban is required
+    private void changeChatBan(BanEntity earlierBanEntity, PersonaEntity personaEntity, LocalDateTime endsOn, String reason, String type) {
+        UserEntity userEntity = personaEntity.getUser();
+        BanEntity banEntity = new BanEntity();
+        banEntity.setEndsAt(endsOn);
+        banEntity.setReason(reason);
+        banEntity.setType(type);
+        banDAO.update(earlierBanEntity);
+        sendKick(personaEntity.getPersonaId());
+
         List<HardwareInfoEntity> hardwareInfoList = hardwareInfoDAO.findByUserId(userEntity.getId());
         for (HardwareInfoEntity hwEntry : hardwareInfoList) {
-        	if (hwEntry != null && (hwEntry.getUserIdOld() == null || hwEntry.getUserIdOld() == hwEntry.getUserId())) { // Don't ban the HWs which is used on 2 or more accounts
-        		hwEntry.setBanned(true);
+            if (hwEntry != null && (hwEntry.getUserIdOld() == null || hwEntry.getUserIdOld() == hwEntry.getUserId())) { // Don't ban the HWs which is used on 2 or more accounts
+            	hwEntry.setBanned(true);
                 hardwareInfoDAO.update(hwEntry);
             }
         }
@@ -184,6 +213,7 @@ public class AdminBO {
         public CommandInfo.CmdAction action;
         public String reason;
         public LocalDateTime timeEnd;
+        public String type;
 
         public static CommandInfo parse(String cmd) {
             cmd = cmd.replaceFirst("/", "");
@@ -204,6 +234,9 @@ public class AdminBO {
                     break;
                 case "kick":
                     action = CmdAction.KICK;
+                    break;
+                case "chatban":
+                    action = CmdAction.CHAT_BAN;
                     break;
                 case "unban":
                     action = CmdAction.UNBAN;
@@ -233,6 +266,27 @@ public class AdminBO {
                     }
 
                     info.reason = reason;
+                    info.type = "EMAIL_BAN";
+                    break;
+                }
+                case CHAT_BAN: {
+                    LocalDateTime endTime = null;
+                    String reason = null;
+
+                    if (split.length >= 2) {
+                        long givenTime = MiscUtils.lengthToMiliseconds(split[1]);
+                        if (givenTime != 0) {
+                            endTime = LocalDateTime.now().plusSeconds(givenTime / 1000);
+                            info.timeEnd = endTime;
+
+                            if (split.length > 2) {
+                                reason = MiscUtils.argsToString(split, 2, split.length);
+                            }
+                        } 
+                    }
+
+                    info.reason = reason;
+                    info.type = "CHAT_BAN";
                     break;
                 }
                 case BAN_F: {
@@ -240,6 +294,7 @@ public class AdminBO {
                     LocalDateTime endTime = LocalDateTime.of(3000, 01, 01, 01, 23, 45); // WEv2 ban until Futurama starts
                     info.timeEnd = endTime;
                     info.reason = reason;
+                    info.type = "EMAIL_BAN";
                     break;
                 }
             }
@@ -253,6 +308,7 @@ public class AdminBO {
             BAN_F,
             UNBAN,
             IGNORE_HW,
+            CHAT_BAN,
             UNKNOWN
         }
     }

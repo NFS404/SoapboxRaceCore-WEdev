@@ -225,7 +225,7 @@ public class EventResultRouteBO {
 		routeEventResult.setLobbyInviteId(0);
 		routeEventResult.setPersonaId(activePersonaId);
 		
-		eventResultBO.physicsMetricsInfoDebug(routeArbitrationPacket);
+		// eventResultBO.physicsMetricsInfoDebug(routeArbitrationPacket);
 		eventBO.sendXmppPacketRoute(eventSessionId, activePersonaId, routeArbitrationPacket, playerRank, true);
 		
 		EventEntity eventEntity2 = eventDAO.findById(currentEventId);
@@ -322,7 +322,7 @@ public class EventResultRouteBO {
 				routeEventResult.setAccolades(new Accolades());
 			}
 		}
-		if (!isInterceptorEvent) {
+		if (!isInterceptorEvent && finishReason == 22) {
 			routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode));
 		}
 		eventSessionDao.update(eventSessionEntity);

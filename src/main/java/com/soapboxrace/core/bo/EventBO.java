@@ -187,10 +187,12 @@ public class EventBO {
 			if (!racer.getPersonaId().equals(activePersonaId)) {
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendRaceEntrantInfo(routeEntrantResultResponse);
-				if (isRaceEnd && playerRank == 1) {
-					xmppEvent.sendEventTimingOut(eventSessionId);
-					eventResultBO.timeLimitTimer(eventSessionId, (long) 60000); // Default timeout time is 60 seconds
-				}
+			}
+			if (isRaceEnd && playerRank == 1) { // FIXME can be executed twice with the sync finish place issues
+				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
+				xmppEvent.sendRaceEntrantInfo(routeEntrantResultResponse);
+				xmppEvent.sendEventTimingOut(eventSessionId);
+				eventResultBO.timeLimitTimer(eventSessionId, (long) 60000); // Default timeout time is 60 seconds
 			}
 		}
 	}

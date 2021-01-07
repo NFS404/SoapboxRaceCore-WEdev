@@ -17,8 +17,10 @@ import com.soapboxrace.core.api.util.Secured;
 import com.soapboxrace.core.bo.AchievementsBO;
 import com.soapboxrace.core.bo.EventBO;
 import com.soapboxrace.core.bo.EventResultBO;
+import com.soapboxrace.core.bo.FriendBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.dao.EventDataDAO;
+import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventEntity;
@@ -59,6 +61,12 @@ public class Event {
 	
 	@EJB
 	private OpenFireSoapBoxCli openFireSoapBoxCli;
+	
+	@EJB
+	private FriendBO friendBO;
+	
+	@EJB
+	private PersonaDAO personaDAO;
 
 	@POST
 	@Secured
@@ -73,7 +81,7 @@ public class Event {
 		// Save the abort info on the event data
 		PersonaPresenceEntity personaPresenceEntity = personaPresenceDAO.findByUserId(userId);
 		EventDataEntity eventDataEntity = eventDataDAO.findById(personaPresenceEntity.getCurrentEventDataId());
-		int eventMode = eventDataEntity.getEventModeId();
+		int eventMode = eventDataEntity.getEvent().getEventModeId();
 		eventDataEntity.setFinishReason(8202); // Aborted
 		eventDataEntity.setServerEventDuration(0);
 		eventDataDAO.update(eventDataEntity);
@@ -104,7 +112,9 @@ public class Event {
 		EventEntity eventEntity = eventDataDAO.findById(eventDataId).getEvent();
 		int eventModeId = eventEntity.getEventModeId();
 		Long timeLimit = eventEntity.getTimeLimit();
-		personaPresenceDAO.updateCurrentEvent(activePersonaId, eventDataId, eventModeId, eventSessionId);
+		int presence = 2; // Player in race
+		personaPresenceDAO.updateCurrentEvent(activePersonaId, eventDataId, eventModeId, eventSessionId, presence);
+		friendBO.sendXmppPresenceToAllFriends(personaDAO.findById(activePersonaId), presence);
 		
 		if (timeLimit != 0 && eventModeId != 24) { // Team Escape have it's own timeout action
 			eventResultBO.timeLimitTimer(eventSessionId, timeLimit);

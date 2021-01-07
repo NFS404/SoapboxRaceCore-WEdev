@@ -98,6 +98,6 @@ public class BanEntity {
 	}
 
 	public enum BanType {
-		USER_BAN, IP_BAN, HWID_BAN, EMAIL_BAN
+		USER_BAN, IP_BAN, HWID_BAN, EMAIL_BAN, CHAT_BAN
 	}
 }

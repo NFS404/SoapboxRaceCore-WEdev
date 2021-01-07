@@ -188,10 +188,12 @@ public class EventResultTeamEscapeBO {
 			if (!racer.getPersonaId().equals(activePersonaId)) {
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendTeamEscapeEntrantInfo(teamEscapeEntrantResultResponse); // Restart the Team Escape timeout timer
-				if (teamEscapeArbitrationPacket.getRank() == 1) {
-					xmppEvent.sendEventTimingOut(eventSessionId);
-					eventResultBO.timeLimitTimer(eventSessionId, (long) 60000); // Default timeout time is 60 seconds
-				}
+			}
+			if (teamEscapeArbitrationPacket.getRank() == 1) { // FIXME can be executed twice with the sync finish place issues
+				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
+				xmppEvent.sendTeamEscapeEntrantInfo(teamEscapeEntrantResultResponse); // Restart the Team Escape timeout timer
+				xmppEvent.sendEventTimingOut(eventSessionId);
+				eventResultBO.timeLimitTimer(eventSessionId, (long) 60000); // Default timeout time is 60 seconds
 			}
 		}
 		if (oneGetAway && teamEscapeArbitrationPacket.getRank() == eventDataDao.getRacers(eventSessionId).size()) {
@@ -213,12 +215,13 @@ public class EventResultTeamEscapeBO {
 				teamEscapeEventResult.setAccolades(new Accolades());
 			}
 		}
-		if (!isMission && arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() < 2) {
-			// For now, you can't get the rewards on SP team escapes ;)
-			System.out.println("Player " + personaEntity.getName() + " has tried to finish Team Escape on SP mode.");
-		}
-		else {
-			teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity, 1));
+		if (!isMission) {
+			if (finishReason == 22 && arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() > 1) {
+				teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity, 1));
+			}
+			else { // No rewards on timeout
+				teamEscapeEventResult.setAccolades(new Accolades());
+			}
 		}
 		teamEscapeEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, teamEscapeArbitrationPacket, teamEscapeArbitrationPacket.getNumberOfCollisions()));
 		teamEscapeEventResult.setEntrants(arrayOfTeamEscapeEntrantResult);

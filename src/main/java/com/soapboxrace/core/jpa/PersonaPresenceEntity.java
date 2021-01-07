@@ -18,7 +18,7 @@ import javax.persistence.Table;
 						+ "SET obj.personaPresence = :personaPresence WHERE obj.activePersonaId = :personaId"), //
 		@NamedQuery(name = "PersonaPresenceEntity.updateCurrentEvent", //
 		query = "UPDATE PersonaPresenceEntity obj " // 
-				+ "SET obj.currentEventDataId = :currentEventDataId, currentEventModeId = :currentEventModeId, currentEventSessionId = :currentEventSessionId WHERE obj.activePersonaId = :personaId"), //
+				+ "SET obj.currentEventDataId = :currentEventDataId, currentEventModeId = :currentEventModeId, currentEventSessionId = :currentEventSessionId, personaPresence = :personaPresence WHERE obj.activePersonaId = :personaId"), //
 		@NamedQuery(name = "PersonaPresenceEntity.updateCurrentEventPost", //
 		query = "UPDATE PersonaPresenceEntity obj " // 
 				+ "SET obj.currentEventDataId = :currentEventDataId, currentEventModeId = :currentEventModeId, currentEventSessionId = :currentEventSessionId, icRacer = :icRacer WHERE obj.activePersonaId = :personaId"), //

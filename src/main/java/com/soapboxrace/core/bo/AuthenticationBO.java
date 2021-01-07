@@ -35,7 +35,7 @@ public class AuthenticationBO {
 	public LoginStatusVO checkIsBannedAccount(String email) {
 		BanEntity banEntity;
 		banEntity = banDAO.findByEmail(email);
-		if (banEntity != null) {
+		if (banEntity != null && banEntity.getType() != "CHAT_BAN") {
 			return new BanUtil(banEntity).invoke();
 		}
 		return null;

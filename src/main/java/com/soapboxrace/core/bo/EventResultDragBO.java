@@ -18,6 +18,7 @@ import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppEvent;
+import com.soapboxrace.jaxb.http.Accolades;
 import com.soapboxrace.jaxb.http.ArrayOfDragEntrantResult;
 import com.soapboxrace.jaxb.http.DragArbitrationPacket;
 import com.soapboxrace.jaxb.http.DragEntrantResult;
@@ -142,7 +143,7 @@ public class EventResultDragBO {
 		}
 		Long eventDataId = eventDataEntity.getId();
 		eventBO.updateEventCarInfo(activePersonaId, eventDataId, customCarEntity);
-		eventResultBO.physicsMetricsInfoDebug(dragArbitrationPacket);
+		// eventResultBO.physicsMetricsInfoDebug(dragArbitrationPacket);
 		
 		ArrayOfDragEntrantResult arrayOfDragEntrantResult = new ArrayOfDragEntrantResult();
 		boolean isSingle = false;
@@ -183,10 +184,12 @@ public class EventResultDragBO {
 			if (!racer.getPersonaId().equals(activePersonaId)) {
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendDragEntrantInfo(dragEntrantResultResponse);
-				if (playerRank == 1) {
-					xmppEvent.sendEventTimingOut(eventSessionId);
-					eventResultBO.timeLimitTimer(eventSessionId, (long) 60000); // Default timeout time is 60 seconds
-				}
+			}
+			if (playerRank == 1) { // FIXME can be executed twice with the sync finish place issues
+				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
+				xmppEvent.sendDragEntrantInfo(dragEntrantResultResponse);
+				xmppEvent.sendEventTimingOut(eventSessionId);
+				eventResultBO.timeLimitTimer(eventSessionId, (long) 60000); // Default timeout time is 60 seconds
 			}
 		}
 
@@ -196,7 +199,13 @@ public class EventResultDragBO {
 		if (arrayOfDragEntrantResult.getDragEntrantResult().size() < 2) {
 			isDropableMode = 3;
 		}
-		dragEventResult.setAccolades(rewardDragBO.getDragAccolades(activePersonaId, dragArbitrationPacket, eventSessionEntity, arrayOfDragEntrantResult, isDropableMode));
+		int finishReason = dragArbitrationPacket.getFinishReason();
+		if (finishReason == 22) {
+			dragEventResult.setAccolades(rewardDragBO.getDragAccolades(activePersonaId, dragArbitrationPacket, eventSessionEntity, arrayOfDragEntrantResult, isDropableMode));
+		}
+		else {
+			dragEventResult.setAccolades(new Accolades());
+		}
 		dragEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, dragArbitrationPacket, dragArbitrationPacket.getNumberOfCollisions()));
 		dragEventResult.setEntrants(arrayOfDragEntrantResult);
 		dragEventResult.setEventId(currentEventId);

@@ -296,7 +296,7 @@ public class DriverPersona {
 		personaPresenceByName.setPresence(0); // Offline by default
 		personaPresenceByName.setUserId(userId);
 		PersonaPresenceEntity personaPresenceEntity = personaPresenceDAO.findByUserId(userId);
-		if (personaPresenceEntity != null) {
+		if (personaPresenceEntity != null && personaPresenceEntity.getActivePersonaId() != 0) {
 			personaPresenceByName.setPresence(personaPresenceEntity.getPersonaPresence());
 		}
 		if (personaPresenceByName.getPersonaId() == 0) {
