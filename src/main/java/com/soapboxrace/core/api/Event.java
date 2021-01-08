@@ -88,7 +88,7 @@ public class Event {
 		
 		if (eventMode == 4 || eventMode == 9 || eventMode == 100) { // Circuit & Sprint, and Interceptor
 			RouteArbitrationPacket routeArbitrationPacket = new RouteArbitrationPacket();
-			eventBO.sendXmppPacketRoute(eventSessionId, activePersonaId, routeArbitrationPacket, 0, false);
+			eventBO.sendXmppPacketRoute(eventSessionId, activePersonaId, routeArbitrationPacket, 0, false, false);
 		}
 		if (eventMode == 24) { // Team Escape
 			eventBO.sendXmppPacketTEAbort(eventSessionId, activePersonaId);

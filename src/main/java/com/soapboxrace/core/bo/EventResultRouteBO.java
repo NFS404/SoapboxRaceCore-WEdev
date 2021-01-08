@@ -226,7 +226,12 @@ public class EventResultRouteBO {
 		routeEventResult.setPersonaId(activePersonaId);
 		
 		// eventResultBO.physicsMetricsInfoDebug(routeArbitrationPacket);
-		eventBO.sendXmppPacketRoute(eventSessionId, activePersonaId, routeArbitrationPacket, playerRank, true);
+		int carclasshash = eventEntity.getCarClassHash();
+		boolean isDNFActive = true;
+		if (carclasshash == 607077938) {
+			isDNFActive = false; // Don't use DNF timeout on open-class racing
+		}
+		eventBO.sendXmppPacketRoute(eventSessionId, activePersonaId, routeArbitrationPacket, playerRank, isDNFActive, true);
 		
 		EventEntity eventEntity2 = eventDAO.findById(currentEventId);
 		boolean isSingle = false;

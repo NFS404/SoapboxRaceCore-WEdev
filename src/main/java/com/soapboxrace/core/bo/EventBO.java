@@ -161,7 +161,7 @@ public class EventBO {
 	
 	// XMPP player result packet - can be used as the finish signal, or as a race abort signal to other players
 	public void sendXmppPacketRoute(Long eventSessionId, Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, 
-			int playerRank, boolean isRaceEnd) {
+			int playerRank, boolean isDNFActive, boolean isRaceEnd) {
 		XMPP_RouteEntrantResultType xmppRouteResult = new XMPP_RouteEntrantResultType();
 		if (!isRaceEnd) { // Abort
 			xmppRouteResult.setBestLapDurationInMilliseconds((long) 0);
@@ -188,7 +188,7 @@ public class EventBO {
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendRaceEntrantInfo(routeEntrantResultResponse);
 			}
-			if (isRaceEnd && playerRank == 1) { // FIXME can be executed twice with the sync finish place issues
+			if (isDNFActive && isRaceEnd && playerRank == 1) { // FIXME can be executed twice with the sync finish place issues
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendRaceEntrantInfo(routeEntrantResultResponse);
 				xmppEvent.sendEventTimingOut(eventSessionId);
