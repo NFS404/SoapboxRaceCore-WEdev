@@ -18,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.soapboxrace.core.api.util.Secured;
 import com.soapboxrace.core.bo.AdminBO;
+import com.soapboxrace.core.bo.DiscordBO;
 import com.soapboxrace.core.bo.HardwareInfoBO;
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
@@ -44,6 +45,9 @@ public class Reporting {
 	
 	@EJB
 	private AdminBO adminBO;
+	
+	@EJB
+	private DiscordBO discordBO;
 	
 	@Context
 	private HttpServletRequest sr;
@@ -73,8 +77,8 @@ public class Reporting {
 	@Secured
 	@Path("/SendMultiplayerConnect")
 	@Produces(MediaType.APPLICATION_XML)
-	public String sendMultiplayerConnect() {
-		System.out.println("/SendMultiplayerConnect: " + sr.getQueryString());
+	public String sendMultiplayerConnect(@QueryParam("personaId") Long personaId, @QueryParam("netErrorCode") Long netErrorCode) {
+		discordBO.outputNetErrorInfo(personaId, netErrorCode);
 		return "";
 	}
 
@@ -83,6 +87,7 @@ public class Reporting {
 	@Path("/SendClientPingTime")
 	@Produces(MediaType.APPLICATION_XML)
 	public String sendClientPingTime(@QueryParam("personaId") Long personaId, @QueryParam("pingTime") Long pingTime) {
+		System.out.println("/SendClientPingTime: " + sr.getQueryString());
 		return "";
 	}
 

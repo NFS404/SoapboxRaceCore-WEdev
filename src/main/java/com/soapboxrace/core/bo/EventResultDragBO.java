@@ -102,9 +102,12 @@ public class EventResultDragBO {
 			return null;
 		}
 		eventDataEntity.setArbitration(eventDataEntity.getArbitration() ? false : true);
-		achievementsBO.applyAirTimeAchievement(dragArbitrationPacket, personaEntity);
-		achievementsBO.applyDragAchievement(eventDataEntity, dragArbitrationPacket, activePersonaId);
-		achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventDataEntity.getEvent().getTrackLength());
+		int finishReason = dragArbitrationPacket.getFinishReason();
+		if (finishReason == 22) { // Proceed with achievements only when finish is proper
+			achievementsBO.applyAirTimeAchievement(dragArbitrationPacket, personaEntity);
+			achievementsBO.applyDragAchievement(eventDataEntity, dragArbitrationPacket, activePersonaId);
+			achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventDataEntity.getEvent().getTrackLength());
+		}
 
 		int currentEventId = eventDataEntity.getEvent().getId();
 		EventEntity eventEntity = eventDataEntity.getEvent();
@@ -199,7 +202,6 @@ public class EventResultDragBO {
 		if (arrayOfDragEntrantResult.getDragEntrantResult().size() < 2) {
 			isDropableMode = 3;
 		}
-		int finishReason = dragArbitrationPacket.getFinishReason();
 		if (finishReason == 22) {
 			dragEventResult.setAccolades(rewardDragBO.getDragAccolades(activePersonaId, dragArbitrationPacket, eventSessionEntity, arrayOfDragEntrantResult, isDropableMode));
 		}

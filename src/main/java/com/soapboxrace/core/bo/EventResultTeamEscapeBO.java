@@ -102,10 +102,13 @@ public class EventResultTeamEscapeBO {
 		}
 		eventDataEntity.setArbitration(arbitStatus ? false : true);
 		int currentEventId = eventDataEntity.getEvent().getId();
-		achievementsBO.applyAirTimeAchievement(teamEscapeArbitrationPacket, personaEntity);
-		achievementsBO.applyPursuitCostToState(teamEscapeArbitrationPacket, personaEntity);
-		achievementsBO.applyTeamEscape(teamEscapeArbitrationPacket, personaEntity);
-		achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventDataEntity.getEvent().getTrackLength());
+		int finishReason = teamEscapeArbitrationPacket.getFinishReason();
+		if (finishReason == 22) { // Proceed with achievements only when finish is proper
+			achievementsBO.applyAirTimeAchievement(teamEscapeArbitrationPacket, personaEntity);
+			achievementsBO.applyPursuitCostToState(teamEscapeArbitrationPacket, personaEntity);
+			achievementsBO.applyTeamEscape(teamEscapeArbitrationPacket, personaEntity);
+			achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventDataEntity.getEvent().getTrackLength());
+		}
 		eventDataEntity.setServerEventDuration(eventEnded - eventDataEntity.getServerEventDuration());
 		eventDataEntity.setAlternateEventDurationInMilliseconds(teamEscapeArbitrationPacket.getAlternateEventDurationInMilliseconds());
 		eventDataEntity.setBustedCount(teamEscapeArbitrationPacket.getBustedCount());
@@ -189,7 +192,7 @@ public class EventResultTeamEscapeBO {
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendTeamEscapeEntrantInfo(teamEscapeEntrantResultResponse); // Restart the Team Escape timeout timer
 			}
-			if (teamEscapeArbitrationPacket.getRank() == 1) { // FIXME can be executed twice with the sync finish place issues
+			if (racer.getFinishReason() != 266 && teamEscapeArbitrationPacket.getRank() == 1) { // FIXME can be executed twice with the sync finish place issues
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendTeamEscapeEntrantInfo(teamEscapeEntrantResultResponse); // Restart the Team Escape timeout timer
 				xmppEvent.sendEventTimingOut(eventSessionId);
@@ -205,7 +208,6 @@ public class EventResultTeamEscapeBO {
 		}
 
 		TeamEscapeEventResult teamEscapeEventResult = new TeamEscapeEventResult();
-		int finishReason = teamEscapeArbitrationPacket.getFinishReason();
 		if (isMission) {
 			boolean isDone = eventMissionsBO.getEventMissionAccolades(eventEntity, eventMissionsEntity, activePersonaId, teamEscapeArbitrationPacket, finishReason);
 			if (isDone) {

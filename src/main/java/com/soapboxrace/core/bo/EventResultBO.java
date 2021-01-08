@@ -82,6 +82,8 @@ public class EventResultBO {
 		TimerConfig timerConfig = new TimerConfig();
 	    timerConfig.setInfo(eventSessionId);
 	    timerService.createSingleActionTimer(timeLimit, timerConfig);
+	    
+//	    timeLimitInterceptorAlert(eventSessionId, (timeLimit - 60000));
 	}
 	
 	@Timeout
@@ -90,6 +92,17 @@ public class EventResultBO {
 		forceStopEvent(eventSessionId);
 	}
 	
+	// FIXME Could be done better
+//	public void timeLimitInterceptorAlert (Long eventSessionId, Long timeLimit) {
+//		try {
+//			Thread.sleep(timeLimit);
+//		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		force60SecsTimer(eventSessionId);
+//	}
+	
 	public void forceStopEvent(Long eventSessionId) {
 		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
 			if (racer.getFinishReason() == 0) { // Racer has not finished yet
@@ -97,6 +110,13 @@ public class EventResultBO {
 				xmppEvent.sendEventTimedOut(eventSessionId);
 			}
 		}
+	}
+	
+	public void force60SecsTimer(Long eventSessionId) {
+		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
+				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
+				xmppEvent.sendEventTimingOut(eventSessionId);
+			}
 	}
 	
 	// after 2 hours of playing, NFSW's time system can glitch sometimes, giving a possible player advantage

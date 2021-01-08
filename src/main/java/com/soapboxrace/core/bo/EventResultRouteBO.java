@@ -133,9 +133,12 @@ public class EventResultRouteBO {
 			return null;
 		}
 		eventDataEntity.setArbitration(arbitStatus ? false : true);
-		achievementsBO.applyRaceAchievements(eventDataEntity, routeArbitrationPacket, personaEntity);
-		achievementsBO.applyAirTimeAchievement(routeArbitrationPacket, personaEntity);
-		achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventEntity.getTrackLength());
+		int finishReason = routeArbitrationPacket.getFinishReason();
+		if (finishReason == 22) { // Proceed with achievements only when finish is proper
+			achievementsBO.applyRaceAchievements(eventDataEntity, routeArbitrationPacket, personaEntity);
+			achievementsBO.applyAirTimeAchievement(routeArbitrationPacket, personaEntity);
+			achievementsBO.applyEventKmsAchievement(personaEntity, (long) eventEntity.getTrackLength());
+		}
 		
 		eventDataEntity.setServerEventDuration(eventEnded - eventDataEntity.getServerEventDuration());
 		updateEventDataEntity(eventDataEntity, routeArbitrationPacket);
@@ -280,7 +283,6 @@ public class EventResultRouteBO {
 				}
 		}
 		
-		int finishReason = routeArbitrationPacket.getFinishReason();
 		if (isInterceptorEvent) { // Bad code?
 			boolean isRacer = true;
 			String[] personaCopsStr = eventSessionEntity.getPersonaCops().split(",");
