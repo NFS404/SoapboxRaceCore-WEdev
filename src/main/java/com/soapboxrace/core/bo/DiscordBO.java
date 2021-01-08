@@ -28,8 +28,7 @@ public class DiscordBO {
 			errorStr = "HANDSHAKE_ERROR";
 		}
 		String message = ":heavy_minus_sign:"
-        		+ "\n:candle: **|** Nгрок **" + playerName + "** был исключён из онлайн-заезда, *ошибка " + errorCode + " (" + errorStr + ")."
-        		+ "\n:candle: **|** Player **" + playerName + "** was kicked from online event, *error " + errorCode + " (" + errorStr + ").";
+        		+ "\n:candle: **| " + playerName + "** вылетел с онлайн-заезда / was kicked from online-event, *error " + errorCode + " (" + errorStr + ").";
 		discordBot.sendMessage(message);
 	}
 }
