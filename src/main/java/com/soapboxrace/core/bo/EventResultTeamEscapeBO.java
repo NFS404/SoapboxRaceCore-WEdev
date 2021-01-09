@@ -71,6 +71,9 @@ public class EventResultTeamEscapeBO {
 	
 	@EJB
 	private EventBO eventBO;
+	
+	@EJB
+	private ParameterBO parameterBO;
 
 	public TeamEscapeEventResult handleTeamEscapeEnd(EventSessionEntity eventSessionEntity, Long activePersonaId,
 			TeamEscapeArbitrationPacket teamEscapeArbitrationPacket, Long eventEnded) {
@@ -173,6 +176,11 @@ public class EventResultTeamEscapeBO {
 			eventDataEntitySP.setIsSingle(true);
 			eventDataDao.update(eventDataEntitySP);
 		}
+		int carclasshash = eventEntity.getCarClassHash();
+		boolean isDNFActive = parameterBO.getBoolParam("DNF_ENABLED");
+		if (carclasshash == 607077938) {
+			isDNFActive = false; // Don't use DNF timeout on open-class racing
+		}
 		boolean oneGetAway = false;
 		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
 			TeamEscapeEntrantResult teamEscapeEntrantResult = new TeamEscapeEntrantResult();
@@ -192,7 +200,7 @@ public class EventResultTeamEscapeBO {
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendTeamEscapeEntrantInfo(teamEscapeEntrantResultResponse); // Restart the Team Escape timeout timer
 			}
-			if (racer.getFinishReason() != 266 && teamEscapeArbitrationPacket.getRank() == 1) { // FIXME can be executed twice with the sync finish place issues
+			if (isDNFActive && racer.getFinishReason() != 266 && teamEscapeArbitrationPacket.getRank() == 1) { // FIXME can be executed twice with the sync finish place issues
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendTeamEscapeEntrantInfo(teamEscapeEntrantResultResponse); // Restart the Team Escape timeout timer
 				xmppEvent.sendEventTimingOut(eventSessionId);

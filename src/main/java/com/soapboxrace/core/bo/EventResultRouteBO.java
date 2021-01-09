@@ -230,7 +230,7 @@ public class EventResultRouteBO {
 		
 		// eventResultBO.physicsMetricsInfoDebug(routeArbitrationPacket);
 		int carclasshash = eventEntity.getCarClassHash();
-		boolean isDNFActive = true;
+		boolean isDNFActive = parameterBO.getBoolParam("DNF_ENABLED");
 		if (carclasshash == 607077938) {
 			isDNFActive = false; // Don't use DNF timeout on open-class racing
 		}

@@ -74,6 +74,9 @@ public class EventResultDragBO {
 	
 	@EJB
 	private CarClassesDAO carClassesDAO;
+	
+	@EJB
+	private ParameterBO parameterBO;
 
 	public DragEventResult handleDragEnd(EventSessionEntity eventSessionEntity, Long activePersonaId, DragArbitrationPacket dragArbitrationPacket, Long eventEnded) {
 		Long eventSessionId = eventSessionEntity.getId();
@@ -174,6 +177,11 @@ public class EventResultDragBO {
 				achievementsBO.applyBrandsAchievements(personaEntity, carBrandsList.getBrandInfo(carPhysicsHash, activePersonaId));
 			}
 		}
+		int carclasshash = eventEntity.getCarClassHash();
+		boolean isDNFActive = parameterBO.getBoolParam("DNF_ENABLED");
+		if (carclasshash == 607077938) {
+			isDNFActive = false; // Don't use DNF timeout on open-class racing
+		}
 		for (EventDataEntity racer : eventDataDao.getRacers(eventSessionId)) {
 			DragEntrantResult dragEntrantResult = new DragEntrantResult();
 			dragEntrantResult.setEventDurationInMilliseconds(racer.getEventDurationInMilliseconds());
@@ -188,7 +196,7 @@ public class EventResultDragBO {
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendDragEntrantInfo(dragEntrantResultResponse);
 			}
-			if (playerRank == 1) { // FIXME can be executed twice with the sync finish place issues
+			if (isDNFActive && playerRank == 1) { // FIXME can be executed twice with the sync finish place issues
 				XmppEvent xmppEvent = new XmppEvent(racer.getPersonaId(), openFireSoapBoxCli);
 				xmppEvent.sendDragEntrantInfo(dragEntrantResultResponse);
 				xmppEvent.sendEventTimingOut(eventSessionId);
