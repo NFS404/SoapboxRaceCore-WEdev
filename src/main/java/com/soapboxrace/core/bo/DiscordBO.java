@@ -19,12 +19,9 @@ public class DiscordBO {
 		String playerName = personaDao.findById(personaId).getName();
 		String errorStr = "!pls fix!";
 		int errorCode = netErrorCode.intValue();
-		switch (errorCode) {
-		case 100:
-			errorStr = "???";
-			break;
+		switch (errorCode) { // Error 100 is a successful finish?
 		case 101:
-			errorStr = "???";
+			errorStr = "Unknown Error";
 			break;
 		case 105:
 			errorStr = "PEER_TIMEOUT";

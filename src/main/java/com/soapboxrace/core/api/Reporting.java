@@ -22,6 +22,7 @@ import com.soapboxrace.core.bo.DiscordBO;
 import com.soapboxrace.core.bo.HardwareInfoBO;
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
+import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.HardwareInfoEntity;
 import com.soapboxrace.core.jpa.UserEntity;
@@ -48,6 +49,9 @@ public class Reporting {
 	
 	@EJB
 	private DiscordBO discordBO;
+	
+	@EJB
+	private PersonaDAO personaDao;
 	
 	@Context
 	private HttpServletRequest sr;
@@ -78,7 +82,14 @@ public class Reporting {
 	@Path("/SendMultiplayerConnect")
 	@Produces(MediaType.APPLICATION_XML)
 	public String sendMultiplayerConnect(@QueryParam("personaId") Long personaId, @QueryParam("netErrorCode") Long netErrorCode) {
-		discordBO.outputNetErrorInfo(personaId, netErrorCode);
+		String playerName = "!pls fix!";
+		if (netErrorCode == 100) {
+			playerName = personaDao.findById(personaId).getName();
+			System.out.println("### Player " + playerName + " got netErrorCode 100 during online-event.");
+		}
+		else {
+			discordBO.outputNetErrorInfo(personaId, netErrorCode);
+		}
 		return "";
 	}
 
