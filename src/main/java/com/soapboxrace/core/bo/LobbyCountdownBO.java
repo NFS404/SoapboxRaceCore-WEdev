@@ -84,6 +84,9 @@ public class LobbyCountdownBO {
 	@EJB
 	private PersonaPresenceDAO personaPresenceDAO;
 	
+	@EJB
+	private AchievementsBO achievementsBO;
+	
 	@Resource
     private TimerService timerService;
 
@@ -124,7 +127,7 @@ public class LobbyCountdownBO {
 		Long team2NOSTest = eventSessionEntity.getTeam2Id();
 		boolean teamNOS = true;
 		eventSessionEntity.setTeamNOS(teamNOS); // True by default
-		// TeamNOS - if race has been randomly started without NOS, team players wouldn't be able to use it, but others will be able
+		// TeamNOS - if race has been randomly started without PUs, team players wouldn't be able to use it, but others will be able
 		if (team2NOSTest != null) {
 			teamNOS = rand.nextBoolean();
 			eventSessionEntity.setTeamNOS(teamNOS);
@@ -178,7 +181,7 @@ public class LobbyCountdownBO {
 				else { // If not - player is a Racer
 					personaRacers.add(personaId);
 					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You are the Racer - finish until " + timeLimit + " to win!\n" +
-					"## NOS is disabled for Racers."), personaId);
+					"## Power-Ups is disabled for Racers."), personaId);
 				}
 			}
 			if ("127.0.0.1".equals(udpRaceIp)) {
@@ -188,7 +191,9 @@ public class LobbyCountdownBO {
 			lobbyEntrantInfo.add(lobbyEntrantInfoType);
 			
 			if (entrantPersona.getTeam() != null && team2NOSTest != null) {
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Team NOS on this race: " + teamNOS), personaId);
+				String puStatus = "TXT_WEV3_BASEANNOUNCER_TEAMPU_ON";
+				if (!teamNOS) {puStatus = "TXT_WEV3_BASEANNOUNCER_TEAMPU_OFF";}
+				achievementsBO.broadcastUICustom(personaId, puStatus, "TEAMPUMODE", 4);
 			}
 		}
 		if (isInterceptorEvent) {
@@ -201,7 +206,7 @@ public class LobbyCountdownBO {
 				for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
 					Long entrantId = lobbyEntrantEntity.getPersona().getPersonaId();
 					openFireSoapBoxCli.send(XmppChat.createSystemMessage(playersList), entrantId);
-					if (personaRacers.contains(entrantId)) { // Give a "racer" tag to presence, so racer wouldn't be able to use NOS
+					if (personaRacers.contains(entrantId)) { // Give a "racer" tag to presence, so racer wouldn't be able to use PUs
 						personaPresenceDAO.updateICRacer(entrantId, true);
 					}
 				}
