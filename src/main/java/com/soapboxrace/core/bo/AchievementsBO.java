@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -462,6 +464,14 @@ public class AchievementsBO {
 			return Integer.valueOf(achievementBrandsEntity.getTeslaWins()).longValue();
 		case FLANKER_COLLECTOR:
 			return Integer.valueOf(achievementBrandsEntity.getFlankerWins()).longValue();
+		case WEV3_SIDEQUEST:
+			int completedEvents = 0;
+			String dailySeriesStr = achievementPersonaEntity.getDailySeries();
+			if (dailySeriesStr != null) {
+				String[] dailySeriesArray = dailySeriesStr.split(",");
+				completedEvents = dailySeriesArray.length;
+			}
+			return Integer.valueOf(completedEvents).longValue();
 		default:
 			break;
 		}
@@ -1229,6 +1239,31 @@ public class AchievementsBO {
 		userEntity.setDBoostAmount(dBoostValue);
 		userDAO.update(userEntity);
 		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV2_DISCORDBOOST, Integer.valueOf(dBoostValue).longValue());
+	}
+	
+	/**
+	 * Apply "Side-Quest" achievement
+	 * @param personaEntity - player persona
+	 * @author Hypercycle
+	 */
+	public void applyDailySeries(PersonaEntity personaEntity, int eventId) {
+		Long eventIdLong = (long) eventId;
+		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
+		String dailySeriesStr = achievementPersonaEntity.getDailySeries();
+		List<Long> dailySeriesArray = new ArrayList<Long>();
+		if (dailySeriesStr != null) {
+			String[] dailySeriesStrArray = dailySeriesStr.split(",");
+			Long[] dailySeriesLong = stringListConverter.StrToLongList(dailySeriesStrArray);
+			dailySeriesArray = Stream.of(dailySeriesLong).collect(Collectors.toCollection(ArrayList::new));
+			if (!dailySeriesArray.contains(eventIdLong)) {
+				dailySeriesArray.add(eventIdLong); // Add the event ID to the completed events list
+			}
+		}
+		else {dailySeriesArray.add(eventIdLong);} // Add the event ID as the first completed event
+		
+		int eventsAmount = dailySeriesArray.size();
+		achievementPersonaEntity.setDailySeries(stringListConverter.listToStr(dailySeriesArray));
+		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV3_SIDEQUEST, Integer.valueOf(eventsAmount).longValue());
 	}
 	
 	/**

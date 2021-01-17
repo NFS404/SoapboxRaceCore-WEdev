@@ -76,7 +76,7 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 
 	public ProductEntity getRandomDrop(String productType, int isDropableMode, boolean isTeamRace) {
 		StringBuilder sqlWhere = new StringBuilder();
-		// 1 - main drop items (1 + 3), 2 - main + rare (1 + 2 + 3), 3 - weak drop items (3), 4 - card-packs only
+		// 1 - main drop items (1 + 3), 2 - main + rare (1 + 2 + 3), 3 - weak drop items (3), 4 - card-packs only, 5 - good drop (1 + 2)
 		if (isDropableMode == 1) {
 			sqlWhere.append(" WHERE obj.isDropableMode <> 0 AND obj.isDropableMode <> 2 AND obj.isDropableMode <> 4 ");
 		}
@@ -85,6 +85,9 @@ public class ProductDAO extends BaseDAO<ProductEntity> {
 		}
 		if (isDropableMode == 3) {
 			sqlWhere.append(" WHERE obj.isDropableMode <> 0 AND obj.isDropableMode <> 1 AND obj.isDropableMode <> 2 AND obj.isDropableMode <> 4");
+		}
+		if (isDropableMode == 5) {
+			sqlWhere.append(" WHERE obj.isDropableMode <> 0 AND obj.isDropableMode <> 3 AND obj.isDropableMode <> 4");
 		}
 		sqlWhere.append(" AND obj.productType= :productType");
 

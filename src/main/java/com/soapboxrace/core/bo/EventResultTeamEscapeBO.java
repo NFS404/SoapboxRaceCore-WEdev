@@ -219,15 +219,17 @@ public class EventResultTeamEscapeBO {
 		if (isMission) {
 			boolean isDone = eventMissionsBO.getEventMissionAccolades(eventEntity, eventMissionsEntity, activePersonaId, teamEscapeArbitrationPacket, finishReason);
 			if (isDone) {
-				teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity, 2));
+				System.out.println("TETest isDone True");
+				teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity, 5, true));
 			}
 			else {
+				System.out.println("TETest isDone False");
 				teamEscapeEventResult.setAccolades(new Accolades());
 			}
 		}
 		if (!isMission) {
 			if (finishReason == 22 && arrayOfTeamEscapeEntrantResult.getTeamEscapeEntrantResult().size() > 1) {
-				teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity, 1));
+				teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity, 1, false));
 			}
 			else { // No rewards on timeout
 				teamEscapeEventResult.setAccolades(new Accolades());

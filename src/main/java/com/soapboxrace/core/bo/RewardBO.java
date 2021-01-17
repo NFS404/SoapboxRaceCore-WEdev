@@ -12,6 +12,7 @@ import com.soapboxrace.core.dao.AchievementStateDAO;
 import com.soapboxrace.core.dao.LevelRepDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.ProductDAO;
+import com.soapboxrace.core.dao.TreasureHuntDAO;
 import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.AchievementRankEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
@@ -21,6 +22,7 @@ import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ProductEntity;
 import com.soapboxrace.core.jpa.SkillModPartEntity;
 import com.soapboxrace.core.jpa.SkillModRewardType;
+import com.soapboxrace.core.jpa.TreasureHuntEntity;
 import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.jaxb.http.Accolades;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
@@ -69,6 +71,9 @@ public class RewardBO {
 	
 	@EJB
 	private UserDAO userDao;
+	
+	@EJB
+	private TreasureHuntDAO treasureHuntDao;
 
 	public Reward getFinalReward(Integer rep, Integer cash) {
 		Reward finalReward = new Reward();
@@ -453,5 +458,19 @@ public class RewardBO {
 		Float repReward = baseRep * rewardValue * rewardMultiplier;
 		Float cashReward = baseCash * rewardValue * cashMultiplier;
 		rewardVO.add(repReward.intValue(), cashReward.intValue(), EnumRewardCategory.PURSUIT, enumRewardType);
+	}
+	
+	public void setTHStreakReward(Long personaId, RewardVO rewardVO) {
+		float repOrig = rewardVO.getRep();
+		float cashOrig = rewardVO.getCash();
+		TreasureHuntEntity treasureHuntEntity = treasureHuntDao.findById(personaId);
+		float thStreakMultiplier = 1;
+		int curStreak = treasureHuntEntity.getStreak();
+		if (!treasureHuntEntity.getIsStreakBroken() && curStreak > 0) {
+			thStreakMultiplier = (1 + ((float) curStreak / 300)); // Example - 50 days / 300 + 1 = 1.17 multiplier (17%+)
+		}
+		Float finalRep = (repOrig * thStreakMultiplier * parameterBO.getFloatParam("REWARD_REP_MULTIPLIER") - repOrig); // Overall rewards multipliers
+		Float finalCash = (cashOrig * thStreakMultiplier * parameterBO.getFloatParam("REWARD_CASH_MULTIPLIER") - cashOrig);
+		rewardVO.add(finalRep.intValue(), finalCash.intValue(), EnumRewardCategory.BONUS, EnumRewardType.NONE);
 	}
 }

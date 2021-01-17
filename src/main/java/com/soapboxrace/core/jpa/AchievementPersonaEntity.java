@@ -72,6 +72,8 @@ public class AchievementPersonaEntity {
 	private int driverAgeDays;
 	private int sbAgeTaken;
 	private int collectorCars;
+	
+	private String dailySeries;
 
 	public int getId() {
 		return id;
@@ -375,6 +377,14 @@ public class AchievementPersonaEntity {
 
 	public void setCollectorCars(int collectorCars) {
 		this.collectorCars = collectorCars;
+	}
+	
+	public String getDailySeries() {
+		return dailySeries;
+	}
+
+	public void setDailySeries(String dailySeries) {
+		this.dailySeries = dailySeries;
 	}
 	
 }

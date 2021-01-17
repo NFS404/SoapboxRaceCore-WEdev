@@ -198,8 +198,8 @@ public class LobbyCountdownBO {
 		}
 		if (isInterceptorEvent) {
 			if (!personaCops.isEmpty() && !personaRacers.isEmpty()) {	
-				eventSessionEntity.setPersonaCops(stringListConverter.interceptorPersonaList(personaCops));
-				eventSessionEntity.setPersonaRacers(stringListConverter.interceptorPersonaList(personaRacers));
+				eventSessionEntity.setPersonaCops(stringListConverter.listToStr(personaCops));
+				eventSessionEntity.setPersonaRacers(stringListConverter.listToStr(personaRacers));
 				eventSessionDao.update(eventSessionEntity);
 				String playersList = "### Cops: " + stringListConverter.interceptorPersonaChatList(personaCops) + "\n"
 						+ "## Racers: " + stringListConverter.interceptorPersonaChatList(personaRacers);

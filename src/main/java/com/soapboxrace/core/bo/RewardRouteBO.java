@@ -10,6 +10,7 @@ import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.SkillModRewardType;
+import com.soapboxrace.core.jpa.TreasureHuntEntity;
 import com.soapboxrace.jaxb.http.Accolades;
 import com.soapboxrace.jaxb.http.RouteArbitrationPacket;
 import com.soapboxrace.jaxb.http.ArrayOfRouteEntrantResult;
@@ -30,7 +31,8 @@ public class RewardRouteBO extends RewardBO {
 	@EJB
 	private ParameterBO parameterBO;
 
-	public Accolades getRouteAccolades(Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, EventSessionEntity eventSessionEntity, ArrayOfRouteEntrantResult arrayOfRouteEntrantResult, int isDropableMode) {
+	public Accolades getRouteAccolades(Long activePersonaId, RouteArbitrationPacket routeArbitrationPacket, EventSessionEntity eventSessionEntity,
+			ArrayOfRouteEntrantResult arrayOfRouteEntrantResult, int isDropableMode, boolean isMission) {
 		boolean isSingle = false;
 		if (arrayOfRouteEntrantResult.getRouteEntrantResult().size() < 2) {
 			isSingle = true;
@@ -53,6 +55,9 @@ public class RewardRouteBO extends RewardBO {
 		setTopSpeedReward(eventEntity, routeArbitrationPacket.getTopSpeed(), rewardVO);
 		setSkillMultiplierReward(personaEntity, rewardVO, SkillModRewardType.SOCIALITE);
 		setMultiplierReward(eventEntity, rewardVO);
+		if (isMission) { // THunt streak will increase the rewards
+			setTHStreakReward(activePersonaId, rewardVO);
+		}
 
 		applyRaceReward(rewardVO.getRep(), rewardVO.getCash(), personaEntity);
 		boolean isTeamRace = false;

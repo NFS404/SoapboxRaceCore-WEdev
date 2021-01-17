@@ -1,17 +1,21 @@
 package com.soapboxrace.core.bo;
 
 import java.time.LocalDate;
+import java.util.stream.Stream;
 
 import javax.ejb.EJB;
+import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.TimeReadConverter;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventMissionsDAO;
+import com.soapboxrace.core.dao.ParameterDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventMissionsEntity;
+import com.soapboxrace.core.jpa.ParameterEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
 
@@ -32,6 +36,12 @@ public class EventMissionsBO {
 	
 	@EJB
 	private AchievementsBO achievementsBO;
+	
+	@EJB
+	private ParameterDAO parameterDAO;
+	
+	@EJB
+	private ParameterBO parameterBO;
 	
 	@EJB
 	private TimeReadConverter timeReadConverter;
@@ -100,12 +110,53 @@ public class EventMissionsBO {
 		if (isDone && (dailyRaceDate == null || !dailyRaceDate.equals(curDate))) {
 			personaEntity.setDailyRaceDate(curDate);
 			personaDao.update(personaEntity);
+			achievementsBO.applyDailySeries(personaEntity, eventEntity.getId());
 		}
 		else {
 			isDone = false; // No Rewards, since it's a replay
 		}
 		achievementsBO.broadcastUICustom(activePersonaId, message, "MISSIONRESULTMODE", 5);
 		return isDone;
+	}
+	
+	// Daily challenge races rotation
+	// Array contains the list of eventIds
+	@Schedule(dayOfWeek = "*", persistent = false)
+	public String dailySeriesRotation() {
+		if (parameterBO.getBoolParam("DAILYSERIES_ROTATION")) {
+			ParameterEntity parameterEntity = parameterDAO.findById("DAILYSERIES_CURRENTID");
+			String dailySeriesStr = parameterBO.getStrParam("DAILYSERIES_SCHEDULE");
+			if (dailySeriesStr == null) {
+				System.out.println("### DailySeriesRotation is not defined!");
+				return "";
+			}
+			String[] dailySeriesArray = dailySeriesStr.split(",");
+			if (dailySeriesArray.length < 2) {
+				System.out.println("### DailySeriesRotation should contain 2 events or more.");
+				return "";
+			}
+			int[] dailySeriesIntArray = Stream.of(dailySeriesArray).mapToInt(Integer::parseInt).toArray();
+			int currentArrayId = Integer.parseInt(parameterEntity.getValue());
+			int currentEventId = dailySeriesIntArray[currentArrayId];
+				
+			updateEventStatus(currentEventId, false); // Disable previous event
+			
+			currentArrayId++;
+			if (currentArrayId >= dailySeriesIntArray.length) {currentArrayId = 0;} // Reset the rotation
+			currentEventId = dailySeriesIntArray[currentArrayId];
+			
+			updateEventStatus(currentEventId, true); // Enable new event
+			
+			parameterEntity.setValue(String.valueOf(currentArrayId));
+			parameterDAO.update(parameterEntity);
+		}
+		return "";
+	}
+	
+	private void updateEventStatus (int eventId, boolean isEnabled) {
+		EventEntity event = eventDAO.findById(eventId);
+		event.setIsEnabled(isEnabled);
+		eventDAO.update(event);
 	}
 	
 }

@@ -361,13 +361,17 @@ public enum AchievementType {
 	 */
 	FLANKER_COLLECTOR(115), //
 	/**
+	 * complete the events of daily Challenge Series
+	 */
+	WEV3_SIDEQUEST(116), //
+	/**
 	 * drive in all events
 	 */
-	WEV2_TRAVELLER(116), //
+	WEV2_TRAVELLER(117), //
 	/**
 	 * install 4-star skills on all slots for X cars
 	 */
-	WEV2_SKILL_MASTER(117); //
+	WEV2_SKILL_MASTER(118); //
 	
 
 	private int id;

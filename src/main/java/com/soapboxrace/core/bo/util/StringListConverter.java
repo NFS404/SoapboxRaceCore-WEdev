@@ -17,11 +17,11 @@ public class StringListConverter {
 	@EJB
 	private PersonaDAO personaDAO;
 
-	public String interceptorPersonaList(List<Long> personas) {
-		if (personas.isEmpty()) {
+	public String listToStr(List<Long> items) {
+		if (items.isEmpty()) {
 			return null;
 		}
-		String list = StringUtils.join(personas, ',');
+		String list = StringUtils.join(items, ',');
 		return list;
 	}
 	

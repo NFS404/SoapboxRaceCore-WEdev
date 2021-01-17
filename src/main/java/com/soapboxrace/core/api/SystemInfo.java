@@ -39,7 +39,7 @@ public class SystemInfo {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		systemInfo.setVersion("sbrw_wevolved_09012021f2");
+		systemInfo.setVersion("sbrw_wevolved_15012021");
 		return systemInfo;
 	}
 }

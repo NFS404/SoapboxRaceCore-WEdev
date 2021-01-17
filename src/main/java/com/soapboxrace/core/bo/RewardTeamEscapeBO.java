@@ -35,7 +35,7 @@ public class RewardTeamEscapeBO extends RewardBO {
 	private EventDataDAO eventDataDAO;
 
 	public Accolades getTeamEscapeAccolades(Long activePersonaId, TeamEscapeArbitrationPacket teamEscapeArbitrationPacket,
-			EventSessionEntity eventSessionEntity, int isDropableMode) {
+			EventSessionEntity eventSessionEntity, int isDropableMode, boolean isMission) {
 		int finishReason = teamEscapeArbitrationPacket.getFinishReason();
 		if (!legitRaceBO.isLegit(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity, false) || finishReason != 22) {
 			return new Accolades();
@@ -81,6 +81,9 @@ public class RewardTeamEscapeBO extends RewardBO {
 		setTopSpeedReward(eventEntity, teamEscapeArbitrationPacket.getTopSpeed(), rewardVO);
 		setSkillMultiplierReward(personaEntity, rewardVO, SkillModRewardType.BOUNTY_HUNTER);
 		setMultiplierReward(eventEntity, rewardVO);
+		if (isMission) { // THunt streak will increase the rewards
+			setTHStreakReward(activePersonaId, rewardVO);
+		}
 
 		applyRaceReward(rewardVO.getRep(), rewardVO.getCash(), personaEntity);
 //		System.out.println("### TE test: player " + personaEntity.getName() + "has requested TE accolades, finishers: " + finishedRacers + ", cash amount: " + rewardVO.getCash());

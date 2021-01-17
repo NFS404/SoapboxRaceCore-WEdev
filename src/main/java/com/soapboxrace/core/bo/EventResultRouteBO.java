@@ -282,55 +282,22 @@ public class EventResultRouteBO {
 				}).start();
 				}
 		}
-		
-		if (isInterceptorEvent) { // Bad code?
-			boolean isRacer = true;
-			String[] personaCopsStr = eventSessionEntity.getPersonaCops().split(",");
-			String[] personaRacersStr = eventSessionEntity.getPersonaRacers().split(",");
-			Long[] personaCopsList = stringListConverter.StrToLongList(personaCopsStr);
-			Long[] personaRacersList = stringListConverter.StrToLongList(personaRacersStr);
-			for (Long personaCop : personaCopsList) {
-				// System.out.println("Cop ID " + personaCop);
-				if (personaCop.equals(activePersonaId)) {
-					// System.out.println("Cop: " + playerName);
-					isRacer = false;
-				}
-			}
-			for (Long personaRacer : personaRacersList) {
-				// System.out.println("Racer ID " + personaRacer);
-				if (personaRacer.equals(activePersonaId)) {
-					// System.out.println("Racer: " + playerName);
-					isRacer = true;
-				}
-			} 
-			if ((!isRacer && finishReason == 22) || (isRacer && finishReason == 16394)) {
-				System.out.println("No rewards to isRacer " + isRacer + " " + playerName + ", session " + eventSessionId);
-				routeEventResult.setAccolades(new Accolades()); // No rewards (Cop on finish or Racer on timeout)
-			}
-			if (isRacer && finishReason == 22) { // Rewards will be given to racers
-				if (!isCopsFailed) { // If any racer has completed the route, cops has failed
-					isCopsFailed = true;
-					eventSessionEntity.setIsCopsFailed(isCopsFailed);
-				}
-				System.out.println("Rewards given to isRacer " + isRacer + " " + playerName + ", session " + eventSessionId);
-				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode)); 
-			}
-			if (!isRacer && finishReason == 16394 && !isCopsFailed) { // Rewards will be given to cops
-				System.out.println("Rewards given to isRacer " + isRacer + " " + playerName + ", session " + eventSessionId);
-				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode)); 
-			}
+		if (isInterceptorEvent) {
+			interceptorAccolades(eventSessionEntity, activePersonaId, finishReason, isCopsFailed, playerName, routeEventResult, routeArbitrationPacket, 
+					arrayOfRouteEntrantResult, isDropableMode);
 		}
+		
 		if (isMission) {
 			boolean isDone = eventMissionsBO.getEventMissionAccolades(eventEntity, eventMissionsEntity, activePersonaId, routeArbitrationPacket, finishReason);
 			if (isDone) {
-				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, 2));
+				routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, 5, true));
 			}
 			else {
 				routeEventResult.setAccolades(new Accolades());
 			}
-		}
-		if (!isInterceptorEvent && finishReason == 22) {
-			routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode));
+		} // Normal rewards mode
+		if (!isMission && !isInterceptorEvent && finishReason == 22) {
+			routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode, false));
 		}
 		eventSessionDao.update(eventSessionEntity);
 		return routeEventResult;
@@ -345,4 +312,44 @@ public class EventResultRouteBO {
 		eventDataEntity.setRank(arbitrationPacket.getRank());
 	}
 	
+	private void interceptorAccolades (EventSessionEntity eventSessionEntity, Long activePersonaId, int finishReason, boolean isCopsFailed,
+			String playerName, RouteEventResult routeEventResult, RouteArbitrationPacket routeArbitrationPacket, ArrayOfRouteEntrantResult arrayOfRouteEntrantResult,
+			int isDropableMode) {
+		Long eventSessionId = eventSessionEntity.getId();
+		boolean isRacer = true;
+		String[] personaCopsStr = eventSessionEntity.getPersonaCops().split(",");
+		String[] personaRacersStr = eventSessionEntity.getPersonaRacers().split(",");
+		Long[] personaCopsList = stringListConverter.StrToLongList(personaCopsStr);
+		Long[] personaRacersList = stringListConverter.StrToLongList(personaRacersStr);
+		for (Long personaCop : personaCopsList) {
+			// System.out.println("Cop ID " + personaCop);
+			if (personaCop.equals(activePersonaId)) {
+				// System.out.println("Cop: " + playerName);
+				isRacer = false;
+			}
+		}
+		for (Long personaRacer : personaRacersList) {
+			// System.out.println("Racer ID " + personaRacer);
+			if (personaRacer.equals(activePersonaId)) {
+				// System.out.println("Racer: " + playerName);
+				isRacer = true;
+			}
+		} 
+		if ((!isRacer && finishReason == 22) || (isRacer && finishReason == 16394)) {
+			System.out.println("No rewards to isRacer " + isRacer + " " + playerName + ", session " + eventSessionId);
+			routeEventResult.setAccolades(new Accolades()); // No rewards (Cop on finish or Racer on timeout)
+		}
+		if (isRacer && finishReason == 22) { // Rewards will be given to racers
+			if (!isCopsFailed) { // If any racer has completed the route, cops has failed
+				isCopsFailed = true;
+				eventSessionEntity.setIsCopsFailed(isCopsFailed);
+			}
+			System.out.println("Rewards given to isRacer " + isRacer + " " + playerName + ", session " + eventSessionId);
+			routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode, false)); 
+		}
+		if (!isRacer && finishReason == 16394 && !isCopsFailed) { // Rewards will be given to cops
+			System.out.println("Rewards given to isRacer " + isRacer + " " + playerName + ", session " + eventSessionId);
+			routeEventResult.setAccolades(rewardRouteBO.getRouteAccolades(activePersonaId, routeArbitrationPacket, eventSessionEntity, arrayOfRouteEntrantResult, isDropableMode, false)); 
+		}
+	}
 }
