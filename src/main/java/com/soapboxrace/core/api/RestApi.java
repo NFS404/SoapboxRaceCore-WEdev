@@ -4,15 +4,20 @@ import java.net.URI;
 
 import javax.ejb.EJB;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
+import com.soapboxrace.core.bo.AuthenticationBO;
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.RestApiBO;
-import com.soapboxrace.jaxb.http.ArrayOfRaceWithTime;
+import com.soapboxrace.jaxb.http.APITokenResult;
+import com.soapboxrace.jaxb.http.APITokenResult.APITokenEntity;
 import com.soapboxrace.jaxb.http.ChangePassword;
 
 /**
@@ -35,6 +40,36 @@ public class RestApi {
 	@EJB
 	private ParameterBO parameterBO;
 	
+	@EJB
+	private AuthenticationBO authBO;
+	
+	@Context
+	UriInfo uri;
+
+	// ===================== Начальная авторизация =======================
+	
+	/**
+	 * Выдача токена для доступа к API
+	 * @param key - постоянный ключ
+	 */
+	@GET
+	@Path("apiAuth")
+	@Produces(MediaType.APPLICATION_XML)
+	public Response apiAuth(@QueryParam("key") String key) {
+		if (parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			URI myUri = uri.getBaseUri();
+			String tempLink = authBO.generateTempAPIToken(myUri.getHost());
+			
+			APITokenResult apiTokenResult = new APITokenResult();
+			apiTokenResult.add(new APITokenEntity(tempLink, 0));
+			return Response.ok(apiTokenResult).build();
+		}
+		else {
+			APITokenResult apiTokenResult = new APITokenResult();
+			apiTokenResult.add(new APITokenEntity("token bro", 515));
+			return Response.ok(apiTokenResult).build();
+		}
+	}
 	
 	// ===================== Страницы =======================
 	
