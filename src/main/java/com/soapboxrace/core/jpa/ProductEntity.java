@@ -46,8 +46,8 @@ public class ProductEntity {
 	private String icon;
 	private int level;
 	private String longDescription;
-	private float price;
-	private float resalePrice;
+	private int price;
+	private int resalePrice;
 	private int priority;
 	private String productId;
 	private String productTitle;
@@ -151,11 +151,11 @@ public class ProductEntity {
 		this.longDescription = longDescription;
 	}
 
-	public float getPrice() {
+	public int getPrice() {
 		return price;
 	}
 
-	public void setPrice(float price) {
+	public void setPrice(int price) {
 		this.price = price;
 	}
 
@@ -271,11 +271,11 @@ public class ProductEntity {
 		this.isDropableMode = isDropableMode;
 	}
 
-	public float getResalePrice() {
+	public int getResalePrice() {
 		return resalePrice;
 	}
 
-	public void setResalePrice(float resalePrice) {
+	public void setResalePrice(int resalePrice) {
 		this.resalePrice = resalePrice;
 	}
 

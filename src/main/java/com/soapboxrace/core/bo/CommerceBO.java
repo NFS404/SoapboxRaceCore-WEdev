@@ -17,6 +17,7 @@ import com.soapboxrace.core.dao.PerformancePartDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.ProductDAO;
 import com.soapboxrace.core.dao.SkillModPartDAO;
+import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.dao.VinylDAO;
 import com.soapboxrace.core.dao.VinylProductDAO;
 import com.soapboxrace.core.dao.VisualPartDAO;
@@ -28,7 +29,10 @@ import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.core.jpa.PerformancePartEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ProductEntity;
+import com.soapboxrace.core.jpa.UserEntity;
 import com.soapboxrace.core.jpa.VinylProductEntity;
+import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.BasketItemTrans;
 import com.soapboxrace.jaxb.http.CommerceSessionTrans;
 import com.soapboxrace.jaxb.http.CustomCarTrans;
@@ -85,6 +89,12 @@ public class CommerceBO {
 
 	@EJB
 	private CarClassesDAO carClassesDAO;
+	
+	@EJB
+    private OpenFireSoapBoxCli openFireSoapBoxCli;
+	
+	@EJB
+	private UserDAO userDAO;
 
 	public OwnedCarTrans responseCar(CommerceSessionTrans commerceSessionTrans) {
 		OwnedCarTrans ownedCarTrans = new OwnedCarTrans();
@@ -292,13 +302,13 @@ public class CommerceBO {
 			OwnedCarTrans ownedCarTrans = OwnedCarConverter.entity2Trans(defaultCarEntity.getOwnedCar());
 			CustomCarTrans customCarTransDB = ownedCarTrans.getCustomCar();
 			CustomCarTrans customCarTrans = commerceSessionTrans.getUpdatedCar().getCustomCar();
-			Float basketTotalValue;
+			int basketTotalValue;
 			if (CommerceOp.VINYL.equals(commerceOp)) {
 				basketTotalValue = getVinylTotalValue(basketItemTransList);
 			} else {
 				basketTotalValue = getBasketTotalValue(basketItemTransList);
 			}
-			Float resellTotalValue = 0F;
+			int resellTotalValue = 0;
 			switch (commerceOp) {
 			case PERFORMANCE:
 				List<PerformancePartTrans> performancePartTransDB = customCarTransDB.getPerformanceParts().getPerformancePartTrans();
@@ -310,7 +320,7 @@ public class CommerceBO {
 				for (PerformancePartTrans performancePartTransTmp : performancePartTransListTmp) {
 					ProductEntity productEntity = productDAO.findByHash(performancePartTransTmp.getPerformancePartAttribHash());
 					if (productEntity != null) {
-						resellTotalValue = Float.sum(resellTotalValue, productEntity.getResalePrice());
+						resellTotalValue = Integer.sum(resellTotalValue, productEntity.getResalePrice());
 					} else {
 						System.err.println("INVALID HASH: [" + performancePartTransTmp.getPerformancePartAttribHash() + "]");
 					}
@@ -326,7 +336,7 @@ public class CommerceBO {
 				for (SkillModPartTrans skillModPartTransTmp : skillModPartTransListTmp) {
 					ProductEntity productEntity = productDAO.findByHash(skillModPartTransTmp.getSkillModPartAttribHash());
 					if (productEntity != null) {
-						resellTotalValue = Float.sum(resellTotalValue, productEntity.getResalePrice());
+						resellTotalValue = Integer.sum(resellTotalValue, productEntity.getResalePrice());
 					} else {
 						System.err.println("INVALID HASH: [" + skillModPartTransTmp.getSkillModPartAttribHash() + "]");
 					}
@@ -351,27 +361,27 @@ public class CommerceBO {
 					Integer hash = inventoryItem.getHash();
 					ProductEntity productEntity = productDAO.findByHash(hash);
 					if (productEntity != null) {
-						resellTotalValue = Float.sum(resellTotalValue, productEntity.getResalePrice());
+						resellTotalValue = Integer.sum(resellTotalValue, productEntity.getResalePrice());
 					}
 				}
 			}
-			Float result = Float.sum(basketTotalValue, (resellTotalValue * -1)) * -1;
+			int result = Integer.sum(basketTotalValue, (resellTotalValue * -1)) * -1;
 //			System.out.println("basket: [" + basketTotalValue + "]");
 //			System.out.println("resell: [" + resellTotalValue + "]");
 //			System.out.println("result: [" + result + "]");
 			PersonaEntity persona = defaultCarEntity.getPersona();
-			float cash = (float) persona.getCash();
-			persona.setCash(Float.sum(cash, result));
+			int cash = persona.getCash();
+			persona.setCash(Integer.sum(cash, result));
 			personaDAO.update(persona);
 		}
 	}
 
-	private Float getVinylTotalValue(List<BasketItemTrans> basketItemTransList) {
-		Float price = 0F;
+	private int getVinylTotalValue(List<BasketItemTrans> basketItemTransList) {
+		int price = 0;
 		for (BasketItemTrans basketItemTrans : basketItemTransList) {
 			VinylProductEntity vinylProductEntity = vinylProductDAO.findByProductId(basketItemTrans.getProductId());
 			if (vinylProductEntity != null) {
-				price = Float.sum(price, vinylProductEntity.getPrice());
+				price = Integer.sum(price, vinylProductEntity.getPrice());
 				disableItem(vinylProductEntity);
 			} else {
 				System.err.println("product [" + basketItemTrans.getProductId() + "] not found");
@@ -380,18 +390,34 @@ public class CommerceBO {
 		return price;
 	}
 
-	private Float getBasketTotalValue(List<BasketItemTrans> basketItemTransList) {
-		Float price = 0F;
+	private int getBasketTotalValue(List<BasketItemTrans> basketItemTransList) {
+		int price = 0;
 		for (BasketItemTrans basketItemTrans : basketItemTransList) {
 			ProductEntity productEntity = productDAO.findByProductId(basketItemTrans.getProductId());
 			if (productEntity != null) {
-				price = Float.sum(price, productEntity.getPrice());
+				price = Integer.sum(price, productEntity.getPrice());
 				disableItem(productEntity);
 			} else {
 				System.err.println("product [" + basketItemTrans.getProductId() + "] not found");
 			}
 		}
 		return price;
+	}
+	
+	public int limitBoostConversion (int money, int maxCashLimit, int sbConvCashValue, int sbConvAmount, UserEntity userEntity,
+			Long personaId, boolean inGame) {
+		int sbConvTries = 0;
+		while (money >= maxCashLimit) { // Convert the over-limit money in SpeedBoost
+			money = money - sbConvCashValue;
+			userEntity.setBoost(userEntity.getBoost() + sbConvAmount);
+			sbConvTries++;
+		}
+		if (inGame) {
+			userDAO.update(userEntity); // Update the User data
+			int sbConvValue = sbConvAmount * sbConvTries;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Money limit - some of your money has been exchanged to " + sbConvValue + " SpeedBoost."), personaId);
+		}
+		return money;
 	}
 
 }

@@ -96,7 +96,7 @@ public class Personas {
 		arrayOfInventoryItemTrans.getInventoryItemTrans().add(new InventoryItemTrans());
 
 		WalletTrans walletTrans = new WalletTrans();
-		walletTrans.setBalance(defaultCarEntity.getPersona().getCash());
+		walletTrans.setBalance((double) defaultCarEntity.getPersona().getCash());
 		walletTrans.setCurrency("CASH");
 
 		ArrayOfWalletTrans arrayOfWalletTrans = new ArrayOfWalletTrans();
@@ -125,11 +125,11 @@ public class Personas {
 		arrayOfInventoryItemTrans.getInventoryItemTrans().add(new InventoryItemTrans());
 
 		WalletTrans cashWallet = new WalletTrans();
-        cashWallet.setBalance(personaEntity.getCash());
+        cashWallet.setBalance((double) personaEntity.getCash());
         cashWallet.setCurrency("CASH");
 
         WalletTrans boostWallet = new WalletTrans();
-        boostWallet.setBalance(userEntity.getBoost());
+        boostWallet.setBalance((double) userEntity.getBoost());
         boostWallet.setCurrency("BOOST"); // why doesn't _NS work? Truly a mystery... - LeoCodes21
 
         ArrayOfWalletTrans arrayOfWalletTrans = new ArrayOfWalletTrans();

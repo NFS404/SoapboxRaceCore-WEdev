@@ -241,8 +241,11 @@ public class TeamsBO {
 		List<EventDataEntity> listOfRacers = eventDataDao.getRacersRanked(eventSessionId);
 		int rankCounter = 1; // Racers result list should be ordered
 		for (EventDataEntity racerDebug : listOfRacers) {
+			long eventDuration = racerDebug.getEventDurationInMilliseconds();
+			long serverDuration = racerDebug.getServerEventDuration();
+			String timeDiffStr = "";
 			PersonaEntity racerEntityDebug = personaDao.findById(racerDebug.getPersonaId());
-			racerTime = timeReadConverter.convertRecord(racerDebug.getServerEventDuration());
+			racerTime = timeReadConverter.convertRecord(serverDuration);
 			TeamsEntity racerTeam = racerEntityDebug.getTeam();
 			if (racerTeam != null) {
 				if (racerTeam.getTeamId() == winnerTeamEntity.getTeamId()) {
@@ -252,7 +255,13 @@ public class TeamsBO {
 					teamIcon = ":small_blue_diamond:";
 				}
 			}
-			message = message.concat(rankCounter + " - " + racerEntityDebug.getName() + " (*" + racerTime + "*) " + teamIcon + " \n");
+			// If player has a client-server time difference more than 500ms, it must be reported
+			if (((eventDuration + 500) < serverDuration) || ((eventDuration + 500) > serverDuration)) {
+				String racerEventTime = timeReadConverter.convertRecord(eventDuration);
+				timeDiffStr = " time diff.: " + racerEventTime;
+			}
+			message = message.concat(rankCounter + " - " + racerEntityDebug.getName() + " (*" + racerTime + "*) " + teamIcon + timeDiffStr + " \n");
+			
 			rankCounter++;
 		}
 		return message;

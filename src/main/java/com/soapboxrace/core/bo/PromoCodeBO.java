@@ -57,6 +57,9 @@ public class PromoCodeBO {
 	
 	@EJB
 	private AchievementsBO achievementsBO;
+	
+	@EJB
+	private CommerceBO commerceBO;
 
 	@Resource(mappedName = "java:jboss/mail/Gmail")
 	private Session mailSession;
@@ -113,14 +116,15 @@ public class PromoCodeBO {
 		}
 		
 		String premiumCodeType = promoCodeEntity.getCodeType();
-		int maxCashFreeAcc = parameterBO.getIntParam("MAX_PLAYER_CASH_FREE");
-		int maxCashPremiumAcc = parameterBO.getIntParam("MAX_PLAYER_CASH_PREMIUM");
-		double premiumMoneyValue = 0;
-		double playerInitialCash = personaEntity.getCash();
-		double finalValue = 0;
-		double cashPreValue = 0;
-		double extraMoneyTransit = 0;
+		int maxCashLimit = parameterBO.getMaxCash();
+		int sbConvAmount = parameterBO.getIntParam("BOOST_CONVERT_AMOUNT");
+		int sbConvCashValue = parameterBO.getIntParam("BOOST_CONVERT_CASHVALUE");
+		int premiumMoneyValue = 0;
+		int playerInitialCash = personaEntity.getCash();
+		int finalValue = 0;
+		int cashPreValue = 0;
 		int playerInitialLevel = personaEntity.getLevel();
+		Long personaId = personaEntity.getPersonaId();
 		int maxLevelCap = parameterBO.getIntParam("MAX_LEVEL");
 		// Predefined World Evolved premium types - Hypercycle
 		// TODO Kick the player while applying the premium?
@@ -132,12 +136,9 @@ public class PromoCodeBO {
 		    		cashPreValue = personaEntity.getCash();
 		    		premiumMoneyValue = 5000000;
 		    		finalValue = playerInitialCash + premiumMoneyValue;
-		    		if (finalValue > maxCashFreeAcc) {
-		    			extraMoneyTransit = (finalValue - maxCashFreeAcc);
-		    			finalValue = maxCashFreeAcc;
-		    			userEntity.setExtraMoney(userEntity.getExtraMoney() + extraMoneyTransit);
-		    		}
+		    		finalValue = commerceBO.limitBoostConversion(finalValue, maxCashLimit, sbConvCashValue, sbConvAmount, userEntity, personaId, false);
 		    		personaEntity.setCash(finalValue);
+		    		
 		    		if (playerInitialLevel < 25) {
 		    			personaEntity.setLevel(25);
 		    		}
@@ -179,11 +180,7 @@ public class PromoCodeBO {
 		    	cashPreValue = personaEntity.getCash();
 		    	premiumMoneyValue = 10000000;
 	    		finalValue = playerInitialCash + premiumMoneyValue;
-	    		if (finalValue > maxCashPremiumAcc) {
-	    			extraMoneyTransit = (finalValue - maxCashPremiumAcc);
-	    			finalValue = maxCashPremiumAcc;
-	    			userEntity.setExtraMoney(userEntity.getExtraMoney() + extraMoneyTransit);
-	    		}
+	    		finalValue = commerceBO.limitBoostConversion(finalValue, maxCashLimit, sbConvCashValue, sbConvAmount, userEntity, personaId, false);
 	    		personaEntity.setCash(finalValue);
 	    		
 	    		if (playerInitialLevel < 40) {
@@ -214,11 +211,8 @@ public class PromoCodeBO {
 		    	cashPreValue = personaEntity.getCash();
 		    	premiumMoneyValue = 30000000;
 	    		finalValue = playerInitialCash + premiumMoneyValue;
-	    		if (finalValue > maxCashPremiumAcc) {
-	    			extraMoneyTransit = (finalValue - maxCashPremiumAcc);
-	    			finalValue = maxCashPremiumAcc;
-	    			userEntity.setExtraMoney(userEntity.getExtraMoney() + extraMoneyTransit);
-	    		}
+	    		finalValue = commerceBO.limitBoostConversion(finalValue, maxCashLimit, sbConvCashValue, sbConvAmount, userEntity, personaId, false);
+	    		
 	    		personaEntity.setCash(finalValue);
 	    		if (playerInitialLevel < 75) {
 	    			personaEntity.setLevel(75);
@@ -242,12 +236,9 @@ public class PromoCodeBO {
 		    	cashPreValue = personaEntity.getCash();
 		    	premiumMoneyValue = 10000000;
 		    	finalValue = playerInitialCash + premiumMoneyValue;
-		    	if (finalValue > maxCashPremiumAcc) {
-		    		extraMoneyTransit = (finalValue - maxCashPremiumAcc);
-		    		finalValue = maxCashPremiumAcc;
-		    		userEntity.setExtraMoney(userEntity.getExtraMoney() + extraMoneyTransit);
-		    	}
+		    	finalValue = commerceBO.limitBoostConversion(finalValue, maxCashLimit, sbConvCashValue, sbConvAmount, userEntity, personaId, false);
 		    	personaEntity.setCash(finalValue);
+		    	
 		    	personaDao.update(personaEntity);
 		    	
 		    	promoCodeEntity.setIsUsed(true);
@@ -259,11 +250,7 @@ public class PromoCodeBO {
 		    	cashPreValue = personaEntity.getCash();
 		    	premiumMoneyValue = 100000000;
 		    	finalValue = playerInitialCash + premiumMoneyValue;
-		    	if (finalValue > maxCashPremiumAcc) {
-		    		extraMoneyTransit = (finalValue - maxCashPremiumAcc);
-		    		finalValue = maxCashPremiumAcc;
-		    		userEntity.setExtraMoney(userEntity.getExtraMoney() + extraMoneyTransit);
-		    	}
+		    	finalValue = commerceBO.limitBoostConversion(finalValue, maxCashLimit, sbConvCashValue, sbConvAmount, userEntity, personaId, false);
 		    	personaEntity.setCash(finalValue);
 		    	personaDao.update(personaEntity);
 		    	
@@ -314,7 +301,7 @@ public class PromoCodeBO {
 			return "ERROR: wrong nickname";
 		}
 		userEntity = personaEntity.getUser();
-		double extraMoneyConvert = Double.parseDouble(extraMoney);
+		int extraMoneyConvert = 0;
 		// yes yes, parsing the single string would be more efficient
 		int timeYearConvert = Integer.parseInt(timeYear);
 		int timeMonthConvert = Integer.parseInt(timeMonth);
@@ -402,4 +389,5 @@ public class PromoCodeBO {
 			personaDao.update(personaEntityUser);
 		}
 	}
+
 }

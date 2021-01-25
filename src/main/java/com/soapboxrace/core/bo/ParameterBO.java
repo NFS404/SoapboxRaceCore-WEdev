@@ -6,7 +6,6 @@ import javax.ejb.Stateless;
 import com.soapboxrace.core.dao.ParameterDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.jpa.ParameterEntity;
-import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.TokenSessionEntity;
 
 @Stateless
@@ -84,19 +83,8 @@ public class ParameterBO {
 		return getIntParam("MAX_CAR_SLOTS_FREE");
 	}
 
-	public int getMaxCash(String securityToken) {
-		TokenSessionEntity tokenSession = tokenDAO.findBySecurityToken(securityToken);
-		if (tokenSession.isPremium()) {
-			return getIntParam("MAX_PLAYER_CASH_PREMIUM");
-		}
-		return getIntParam("MAX_PLAYER_CASH_FREE");
-	}
-
-	public int getMaxCash(PersonaEntity persona) {
-		if (persona.getUser().isPremium()) {
-			return getIntParam("MAX_PLAYER_CASH_PREMIUM");
-		}
-		return getIntParam("MAX_PLAYER_CASH_FREE");
+	public int getMaxCash() {
+		return getIntParam("MAX_PLAYER_CASH");
 	}
 
 	public Integer getIntParam(String parameter) {

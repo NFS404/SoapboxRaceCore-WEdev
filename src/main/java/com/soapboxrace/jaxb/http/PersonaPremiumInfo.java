@@ -17,7 +17,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "Persona", propOrder = {
 		"SUCCESS",
 		"NAME",
-		"EXTRA_MONEY",
 		"PREMIUM",
 		"PREMIUM_TYPE",
 		"PREMIUM_ENDS"
@@ -29,9 +28,6 @@ public class PersonaPremiumInfo {
 	
 	@XmlElement(name = "Name")
 	private String NAME;
-	
-	@XmlElement(name = "ExtraMoney")
-	private Long EXTRA_MONEY;
 	
 	@XmlElement(name = "Premium")
 	private boolean PREMIUM;
@@ -45,7 +41,6 @@ public class PersonaPremiumInfo {
 	public PersonaPremiumInfo() {
 		SUCCESS = false;
 		NAME = "";
-		EXTRA_MONEY = 0l;
 		PREMIUM = false;
 		PREMIUM_TYPE = "";
 		PREMIUM_ENDS = "";
@@ -53,14 +48,12 @@ public class PersonaPremiumInfo {
 	
 	public PersonaPremiumInfo(
 			String name, 
-			double extramoney, 
 			boolean premium, 
 			String premiumtype, 
 			LocalDate premiumends
 		) {
 		SUCCESS = true;
 		NAME = name;
-		EXTRA_MONEY = new Long((int) extramoney);
 		PREMIUM = premium;
 		PREMIUM_TYPE = premiumtype;
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");

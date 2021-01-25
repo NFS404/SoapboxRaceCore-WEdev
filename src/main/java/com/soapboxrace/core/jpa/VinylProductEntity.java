@@ -41,7 +41,7 @@ public class VinylProductEntity {
 	private String icon;
 	private int level;
 	private String longDescription;
-	private float price;
+	private int price;
 	private int priority;
 	private String productId;
 	private String productTitle;
@@ -141,11 +141,11 @@ public class VinylProductEntity {
 		this.longDescription = longDescription;
 	}
 
-	public float getPrice() {
+	public int getPrice() {
 		return price;
 	}
 
-	public void setPrice(float price) {
+	public void setPrice(int price) {
 		this.price = price;
 	}
 

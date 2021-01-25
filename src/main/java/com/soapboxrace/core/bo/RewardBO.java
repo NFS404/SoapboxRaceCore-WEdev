@@ -74,6 +74,9 @@ public class RewardBO {
 	
 	@EJB
 	private TreasureHuntDAO treasureHuntDao;
+	
+	@EJB
+	private CommerceBO commerceBO;
 
 	public Reward getFinalReward(Integer rep, Integer cash) {
 		Reward finalReward = new Reward();
@@ -118,8 +121,8 @@ public class RewardBO {
 		if (inventoryFull) {
 			luckyDrawItem.setWasSold(true);
 			if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
-				float resalePrice = productEntity.getResalePrice();
-				double cash = personaEntity.getCash();
+				int resalePrice = productEntity.getResalePrice();
+				int cash = personaEntity.getCash();
 				personaEntity.setCash(cash + resalePrice);
 				personaDao.update(personaEntity);
 			}
@@ -138,10 +141,13 @@ public class RewardBO {
 	public void applyRaceReward(Integer exp, Integer cash, PersonaEntity personaEntity) {
 		int maxLevel = getMaxLevel(personaEntity);
 		if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
-			int incomeCash = (int) personaEntity.getCash() + cash;
-			final int maxCash = parameterBO.getMaxCash(personaEntity);
+			int incomeCash = personaEntity.getCash() + cash;
+			final int maxCash = parameterBO.getMaxCash();
 			if (incomeCash > maxCash) {
-				incomeCash = maxCash;
+				int sbConvAmount = parameterBO.getIntParam("BOOST_CONVERT_AMOUNT");
+				int sbConvCashValue = parameterBO.getIntParam("BOOST_CONVERT_CASHVALUE");
+				incomeCash = commerceBO.limitBoostConversion(incomeCash, maxCash, sbConvCashValue, sbConvAmount, personaEntity.getUser(),
+						personaEntity.getPersonaId(), true);
 			} else if (incomeCash < 1) {
 				incomeCash = 1;
 			}

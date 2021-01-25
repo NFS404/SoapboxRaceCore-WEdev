@@ -69,13 +69,13 @@ public class UserEntity {
 	private LocalDateTime lastLogin;
 
 	@Column(name = "extramoney")
-	private double extramoney;
+	private int extramoney;
 	
 	@Column(name = "moneyGiven")
-	private double moneyGiven;
+	private int moneyGiven;
 	
 	@Column(name = "boost")
-	private double boost;
+	private int boost;
 	
 	@Column(name = "userAgent", length = 255)
 	private String ua;
@@ -212,27 +212,27 @@ public class UserEntity {
 		this.gameHardwareHash = gameHardwareHash;
 	}
 	
-	public double getExtraMoney() {
+	public int getExtraMoney() {
 		return extramoney;
 	}
 	
-	public void setExtraMoney(double extramoney) {
+	public void setExtraMoney(int extramoney) {
 		this.extramoney = extramoney;
 	}
 	
-	public double getMoneyGiven() {
+	public int getMoneyGiven() {
 		return moneyGiven;
 	}
 	
-	public void setMoneyGiven(double moneyGiven) {
+	public void setMoneyGiven(int moneyGiven) {
 		this.moneyGiven = moneyGiven;
 	}
 	
-	public double getBoost() {
+	public int getBoost() {
 		return boost;
 	}
 	
-	public void setBoost(double boost) {
+	public void setBoost(int boost) {
 		this.boost = boost;
 	}
 	

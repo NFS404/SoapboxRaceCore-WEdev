@@ -706,14 +706,14 @@ public class AchievementsBO {
 			RewardDestinyType rewardDestiny = rewardDropEntity.getRewardDestiny();
 			switch (rewardDestiny) { // Depending on the type of reward object
 			case CASH:
-				personaEntity.setCash(personaEntity.getCash() + rewardDropEntity.getAmount().doubleValue());
+				personaEntity.setCash(personaEntity.getCash() + rewardDropEntity.getAmount());
 				personaDAO.update(personaEntity);
 				item.setHash(-429893590);
 				String moneyFormat = NumberFormat.getNumberInstance(Locale.US).format(rewardDropEntity.getAmount());
 				item.setTitle("$" + moneyFormat);
 				break;
 			case SPEEDBOOST:
-				userEntity.setBoost(userEntity.getBoost() + rewardDropEntity.getAmount().doubleValue());
+				userEntity.setBoost(userEntity.getBoost() + rewardDropEntity.getAmount());
 				userDAO.update(userEntity);
 				item.setHash(723701634); // SpeedBoost Icon
 				String boostFormat = NumberFormat.getNumberInstance(Locale.US).format(rewardDropEntity.getAmount());
@@ -773,10 +773,10 @@ public class AchievementsBO {
 		achievementRewards.setCommerceItems(arrayOfCommerceItemTrans);
 		
 		WalletTrans cashWallet = new WalletTrans();
-		cashWallet.setBalance(personaEntity.getCash());
+		cashWallet.setBalance((double) personaEntity.getCash());
 		cashWallet.setCurrency("CASH");
 		WalletTrans boostWallet = new WalletTrans();
-        boostWallet.setBalance(userEntity.getBoost());
+        boostWallet.setBalance((double) userEntity.getBoost());
         boostWallet.setCurrency("BOOST"); // why doesn't _NS work? Truly a mystery... - LeoCodes21
 
 		ArrayOfWalletTrans arrayOfWalletTrans = new ArrayOfWalletTrans();

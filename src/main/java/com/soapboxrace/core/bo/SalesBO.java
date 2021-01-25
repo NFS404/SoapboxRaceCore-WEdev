@@ -59,7 +59,7 @@ public class SalesBO {
 			saleCar4 = null;
 		}
 		ProductEntity saleCar1Prod = productDAO.findByCarName(saleCar1);
-		float prod1Price = saleCar1Prod.getPrice();
+		int prod1Price = saleCar1Prod.getPrice();
 		
 		salesEntity.setCar1(saleCar1); // Take the original car's price and level-requirement
 		salesEntity.setCar1Cost(prod1Price);
@@ -76,7 +76,7 @@ public class SalesBO {
 		if (saleCar2 != null) {
 			// System.out.println("saleCar2");
 			ProductEntity saleCar2Prod = productDAO.findByCarName(saleCar2);
-			float prod2Price = saleCar2Prod.getPrice();
+			int prod2Price = saleCar2Prod.getPrice();
 			salesEntity.setCar2(saleCar2); // Take the original car's price and level-requirement
 			salesEntity.setCar2Cost(prod2Price);
 			salesEntity.setCar2Lvl(saleCar2Prod.getLevel());
@@ -89,7 +89,7 @@ public class SalesBO {
         if (saleCar3 != null) {
         	// System.out.println("saleCar3");
         	ProductEntity saleCar3Prod = productDAO.findByCarName(saleCar3);
-        	float prod3Price = saleCar3Prod.getPrice();
+        	int prod3Price = saleCar3Prod.getPrice();
 			salesEntity.setCar3(saleCar3); // Take the original car's price and level-requirement
 			salesEntity.setCar3Cost(prod3Price);
 			salesEntity.setCar3Lvl(saleCar3Prod.getLevel());
@@ -102,7 +102,7 @@ public class SalesBO {
         if (saleCar4 != null) {
         	// System.out.println("saleCar4");
         	ProductEntity saleCar4Prod = productDAO.findByCarName(saleCar4);
-        	float prod4Price = saleCar4Prod.getPrice();
+        	int prod4Price = saleCar4Prod.getPrice();
 			salesEntity.setCar4(saleCar4); // Take the original car's price and level-requirement
 			salesEntity.setCar4Cost(prod4Price);
 			salesEntity.setCar4Lvl(saleCar4Prod.getLevel());

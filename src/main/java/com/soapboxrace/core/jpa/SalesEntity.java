@@ -19,10 +19,10 @@ public class SalesEntity {
 	private int car2Lvl;
 	private int car3Lvl;
 	private int car4Lvl;
-	private float car1Cost;
-	private float car2Cost;
-	private float car3Cost;
-	private float car4Cost;
+	private int car1Cost;
+	private int car2Cost;
+	private int car3Cost;
+	private int car4Cost;
 
 	public Long getId() {
 		return id;
@@ -96,35 +96,35 @@ public class SalesEntity {
 		this.car4Lvl = car4Lvl;
 	}
 	
-	public float getCar1Cost() {
+	public int getCar1Cost() {
 		return car1Cost;
 	}
 
-	public void setCar1Cost(float car1Cost) {
+	public void setCar1Cost(int car1Cost) {
 		this.car1Cost = car1Cost;
 	}
 	
-	public float getCar2Cost() {
+	public int getCar2Cost() {
 		return car2Cost;
 	}
 
-	public void setCar2Cost(float car2Cost) {
+	public void setCar2Cost(int car2Cost) {
 		this.car2Cost = car2Cost;
 	}
 	
-	public float getCar3Cost() {
+	public int getCar3Cost() {
 		return car3Cost;
 	}
 
-	public void setCar3Cost(float car3Cost) {
+	public void setCar3Cost(int car3Cost) {
 		this.car3Cost = car3Cost;
 	}
 	
-	public float getCar4Cost() {
+	public int getCar4Cost() {
 		return car4Cost;
 	}
 
-	public void setCar4Cost(float car4Cost) {
+	public void setCar4Cost(int car4Cost) {
 		this.car4Cost = car4Cost;
 	}
 }

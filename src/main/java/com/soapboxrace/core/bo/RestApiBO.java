@@ -369,7 +369,7 @@ public class RestApiBO {
 				carClassesEntity.getFullName(), race.getCarClassHash(), race.getTimeMS().intValue(), 
 				race.getTimeMSAlt().intValue(), race.getTimeMSSrv().intValue(), race.getAirTimeMS().intValue(), 
 				race.getBestLapTimeMS().intValue(), (float)(race.getTopSpeed() * 3.6), (float)(race.getAvgSpeed() * 3.6), race.getPerfectStart(),
-				race.getIsSingle(), race.getDate().toString(), isCarVersionVaild, 
+				race.getIsSingle(), race.isTraining(), race.getDate().toString(), isCarVersionVaild, 
 				// Power-ups info
 				eventPowerupsEntity.getNosShot(), eventPowerupsEntity.getSlingshot(), eventPowerupsEntity.getOneMoreLap(), 
 				eventPowerupsEntity.getReady(), eventPowerupsEntity.getTrafficMagnet(), eventPowerupsEntity.getShield(),
@@ -591,7 +591,6 @@ public class RestApiBO {
 		if (email.equalsIgnoreCase(user.getEmail()) && password.equals(user.getPassword()))
 			premiumInfo = new PersonaPremiumInfo(
 					username, 
-					user.getExtraMoney(),
 					user.isPremium(),
 					premiumTypeFull, 
 					premiumEnds

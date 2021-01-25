@@ -31,7 +31,7 @@ public class PersonaEntity {
 	@Column(name = "ID", nullable = false)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long personaId;
-	private double cash;
+	private int cash;
 	private int iconIndex;
 	private int level;
 	private String motto;
@@ -60,11 +60,11 @@ public class PersonaEntity {
 	@Column(name = "created")
 	private LocalDateTime created;
 
-	public double getCash() {
+	public int getCash() {
 		return cash;
 	}
 
-	public void setCash(double cash) {
+	public void setCash(int cash) {
 		this.cash = cash;
 	}
 

@@ -156,9 +156,9 @@ public class UserBO {
         String[] values = entryValue.split(" ");
         
         String entryName = values[0].toString(); // Nickname value
-        double entryCash = 0;
+        int entryCash = 0;
         try {
-        	entryCash = (double) Integer.parseInt(values[1].toString()); // Cash value
+        	entryCash = Integer.parseInt(values[1].toString()); // Cash value
         } catch (NumberFormatException|ArrayIndexOutOfBoundsException ex) {
         	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Money number is invaild, try again."), personaId);
         	return null;
@@ -170,12 +170,12 @@ public class UserBO {
         
         // Sender's info
 		UserEntity userEntitySender = personaEntity.getUser();
-		double personaMoneySender = personaEntity.getCash();
-		double moneyGivenAlready = userEntitySender.getMoneyGiven();
+		int personaMoneySender = personaEntity.getCash();
+		int moneyGivenAlready = userEntitySender.getMoneyGiven();
 		int levelCap = parameterBO.getIntParam("SENDMONEY_LEVELCAP");
         
 		boolean premiumStatusSender = userEntitySender.isPremium();
-		double sendLimit = 0;
+		int sendLimit = 0;
 		if (!premiumStatusSender) {
 			sendLimit = parameterBO.getIntParam("MAX_SENDMONEY_FREE");
 		}
@@ -212,34 +212,26 @@ public class UserBO {
 		
 		else {
 			// Target player's info
-			UserEntity userEntityTarget = personaEntityTarget.getUser();
-			double personaMoneyTarget = personaEntityTarget.getCash();
-			boolean premiumStatusTarget = userEntityTarget.isPremium();
-			
-			int moneyLimit = 0;
-			double moneyDiff = 0;
-			if (!premiumStatusTarget) {
-				moneyLimit = parameterBO.getIntParam("MAX_PLAYER_CASH_FREE");
-			}
-			if (premiumStatusTarget) {
-				moneyLimit = parameterBO.getIntParam("MAX_PLAYER_CASH_PREMIUM");
-			}
+			int personaMoneyTarget = personaEntityTarget.getCash();
+			int moneyLimit = parameterBO.getMaxCash();
+			int moneyDiff = 0;
+
 			if (personaMoneyTarget >= moneyLimit) {
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This player cannot get more money."), personaId);
 				return null;
 			}
 			
 			else {
-				double personaMoneyTargetNew = personaMoneyTarget + entryCash;
+				int personaMoneyTargetNew = personaMoneyTarget + entryCash;
 				if (personaMoneyTargetNew > moneyLimit) {
 					personaMoneyTargetNew = moneyLimit;
 				}
 				moneyDiff = personaMoneyTargetNew - personaMoneyTarget;
 				personaEntityTarget.setCash(personaMoneyTargetNew);
 				personaEntity.setCash(personaMoneySender - moneyDiff);
-				double moneyGivenFinal = moneyGivenAlready + moneyDiff;
+				int moneyGivenFinal = moneyGivenAlready + moneyDiff;
 				userEntitySender.setMoneyGiven(moneyGivenFinal);
-				double moneyGivenFinal2 = sendLimit - moneyGivenFinal;
+				int moneyGivenFinal2 = sendLimit - moneyGivenFinal;
 				
 				personaDAO.update(personaEntityTarget);
 				personaDAO.update(personaEntity);
@@ -261,22 +253,16 @@ public class UserBO {
 	}
 	
 	// Get extra reserve money to current persona - re-fill the persona's cash account
+	// Obsolete, only for old players
 	public void getMoney(PersonaEntity personaEntity) {
 		UserEntity userEntity = personaEntity.getUser();
-		double extraMoneyCur = userEntity.getExtraMoney(); // Orig. full value
-		double personaMoney = personaEntity.getCash();
-		boolean premiumStatus = userEntity.isPremium();
+		int extraMoneyCur = userEntity.getExtraMoney(); // Orig. full value
+		int personaMoney = personaEntity.getCash();
 		Long personaId = personaEntity.getPersonaId();
 		
-		double extraMoneyLimited = extraMoneyCur; // Value with cash limit applied
-		int moneyLimit = 0;
-		double moneyDiff = 0;
-		if (!premiumStatus) {
-			moneyLimit = parameterBO.getIntParam("MAX_PLAYER_CASH_FREE");
-		}
-		if (premiumStatus) {
-			moneyLimit = parameterBO.getIntParam("MAX_PLAYER_CASH_PREMIUM");
-		}
+		int extraMoneyLimited = extraMoneyCur; // Value with cash limit applied
+		int moneyLimit = parameterBO.getMaxCash();
+		int moneyDiff = 0;
 		
 		if (extraMoneyCur == 0) {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You cannot have any money on the WeBank."), personaId);
@@ -288,7 +274,7 @@ public class UserBO {
 			if (extraMoneyCur > moneyLimit) {
 				extraMoneyLimited = moneyLimit;
 			}
-			double personaMoneyNew = personaMoney + extraMoneyLimited;
+			int personaMoneyNew = personaMoney + extraMoneyLimited;
 			if (personaMoneyNew > moneyLimit) {
 				personaMoneyNew = moneyLimit;
 			}

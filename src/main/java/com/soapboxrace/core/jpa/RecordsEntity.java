@@ -78,6 +78,7 @@ public class RecordsEntity {
 	private Long eventDataId;
 	private int eventModeId;
 	private boolean userBan;
+	private boolean training;
 	
 	@ManyToOne
 	@JoinColumn(name = "EVENTPOWERUPSID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "RECORDS_EVENT_POWERUPS_FK"))
@@ -301,6 +302,14 @@ public class RecordsEntity {
 
 	public void setUserBan(boolean userBan) {
 		this.userBan = userBan;
+	}
+	
+	public boolean isTraining() {
+		return training;
+	}
+
+	public void setIsTraining(boolean training) {
+		this.training = training;
 	}
 	
 }

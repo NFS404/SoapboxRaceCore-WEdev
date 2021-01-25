@@ -93,6 +93,7 @@ public class ArrayOfRaceWithTime {
 			float avgSpeed,
 			boolean perfectStart,
 			boolean isSingle,
+			boolean training,
 			String date,
 			boolean isCarVersionVaild,
 			int pNos,
@@ -113,7 +114,7 @@ public class ArrayOfRaceWithTime {
 			boolean hasLowkit
 		) {
 		 Race race = new Race(id, playerName, playerIconId, carName, carClassHash, raceTime, raceAltTime, srvTime, airTime, lapTime, maxSpeed, avgSpeed, perfectStart,
-	                isSingle, date, isCarVersionVaild, pNos, pSlingshot, pOneMoreLap, pReady, pMagnet, pShield, pEvade, pJuggernaut, pRunFlatTires, 
+	                isSingle, training, date, isCarVersionVaild, pNos, pSlingshot, pOneMoreLap, pReady, pMagnet, pShield, pEvade, pJuggernaut, pRunFlatTires, 
 	                pCooldown, pTeamEvade, pTeamSlingshot, rating, hasBodykit, hasSpoiler, hasLowkit);
 	     races.add(race);
 	     return race;
@@ -135,6 +136,7 @@ public class ArrayOfRaceWithTime {
 		"avgSpeed",
 		"perfectStart",
 		"isSingle",
+		"training",
 		"date",
 		"isCarVersionVaild",
 		"pNos",
@@ -185,6 +187,8 @@ public class ArrayOfRaceWithTime {
 		private boolean perfectStart;
 		@XmlElement(name = "IsSingle")
 		private boolean isSingle;
+		@XmlElement(name = "Training")
+		private boolean training;
 		@XmlElement(name = "Date")
 		private String date;
 		@XmlElement(name = "IsCarVersionVaild")
@@ -255,6 +259,7 @@ public class ArrayOfRaceWithTime {
 				float avgSpeed,
 				boolean perfectStart,
 				boolean isSingle,
+				boolean training,
 				String date,
 				boolean isCarVersionVaild,
 				int pNos,
@@ -287,6 +292,7 @@ public class ArrayOfRaceWithTime {
 			this.avgSpeed = avgSpeed;	
 			this.perfectStart = perfectStart;
 			this.isSingle = isSingle;
+			this.training = training;
 			this.date = date;
 			this.isCarVersionVaild = isCarVersionVaild;
 			this.pNos = pNos;

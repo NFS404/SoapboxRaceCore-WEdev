@@ -10,6 +10,7 @@ import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.TimeReadConverter;
 import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.CustomCarDAO;
+import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.EventPowerupsDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
@@ -60,10 +61,20 @@ public class RecordsBO {
 	
 	@EJB
 	private EventResultBO eventResultBO;
+	
+	@EJB
+	private EventDAO eventDAO;
 
 	public void submitRecord(EventEntity eventEntity, PersonaEntity personaEntity, EventDataEntity eventDataEntity, CustomCarEntity customCarEntity, 
 			CarClassesEntity carClassesEntity) {
 //		System.out.println("RecordEntry start");
+		int baseEventId = eventEntity.getBaseEvent();
+		boolean isTraining = false;
+		if (baseEventId != 0) {
+			eventEntity = eventDAO.findById(baseEventId); 
+			isTraining = true;
+			// If the event have a BaseEventId - it's a training event, swap the event with main one to save the record
+		}
 		boolean recordCaptureFinished = false;
 		Long personaId = personaEntity.getPersonaId();
 		UserEntity userEntity = personaEntity.getUser();
@@ -132,6 +143,7 @@ public class RecordsBO {
 			recordsEntityNew.setEventPowerups(eventPowerupsEntity);
 			recordsEntityNew.setEvent(eventEntity);
 			recordsEntityNew.setEventModeId(eventEntity.getEventModeId());
+			recordsEntityNew.setIsTraining(isTraining);
 			recordsEntityNew.setPersona(personaEntity);
 			recordsEntityNew.setUser(userEntity);
 				
@@ -185,6 +197,7 @@ public class RecordsBO {
 			recordsEntity.setEventPowerups(eventPowerupsEntity);
 //			recordsEntity.setEvent(eventEntity);
 //			recordsEntity.setEventModeId(eventEntity.getEventModeId());
+			recordsEntity.setIsTraining(isTraining);
 			recordsEntity.setPersona(personaEntity);
 //			recordsEntity.setUser(personaEntity.getUser());
 				

@@ -153,7 +153,7 @@ public class BasketBO {
         }
         
         int price = ((int) productDao.findByProductId(productId).getPrice());
-        double playerMoney = personaEntity.getCash();
+        int playerMoney = personaEntity.getCash();
         if (playerMoney < price) {
             return CommerceResultStatus.FAIL_LOCKED_PRODUCT_NOT_ACCESSIBLE_TO_THIS_USER;
         }
@@ -233,7 +233,7 @@ public class BasketBO {
 				personaDao.update(personaEntity);
 				break;
 			case "_NS":
-				Double speedBoost = userEntity.getBoost();
+				int speedBoost = userEntity.getBoost();
 				if (productEntity == null || speedBoost < productEntity.getPrice()) {
 					return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
 				}
@@ -317,7 +317,7 @@ public class BasketBO {
 		}
 		
 		String currencyType = bundleProduct.getCurrency(); // CASH or _NS (Boost)
-        float bundlePrice = bundleProduct.getPrice();
+		int bundlePrice = bundleProduct.getPrice();
         if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
         	if (currencyType.contentEquals("CASH") && personaEntity.getCash() < bundlePrice) {
 	        	return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
@@ -381,7 +381,7 @@ public class BasketBO {
 	    if (bundleProduct == null) {
 	        return CommerceResultStatus.FAIL_INVALID_BASKET;
 	    }
-	    float bundlePrice = bundleProduct.getPrice();
+	    int bundlePrice = bundleProduct.getPrice();
         if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
 	        if (personaEntity.getCash() < bundlePrice) {
 		       	return CommerceResultStatus.FAIL_INSUFFICIENT_FUNDS;
@@ -519,7 +519,7 @@ public class BasketBO {
 			return false;
 		}
 
-		final int maxCash = parameterBO.getMaxCash(securityToken);
+		final int maxCash = parameterBO.getMaxCash();
 		if (personaEntity.getCash() < maxCash) {
 			int cashTotal = (int) (personaEntity.getCash() + ownedCarEntity.getCustomCar().getResalePrice());
 			if (parameterBO.getBoolParam("ENABLE_ECONOMY")) {
