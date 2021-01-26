@@ -395,7 +395,7 @@ public class BasketBO {
 		List<CommerceItemTrans> commerceItems = new ArrayList<>();
 
 		CommerceItemTrans item = new CommerceItemTrans();
-		int boostAmount = Integer.parseInt(bundleProduct.getLongDescription()); // LongDescription of this item is the currency amount
+		int boostAmount = parameterBO.getIntParam("BOOST_CONVERT_AMOUNT");
 		item.setHash(723701634); // Special item with icon
 		
 		item.setTitle(boostAmount + " SPEEDBOOST");
