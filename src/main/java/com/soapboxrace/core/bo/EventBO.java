@@ -133,7 +133,7 @@ public class EventBO {
 		EventSessionEntity eventSessionEntity = new EventSessionEntity();
 		eventSessionEntity.setEvent(eventEntity);
 		eventSessionEntity.setStarted(System.currentTimeMillis());
-		eventSessionEntity.setTeamNOS(true); // Temporal value
+		eventSessionEntity.setTeamNOS(false); // Temporal value
 		eventSessionDao.insert(eventSessionEntity);
 		return eventSessionEntity;
 	}

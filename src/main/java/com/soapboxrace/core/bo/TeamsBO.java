@@ -256,7 +256,8 @@ public class TeamsBO {
 				}
 			}
 			// If player has a client-server time difference more than 500ms, it must be reported
-			if (((eventDuration + 500) < serverDuration) || ((eventDuration + 500) > serverDuration)) {
+			long diff = eventDuration - serverDuration;
+			if (diff > 500 || diff < -500) {
 				String racerEventTime = timeReadConverter.convertRecord(eventDuration);
 				timeDiffStr = " time diff.: " + racerEventTime;
 			}

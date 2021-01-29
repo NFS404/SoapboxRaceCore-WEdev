@@ -159,17 +159,19 @@ public class AdminBO {
 
         if (!type.contentEquals("CHAT_BAN")) {
         	List<HardwareInfoEntity> hardwareInfoList = hardwareInfoDAO.findByUserId(userEntity.getId());
-            for (HardwareInfoEntity hwEntry : hardwareInfoList) {
-            	Long userId = hwEntry.getUserId();
-            	Long userIdOld = hwEntry.getUserIdOld();
-            	if (userIdOld != null && userId.intValue() != userIdOld.intValue()) { 
-            		continue; // Don't ban the HWs which is used on 2 or more accounts
+        	if (hardwareInfoList != null) {
+        		for (HardwareInfoEntity hwEntry : hardwareInfoList) {
+                	Long userId = hwEntry.getUserId();
+                	Long userIdOld = hwEntry.getUserIdOld();
+                	if (userIdOld != null && userId.intValue() != userIdOld.intValue()) { 
+                		continue; // Don't ban the HWs which is used on 2 or more accounts
+                    }
+                	else {
+                		hwEntry.setBanned(true);
+                        hardwareInfoDAO.update(hwEntry);
+                	}
                 }
-            	else {
-            		hwEntry.setBanned(true);
-                    hardwareInfoDAO.update(hwEntry);
-            	}
-            }
+        	}
         }
     }
     

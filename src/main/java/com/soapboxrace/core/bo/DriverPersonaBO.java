@@ -232,11 +232,13 @@ public class DriverPersonaBO {
 	}
 	
 	// Works as a recycle bin - holds a drivers for some time, in case of player's mistakes - Hypercycle
+	// FIXME No automatic clean-up
 	public void deletePersonaTemp(Long personaId) {
 		PersonaEntity personaEntity = personaDao.findById(personaId);
 		UserEntity userEntityTemp = userDao.findById((long)(parameterBO.getIntParam("PERSONADELETE_TEMPID")));
 
 		personaEntity.setUser(userEntityTemp);
+		personaEntity.setTeam(null);
 		personaEntity.setName(personaEntity.getName() + "_TD");
 		personaEntity.setCreated(LocalDateTime.now()); // can check when driver got deleted
 		recordsDAO.deletePersonaRecords(personaEntity);

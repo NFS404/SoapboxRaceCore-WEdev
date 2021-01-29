@@ -24,6 +24,7 @@ import com.soapboxrace.core.dao.LobbyDAO;
 import com.soapboxrace.core.dao.OwnedCarDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
+import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.TokenSessionDAO;
 import com.soapboxrace.core.dao.VisualPartDAO;
 import com.soapboxrace.core.jpa.EventEntity;
@@ -87,6 +88,9 @@ public class LobbyCountdownBO {
 	@EJB
 	private AchievementsBO achievementsBO;
 	
+	@EJB
+	private TeamsDAO teamsDAO;
+	
 	@Resource
     private TimerService timerService;
 
@@ -124,14 +128,11 @@ public class LobbyCountdownBO {
 		eventSessionEntity.setTeam1Id(lobbyEntity.getTeam1Id());
 		eventSessionEntity.setTeam2Id(lobbyEntity.getTeam2Id());
 		
-		Long team2NOSTest = eventSessionEntity.getTeam2Id();
-		boolean teamNOS = true;
-		eventSessionEntity.setTeamNOS(teamNOS); // True by default
+		Long team1Id = eventSessionEntity.getTeam1Id();
+		Long team2Id = eventSessionEntity.getTeam2Id();
+		eventSessionEntity.setTeamNOS(false); // False by default
 		// TeamNOS - if race has been randomly started without PUs, team players wouldn't be able to use it, but others will be able
-		if (team2NOSTest != null) {
-			teamNOS = rand.nextBoolean();
-			eventSessionEntity.setTeamNOS(teamNOS);
-		}
+		// Permanently disabled due to the community request
 		eventSessionDao.insert(eventSessionEntity);
 		String udpRaceIp = parameterBO.getStrParam("UDP_RACE_IP");
 		
@@ -190,11 +191,19 @@ public class LobbyCountdownBO {
 			}
 			lobbyEntrantInfo.add(lobbyEntrantInfoType);
 			
-			if (entrantPersona.getTeam() != null && team2NOSTest != null) {
-				String puStatus = "TXT_WEV3_BASEANNOUNCER_TEAMPU_ON";
-				if (!teamNOS) {puStatus = "TXT_WEV3_BASEANNOUNCER_TEAMPU_OFF";}
-				achievementsBO.broadcastUICustom(personaId, puStatus, "TEAMPUMODE", 4);
-			}
+			if (entrantPersona.getTeam() != null && team2Id != null) { // Get the opponent team name and make a notification
+				String opponentTeamName = "!pls fix!";
+				if (entrantPersona.getTeam().getTeamId().equals(team2Id)) {
+					opponentTeamName = teamsDAO.findById(team1Id).getTeamName();
+				}
+				else {opponentTeamName = teamsDAO.findById(team2Id).getTeamName();}
+				achievementsBO.broadcastUICustom(personaId, opponentTeamName, "TEAMRACEMODE", 4);
+		    }
+//			if (entrantPersona.getTeam() != null && team2NOS != null) {
+//				String puStatus = "TXT_WEV3_BASEANNOUNCER_TEAMPU_ON";
+//				if (!teamNOS) {puStatus = "TXT_WEV3_BASEANNOUNCER_TEAMPU_OFF";}
+//				achievementsBO.broadcastUICustom(personaId, puStatus, "TEAMPUMODE", 4);
+//			}
 		}
 		if (isInterceptorEvent) {
 			if (!personaCops.isEmpty() && !personaRacers.isEmpty()) {	

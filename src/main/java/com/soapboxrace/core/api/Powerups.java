@@ -83,10 +83,9 @@ public class Powerups {
 
 		if (parameterBO.getBoolParam("POWERUPS_ENABLED")) {
 			// TeamNOS - if race has been randomly started without PUs, team players wouldn't be able to use it, but others will be able
-			if (teamId != 0 && serverEventSessionId != null) {
-				if (!eventSessionDao.findById(serverEventSessionId).getTeamNOS()) {
-					return "";
-				}
+			// Permanently disabled due to community request
+			if (teamId != 0 && serverEventSessionId != null && eventSessionDao.findById(serverEventSessionId).getTeam2Check()) {
+				return "";
 			}
 			// Interceptor - racers can't use power-ups
 			if (serverEventModeId == 100 && personaPresenceEntity.getICRacer()) {

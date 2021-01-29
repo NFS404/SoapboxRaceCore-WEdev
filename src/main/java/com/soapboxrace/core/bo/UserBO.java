@@ -226,6 +226,11 @@ public class UserBO {
 				if (personaMoneyTargetNew > moneyLimit) {
 					personaMoneyTargetNew = moneyLimit;
 				}
+				// If the money value is greater than available send amount, we change it to the max from that amount
+				int givenMoneyDiff = sendLimit - moneyGivenAlready;
+				if (personaMoneyTargetNew > givenMoneyDiff) { 
+					personaMoneyTargetNew = givenMoneyDiff;
+				}
 				moneyDiff = personaMoneyTargetNew - personaMoneyTarget;
 				personaEntityTarget.setCash(personaMoneyTargetNew);
 				personaEntity.setCash(personaMoneySender - moneyDiff);
