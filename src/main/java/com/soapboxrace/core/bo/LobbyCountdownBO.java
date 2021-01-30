@@ -1,7 +1,6 @@
 package com.soapboxrace.core.bo;
 
 import java.nio.ByteBuffer;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -114,7 +113,6 @@ public class LobbyCountdownBO {
 		}
 		Collections.sort(entrants);
 		EventEntity eventEntity = lobbyEntity.getEvent();
-		SecureRandom rand = new SecureRandom();
 		XMPP_LobbyLaunchedType lobbyLaunched = new XMPP_LobbyLaunchedType();
 		Entrants entrantsType = new Entrants();
 		List<LobbyEntrantInfo> lobbyEntrantInfo = entrantsType.getLobbyEntrantInfo();
@@ -198,6 +196,7 @@ public class LobbyCountdownBO {
 				}
 				else {opponentTeamName = teamsDAO.findById(team2Id).getTeamName();}
 				achievementsBO.broadcastUICustom(personaId, opponentTeamName, "TEAMRACEMODE", 4);
+				personaPresenceDAO.updateDisablePU(personaId, true); // Disable Power-Ups for Team Racing player
 		    }
 //			if (entrantPersona.getTeam() != null && team2NOS != null) {
 //				String puStatus = "TXT_WEV3_BASEANNOUNCER_TEAMPU_ON";
@@ -216,7 +215,7 @@ public class LobbyCountdownBO {
 					Long entrantId = lobbyEntrantEntity.getPersona().getPersonaId();
 					openFireSoapBoxCli.send(XmppChat.createSystemMessage(playersList), entrantId);
 					if (personaRacers.contains(entrantId)) { // Give a "racer" tag to presence, so racer wouldn't be able to use PUs
-						personaPresenceDAO.updateICRacer(entrantId, true);
+						personaPresenceDAO.updateDisablePU(entrantId, true); // Disable Power-Ups for Racer player
 					}
 				}
 			}

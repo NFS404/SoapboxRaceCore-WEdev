@@ -18,13 +18,13 @@ import javax.persistence.Table;
 						+ "SET obj.personaPresence = :personaPresence WHERE obj.activePersonaId = :personaId"), //
 		@NamedQuery(name = "PersonaPresenceEntity.updateCurrentEvent", //
 		query = "UPDATE PersonaPresenceEntity obj " // 
-				+ "SET obj.currentEventDataId = :currentEventDataId, currentEventModeId = :currentEventModeId, currentEventSessionId = :currentEventSessionId, personaPresence = :personaPresence WHERE obj.activePersonaId = :personaId"), //
+				+ "SET obj.currentEventDataId = :currentEventDataId, obj.currentEventModeId = :currentEventModeId, obj.currentEventSessionId = :currentEventSessionId, obj.personaPresence = :personaPresence WHERE obj.activePersonaId = :personaId"), //
 		@NamedQuery(name = "PersonaPresenceEntity.updateCurrentEventPost", //
 		query = "UPDATE PersonaPresenceEntity obj " // 
-				+ "SET obj.currentEventDataId = :currentEventDataId, currentEventModeId = :currentEventModeId, currentEventSessionId = :currentEventSessionId, icRacer = :icRacer WHERE obj.activePersonaId = :personaId"), //
-		@NamedQuery(name = "PersonaPresenceEntity.updateICRacer", //
+				+ "SET obj.currentEventDataId = :currentEventDataId, obj.currentEventModeId = :currentEventModeId, obj.currentEventSessionId = :currentEventSessionId, obj.disablePU = :disablePU WHERE obj.activePersonaId = :personaId"), //
+		@NamedQuery(name = "PersonaPresenceEntity.updateDisablePU", //
 		query = "UPDATE PersonaPresenceEntity obj " // 
-				+ "SET icRacer = :icRacer WHERE obj.activePersonaId = :personaId"), //
+				+ "SET obj.disablePU = :disablePU WHERE obj.activePersonaId = :personaId"), //
 		@NamedQuery(name = "PersonaPresenceEntity.isUserOnline", query = "SELECT obj FROM PersonaPresenceEntity obj WHERE obj.userId = :userId AND obj.personaPresence <> 0") //
 })
 public class PersonaPresenceEntity {
@@ -40,7 +40,7 @@ public class PersonaPresenceEntity {
 	private Long currentEventDataId;
 	private Long currentEventModeId;
 	private Long currentEventSessionId;
-	private boolean icRacer;
+	private boolean disablePU;
 
 	public Long getUserId() {
 		return userId;
@@ -98,12 +98,12 @@ public class PersonaPresenceEntity {
 		this.currentEventSessionId = currentEventSessionId;
 	}
 	
-	public boolean getICRacer() {
-		return icRacer;
+	public boolean getDisablePU() {
+		return disablePU;
 	}
 
-	public void setICRacer(boolean icRacer) {
-		this.icRacer = icRacer;
+	public void setDisablePU(boolean disablePU) {
+		this.disablePU = disablePU;
 	}
 
 }

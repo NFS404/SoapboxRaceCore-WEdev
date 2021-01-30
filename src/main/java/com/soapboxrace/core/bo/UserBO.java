@@ -152,6 +152,10 @@ public class UserBO {
 	// FriendResult allows to stop the function with "return null", since it's called from FriendBO
 	public FriendResult sendMoney(PersonaEntity personaEntity, String displayName) {
 		Long personaId = personaEntity.getPersonaId();
+		if (!parameterBO.getBoolParam("MONEY_TRANSFER")) {
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Money Transfers is disabled."), personaId);
+			return null;
+		}
 		String entryValue = displayName.replaceFirst("/SENDMONEY ", "");
         String[] values = entryValue.split(" ");
         
@@ -222,15 +226,16 @@ public class UserBO {
 			}
 			
 			else {
+				// If the money value is greater than available send amount, we change it to the max from that amount
+				int givenMoneyDiff = sendLimit - moneyGivenAlready;
+				if (entryCash > givenMoneyDiff) { 
+					entryCash = givenMoneyDiff;
+				}
 				int personaMoneyTargetNew = personaMoneyTarget + entryCash;
 				if (personaMoneyTargetNew > moneyLimit) {
 					personaMoneyTargetNew = moneyLimit;
 				}
-				// If the money value is greater than available send amount, we change it to the max from that amount
-				int givenMoneyDiff = sendLimit - moneyGivenAlready;
-				if (personaMoneyTargetNew > givenMoneyDiff) { 
-					personaMoneyTargetNew = givenMoneyDiff;
-				}
+				
 				moneyDiff = personaMoneyTargetNew - personaMoneyTarget;
 				personaEntityTarget.setCash(personaMoneyTargetNew);
 				personaEntity.setCash(personaMoneySender - moneyDiff);
