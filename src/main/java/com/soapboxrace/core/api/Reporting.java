@@ -98,7 +98,7 @@ public class Reporting {
 	@Path("/SendClientPingTime")
 	@Produces(MediaType.APPLICATION_XML)
 	public String sendClientPingTime(@QueryParam("personaId") Long personaId, @QueryParam("pingTime") Long pingTime) {
-		System.out.println("/SendClientPingTime: " + sr.getQueryString());
+		// System.out.println("/SendClientPingTime: " + sr.getQueryString());
 		return "";
 	}
 

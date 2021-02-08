@@ -91,6 +91,16 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		else return List.get(0);
 	}
 	
+	public BigInteger countRecordsByCar(int eventId, boolean powerUps, int carPhysicsHash) {
+		Query query = entityManager.createNativeQuery(
+			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carPhysicsHash = "+carPhysicsHash+" and userBan = false");
+		@SuppressWarnings("unchecked")
+		List<BigInteger> List = query.getResultList();
+		if (List.isEmpty())
+			return new BigInteger("0");
+		else return List.get(0);
+	}
+	
 	// If some server admin did a manual player unban via DB, and forgot to uncheck the userBan field for him, this player should know about it
 	public BigInteger countBannedRecords(Long userId) {
 		Query query = entityManager.createNativeQuery(
@@ -177,6 +187,24 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		query.setParameter("event", event);
 		query.setParameter("powerUps", powerups);
 		query.setParameter("user", userEntity);
+		return query.getResultList();
+	}
+	
+	/**
+	 * Получить список лучших заездов во всех вариациях трассы. Фильтрация по модели автомобиля
+	 * @param eventid - номер трассы
+	 * @param carPhysicsHash - хэш модель автомобиля
+	 * @param page - Номер страницы
+	 * @param onPage - Сколько позиций на странице
+	 * @author Hypercycle
+	 */
+	public List<RecordsEntity> statsEventCar(EventEntity event, boolean powerups, int carPhysicsHash, int page, int onPage) {
+		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.statsEventCar", RecordsEntity.class);
+		query.setParameter("event", event);
+		query.setParameter("powerUps", powerups);
+		query.setParameter("carPhysicsHash", carPhysicsHash);
+		query.setFirstResult((page-1) * onPage);
+		query.setMaxResults(onPage);
 		return query.getResultList();
 	}
 }

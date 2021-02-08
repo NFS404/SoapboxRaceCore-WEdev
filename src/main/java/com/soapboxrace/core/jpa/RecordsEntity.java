@@ -47,6 +47,13 @@ query = "SELECT obj FROM RecordsEntity obj "
                 + "AND obj.powerUps = :powerUps "
                 + "AND obj.user = :user "
                 + "ORDER BY obj.timeMS "),//
+@NamedQuery(name = "RecordsEntity.statsEventCar", //
+        query = "SELECT obj FROM RecordsEntity obj "
+                + "WHERE obj.event = :event "
+                + "AND obj.userBan = false "
+                + "AND obj.powerUps = :powerUps "
+                + "AND obj.carPhysicsHash = :carPhysicsHash "
+                + "ORDER BY obj.timeMS "),//
 })
 public class RecordsEntity {
 

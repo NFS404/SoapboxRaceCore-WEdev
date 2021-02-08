@@ -43,6 +43,7 @@ public class EventMissionsEntity {
 	private int copsCostToState;
 	private float minTopSpeed;
 	private Long airTime;
+	private float avgSpeed;
 	
 	private int week;
 	
@@ -148,6 +149,14 @@ public class EventMissionsEntity {
 
 	public void setMinTopSpeed(float minTopSpeed) {
 		this.minTopSpeed = minTopSpeed;
+	}
+	
+	public float getAvgSpeed() {
+		return avgSpeed;
+	}
+
+	public void setAvgSpeed(float avgSpeed) {
+		this.avgSpeed = avgSpeed;
 	}
 	
 	public Long getAirTime() {

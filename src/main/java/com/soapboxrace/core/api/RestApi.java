@@ -141,13 +141,13 @@ public class RestApi {
 	@GET
 	@Path("TopTimeOnEvent")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response racesEvent(@QueryParam("eventid") int eventid, @QueryParam("powerups") boolean powerups, 
-			@QueryParam("carclass") String carclass, @QueryParam("page") int page, @QueryParam("onpage") int onPage, @QueryParam("key") String key) {
+	public Response racesEvent(@QueryParam("eventid") int eventid, @QueryParam("powerups") boolean powerups, @QueryParam("carclass") String carclass, 
+			@QueryParam("oldrecords") boolean oldRecords, @QueryParam("page") int page, @QueryParam("onpage") int onPage, @QueryParam("key") String key) {
 		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
 			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
 			return Response.temporaryRedirect(URI.create(accessDenied)).build();
 		}
-		return Response.ok(bo.getTopTimeRace(eventid, powerups, carclass, page, onPage)).build();
+		return Response.ok(bo.getTopTimeRace(eventid, powerups, carclass, "", oldRecords, page, onPage)).build();
 	}
 	/**
 	 * Страница Трассы для профиля
@@ -155,14 +155,29 @@ public class RestApi {
 	@GET
 	@Path("TopTimeRacesByPersona")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response racesPersona(@QueryParam("eventid") int eventid, @QueryParam("powerups") boolean powerups, @QueryParam("personaname") String personaname, @QueryParam("page") int page, 
-            @QueryParam("onpage") int onPage, @QueryParam("key") String key) {
+	public Response racesPersona(@QueryParam("eventid") int eventid, @QueryParam("powerups") boolean powerups, @QueryParam("personaname") String personaname, 
+			@QueryParam("oldrecords") boolean oldRecords, @QueryParam("page") int page, @QueryParam("onpage") int onPage, @QueryParam("key") String key) {
         if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
             String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
             return Response.temporaryRedirect(URI.create(accessDenied)).build();
         }
-        return Response.ok(bo.getTopTimeRaceByPersona(eventid, powerups, personaname, page, onPage)).build();
+        return Response.ok(bo.getTopTimeRaceByPersona(eventid, powerups, personaname, oldRecords, page, onPage)).build();
     }
+	/**
+	 * Страница Трассы, вывод рекордов по модели автомобиля
+	 */
+	@GET
+	@Path("TopTimeOnEventByCar")
+	@Produces(MediaType.APPLICATION_XML)
+	public Response racesEventByCar(@QueryParam("eventid") int eventid, @QueryParam("powerups") boolean powerups, @QueryParam("carmodel") String carmodel, 
+			@QueryParam("oldrecords") boolean oldRecords, @QueryParam("page") int page, @QueryParam("onpage") int onPage, @QueryParam("key") String key) {
+		if (!parameterBO.getStrParam("RESTAPI_KEY").equals(key)) {
+			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
+			return Response.temporaryRedirect(URI.create(accessDenied)).build();
+		}
+		if (carmodel == null) {carmodel = "";}
+		return Response.ok(bo.getTopTimeRace(eventid, powerups, "all", carmodel, oldRecords, page, onPage)).build();
+	}
 	/**
 	 * Страница Трассы
 	 */

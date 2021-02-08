@@ -123,7 +123,7 @@ public class MatchMaking {
 	
 		EventEntity eventEntity = eventDAO.findById(eventId);
 		eventMissionsBO.getEventMissionInfo(eventEntity, activePersonaId);
-
+		
 		return sessionInfo;
 	}
 

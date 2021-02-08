@@ -182,13 +182,17 @@ public class TeamsBO {
 				String eventName = "!pls fix!";
 				int winnerTeamPoints = 0;
 				for (EventDataEntity racer : eventDataDao.getRacersRanked(eventSessionId)) {
+					System.out.println("### TeamsWinner debug: " + racer.getPersonaId() + ", session: " + eventSessionId);
 					PersonaEntity racerEntity = personaDao.findById(racer.getPersonaId());
 					TeamsEntity racerTeamEntity = racerEntity.getTeam();
 					if (racerTeamEntity != null && teamWinner == null) {
+						System.out.println("### TeamsWinner debugTeamIs: " + racer.getPersonaId() + ", session: " + eventSessionId);
 						Long racerTeamId = racerTeamEntity.getTeamId();
 						if ((racerTeamId == team1 || racerTeamId == team2)) {
+							System.out.println("### TeamsWinner debugTeamOn: " + racer.getPersonaId() + ", session: " + eventSessionId);
 							OwnedCarTrans defaultCar = personaBO.getDefaultCar(racer.getPersonaId());
 							if (defaultCar.getCustomCar().getCarClassHash() == targetCarClass || targetCarClass == 0) {
+								System.out.println("### TeamsWinner debugWinner: " + racer.getPersonaId() + ", session: " + eventSessionId);
 								teamWinner = racerTeamId;
 								eventSessionEntity.setTeamWinner(racerTeamId);
 								eventSessionDao.update(eventSessionEntity);

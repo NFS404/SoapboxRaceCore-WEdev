@@ -51,14 +51,17 @@ public class EventMissionsBO {
 		LocalDate dailyRaceDate = personaDao.findById(activePersonaId).getDailyRaceDate();
 		if (eventMissionsEntity != null) {
 			String eventType = eventMissionsEntity.getEventType();
-			String timeTarget = "!!!";
+			String msgTarget = "!!!";
 			String message = "!pls fix!";
+			String msgMode = "MISSIONMODE";
+			
 			Long timeLimit = eventEntity.getTimeLimit();
+			float speedGoal = eventMissionsEntity.getAvgSpeed();
 			LocalDate curDate = LocalDate.now();
 			switch (eventType) {
 			case "TimeAttack":
-				timeTarget = timeReadConverter.convertRecord(timeLimit);
-				message = timeTarget;
+				msgTarget = timeReadConverter.convertRecord(timeLimit);
+				message = msgTarget;
 				break;
 			case "Race":
 				message = "TXT_WEV3_BASEANNOUNCER_RACE_GOAL";
@@ -66,8 +69,13 @@ public class EventMissionsBO {
 			case "Escort":
 				message = "TXT_WEV3_BASEANNOUNCER_ESCORT_GOAL";
 				break;
+			case "Speedtrap":
+				msgMode = "MISSIONMODE_SPEEDTRAP";
+				msgTarget = Math.round(speedGoal) + " KM/H";
+				message = msgTarget;
+				break;
 			}
-			achievementsBO.broadcastUICustom(activePersonaId, message, "MISSIONMODE", 5);
+			achievementsBO.broadcastUICustom(activePersonaId, message, msgMode, 5);
 			// Daily Race's reward can be given only once per day
 			if (dailyRaceDate != null && dailyRaceDate.equals(curDate)) { 
 				String messageNoReward = "TXT_WEV3_BASEANNOUNCER_MISSION_REPLAY";
@@ -82,9 +90,14 @@ public class EventMissionsBO {
 		LocalDate dailyRaceDate = personaEntity.getDailyRaceDate();
 		String eventType = eventMissionsEntity.getEventType();
 		String message = "TXT_WEV3_BASEANNOUNCER_MISSIONRESULT_FAIL";
+		String msgType = "MISSIONRESULTMODE";
+		
 		Long playerTime = arbitrationPacket.getEventDurationInMilliseconds();
 		int playerRank = arbitrationPacket.getRank();
+		float playerAvgSpeed = arbitrationPacket.getPhysicsMetrics().getSpeedAverage();
+				
 		Long timeLimit = eventEntity.getTimeLimit();
+		float speedTarget = eventMissionsEntity.getAvgSpeed();
 		LocalDate curDate = LocalDate.now();
 		boolean isDone = false;
 		switch (eventType) {
@@ -95,7 +108,7 @@ public class EventMissionsBO {
 			}
 			break;
 		case "Race":
-			if (playerRank == 1) {
+			if (finishReason == 22 && playerRank == 1) {
 				isDone = true;
 				message = "TXT_WEV3_BASEANNOUNCER_MISSIONRESULT_WIN";
 			}
@@ -104,6 +117,17 @@ public class EventMissionsBO {
 			if (finishReason == 22 && playerRank == 2 && playerTime < timeLimit) {
 				isDone = true;
 				message = "TXT_WEV3_BASEANNOUNCER_MISSIONRESULT_WIN";
+			}
+			break;
+		case "Speedtrap":
+			long playerSpeed = Math.round(playerAvgSpeed * 3.6);
+			message = playerSpeed + " KM/H";
+			if (finishReason == 22 && playerSpeed >= speedTarget) {
+				isDone = true;
+				msgType = "MISSION_AVGSPEEDDONE_RESULTMODE";
+			}
+			else {
+				msgType = "MISSION_AVGSPEEDFAIL_RESULTMODE";
 			}
 			break;
 		}
@@ -115,7 +139,7 @@ public class EventMissionsBO {
 		else {
 			isDone = false; // No Rewards, since it's a replay
 		}
-		achievementsBO.broadcastUICustom(activePersonaId, message, "MISSIONRESULTMODE", 5);
+		achievementsBO.broadcastUICustom(activePersonaId, message, msgType, 5);
 		return isDone;
 	}
 	

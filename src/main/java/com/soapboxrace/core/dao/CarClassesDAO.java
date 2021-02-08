@@ -36,6 +36,12 @@ public class CarClassesDAO extends BaseDAO<CarClassesEntity> {
 		return query.getSingleResult();
 	}
 	
+	public CarClassesEntity findByRecordsCarName(String recordCarName) {
+		TypedQuery<CarClassesEntity> query = entityManager.createQuery("SELECT obj FROM CarClassesEntity obj WHERE obj.modelSmall = :modelSmall", CarClassesEntity.class);
+		query.setParameter("modelSmall", recordCarName);
+		return query.getSingleResult();
+	}
+	
 	public List<CarClassesEntity> findByLootboxType(int lootboxType) {
 		TypedQuery<CarClassesEntity> query = entityManager.createQuery("SELECT obj FROM CarClassesEntity obj WHERE obj.lootboxType = :lootboxType", CarClassesEntity.class);
 		query.setParameter("lootboxType", lootboxType);
