@@ -219,11 +219,9 @@ public class EventResultTeamEscapeBO {
 		if (isMission) {
 			boolean isDone = eventMissionsBO.getEventMissionAccolades(eventEntity, eventMissionsEntity, activePersonaId, teamEscapeArbitrationPacket, finishReason);
 			if (isDone) {
-				System.out.println("TETest isDone True");
 				teamEscapeEventResult.setAccolades(rewardTeamEscapeBO.getTeamEscapeAccolades(activePersonaId, teamEscapeArbitrationPacket, eventSessionEntity, 5, true));
 			}
 			else {
-				System.out.println("TETest isDone False");
 				teamEscapeEventResult.setAccolades(new Accolades());
 			}
 		}

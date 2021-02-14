@@ -1247,6 +1247,7 @@ public class AchievementsBO {
 	 * @author Hypercycle
 	 */
 	public void applyDailySeries(PersonaEntity personaEntity, int eventId) {
+		boolean skipProgress = false;
 		Long eventIdLong = (long) eventId;
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		String dailySeriesStr = achievementPersonaEntity.getDailySeries();
@@ -1258,12 +1259,16 @@ public class AchievementsBO {
 			if (!dailySeriesArray.contains(eventIdLong)) {
 				dailySeriesArray.add(eventIdLong); // Add the event ID to the completed events list
 			}
+			else {
+				skipProgress = true; // Don't trigger the achievement progress, since the event is already completed
+			}
 		}
 		else {dailySeriesArray.add(eventIdLong);} // Add the event ID as the first completed event
-		
-		int eventsAmount = dailySeriesArray.size();
-		achievementPersonaEntity.setDailySeries(stringListConverter.listToStr(dailySeriesArray));
-		processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV3_SIDEQUEST, Integer.valueOf(eventsAmount).longValue());
+		if (!skipProgress) {
+			int eventsAmount = dailySeriesArray.size();
+			achievementPersonaEntity.setDailySeries(stringListConverter.listToStr(dailySeriesArray));
+			processAchievementByThresholdValue(achievementPersonaEntity, AchievementType.WEV3_SIDEQUEST, Integer.valueOf(eventsAmount).longValue());
+		}
 	}
 	
 	/**

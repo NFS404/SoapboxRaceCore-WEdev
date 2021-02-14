@@ -189,15 +189,18 @@ public class LobbyCountdownBO {
 			}
 			lobbyEntrantInfo.add(lobbyEntrantInfoType);
 			
-			if (entrantPersona.getTeam() != null && team2Id != null) { // Get the opponent team name and make a notification
-				String opponentTeamName = "!pls fix!";
-				if (entrantPersona.getTeam().getTeamId().equals(team2Id)) {
-					opponentTeamName = teamsDAO.findById(team1Id).getTeamName();
-				}
-				else {opponentTeamName = teamsDAO.findById(team2Id).getTeamName();}
-				achievementsBO.broadcastUICustom(personaId, opponentTeamName, "TEAMRACEMODE", 4);
-				personaPresenceDAO.updateDisablePU(personaId, true); // Disable Power-Ups for Team Racing player
-		    }
+			if (entrantPersona.getTeam() != null) {
+				Long playerTeamId = entrantPersona.getTeam().getTeamId();
+				if (playerTeamId.equals(team1Id) || playerTeamId.equals(team1Id)) { // Get the opponent team name and make a notification
+					String opponentTeamName = "!pls fix!";
+					if (entrantPersona.getTeam().getTeamId().equals(team2Id)) {
+						opponentTeamName = teamsDAO.findById(team1Id).getTeamName();
+					}
+					else {opponentTeamName = teamsDAO.findById(team2Id).getTeamName();}
+					achievementsBO.broadcastUICustom(personaId, opponentTeamName, "TEAMRACEMODE", 4);
+					personaPresenceDAO.updateDisablePU(personaId, true); // Disable Power-Ups for Team Racing player
+			    }
+			}
 //			if (entrantPersona.getTeam() != null && team2NOS != null) {
 //				String puStatus = "TXT_WEV3_BASEANNOUNCER_TEAMPU_ON";
 //				if (!teamNOS) {puStatus = "TXT_WEV3_BASEANNOUNCER_TEAMPU_OFF";}

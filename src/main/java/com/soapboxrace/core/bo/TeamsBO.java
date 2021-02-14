@@ -191,6 +191,7 @@ public class TeamsBO {
 						if ((racerTeamId == team1 || racerTeamId == team2)) {
 							System.out.println("### TeamsWinner debugTeamOn: " + racer.getPersonaId() + ", session: " + eventSessionId);
 							OwnedCarTrans defaultCar = personaBO.getDefaultCar(racer.getPersonaId());
+							System.out.println("### TeamsWinner debugCar: " + defaultCar.getCustomCar().getCarClassHash() + " " + targetCarClass + " " + racer.getPersonaId() + ", session: " + eventSessionId);
 							if (defaultCar.getCustomCar().getCarClassHash() == targetCarClass || targetCarClass == 0) {
 								System.out.println("### TeamsWinner debugWinner: " + racer.getPersonaId() + ", session: " + eventSessionId);
 								teamWinner = racerTeamId;

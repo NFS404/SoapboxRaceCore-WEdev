@@ -8,12 +8,12 @@ import javax.ejb.Stateless;
 @Stateless
 public class SceneryBO {
     private final Map<String, Long> sceneryIds = new HashMap<>();
-
     {
         sceneryIds.put("SCENERY_GROUP_NORMAL", 0L);
         sceneryIds.put("SCENERY_GROUP_OKTOBERFEST", 1L);
         sceneryIds.put("SCENERY_GROUP_HALLOWEEN", 2L);
         sceneryIds.put("SCENERY_GROUP_CHRISTMAS", 3L);
+        // sceneryIds.put("SCENERY_GROUP_VALENTINES", 4L); // Not available due to scenery group bugs
         sceneryIds.put("SCENERY_GROUP_NEWYEARS", 5L);
     }
 
