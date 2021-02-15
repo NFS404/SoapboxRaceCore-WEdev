@@ -284,6 +284,7 @@ public class RestApiBO {
 	 * @param onPage - Сколько позиций на странице
 	 */
 	public ArrayOfRaceWithTime getTopTimeRace(int eventid, boolean powerups, String carclass, String carmodel, boolean oldRecords, int page, int onPage) {
+		// FIXME OldRecords feature is broken, needs fix
 		if (onPage > 300) onPage = 300;
 		ArrayOfRaceWithTime list = new ArrayOfRaceWithTime();
 		int carclasshash = 0;
@@ -320,17 +321,20 @@ public class RestApiBO {
 		List<RecordsEntity> recordsList = new ArrayList<RecordsEntity>();
 		CarClassesEntity definedCarClassesEntity = null;
 		if (carmodel.contentEquals("") && carclasshash == 0) { 
+			list.setCount(recordsDAO.countRecordsAll(eventid, powerups));
 			recordsList = recordsDAO.statsEventAll(event, powerups, page, onPage);
 		}
 		if (!carmodel.contentEquals("")) {
 			definedCarClassesEntity = carClassesDAO.findByRecordsCarName(carmodel);
-			recordsList = recordsDAO.statsEventCar(event, powerups, definedCarClassesEntity.getHash(), page, onPage);
+			int carHash = definedCarClassesEntity.getHash();
+			list.setCount(recordsDAO.countRecordsByCar(eventid, powerups, carHash));
+			recordsList = recordsDAO.statsEventCar(event, powerups, carHash, page, onPage);
 		}
 		if (carclasshash != 0) {
+			list.setCount(recordsDAO.countRecords(eventid, powerups, carclasshash));
 			recordsList = recordsDAO.statsEventClass(event, powerups, carclasshash, page, onPage);
 		}
 		
-		int recordCount = 0;
 		for (RecordsEntity race : recordsList) {
 			CarClassesEntity recordCarClassesEntity = null;
 			if (definedCarClassesEntity == null) {
@@ -340,13 +344,11 @@ public class RestApiBO {
 				recordCarClassesEntity = definedCarClassesEntity;
 			}
 			boolean isCarVersionVaild = carVersionCheck(recordCarClassesEntity.getCarVersion(), race.getCarVersion());
-			if (!oldRecords && !isCarVersionVaild) {
-				continue; // Skip non-actual record
-			}
+//			if (!oldRecords && !isCarVersionVaild) {
+//				continue; // Skip non-actual record
+//			}
 			prepareWebRecordEntry(race, list, recordCarClassesEntity, isCarVersionVaild);
-			recordCount++;
 		}
-		list.setCount(BigInteger.valueOf(recordCount));
 		return list;
 	}
 	/**
@@ -434,18 +436,16 @@ public class RestApiBO {
 					event.getBaseEvent()
 				);
 		
-		int recordCount = 0;
+		list.setCount(recordsDAO.countRecordsPersona(eventid, powerups, userEntity.getId()));
 		for (RecordsEntity race : recordsDAO.statsEventPersona(event, powerups, userEntity)) {
 			CarClassesEntity recordCarClassesEntity = null;
 			recordCarClassesEntity = carClassesDAO.findByHash(race.getCarPhysicsHash());
 			boolean isCarVersionVaild = carVersionCheck(recordCarClassesEntity.getCarVersion(), race.getCarVersion());
-			if (!oldRecords && !isCarVersionVaild) {
-				continue; // Skip non-actual record
-			}
+//			if (!oldRecords && !isCarVersionVaild) {
+//				continue; // Skip non-actual record
+//			}
 			prepareWebRecordEntry(race, list, recordCarClassesEntity, isCarVersionVaild);
-			recordCount++;
 		}
-		list.setCount(BigInteger.valueOf(recordCount));
 		
 		return list;
 	}
