@@ -316,7 +316,7 @@ public class WindowCommandsBO {
 			// Remove hidden items from car's special slots
 			if (displayName.contains("/DELHIDDENPARTS")) {
 				visualPartDAO.deleteHiddenItems(personaBO.getDefaultCarEntity(personaId).getOwnedCar().getCustomCar());
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Hidden parts is removed, go to the Garage and back."), personaId);
+				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Hidden parts is removed, go to the Garage and return back."), personaId);
 				return null;
 			}
 		}
