@@ -24,6 +24,6 @@ public class GetBlockersByUsers {
     @Produces(MediaType.APPLICATION_XML)
     public Response getBlockedUserList(@HeaderParam("userId") Long userId, @HeaderParam("securityToken") String securityToken) {
         Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
-        return Response.ok().entity(socialBO.getBlockersByUsers(activePersonaId)).build();
+        return Response.ok().entity(socialBO.getBlockersByUsers(activePersonaId, userId)).build();
     }
 }

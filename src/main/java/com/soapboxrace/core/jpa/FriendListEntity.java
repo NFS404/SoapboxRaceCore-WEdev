@@ -13,6 +13,8 @@ import javax.persistence.Table;
 @NamedQueries({ //
 	@NamedQuery(name = "FriendListEntity.findByOwnerId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId"), //
 	@NamedQuery(name = "FriendListEntity.findAcceptedByOwnerId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId AND obj.isAccepted = true"), //
+	@NamedQuery(name = "FriendListEntity.findBlockedByOwnerId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId AND obj.isBlocked = true"), //
+	@NamedQuery(name = "FriendListEntity.findByRemoteUserBlockedId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userId = :userId AND obj.isBlocked = true"), //
 	@NamedQuery(name = "FriendListEntity.findByOwnerIdAndFriendPersona", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId AND obj.personaId = :personaId") //
 })
 public class FriendListEntity {
@@ -25,6 +27,7 @@ public class FriendListEntity {
 	private Long personaId;
 	private Long userId;
 	private Boolean isAccepted;
+	private Boolean isBlocked;
 	
 	public Long getId() {
 		return id;
@@ -64,6 +67,14 @@ public class FriendListEntity {
 	
 	public void setIsAccepted(Boolean isAccepted) {
 		this.isAccepted = isAccepted;
+	}
+	
+	public Boolean getIsBlocked() {
+		return isBlocked;
+	}
+	
+	public void setIsBlocked(Boolean isBlocked) {
+		this.isBlocked = isBlocked;
 	}
 
 }

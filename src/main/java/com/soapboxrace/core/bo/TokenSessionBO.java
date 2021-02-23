@@ -60,11 +60,13 @@ public class TokenSessionBO {
 			tokenSessionEntity = tokenDAO.findBySecurityToken(securityToken);
 		}
 		if (tokenSessionEntity == null || !tokenSessionEntity.getUserId().equals(userId)) {
+			System.out.println("### User " + userId + "has falied the token verification.");
 			return false;
 		}
 		long time = new Date().getTime();
 		long tokenTime = tokenSessionEntity.getExpirationDate().getTime();
 		if (time > tokenTime) {
+			System.out.println("### User " + userId + "has falied the token verification.");
 			return false;
 		}
 		tokenSessionEntity.setExpirationDate(getMinutes(6));

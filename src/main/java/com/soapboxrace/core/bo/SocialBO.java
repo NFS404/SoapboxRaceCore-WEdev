@@ -1,11 +1,16 @@
 package com.soapboxrace.core.bo;
 
+import java.util.List;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
+import com.soapboxrace.core.dao.FriendListDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.ReportDAO;
+import com.soapboxrace.core.dao.UserDAO;
+import com.soapboxrace.core.jpa.FriendListEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.ReportEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
@@ -14,6 +19,7 @@ import com.soapboxrace.jaxb.http.ArrayOfBasicBlockPlayerInfo;
 import com.soapboxrace.jaxb.http.ArrayOfLong;
 import com.soapboxrace.jaxb.http.BasicBlockPlayerInfo;
 import com.soapboxrace.jaxb.http.PersonaBase;
+import com.soapboxrace.jaxb.xmpp.XMPP_ResponseTypePersonaBase;
 
 @Stateless
 public class SocialBO {
@@ -29,6 +35,15 @@ public class SocialBO {
 	
 	@EJB
 	private DiscordWebhook discordBot;
+	
+	@EJB
+	private FriendListDAO friendListDAO;
+	
+	@EJB
+	private FriendBO friendBO;
+	
+	@EJB
+	private UserDAO userDAO;
 	
 	@EJB
 	private OpenFireSoapBoxCli openFireSoapBoxCli;
@@ -73,99 +88,100 @@ public class SocialBO {
 		}
 	}
 	
-	// Taken from SBRW-Core - https://github.com/SoapboxRaceWorld/soapbox-race-core/
+	// Parts taken from WorldUnited.gg 
 	public ArrayOfBasicBlockPlayerInfo getBlockedUserList(Long userId) {
-//        List<SocialRelationshipEntity> socialRelationshipEntityList =
-//                this.socialRelationshipDAO.findByUserIdAndStatus(userId, 2L);
         ArrayOfBasicBlockPlayerInfo arrayOfBasicBlockPlayerInfo = new ArrayOfBasicBlockPlayerInfo();
-
-//        for (SocialRelationshipEntity socialRelationshipEntity : socialRelationshipEntityList) {
-//            this.addBlockedUserToList(arrayOfBasicBlockPlayerInfo, socialRelationshipEntity);
-//        }
-
+        
+        List<FriendListEntity> blockedPlayersList = friendListDAO.findBlockedByOwnerId(userId);
+        for (FriendListEntity friendListEntity : blockedPlayersList) {
+            this.addBlockedUserToList(arrayOfBasicBlockPlayerInfo, friendListEntity);
+        }
         return arrayOfBasicBlockPlayerInfo;
     }
 
-    public ArrayOfLong getBlockersByUsers(Long personaId) {
+	// Parts taken from WorldUnited.gg 
+    public ArrayOfLong getBlockersByUsers(Long personaId, Long userId) {
         PersonaEntity personaEntity = personaDao.findById(personaId);
-
         if (personaEntity == null) {
-            //
+        	System.out.println("### User " + userId + "has tried to request blocked players list without Persona ID somehow.");
+        	return null;
         }
 
         ArrayOfLong arrayOfLong = new ArrayOfLong();
-
- //       for (SocialRelationshipEntity socialRelationshipEntity :
- //               this.socialRelationshipDAO.findByRemoteUserIdAndStatus(personaEntity.getUser().getId(), 2L)) {
- //           arrayOfLong.getLong().add(socialRelationshipEntity.getUser().getId());
- //       }
-
+        for (FriendListEntity friendListEntity : friendListDAO.findByRemoteUserBlockedId(userId)) {
+            arrayOfLong.getLong().add(friendListEntity.getUserId());
+        }
         return arrayOfLong;
     }
     
+    // Parts taken from WorldUnited.gg 
     public PersonaBase blockPlayer(Long userId, Long activePersonaId, Long otherPersonaId) {
         PersonaEntity activePersonaEntity = personaDao.findById(activePersonaId);
-
         if (activePersonaEntity == null) {
-            //
+        	System.out.println("### User " + userId + "has sent the player block request without Persona ID somehow.");
+        	return null;
         }
 
         PersonaEntity otherPersonaEntity = personaDao.findById(otherPersonaId);
-
         if (otherPersonaEntity == null) {
-            //
+        	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild player reference, try again."), activePersonaId);
+        	return null;
         }
 
-//        SocialRelationshipEntity localSide = socialRelationshipDAO.findByLocalAndRemoteUser(userId,
-//                otherPersonaEntity.getUser().getId());
-//        SocialRelationshipEntity remoteSide =
-//                socialRelationshipDAO.findByLocalAndRemoteUser(otherPersonaEntity.getUser().getId(),
-//                        userId);
+        Long otherPersonaUserId = otherPersonaEntity.getUser().getId();
+        FriendListEntity localSide = friendListDAO.findByOwnerIdAndFriendPersona(userId, otherPersonaUserId);
+        FriendListEntity remoteSide = friendListDAO.findByOwnerIdAndFriendPersona(otherPersonaUserId, userId);
 
-//        if (localSide == null) {
-//            createNewRelationship(activePersonaEntity, otherPersonaEntity, 2L);
-//        } else {
-//            localSide.setStatus(2L);
-//            socialRelationshipDAO.update(localSide);
-//        }
-
-//        if (remoteSide != null) {
-//            socialRelationshipDAO.delete(remoteSide);
-//            sendPresencePacket(activePersonaEntity, 0L, otherPersonaId);
-//        }
-
+        if (localSide == null) { // Create new FList entry
+        	friendBO.createNewFriendListEntry(otherPersonaId, userId, otherPersonaUserId, false, true);
+        } 
+        else { // Friend became Enemy...
+            localSide.setIsBlocked(true);
+            friendListDAO.update(localSide);
+        }
+        if (remoteSide != null) { // Remove the FList entry on the other side, since we have a block
+        	friendListDAO.delete(remoteSide);
+            sendPresencePacket(activePersonaEntity, 0, otherPersonaId);
+        }
         return driverPersonaBO.getPersonaBase(otherPersonaEntity);
     }
 
-    public PersonaBase unblockPlayer(Long userId, Long otherPersonaId) {
+    public PersonaBase unblockPlayer(Long userId, Long activePersonaId, Long otherPersonaId) {
         PersonaEntity otherPersonaEntity = personaDao.findById(otherPersonaId);
-
         if (otherPersonaEntity == null) {
-            //
+        	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild player reference, try again."), activePersonaId);
+        	return null;
         }
+        FriendListEntity localSide = friendListDAO.findByOwnerIdAndFriendPersona(userId, otherPersonaId);
 
-//        SocialRelationshipEntity localSide = socialRelationshipDAO.findByLocalAndRemoteUser(userId,
-//                otherPersonaEntity.getUser().getId());
-
-//        if (localSide != null && localSide.getStatus() == 2L) {
-//            socialRelationshipDAO.delete(localSide);
-//        } else {
-            //
-//        }
+        if (localSide != null && localSide.getIsBlocked()) {
+        	friendListDAO.delete(localSide);
+        } 
+        else { // How the player able to un-block a player who is not blocked on first place?
+        	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Request error - contact with the server staff."), activePersonaId);
+        	System.out.println("### User " + userId + " has tried to un-block a persona ID " + otherPersonaId + ", who is not blocked at all.");
+        	return null;
+        }
 
         return driverPersonaBO.getPersonaBase(otherPersonaEntity);
     }
     
-//    private void addBlockedUserToList(ArrayOfBasicBlockPlayerInfo arrayOfBasicBlockPlayerInfo,
-//            SocialRelationshipEntity socialRelationshipEntity) {
-//        for (PersonaEntity personaEntity : socialRelationshipEntity.getRemoteUser().getPersonas()) {
-//            BasicBlockPlayerInfo basicBlockPlayerInfo = new BasicBlockPlayerInfo();
-//
-//            basicBlockPlayerInfo.setPersonaId(personaEntity.getPersonaId());
-//            basicBlockPlayerInfo.setUserId(socialRelationshipEntity.getRemoteUser().getId());
-//
-//            arrayOfBasicBlockPlayerInfo.getBasicBlockPlayerInfo().add(basicBlockPlayerInfo);
-//            }
-//        }
-
+    private void addBlockedUserToList(ArrayOfBasicBlockPlayerInfo arrayOfBasicBlockPlayerInfo, FriendListEntity friendListEntity) {
+    	Long targetUserId = friendListEntity.getUserId();
+    	for (PersonaEntity personaEntity : userDAO.findById(targetUserId).getListOfProfile()) {
+        	BasicBlockPlayerInfo basicBlockPlayerInfo = new BasicBlockPlayerInfo();
+        	basicBlockPlayerInfo.setPersonaId(personaEntity.getPersonaId());
+        	basicBlockPlayerInfo.setUserId(targetUserId);
+        	arrayOfBasicBlockPlayerInfo.getBasicBlockPlayerInfo().add(basicBlockPlayerInfo);
+        }
+    }
+    
+    // Parts taken from WorldUnited.gg 
+    private void sendPresencePacket(PersonaEntity personaEntity, int presence, Long targetPersonaId) {
+    	XMPP_ResponseTypePersonaBase personaPacket = new XMPP_ResponseTypePersonaBase();
+    	PersonaBase xmppPersonaBase = driverPersonaBO.getPersonaBase(personaEntity);
+    	xmppPersonaBase.setPresence(presence);
+    	personaPacket.setPersonaBase(xmppPersonaBase);
+    	openFireSoapBoxCli.send(personaPacket, targetPersonaId);
+    }
 }

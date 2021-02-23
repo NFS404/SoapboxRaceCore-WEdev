@@ -305,10 +305,10 @@ public class UserBO {
 	
 	// Alternative Freeroam sync module (experimental)
 	public boolean isFRSyncAlt(String securityToken) {
-		UserEntity userEntity = userDao.findById(tokenDAO.findBySecurityToken(securityToken).getUserId());
-		if (userEntity == null) {
-			return false;
-		}
+		if (securityToken == null) {return false;}
+		Long userId = tokenDAO.findBySecurityToken(securityToken).getUserId();
+		UserEntity userEntity = userDao.findById(userId);
+		if (userEntity == null) {return false;}
 		return userEntity.getFRSyncAlt();
 	}
 }

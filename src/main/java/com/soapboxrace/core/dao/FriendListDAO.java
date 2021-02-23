@@ -30,6 +30,18 @@ public class FriendListDAO extends BaseDAO<FriendListEntity> {
 		return query.getResultList();
 	}
 	
+	public List<FriendListEntity> findBlockedByOwnerId(Long ownerId) {
+		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.findBlockedByOwnerId", FriendListEntity.class);
+		query.setParameter("userOwnerId", ownerId);
+		return query.getResultList();
+	}
+	
+	public List<FriendListEntity> findByRemoteUserBlockedId(Long userId) {
+		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.findByRemoteUserBlockedId", FriendListEntity.class);
+		query.setParameter("userId", userId);
+		return query.getResultList();
+	}
+	
 	public FriendListEntity findByOwnerIdAndFriendPersona(Long ownerId, Long friendPersona) {
 		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.findByOwnerIdAndFriendPersona", FriendListEntity.class);
 		query.setParameter("userOwnerId", ownerId);

@@ -316,6 +316,9 @@ public class Personas {
 	public String giveCarsBundle(@FormParam("adminToken") String adminToken, @FormParam("playerName") String playerName) {
 		if (parameterBO.getStrParam("ADMIN_TOKEN").equals(adminToken)) {
 			PersonaEntity personaEntity = personaDao.findByNameIgnoreCase(playerName);
+			if (personaEntity == null) {
+				return "ERROR: wrong nickname";
+			}
 			UserEntity userEntity = personaEntity.getUser();
 			String carsBundleInit = parameterBO.getStrParam("ITEM_SPECIALCARS_BUNDLE");
             String[] carsBundle = carsBundleInit.split(",");
