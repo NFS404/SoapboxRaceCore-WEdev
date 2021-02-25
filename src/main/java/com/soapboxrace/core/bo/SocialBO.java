@@ -92,9 +92,23 @@ public class SocialBO {
 	public ArrayOfBasicBlockPlayerInfo getBlockedUserList(Long userId) {
         ArrayOfBasicBlockPlayerInfo arrayOfBasicBlockPlayerInfo = new ArrayOfBasicBlockPlayerInfo();
         
-        List<FriendListEntity> blockedPlayersList = friendListDAO.findBlockedByOwnerId(userId);
-        for (FriendListEntity friendListEntity : blockedPlayersList) {
-            this.addBlockedUserToList(arrayOfBasicBlockPlayerInfo, friendListEntity);
+        List<FriendListEntity> blockedPlayersList = friendListDAO.getUserBlockedList(userId);
+        for (FriendListEntity blockedEntity : blockedPlayersList) {
+        	boolean isOurDriverIsA = false;
+        	Long entityUserId = 0L;
+			if (blockedEntity.getUserId_A().equals(userId)) { // User A gets User B as Friend
+				isOurDriverIsA = true;
+				entityUserId = blockedEntity.getUserId_B();
+			}
+			else { // User B gets User A as Friend
+				isOurDriverIsA = false;
+				entityUserId = blockedEntity.getUserId_A();
+			}
+			// Block status (0 - not blocked, 1 - user A requested the block, 2 - user B requested the block, 3 - both users is blocked each other)
+			if ((isOurDriverIsA && blockedEntity.getBlockStatus() == 1) || (!isOurDriverIsA && blockedEntity.getBlockStatus() == 2) 
+					|| blockedEntity.getBlockStatus() == 3) {
+				addBlockedUserToList(arrayOfBasicBlockPlayerInfo, entityUserId);
+			}
         }
         return arrayOfBasicBlockPlayerInfo;
     }
@@ -108,8 +122,21 @@ public class SocialBO {
         }
 
         ArrayOfLong arrayOfLong = new ArrayOfLong();
-        for (FriendListEntity friendListEntity : friendListDAO.findByRemoteUserBlockedId(userId)) {
-            arrayOfLong.getLong().add(friendListEntity.getUserId());
+        for (FriendListEntity blockedEntity : friendListDAO.getUserBlockedList(userId)) {
+        	Long blockedUserId = 0L;
+        	boolean isOurDriverIsA = true;
+			if (blockedEntity.getUserId_A().equals(userId)) { // User A gets User B as Friend
+				blockedUserId = blockedEntity.getUserId_B();
+			}
+			else { // User B gets User A as Friend
+				blockedUserId = blockedEntity.getUserId_A();
+				isOurDriverIsA = false;
+			}
+			// Block status (0 - not blocked, 1 - user A requested the block, 2 - user B requested the block, 3 - both users is blocked each other)
+			if ((!isOurDriverIsA && blockedEntity.getBlockStatus() == 1) || (isOurDriverIsA && blockedEntity.getBlockStatus() == 2) 
+					|| blockedEntity.getBlockStatus() == 3) {
+				arrayOfLong.getLong().add(blockedUserId);
+			}
         }
         return arrayOfLong;
     }
@@ -129,20 +156,47 @@ public class SocialBO {
         }
 
         Long otherPersonaUserId = otherPersonaEntity.getUser().getId();
-        FriendListEntity localSide = friendListDAO.findByOwnerIdAndFriendPersona(userId, otherPersonaUserId);
-        FriendListEntity remoteSide = friendListDAO.findByOwnerIdAndFriendPersona(otherPersonaUserId, userId);
+        FriendListEntity relationshipEntity = friendListDAO.findUsersRelationship(userId, otherPersonaUserId);
 
-        if (localSide == null) { // Create new FList entry
-        	friendBO.createNewFriendListEntry(otherPersonaId, userId, otherPersonaUserId, false, true);
+        if (relationshipEntity == null) { // Create new FList entry
+        	friendBO.createNewFriendListEntry(userId, activePersonaId, otherPersonaUserId, otherPersonaId, 0, 1);
         } 
-        else { // Friend became Enemy...
-            localSide.setIsBlocked(true);
-            friendListDAO.update(localSide);
+        else { // If it's already exist
+        	int blockStatus = relationshipEntity.getBlockStatus();
+        	int status = relationshipEntity.getStatus();
+        	if (blockStatus == 3) { // Both players has blocked each other
+        		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You has already blocked this driver."), activePersonaId);
+            	return null;
+        	}
+        	boolean isOurDriverIsA = false;
+			if (relationshipEntity.getUserId_A().equals(userId)) { // User A gets User B as Friend
+				isOurDriverIsA = true;
+			}
+        	
+        	if (status == 2 || status == 1) { // Player is Friend
+        		if (isOurDriverIsA) {
+        			relationshipEntity.setBlockStatus(1); // Block from player A
+        		}
+        		else {
+        			relationshipEntity.setBlockStatus(2); // Block from player B
+        		}
+        		if (status == 1) { // Player have pending friend request
+            		relationshipEntity.setStatus(0); // Remove the friend request
+            	}
+        	}
+        	
+        	if (blockStatus == 1 || blockStatus == 2) { // Sender or player has already being blocked
+    			if (isOurDriverIsA && blockStatus == 1) {
+    				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You has already blocked this driver."), activePersonaId);
+                	return null;
+    			}
+    			if (!isOurDriverIsA && blockStatus == 1 || isOurDriverIsA && blockStatus == 2) { // Make a block of both drivers
+    				relationshipEntity.setBlockStatus(3);
+    			}
+        	}
         }
-        if (remoteSide != null) { // Remove the FList entry on the other side, since we have a block
-        	friendListDAO.delete(remoteSide);
-            sendPresencePacket(activePersonaEntity, 0, otherPersonaId);
-        }
+        sendPresencePacket(activePersonaEntity, 0, otherPersonaId);
+
         return driverPersonaBO.getPersonaBase(otherPersonaEntity);
     }
 
@@ -152,10 +206,47 @@ public class SocialBO {
         	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invaild player reference, try again."), activePersonaId);
         	return null;
         }
-        FriendListEntity localSide = friendListDAO.findByOwnerIdAndFriendPersona(userId, otherPersonaId);
+        Long otherPersonaUserId = otherPersonaEntity.getUser().getId();
+        FriendListEntity relationshipEntity = friendListDAO.findUsersRelationship(userId, otherPersonaUserId);
 
-        if (localSide != null && localSide.getIsBlocked()) {
-        	friendListDAO.delete(localSide);
+        if (relationshipEntity != null) {
+        	int blockStatus = relationshipEntity.getBlockStatus();
+        	int status = relationshipEntity.getStatus();
+        	boolean isOurDriverIsA = false;
+			if (relationshipEntity.getUserId_A().equals(userId)) { // User A gets User B as Friend
+				isOurDriverIsA = true;
+			}
+			
+			if (blockStatus == 1) {
+				if (isOurDriverIsA) { // Remove the block
+					relationshipEntity.setBlockStatus(0);
+				}
+				else {
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You cannot un-block this driver, since he blocked you first."), activePersonaId);
+		        	return null;
+				}
+			}
+			if (blockStatus == 2) {
+				if (!isOurDriverIsA) { // Remove the block
+					relationshipEntity.setBlockStatus(0);
+				}
+				else {
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You cannot un-block this driver, since he blocked you first."), activePersonaId);
+		        	return null;
+				}
+			}
+			if (blockStatus == 3) {
+				if (isOurDriverIsA) {
+					relationshipEntity.setBlockStatus(2); // User B block still exists
+				}
+				else {
+					relationshipEntity.setBlockStatus(1); // User A block still exists
+				}
+			}
+			
+			if (status == 0) { // Remove the entry when players is not friends
+				friendListDAO.delete(relationshipEntity);
+			}
         } 
         else { // How the player able to un-block a player who is not blocked on first place?
         	openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Request error - contact with the server staff."), activePersonaId);
@@ -166,12 +257,11 @@ public class SocialBO {
         return driverPersonaBO.getPersonaBase(otherPersonaEntity);
     }
     
-    private void addBlockedUserToList(ArrayOfBasicBlockPlayerInfo arrayOfBasicBlockPlayerInfo, FriendListEntity friendListEntity) {
-    	Long targetUserId = friendListEntity.getUserId();
-    	for (PersonaEntity personaEntity : userDAO.findById(targetUserId).getListOfProfile()) {
+    private void addBlockedUserToList(ArrayOfBasicBlockPlayerInfo arrayOfBasicBlockPlayerInfo, Long userId) {
+    	for (PersonaEntity personaEntity : userDAO.findById(userId).getListOfProfile()) {
         	BasicBlockPlayerInfo basicBlockPlayerInfo = new BasicBlockPlayerInfo();
         	basicBlockPlayerInfo.setPersonaId(personaEntity.getPersonaId());
-        	basicBlockPlayerInfo.setUserId(targetUserId);
+        	basicBlockPlayerInfo.setUserId(userId);
         	arrayOfBasicBlockPlayerInfo.getBasicBlockPlayerInfo().add(basicBlockPlayerInfo);
         }
     }

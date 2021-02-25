@@ -11,11 +11,9 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "FRIEND_LIST")
 @NamedQueries({ //
-	@NamedQuery(name = "FriendListEntity.findByOwnerId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId"), //
-	@NamedQuery(name = "FriendListEntity.findAcceptedByOwnerId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId AND obj.isAccepted = true"), //
-	@NamedQuery(name = "FriendListEntity.findBlockedByOwnerId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId AND obj.isBlocked = true"), //
-	@NamedQuery(name = "FriendListEntity.findByRemoteUserBlockedId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userId = :userId AND obj.isBlocked = true"), //
-	@NamedQuery(name = "FriendListEntity.findByOwnerIdAndFriendPersona", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId AND obj.personaId = :personaId") //
+	@NamedQuery(name = "FriendListEntity.getUserFriendList", query = "SELECT obj FROM FriendListEntity obj WHERE (obj.userId_A = :userId OR obj.userId_B = :userId) AND obj.blockStatus = 0"), //
+	@NamedQuery(name = "FriendListEntity.findUsersRelationship", query = "SELECT obj FROM FriendListEntity obj WHERE (obj.userId_A = :userId OR obj.userId_B = :userId) AND (obj.userId_A = :userFriendId OR obj.userId_B = :userFriendId)"), //
+	@NamedQuery(name = "FriendListEntity.getUserBlockedList", query = "SELECT obj FROM FriendListEntity obj WHERE (obj.userId_A = :userId OR obj.userId_B = :userId) AND obj.blockStatus <> 0") //
 })
 public class FriendListEntity {
 
@@ -23,11 +21,16 @@ public class FriendListEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	private Long userOwnerId;
-	private Long personaId;
-	private Long userId;
-	private Boolean isAccepted;
-	private Boolean isBlocked;
+	// User-sender
+	private Long userId_A;
+	private Long personaId_A;
+	// User-recipient
+	private Long userId_B;
+	private Long personaId_B;
+	// Relationship status (0 - blocked, 1 - friend request pending, 2 - friends)
+	private int status;
+	// Block status (0 - not blocked, 1 - user A requested the block, 2 - user B requested the block, 3 - both users is blocked each other)
+	private int blockStatus;
 	
 	public Long getId() {
 		return id;
@@ -37,44 +40,52 @@ public class FriendListEntity {
 		this.id = id;
 	}
 
-	public Long getUserOwnerId() {
-		return userOwnerId;
+	public Long getUserId_A() {
+		return userId_A;
 	}
 
-	public void setUserOwnerId(Long userOwnerId) {
-		this.userOwnerId = userOwnerId;
+	public void setUserId_A(Long userId_A) {
+		this.userId_A = userId_A;
+	}
+	
+	public Long getPersonaId_A() {
+		return personaId_A;
 	}
 
-    public Long getPersonaId() {
-        return personaId;
-    }
-
-    public void setPersonaId(Long personaId) {
-        this.personaId = personaId;
-    }
-    
-    public Long getUserId() {
-		return userId;
+	public void setPersonaId_A(Long personaId_A) {
+		this.personaId_A = personaId_A;
 	}
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public Long getUserId_B() {
+		return userId_B;
+	}
+
+	public void setUserId_B(Long userId_B) {
+		this.userId_B = userId_B;
 	}
 	
-	public Boolean getIsAccepted() {
-		return isAccepted;
+	public Long getPersonaId_B() {
+		return personaId_B;
+	}
+
+	public void setPersonaId_B(Long personaId_B) {
+		this.personaId_B = personaId_B;
 	}
 	
-	public void setIsAccepted(Boolean isAccepted) {
-		this.isAccepted = isAccepted;
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
 	}
 	
-	public Boolean getIsBlocked() {
-		return isBlocked;
+	public int getBlockStatus() {
+		return blockStatus;
 	}
-	
-	public void setIsBlocked(Boolean isBlocked) {
-		this.isBlocked = isBlocked;
+
+	public void setBlockStatus(int blockStatus) {
+		this.blockStatus = blockStatus;
 	}
 
 }

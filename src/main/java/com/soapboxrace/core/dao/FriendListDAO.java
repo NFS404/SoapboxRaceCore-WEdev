@@ -17,36 +17,24 @@ public class FriendListDAO extends BaseDAO<FriendListEntity> {
 	protected void setEntityManager(EntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
-
-	public List<FriendListEntity> findByOwnerId(Long ownerId) {
-		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.findByOwnerId", FriendListEntity.class);
-		query.setParameter("userOwnerId", ownerId);
-		return query.getResultList();
-	}
 	
-	public List<FriendListEntity> findAcceptedByOwnerId(Long ownerId) {
-		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.findAcceptedByOwnerId", FriendListEntity.class);
-		query.setParameter("userOwnerId", ownerId);
-		return query.getResultList();
-	}
-	
-	public List<FriendListEntity> findBlockedByOwnerId(Long ownerId) {
-		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.findBlockedByOwnerId", FriendListEntity.class);
-		query.setParameter("userOwnerId", ownerId);
-		return query.getResultList();
-	}
-	
-	public List<FriendListEntity> findByRemoteUserBlockedId(Long userId) {
-		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.findByRemoteUserBlockedId", FriendListEntity.class);
+	public List<FriendListEntity> getUserFriendList(Long userId) {
+		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.getUserFriendList", FriendListEntity.class);
 		query.setParameter("userId", userId);
 		return query.getResultList();
 	}
 	
-	public FriendListEntity findByOwnerIdAndFriendPersona(Long ownerId, Long friendPersona) {
-		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.findByOwnerIdAndFriendPersona", FriendListEntity.class);
-		query.setParameter("userOwnerId", ownerId);
-		query.setParameter("personaId", friendPersona);
+	public FriendListEntity findUsersRelationship(Long userId, Long userFriendId) {
+		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.findUsersRelationship", FriendListEntity.class);
+		query.setParameter("userId", userId);
+		query.setParameter("userFriendId", userFriendId);
 		return ( query.getResultList() != null && !query.getResultList().isEmpty() ) ? query.getResultList().get(0) : null;
+	}
+	
+	public List<FriendListEntity> getUserBlockedList(Long userId) {
+		TypedQuery<FriendListEntity> query = entityManager.createNamedQuery("FriendListEntity.getUserBlockedList", FriendListEntity.class);
+		query.setParameter("userId", userId);
+		return query.getResultList();
 	}
 
 }

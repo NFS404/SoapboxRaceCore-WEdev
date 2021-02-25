@@ -83,6 +83,9 @@ public class WindowCommandsBO {
 	
 	@EJB
 	private VisualPartDAO visualPartDAO;
+	
+	@EJB
+	private FriendBO friendBO;
 
 	// Teams actions parser into "add a friend" window - Hypercycle
 	// XMPP messages can go into timeouts, if ' symbol is used
@@ -332,15 +335,32 @@ public class WindowCommandsBO {
 			}
 			Long invitedId = personaInvited.getPersonaId();
 			Long invitedUserId = personaInvited.getUser().getId();
-			if (personaSender.getPersonaId() == personaInvited.getPersonaId() || senderUserId == invitedUserId) {
+			if (senderId == invitedId || senderUserId == invitedUserId) {
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You cannot be a friend for yourself."), senderId);
 				return null;
 			}
-			FriendListEntity friendListEntity = friendListDAO.findByOwnerIdAndFriendPersona(invitedUserId, senderId);
+			FriendListEntity friendListEntity = friendListDAO.findUsersRelationship(senderUserId, invitedUserId);
 			if (friendListEntity != null) {
-				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This player is already on your friend-list."), senderId);
-				return null;
+				switch (friendListEntity.getBlockStatus()) {
+				case 1:
+				case 3:
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Un-block this driver first."), senderId);
+					return null;
+				case 2:
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This driver has blocked you."), senderId);
+					return null;
+				}
+				if (friendListEntity.getStatus() == 1) {
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Invite has been already sent - waiting for response."), senderId);
+					return null;
+				}
+				else {
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This player is already on your friend-list."), senderId);
+					return null;
+				}
+				
 			}
+			
 			XMPP_FriendPersonaType friendPersonaType = new XMPP_FriendPersonaType();
 			friendPersonaType.setIconIndex(personaSender.getIconIndex());
 			friendPersonaType.setLevel(personaSender.getLevel());
@@ -352,14 +372,7 @@ public class WindowCommandsBO {
 
 			XmppFriend xmppFriend = new XmppFriend(invitedId, openFireSoapBoxCli);
 			xmppFriend.sendFriendRequest(friendPersonaType);
-
-			// Insert db record for invited player
-			FriendListEntity friendListInsert = new FriendListEntity();
-			friendListInsert.setUserOwnerId(invitedUserId);
-			friendListInsert.setUserId(senderUserId);
-			friendListInsert.setPersonaId(senderId);
-			friendListInsert.setIsAccepted(false);
-			friendListDAO.insert(friendListInsert);
+			friendBO.createNewFriendListEntry(senderUserId, senderId, invitedUserId, invitedId, 1, 0);
 
 			FriendPersona friendPersona = new FriendPersona();
 			friendPersona.setIconIndex(personaInvited.getIconIndex());

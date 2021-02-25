@@ -15,6 +15,7 @@ import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.dao.VinylStorageDAO;
 import com.soapboxrace.core.jpa.FriendListEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
+import com.soapboxrace.core.jpa.PersonaPresenceEntity;
 import com.soapboxrace.core.jpa.TokenSessionEntity;
 import com.soapboxrace.core.xmpp.OpenFireRestApiCli;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
@@ -88,18 +89,34 @@ public class FriendBO {
 		ArrayOfFriendPersona arrayOfFriendPersona = new ArrayOfFriendPersona();
 		List<FriendPersona> friendPersonaList = arrayOfFriendPersona.getFriendPersona();
 
-		List<FriendListEntity> friendList = friendListDAO.findByOwnerId(userId);
-		for (FriendListEntity entity : friendList) {
-			PersonaEntity personaEntity = personaDAO.findById(entity.getPersonaId());
-			if (personaEntity == null || entity.getIsBlocked()) {
+		List<FriendListEntity> friendList = friendListDAO.getUserFriendList(userId);
+		for (FriendListEntity friendEntity : friendList) {
+			PersonaEntity friendPersonaEntity = null;
+			Long friendUserId = 0L;
+			boolean isOurDriverIsA = true;
+			if (friendEntity.getUserId_A().equals(userId)) { // User A gets User B as Friend
+				friendPersonaEntity = personaDAO.findById(friendEntity.getPersonaId_B());
+				friendUserId = friendEntity.getUserId_B();
+				isOurDriverIsA = true;
+			}
+			else { // User B gets User A as Friend
+				friendPersonaEntity = personaDAO.findById(friendEntity.getPersonaId_A());
+				friendUserId = friendEntity.getUserId_A();
+				isOurDriverIsA = false;
+			}
+			
+			if (friendPersonaEntity == null) { // If some error or illegal Persona deletion happens
+				System.out.println("### FriendEntity ID " + friendEntity + " contains invaild Persona ID reference!");
 				continue;
 			}
-
-			int presence = 3; // 0 - offline, 1 - freeroam, 2 - racing or safehouse, 3 - friend request
-			if (entity.getIsAccepted()) {
-				presence = personaPresenceDAO.findByUserId(userId).getPersonaPresence();
+			int presence = 3; // 0 - offline, 1 - freeroam, 2 - racing or safehouse, 3 - pending friend request
+			if (isOurDriverIsA && friendEntity.getStatus() == 1) { // User A awaits for the User B invite decision, display as "offline"
+				presence = 0;
 			}
-			addPersonaToFriendList(friendPersonaList, personaEntity, presence);
+			if (friendEntity.getStatus() == 2) { // Invite accepted, so get the current presence
+				presence = personaPresenceDAO.findByUserId(friendUserId).getPersonaPresence();
+			}
+			addPersonaToFriendList(friendPersonaList, friendPersonaEntity, presence, friendUserId);
 		}
 
 		PersonaFriendsList personaFriendsList = new PersonaFriendsList();
@@ -107,7 +124,7 @@ public class FriendBO {
 		return personaFriendsList;
 	}
 
-	private void addPersonaToFriendList(List<FriendPersona> friendPersonaList, PersonaEntity personaEntity, int presence) {
+	private void addPersonaToFriendList(List<FriendPersona> friendPersonaList, PersonaEntity personaEntity, int presence, Long friendUserId) {
 		FriendPersona friendPersona = new FriendPersona();
 		friendPersona.setIconIndex(personaEntity.getIconIndex());
 		friendPersona.setLevel(personaEntity.getLevel());
@@ -116,16 +133,16 @@ public class FriendBO {
 		friendPersona.setPersonaId(personaEntity.getPersonaId());
 		friendPersona.setPresence(presence);
 		friendPersona.setSocialNetwork(0);
-		friendPersona.setUserId(personaEntity.getUser().getId());
+		friendPersona.setUserId(friendUserId);
 		friendPersonaList.add(friendPersona);
 	}
 
 	// Accept or decline the friend request
 	public PersonaBase sendResponseFriendRequest(Long personaId, Long friendPersonaId, int resolution) {
-		// Execute some DB things
 		PersonaEntity personaInvited = personaDAO.findById(personaId);
 		PersonaEntity personaSender = personaDAO.findById(friendPersonaId);
 		if (personaInvited == null || personaSender == null) {
+			System.out.println("### Some ResponseFriendRequest contains invaild Persona ID references.");
 			return null;
 		}
 
@@ -133,26 +150,34 @@ public class FriendBO {
 		Long personaSenderUser = personaSender.getUser().getId();
 		Long personaInvitedId = personaInvited.getPersonaId();
 		Long personaInvitedUser = personaInvited.getUser().getId();
-		
-		if (resolution == 0) {
-			removeFriend(personaInvitedId, personaSenderId);
-			return null;
-		}
 
-		FriendListEntity friendListEntity = friendListDAO.findByOwnerIdAndFriendPersona(personaInvitedUser, personaSenderId);
+		FriendListEntity friendListEntity = friendListDAO.findUsersRelationship(personaSenderUser, personaInvitedUser);
 		if (friendListEntity == null) {
+			System.out.println("### User ID " + personaSenderUser + " has tried to accept the FriendEntity request, which is not exist!");
 			return null;
 		}
-		friendListEntity.setIsAccepted(true);
-		friendListEntity.setIsBlocked(false);
+		if (resolution == 0) { // Resolution: 0 - request declined, 1 - request accepted
+			int blockStatus = friendListEntity.getBlockStatus();
+			if (blockStatus == 0) { 
+				removeFriend(personaInvitedId, personaSenderId);
+				return null;
+			}
+			else {
+				friendListEntity.setStatus(0);
+				friendListDAO.update(friendListEntity);
+				return null;
+			}
+		}
+		friendListEntity.setStatus(2); // Relationship status (0 - blocked, 1 - friend request pending, 2 - friends)
+		friendListEntity.setBlockStatus(0);
 		friendListDAO.update(friendListEntity);
 
-		// Insert db record for sender player
-		friendListEntity = friendListDAO.findByOwnerIdAndFriendPersona(personaSenderUser, personaInvitedId);
-		if (friendListEntity == null) {
-			createNewFriendListEntry(personaInvitedId, personaSenderUser, personaInvitedUser, true, false);
+		int invitedPresence = 3;
+		PersonaPresenceEntity invitedPresenceEntity = personaPresenceDAO.findByUserId(personaInvitedUser);
+		if (invitedPresenceEntity.getActivePersonaId().equals(personaInvitedId)) {
+			invitedPresence = invitedPresenceEntity.getPersonaPresence();
 		}
-
+		
 		// Send all info to personaSender
 		FriendPersona friendPersona = new FriendPersona();
 		friendPersona.setIconIndex(personaInvited.getIconIndex());
@@ -160,7 +185,7 @@ public class FriendBO {
 		friendPersona.setName(personaInvited.getName());
 		friendPersona.setOriginalName(personaInvited.getName());
 		friendPersona.setPersonaId(personaInvitedId);
-		friendPersona.setPresence(3);
+		friendPersona.setPresence(invitedPresence);
 		friendPersona.setUserId(personaInvitedUser);
 
 		XMPP_FriendResultType friendResultType = new XMPP_FriendResultType();
@@ -186,29 +211,29 @@ public class FriendBO {
 		return personaBase;
 	}
 
-	public void createNewFriendListEntry(Long friendPersonaId, Long userSenderId, Long userInvitedId, boolean isAccepted, boolean isBlocked) {
+	public void createNewFriendListEntry(Long userSenderId, Long senderPersonaId, Long userInvitedId, Long invitedPersonaId, 
+			int status, int blockStatus) {
 		FriendListEntity friendListInsert = new FriendListEntity();
-		friendListInsert.setUserOwnerId(userSenderId);
-		friendListInsert.setUserId(userInvitedId);
-		friendListInsert.setPersonaId(friendPersonaId);
-		friendListInsert.setIsAccepted(isAccepted);
-		friendListInsert.setIsBlocked(isBlocked);
+		friendListInsert.setUserId_A(userSenderId);
+		friendListInsert.setPersonaId_A(senderPersonaId);
+		friendListInsert.setUserId_B(userInvitedId);
+		friendListInsert.setPersonaId_B(invitedPersonaId);
+		friendListInsert.setStatus(status);
+		friendListInsert.setBlockStatus(blockStatus);
 		friendListDAO.insert(friendListInsert);
 	}
 	
+	// Remove the relationship entry
 	public void removeFriend(Long personaId, Long friendPersonaId) {
 		PersonaEntity personaInvited = personaDAO.findById(personaId);
 		PersonaEntity personaSender = personaDAO.findById(friendPersonaId);
 		if (personaInvited == null || personaSender == null) {
+			System.out.println("### Some RemoveFriendRequest contains invaild Persona ID references.");
 			return;
 		}
-
-		FriendListEntity friendListEntity = friendListDAO.findByOwnerIdAndFriendPersona(personaInvited.getUser().getId(), personaSender.getPersonaId());
-		if (friendListEntity != null) {
-			friendListDAO.delete(friendListEntity);
-		}
-
-		friendListEntity = friendListDAO.findByOwnerIdAndFriendPersona(personaSender.getUser().getId(), personaInvited.getPersonaId());
+		Long personaSenderUser = personaSender.getUser().getId();
+		Long personaInvitedUser = personaInvited.getUser().getId();
+		FriendListEntity friendListEntity = friendListDAO.findUsersRelationship(personaSenderUser, personaInvitedUser);
 		if (friendListEntity != null) {
 			friendListDAO.delete(friendListEntity);
 		}
@@ -232,11 +257,22 @@ public class FriendBO {
 
 	// Update the player status for his friend-list
 	public void sendXmppPresenceToAllFriends(PersonaEntity personaEntity, int presence) {
-		List<FriendListEntity> friends = friendListDAO.findAcceptedByOwnerId(personaEntity.getUser().getId());
-		if (friends != null) {
-			for (FriendListEntity friend : friends) {
-				if (!personaPresenceDAO.isUserNotOnline(friend.getUserId())) {
-					sendXmppPresence(personaEntity, presence, friend.getPersonaId());
+		Long userId = personaEntity.getUser().getId();
+		List<FriendListEntity> friendList = friendListDAO.getUserFriendList(userId);
+		if (friendList != null) {
+			for (FriendListEntity friend : friendList) {
+				Long friendUserId = 0L;
+				Long friendPersonaId = 0L;
+				if (friend.getUserId_A().equals(userId)) { // User A gets User B as Friend
+					friendPersonaId = friend.getPersonaId_B();
+					friendUserId = friend.getUserId_B();
+				}
+				else { // User B gets User A as Friend
+					friendPersonaId = friend.getPersonaId_A();
+					friendUserId = friend.getUserId_A();
+				}
+				if (!personaPresenceDAO.isUserNotOnline(friendUserId)) {
+					sendXmppPresence(personaEntity, presence, friendPersonaId);
 				}
 			}
 		}
