@@ -15,7 +15,8 @@ import javax.persistence.Table;
 	@NamedQuery(name = "FriendListEntity.findAcceptedByOwnerId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId AND obj.isAccepted = true"), //
 	@NamedQuery(name = "FriendListEntity.findBlockedByOwnerId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId AND obj.isBlocked = true"), //
 	@NamedQuery(name = "FriendListEntity.findByRemoteUserBlockedId", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userId = :userId AND obj.isBlocked = true"), //
-	@NamedQuery(name = "FriendListEntity.findByOwnerIdAndFriendPersona", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId AND obj.personaId = :personaId") //
+	@NamedQuery(name = "FriendListEntity.findByOwnerIdAndFriendPersona", query = "SELECT obj FROM FriendListEntity obj WHERE obj.userOwnerId = :userOwnerId AND obj.personaId = :personaId"), //
+	@NamedQuery(name = "FriendListEntity.deleteByPersona", query = "DELETE FROM FriendListEntity obj WHERE obj.persona.id = :personaId") //
 })
 public class FriendListEntity {
 

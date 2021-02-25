@@ -332,7 +332,7 @@ public class WindowCommandsBO {
 			}
 			Long invitedId = personaInvited.getPersonaId();
 			Long invitedUserId = personaInvited.getUser().getId();
-			if (personaSender.getPersonaId() == personaInvited.getPersonaId() || senderUserId == invitedUserId) {
+			if (senderId == invitedId || senderUserId == invitedUserId) {
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You cannot be a friend for yourself."), senderId);
 				return null;
 			}

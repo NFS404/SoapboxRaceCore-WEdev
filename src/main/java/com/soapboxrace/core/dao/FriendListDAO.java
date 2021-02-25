@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
@@ -48,5 +49,11 @@ public class FriendListDAO extends BaseDAO<FriendListEntity> {
 		query.setParameter("personaId", friendPersona);
 		return ( query.getResultList() != null && !query.getResultList().isEmpty() ) ? query.getResultList().get(0) : null;
 	}
+	
+	public void deleteByPersona(Long personaId) {
+        Query query = entityManager.createNamedQuery("FriendListEntity.deleteByPersona");
+        query.setParameter("personaId", personaId);
+        query.executeUpdate();
+    }
 
 }

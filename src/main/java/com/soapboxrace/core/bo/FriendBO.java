@@ -82,7 +82,6 @@ public class FriendBO {
 	@EJB
 	private AchievementsBO achievementsBO;
 
-	// FIXME Players who sent the friend request can teleport to the player, no matter which request status is
 	// Loading the player friend-list
 	public PersonaFriendsList getFriendListFromUserId(Long userId) {
 		ArrayOfFriendPersona arrayOfFriendPersona = new ArrayOfFriendPersona();
@@ -96,6 +95,9 @@ public class FriendBO {
 			}
 
 			int presence = 3; // 0 - offline, 1 - freeroam, 2 - racing or safehouse, 3 - friend request
+			if (entity.getUserOwnerId().equals(userId) && !entity.getIsAccepted()) {
+				presence = 0; // User A awaits for the User B invite decision, display as "offline"
+			}
 			if (entity.getIsAccepted()) {
 				presence = personaPresenceDAO.findByUserId(userId).getPersonaPresence();
 			}

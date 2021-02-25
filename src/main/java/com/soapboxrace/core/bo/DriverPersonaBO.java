@@ -10,6 +10,7 @@ import javax.ejb.Stateless;
 import com.soapboxrace.core.dao.AchievementPersonaDAO;
 import com.soapboxrace.core.dao.AchievementStateDAO;
 import com.soapboxrace.core.dao.CarSlotDAO;
+import com.soapboxrace.core.dao.FriendListDAO;
 import com.soapboxrace.core.dao.InventoryDAO;
 import com.soapboxrace.core.dao.InventoryItemDAO;
 import com.soapboxrace.core.dao.LobbyEntrantDAO;
@@ -24,6 +25,7 @@ import com.soapboxrace.core.jpa.AchievementRankEntity;
 import com.soapboxrace.core.jpa.BadgeDefinitionEntity;
 import com.soapboxrace.core.jpa.BadgePersonaEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
+import com.soapboxrace.core.jpa.FriendListEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.TreasureHuntEntity;
 import com.soapboxrace.core.jpa.UserEntity;
@@ -82,6 +84,9 @@ public class DriverPersonaBO {
 	
 	@EJB
 	private PersonaPresenceDAO personaPresenceDAO;
+	
+	@EJB
+	private FriendListDAO friendListDAO;
 
 	public ProfileData createPersona(Long userId, PersonaEntity personaEntity) {
 		UserEntity userEntity = userDao.findById(userId);
@@ -220,6 +225,8 @@ public class DriverPersonaBO {
 		for (CarSlotEntity carSlotEntity : carSlots) {
 			carSlotDAO.delete(carSlotEntity);
 		}
+		
+		deletePersonaFriendList(personaId, personaEntity.getUser().getId());
 		recordsDAO.deletePersonaRecords(personaEntity);
 		carSlotDAO.deleteByPersona(personaEntity);
 		lobbyEntrantDAO.deleteByPersona(personaEntity);
@@ -237,12 +244,25 @@ public class DriverPersonaBO {
 		PersonaEntity personaEntity = personaDao.findById(personaId);
 		UserEntity userEntityTemp = userDao.findById((long)(parameterBO.getIntParam("PERSONADELETE_TEMPID")));
 
+		deletePersonaFriendList(personaId, personaEntity.getUser().getId());
 		personaEntity.setUser(userEntityTemp);
 		personaEntity.setTeam(null);
 		personaEntity.setName(personaEntity.getName() + "_TD");
 		personaEntity.setCreated(LocalDateTime.now()); // can check when driver got deleted
 		recordsDAO.deletePersonaRecords(personaEntity);
 		personaDao.insert(personaEntity);
+	}
+	
+	public void deletePersonaFriendList(Long personaId, Long userId) {
+		friendListDAO.deleteByPersona(personaId); // Delete all B-side friend entries
+		List<FriendListEntity> friendList = friendListDAO.findByOwnerId(userId); // Get the user friend-list
+		FriendListEntity checkFriendEntity = null;
+		for (FriendListEntity friendEntity : friendList) {
+			checkFriendEntity = friendListDAO.findByOwnerIdAndFriendPersona(userId, friendEntity.getPersonaId());
+			if (checkFriendEntity == null) { // Check for non-removed A-side friend entries
+				friendListDAO.delete(friendEntity);
+			}
+		}
 	}
 
 	public void updateStatusMessage(String message, Long personaId) {
