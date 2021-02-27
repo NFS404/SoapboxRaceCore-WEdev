@@ -21,6 +21,8 @@ import javax.persistence.Table;
 			+ "streak AS treasureHunt "
 		+ "FROM "
 			+ "persona p "
+		+ "WHERE "
+			+ "p.isHidden = false "
 		+ "INNER JOIN treasure_hunt e ON p.id=e.personaid "
 		+ "ORDER BY treasureHunt DESC",
 	resultClass = PersonaTopTreasureHunt.class

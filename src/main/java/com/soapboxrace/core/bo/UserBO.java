@@ -129,6 +129,9 @@ public class UserBO {
 		ArrayOfProfileData arrayOfProfileData = new ArrayOfProfileData();
 		List<PersonaEntity> listOfProfile = userEntity.getListOfProfile();
 		for (PersonaEntity personaEntity : listOfProfile) {
+			if (personaEntity.isHidden()) {
+				continue; // Hidden persona is excluded
+			}
 			// switch to apache beanutils copy
 			ProfileData profileData = new ProfileData();
 			profileData.setName(personaEntity.getName());

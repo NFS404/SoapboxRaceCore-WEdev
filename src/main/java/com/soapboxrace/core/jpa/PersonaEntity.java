@@ -23,7 +23,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "PERSONA")
 @NamedQueries({ //
-		@NamedQuery(name = "PersonaEntity.findByName", query = "SELECT obj FROM PersonaEntity obj WHERE obj.name = :name") //
+		@NamedQuery(name = "PersonaEntity.findByName", query = "SELECT obj FROM PersonaEntity obj WHERE obj.name = :name AND obj.isHidden = false"), //
+		@NamedQuery(name = "PersonaEntity.findAllHiddenDrivers", query = "SELECT obj FROM PersonaEntity obj WHERE obj.isHidden = true") //
 })
 public class PersonaEntity {
 
@@ -45,6 +46,7 @@ public class PersonaEntity {
 	private int carSlots = 6;
 	private int racesCount;
 	private LocalDate dailyRaceDate;
+	private boolean isHidden; // Temporarily removed persona
 
 	@ManyToOne
 	@JoinColumn(name = "USERID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "FK_PERSONA_USER"))
@@ -210,6 +212,14 @@ public class PersonaEntity {
 
 	public void setDailyRaceDate(LocalDate dailyRaceDate) {
 		this.dailyRaceDate = dailyRaceDate;
+	}
+	
+	public boolean isHidden() {
+		return isHidden;
+	}
+
+	public void setHidden(boolean isHidden) {
+		this.isHidden = isHidden;
 	}
 
 }

@@ -1,7 +1,10 @@
 package com.soapboxrace.core.bo;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
@@ -13,6 +16,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.TimeReadConverter;
+import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
@@ -20,6 +24,8 @@ import com.soapboxrace.core.dao.TeamsDAO;
 import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
+import com.soapboxrace.core.jpa.LobbyEntity;
+import com.soapboxrace.core.jpa.LobbyEntrantEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.jpa.TeamsEntity;
 import com.soapboxrace.core.jpa.UserEntity;
@@ -62,6 +68,9 @@ public class TeamsBO {
 	
 	@EJB
 	private AchievementsBO achievementsBO;
+	
+	@EJB
+	private CarClassesDAO carClassesDAO;
 	
 	@EJB
 	private TimeReadConverter timeReadConverter;
@@ -353,6 +362,63 @@ public class TeamsBO {
 			
 			discordBot.sendMessage(message, true);
 		}
+	}
+	
+	// Teams & players announcements for the event
+	public void teamRacingLobbyInit (LobbyEntity lobbyEntity, TeamsEntity racerTeamEntity, Long teamRacerPersona, List<LobbyEntrantEntity> entrants) {
+		boolean teamIsAssigned = false;
+		Long team1id = lobbyEntity.getTeam1Id();
+		Long team2id = lobbyEntity.getTeam2Id();
+		String team1Name = "";
+		String team2Name = "";
+		Long racerTeamId = racerTeamEntity.getTeamId();
+		if (team1id == racerTeamId) {
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team joined as #1."), teamRacerPersona);
+			return;
+		}
+		if (team2id == racerTeamId) {
+			team1Name = teamsDao.findById(team1id).getTeamName();
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team joined as #2. First team is " + team1Name), teamRacerPersona);
+			return;
+		}
+		if (team1id == null && !teamIsAssigned) {
+			lobbyEntity.setTeam1Id(racerTeamId);
+			teamIsAssigned = true;
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team joined as #1."), teamRacerPersona);
+			return;
+		}
+		if (team1id != racerTeamId && team2id == null && !teamIsAssigned) {
+			lobbyEntity.setTeam2Id(racerTeamId);
+			teamIsAssigned = true;
+			team1Name = teamsDao.findById(team1id).getTeamName();
+			team2Name = racerTeamEntity.getTeamName();
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team joined as #2. First team is " + team1Name), teamRacerPersona);
+					
+			for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
+				PersonaEntity entrantPersona = lobbyEntrantEntity.getPersona();
+				TeamsEntity teamsEntity1 = entrantPersona.getTeam();
+				if (teamsEntity1 != null && teamsEntity1.getTeamId() == team1id) {
+					// System.out.println("### TEAMS: " + entrantPersona.getName() + " has got the Team2 (" + team2Name + ") message, his team: " + teamsEntity1.getTeamName());
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Second team is " + team2Name), entrantPersona.getPersonaId());
+					return;
+				}
+			}
+		}
+		if (team1id != racerTeamId && team2id != racerTeamId && !teamIsAssigned) {
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your team is not participating in this event."), teamRacerPersona);
+		}
+	}
+	
+	// Teams should participate on the allowed cars
+	public boolean isPlayerCarAllowed (int physicsProfileHash) {
+		String[] carsArray = parameterBO.getStrParam("TEAM_ALLOWEDCARS").split(",");
+		String playerCarTag = carClassesDAO.findByHash(physicsProfileHash).getStoreName();
+		List<String> carsStrArray = new ArrayList<String>();
+		carsStrArray = Stream.of(carsArray).collect(Collectors.toCollection(ArrayList::new));
+		if (carsStrArray.contains(playerCarTag)) {
+			return true;
+		}
+		return false;
 	}
 
 	private UserEntity checkLogin(String email, String password) {

@@ -53,6 +53,11 @@ public class PersonaDAO extends BaseDAO<PersonaEntity> {
 		List<PersonaEntity> resultList = query.getResultList();
 		return !resultList.isEmpty() ? resultList.get(0) : null;
 	}
+	
+	public List<PersonaEntity> findAllHiddenDrivers() {
+		TypedQuery<PersonaEntity> query = entityManager.createNamedQuery("PersonaEntity.findAllHiddenDrivers", PersonaEntity.class);
+		return query.getResultList();
+	}
 
 	public List<PersonaEntity> getAllPaged(int offset, int max) {
 		TypedQuery<PersonaEntity> query = entityManager.createQuery("SELECT obj FROM PersonaEntity obj ", PersonaEntity.class);
@@ -78,7 +83,7 @@ public class PersonaDAO extends BaseDAO<PersonaEntity> {
 	 * @author Vadimka
 	 */
 	public List<PersonaEntity> getTopScore(int onPage) {
-		TypedQuery<PersonaEntity> query = entityManager.createQuery("SELECT obj FROM PersonaEntity obj ORDER BY score DESC", PersonaEntity.class);
+		TypedQuery<PersonaEntity> query = entityManager.createQuery("SELECT obj FROM PersonaEntity obj WHERE obj.isHidden = false ORDER BY score DESC", PersonaEntity.class);
 		query.setMaxResults(onPage);
 		return query.getResultList();
 	}

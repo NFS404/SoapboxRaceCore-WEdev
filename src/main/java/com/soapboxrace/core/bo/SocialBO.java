@@ -169,6 +169,9 @@ public class SocialBO {
     private void addBlockedUserToList(ArrayOfBasicBlockPlayerInfo arrayOfBasicBlockPlayerInfo, FriendListEntity friendListEntity) {
     	Long targetUserId = friendListEntity.getUserId();
     	for (PersonaEntity personaEntity : userDAO.findById(targetUserId).getListOfProfile()) {
+    		if (personaEntity.isHidden()) {
+				continue; // Hidden persona is excluded
+			}
         	BasicBlockPlayerInfo basicBlockPlayerInfo = new BasicBlockPlayerInfo();
         	basicBlockPlayerInfo.setPersonaId(personaEntity.getPersonaId());
         	basicBlockPlayerInfo.setUserId(targetUserId);

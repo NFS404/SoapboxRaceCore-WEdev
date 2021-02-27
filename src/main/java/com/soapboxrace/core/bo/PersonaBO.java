@@ -1,11 +1,15 @@
 package com.soapboxrace.core.bo;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.EJB;
+import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 
+import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.OwnedCarConverter;
 import com.soapboxrace.core.dao.AchievementDAO;
 import com.soapboxrace.core.dao.AchievementRankDAO;
@@ -66,6 +70,12 @@ public class PersonaBO {
 	
 	@EJB
 	private AchievementRankDAO achievementRankDAO;
+	
+	@EJB
+	private DriverPersonaBO driverPersonaBO;
+	
+	@EJB
+	private DiscordWebhook discordBot;
 
 	public void changeDefaultCar(Long personaId, Long defaultCarId) {
 		PersonaEntity personaEntity = personaDAO.findById(personaId);
@@ -183,6 +193,28 @@ public class PersonaBO {
 		badgePersonaEntity.setAchievementId(achievementDefinitionEntity);
 		badgePersonaDAO.deleteByPersonaSlot(persona, slot);
 		badgePersonaDAO.update(badgePersonaEntity);
+	}
+	
+	// Delete the temp-hidden drivers after 30 days
+	@Schedule(dayOfWeek = "MON", persistent = false)
+	public void tempHiddenPersonaDeletion() {
+		List<PersonaEntity> hiddenPersonas = personaDAO.findAllHiddenDrivers();
+		int i = 0;
+		if (hiddenPersonas != null) {
+			for (PersonaEntity hiddenPersona : hiddenPersonas) { 
+				// "Created" time field was changed to reflect the temp-removal date
+				Long days = ChronoUnit.DAYS.between(LocalDateTime.now(), hiddenPersona.getCreated().plusDays(30));
+				if (days <= 0) {
+					driverPersonaBO.deletePersona(hiddenPersona.getPersonaId());
+					i++;
+				}
+			}
+		}
+		System.out.println("### Persona Temp Storage clean-up: " + i + " drivers was permanently deleted.");
+		String message = ":heavy_minus_sign:"
+        		+ "\n:x: **|** Было окончательно удалено " + i + " водителей из хранилища скрытых водителей."
+        		+ "\n:x: **|** " + i + " drivers from Hidden Drivers Storage were permamently deleted.";
+		discordBot.sendMessage(message);
 	}
 	
 	

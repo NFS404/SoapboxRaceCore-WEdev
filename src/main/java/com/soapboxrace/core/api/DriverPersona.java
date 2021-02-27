@@ -209,7 +209,6 @@ public class DriverPersona {
 			return Response.status(Response.Status.NOT_ACCEPTABLE).entity("Invalid name. Can only contain A-Z, 0-9, and can be between 3 and 15 characters.")
 					.build();
 		}
-
 		ArrayOfString nameReserveResult = bo.reserveName(name);
 
 		if (!nameReserveResult.getString().isEmpty()) {
@@ -245,13 +244,11 @@ public class DriverPersona {
 		if (parameterBO.getBoolParam("PERSONADELETE_TEMPMODE")) {
 			System.out.println("### User with mail " + tokenSessionBo.getUser(securityToken).getEmail() + " has deleted one of his driver persona (Temp mode): " + deletedName);
 			bo.deletePersonaTemp(personaId);
-			
 		}
 		else {
 			System.out.println("### User with mail " + tokenSessionBo.getUser(securityToken).getEmail() + " has deleted one of his driver persona: " + deletedName);
 			bo.deletePersona(personaId);
 		}
-		
 		return "<long>0</long>";
 	}
 

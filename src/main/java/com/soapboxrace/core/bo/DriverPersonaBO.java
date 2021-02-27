@@ -103,6 +103,7 @@ public class DriverPersonaBO {
 		personaEntity.setCash(parameterBO.getIntParam("STARTING_CASH_AMOUNT"));
 		personaEntity.setLevel(parameterBO.getIntParam("STARTING_LEVEL_NUMBER"));
 		personaEntity.setCreated(LocalDateTime.now());
+		personaEntity.setHidden(false);
 		personaDao.insert(personaEntity);
 
 		inventoryBO.createInventory(personaEntity);
@@ -238,19 +239,17 @@ public class DriverPersonaBO {
 		personaDao.delete(personaEntity);
 	}
 	
-	// Works as a recycle bin - holds a drivers for some time, in case of player's mistakes - Hypercycle
-	// FIXME No automatic clean-up
+	// Works as a recycle bin - holds a drivers for some time, in case of player's mistakes
 	public void deletePersonaTemp(Long personaId) {
 		PersonaEntity personaEntity = personaDao.findById(personaId);
-		UserEntity userEntityTemp = userDao.findById((long)(parameterBO.getIntParam("PERSONADELETE_TEMPID")));
-
+		
 		deletePersonaFriendList(personaId, personaEntity.getUser().getId());
-		personaEntity.setUser(userEntityTemp);
 		personaEntity.setTeam(null);
 		personaEntity.setName(personaEntity.getName() + "_TD");
 		personaEntity.setCreated(LocalDateTime.now()); // can check when driver got deleted
 		recordsDAO.deletePersonaRecords(personaEntity);
-		personaDao.insert(personaEntity);
+		personaEntity.setHidden(true); // Hides the persona from user and other players
+		personaDao.update(personaEntity);
 	}
 	
 	public void deletePersonaFriendList(Long personaId, Long userId) {
@@ -274,7 +273,7 @@ public class DriverPersonaBO {
 	public ArrayOfString reserveName(String name) {
 		ArrayOfString arrayOfString = new ArrayOfString();
 		if (personaDao.findByName(name) != null) {
-			arrayOfString.getString().add("NONE");
+			arrayOfString.getString().add("NONE"); // TODO Random nickname generation?
 		}
 		return arrayOfString;
 	}

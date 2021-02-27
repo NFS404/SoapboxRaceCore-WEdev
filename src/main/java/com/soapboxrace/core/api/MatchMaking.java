@@ -23,6 +23,8 @@ import com.soapboxrace.core.dao.LobbyDAO;
 import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
+import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.CustomCarTrans;
 import com.soapboxrace.jaxb.http.LobbyInfo;
 import com.soapboxrace.jaxb.http.SecurityChallenge;
@@ -57,6 +59,9 @@ public class MatchMaking {
 	
 	@EJB
 	private EventDAO eventDAO;
+	
+	@EJB
+	private OpenFireSoapBoxCli openFireSoapBoxCli;
 
 	@PUT
 	@Secured
@@ -67,7 +72,12 @@ public class MatchMaking {
 		CustomCarTrans customCar = personaBO.getDefaultCar(activePersonaId).getCustomCar();
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCar.getPhysicsProfileHash());
 //		lobbyBO.joinFastLobby(securityToken, activePersonaId, defaultCar.getCustomCar().getCarClassHash(), lobbyBO.carDivision(defaultCar.getCustomCar().getCarClassHash()), defaultCar.getCustomCar().getRaceFilter());
-		lobbyBO.joinFastLobby(securityToken, activePersonaId, customCar.getCarClassHash(), customCar.getRaceFilter(), carClassesEntity.getQuickRaceAllowed());
+		if (!carClassesEntity.getQuickRaceAllowed()) {
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You cannot join to racing on this vehicle."), activePersonaId);
+		}
+		else {
+			lobbyBO.joinFastLobby(securityToken, activePersonaId, customCar.getCarClassHash(), customCar.getRaceFilter());
+		}
 		return "";
 	}
 

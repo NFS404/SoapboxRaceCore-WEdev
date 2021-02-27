@@ -21,6 +21,8 @@ import javax.persistence.Table;
 			+ "p.racesCount racescount "
 		+ "FROM "
 			+ "persona p "
+		+ "WHERE "
+			+ "p.isHidden = false "
 		+ "GROUP BY p.id"
 		+ ") s ORDER BY racescount DESC",
 	resultClass = PersonaTopRaceEntity.class
