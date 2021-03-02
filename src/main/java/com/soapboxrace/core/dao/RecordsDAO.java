@@ -23,6 +23,7 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		this.entityManager = entityManager;
 	}
 
+	// Search for the existing player record during event finish
 	public RecordsEntity findCurrentRace(EventEntity event, UserEntity user, boolean powerUps, int carClassHash) {
 		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.findCurrentRace", RecordsEntity.class);
 		query.setParameter("event", event);
@@ -32,6 +33,14 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 
 		List<RecordsEntity> resultList = query.getResultList();
 		return !resultList.isEmpty() ? resultList.get(0) : null;
+	}
+	
+	// Take all un-checked records to check for actual car version
+	public List<RecordsEntity> checkAllRecords() {
+		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.checkAllRecords", RecordsEntity.class);
+
+		List<RecordsEntity> resultList = query.getResultList();
+		return resultList;
 	}
 
 	public RecordsEntity getWRRecord(EventEntity event, boolean powerUps, int carClassHash, Long timeMS) {
@@ -59,10 +68,14 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		return count; // 0 means 1st place
 	}
 	
-	public BigInteger countRecords(int eventId, boolean powerUps, int carClassHash) {
-		Query query = entityManager.createNativeQuery(
-			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carClassHash = "+carClassHash+" and userBan = false"
-		);
+	public BigInteger countRecords(int eventId, boolean powerUps, int carClassHash, boolean oldRecords) {
+		StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carClassHash = "+carClassHash+" and userBan = false ");
+		if (!oldRecords) { // If true - display all record types
+			sqlQuery.append("AND obj.isObsolete = false "); 
+		}
+		
+		Query query = entityManager.createNativeQuery(sqlQuery.toString());
 		@SuppressWarnings("unchecked")
 		List<BigInteger> List = query.getResultList();
 		if (List.isEmpty())
@@ -70,10 +83,14 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		else return List.get(0);
 	}
 	
-	public BigInteger countRecordsAll(int eventId, boolean powerUps) {
-		Query query = entityManager.createNativeQuery(
-//			"SELECT Count(DISTINCT userId) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and userBan = false");
-			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and userBan = false");
+	public BigInteger countRecordsAll(int eventId, boolean powerUps, boolean oldRecords) {
+		StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT Count(*) from records WHERE eventId = "+eventId+" AND powerUps = "+powerUps+" AND userBan = false ");
+		if (!oldRecords) { // If true - display all record types
+			sqlQuery.append("AND obj.isObsolete = false "); 
+		}
+		
+		Query query = entityManager.createNativeQuery(sqlQuery.toString());
 		@SuppressWarnings("unchecked")
 		List<BigInteger> List = query.getResultList();
 		if (List.isEmpty())
@@ -91,9 +108,14 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		else return List.get(0);
 	}
 	
-	public BigInteger countRecordsByCar(int eventId, boolean powerUps, int carPhysicsHash) {
-		Query query = entityManager.createNativeQuery(
-			"SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carPhysicsHash = "+carPhysicsHash+" and userBan = false");
+	public BigInteger countRecordsByCar(int eventId, boolean powerUps, int carPhysicsHash, boolean oldRecords) {
+		StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carPhysicsHash = "+carPhysicsHash+" and userBan = false ");
+		if (!oldRecords) { // If true - display all record types
+			sqlQuery.append("AND obj.isObsolete = false "); 
+		}
+		
+		Query query = entityManager.createNativeQuery(sqlQuery.toString());
 		@SuppressWarnings("unchecked")
 		List<BigInteger> List = query.getResultList();
 		if (List.isEmpty())
@@ -143,35 +165,62 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 	 * @param eventid - номер трассы
 	 * @param powerups - наличие бонусов (true/false)
 	 * @param carclasshash - номер класса машин
+	 * @param oldrecords - отображение устаревших рекордов (true/false)
 	 * @param page - Номер страницы
 	 * @param onPage - Сколько позиций на странице
 	 * @author Vadimka, Hypercycle
 	 */
-	public List<RecordsEntity> statsEventClass(EventEntity event, boolean powerups, int carClassHash, int page, int onPage) {
-		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.statsEventClass",RecordsEntity.class);
+	@SuppressWarnings("unchecked")
+	public List<RecordsEntity> statsEventClass(EventEntity event, boolean powerups, int carClassHash, boolean oldRecords, int page, int onPage) {
+		StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT obj FROM RecordsEntity obj ");
+		sqlQuery.append("WHERE obj.event = :event ");
+		sqlQuery.append("AND obj.powerUps = :powerUps "); 
+		sqlQuery.append("AND obj.carClassHash = :carClassHash "); 
+		sqlQuery.append("AND obj.userBan = false "); 
+		if (!oldRecords) { // If true - display all record types
+			sqlQuery.append("AND obj.isObsolete = false "); 
+		}
+		sqlQuery.append("ORDER BY obj.timeMS "); 
+		
+		Query query = entityManager.createQuery(sqlQuery.toString());
 		query.setParameter("event", event);
 		query.setParameter("powerUps", powerups);
 		query.setParameter("carClassHash", carClassHash);
 		query.setFirstResult((page-1) * onPage);
 		query.setMaxResults(onPage);
-		return query.getResultList();
+		List<RecordsEntity> list = query.getResultList();
+		return list;
 	}
 	
 	/**
 	 * Получить список лучших заездов по времени
 	 * @param eventid - номер трассы
 	 * @param powerups - наличие бонусов (true/false)
+	 * @param oldrecords - отображение устаревших рекордов (true/false)
 	 * @param page - Номер страницы
 	 * @param onPage - Сколько позиций на странице
 	 * @author Vadimka, Hypercycle
 	 */
-	public List<RecordsEntity> statsEventAll(EventEntity event, boolean powerups, int page, int onPage) {
-		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.statsEventAll", RecordsEntity.class);
+	@SuppressWarnings("unchecked")
+	public List<RecordsEntity> statsEventAll(EventEntity event, boolean powerups, boolean oldRecords, int page, int onPage) {
+		StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT obj FROM RecordsEntity obj ");
+		sqlQuery.append("WHERE obj.event = :event ");
+		sqlQuery.append("AND obj.powerUps = :powerUps "); 
+		sqlQuery.append("AND obj.userBan = false "); 
+		if (!oldRecords) { // If true - display all record types
+			sqlQuery.append("AND obj.isObsolete = false "); 
+		}
+		sqlQuery.append("ORDER BY obj.timeMS "); 
+		
+		Query query = entityManager.createQuery(sqlQuery.toString());
 		query.setParameter("event", event);
 		query.setParameter("powerUps", powerups);
 		query.setFirstResult((page-1) * onPage);
 		query.setMaxResults(onPage);
-		return query.getResultList();
+		List<RecordsEntity> list = query.getResultList();
+		return list;
 	}
 	
 	/**
@@ -194,17 +243,30 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 	 * Получить список лучших заездов во всех вариациях трассы. Фильтрация по модели автомобиля
 	 * @param eventid - номер трассы
 	 * @param carPhysicsHash - хэш модель автомобиля
+	 * @param oldrecords - отображение устаревших рекордов (true/false)
 	 * @param page - Номер страницы
 	 * @param onPage - Сколько позиций на странице
 	 * @author Hypercycle
 	 */
-	public List<RecordsEntity> statsEventCar(EventEntity event, boolean powerups, int carPhysicsHash, int page, int onPage) {
-		TypedQuery<RecordsEntity> query = entityManager.createNamedQuery("RecordsEntity.statsEventCar", RecordsEntity.class);
+	@SuppressWarnings("unchecked")
+	public List<RecordsEntity> statsEventCar(EventEntity event, boolean powerups, int carPhysicsHash, boolean oldRecords, int page, int onPage) {
+		StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT obj FROM RecordsEntity obj ");
+		sqlQuery.append("AND obj.userBan = false ");
+		sqlQuery.append("AND obj.powerUps = :powerUps "); 
+		sqlQuery.append("AND obj.carPhysicsHash = :carPhysicsHash "); 
+		if (!oldRecords) { // If true - display all record types
+			sqlQuery.append("AND obj.isObsolete = false "); 
+		}
+		sqlQuery.append("ORDER BY obj.timeMS "); 
+		
+		Query query = entityManager.createQuery(sqlQuery.toString());
 		query.setParameter("event", event);
 		query.setParameter("powerUps", powerups);
 		query.setParameter("carPhysicsHash", carPhysicsHash);
 		query.setFirstResult((page-1) * onPage);
 		query.setMaxResults(onPage);
-		return query.getResultList();
+		List<RecordsEntity> list = query.getResultList();
+		return list;
 	}
 }

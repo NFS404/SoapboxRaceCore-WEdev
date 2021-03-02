@@ -2,8 +2,11 @@ package com.soapboxrace.core.bo;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import javax.ejb.EJB;
+import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 
 import com.soapboxrace.core.bo.util.DiscordWebhook;
@@ -64,6 +67,9 @@ public class RecordsBO {
 	
 	@EJB
 	private EventDAO eventDAO;
+	
+	@EJB
+	private RestApiBO restApiBO;
 
 	public void submitRecord(EventEntity eventEntity, PersonaEntity personaEntity, EventDataEntity eventDataEntity, CustomCarEntity customCarEntity, 
 			CarClassesEntity carClassesEntity) {
@@ -144,6 +150,7 @@ public class RecordsBO {
 			recordsEntityNew.setEvent(eventEntity);
 			recordsEntityNew.setEventModeId(eventEntity.getEventModeId());
 			recordsEntityNew.setIsTraining(isTraining);
+			recordsEntityNew.setIsObsolete(false);
 			recordsEntityNew.setPersona(personaEntity);
 			recordsEntityNew.setUser(userEntity);
 				
@@ -198,6 +205,7 @@ public class RecordsBO {
 //			recordsEntity.setEvent(eventEntity);
 //			recordsEntity.setEventModeId(eventEntity.getEventModeId());
 			recordsEntity.setIsTraining(isTraining);
+			recordsEntity.setIsObsolete(false);
 			recordsEntity.setPersona(personaEntity);
 //			recordsEntity.setUser(personaEntity.getUser());
 				
@@ -239,9 +247,24 @@ public class RecordsBO {
 //		System.out.println("RecordEntry end");
 	}
 	
+	// Change the status of out-dated records and mark them as "obsolete"
+	// Can cause heavy load when starting for first time
+	@Schedule(dayOfWeek = "TUE", persistent = false)
+	public void markObsoleteRecords() {
+		List<RecordsEntity> actualRecords = recordsDAO.checkAllRecords();
+		for (RecordsEntity record : actualRecords) {
+			boolean isCarVersionActual = restApiBO.carVersionCheck(carClassesDAO.findByHash(record.getCarPhysicsHash()).getCarVersion(), record.getCarVersion());
+			if (!isCarVersionActual) { // Mark the record as Obsolete
+				record.setIsObsolete(true);
+				recordsDAO.update(record);
+			}
+		}
+	}
+	
 	// TrackMania-like score points system
+	// TODO Needs something better
 	public int calcSkillPoints(int eventId, boolean powerUpsInRace, int carClassHash, int recordRank) {
-		int recordCount = recordsDAO.countRecords(eventId, powerUpsInRace, carClassHash).intValue();
+		int recordCount = recordsDAO.countRecords(eventId, powerUpsInRace, carClassHash, false).intValue();
 		int skillpoints = 0;
 		if (recordCount < 2) {
 			skillpoints = 25; // 1st from of 2 players will got 50 SP, so for the single result on the event, player will have initial 25 SP

@@ -12,7 +12,6 @@ import javax.ws.rs.core.Response;
 
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.RestApiBO;
-import com.soapboxrace.jaxb.http.ArrayOfRaceWithTime;
 import com.soapboxrace.jaxb.http.ChangePassword;
 
 /**
@@ -147,7 +146,7 @@ public class RestApi {
 			String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
 			return Response.temporaryRedirect(URI.create(accessDenied)).build();
 		}
-		return Response.ok(bo.getTopTimeRace(eventid, powerups, carclass, "", false, page, onPage)).build();
+		return Response.ok(bo.getTopTimeRace(eventid, powerups, carclass, "", oldRecords, page, onPage)).build();
 	}
 	/**
 	 * Страница Трассы для профиля
@@ -161,7 +160,7 @@ public class RestApi {
             String accessDenied = parameterBO.getStrParam("RESTAPI_FAILURELINK");
             return Response.temporaryRedirect(URI.create(accessDenied)).build();
         }
-        return Response.ok(bo.getTopTimeRaceByPersona(eventid, powerups, personaname, false, page, onPage)).build();
+        return Response.ok(bo.getTopTimeRaceByPersona(eventid, powerups, personaname, true, page, onPage)).build();
     }
 	/**
 	 * Страница Трассы, вывод рекордов по модели автомобиля

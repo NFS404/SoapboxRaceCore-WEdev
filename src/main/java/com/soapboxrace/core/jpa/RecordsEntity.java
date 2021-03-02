@@ -25,35 +25,20 @@ import javax.persistence.Table;
         		+ "AND obj.carClassHash = :carClassHash "
         		+ "AND obj.timeMS <= :timeMS "
         		+ "AND obj.userBan = false "
+        		+ "AND obj.isObsolete = false "
                 + "ORDER BY obj.timeMS "),//
 
-@NamedQuery(name = "RecordsEntity.statsEventClass", //
-        query = "SELECT obj FROM RecordsEntity obj "
-                + "WHERE obj.event = :event "
-                + "AND obj.powerUps = :powerUps "
-                + "AND obj.carClassHash = :carClassHash "
-                + "AND obj.userBan = false "
-                + "ORDER BY obj.timeMS "),//
-@NamedQuery(name = "RecordsEntity.statsEventAll", //
-query = "SELECT obj FROM RecordsEntity obj "
-                + "WHERE obj.event = :event "
-                + "AND obj.powerUps = :powerUps "
-                + "AND obj.userBan = false "
-                + "ORDER BY obj.timeMS "),//
-@NamedQuery(name = "RecordsEntity.statsEventPersona", //
+@NamedQuery(name = "RecordsEntity.statsEventPersona", // Note: obsolete personal records is being displayed 
         query = "SELECT obj FROM RecordsEntity obj "
                 + "WHERE obj.event = :event "
                 + "AND obj.userBan = false "
                 + "AND obj.powerUps = :powerUps "
                 + "AND obj.user = :user "
                 + "ORDER BY obj.timeMS "),//
-@NamedQuery(name = "RecordsEntity.statsEventCar", //
-        query = "SELECT obj FROM RecordsEntity obj "
-                + "WHERE obj.event = :event "
-                + "AND obj.userBan = false "
-                + "AND obj.powerUps = :powerUps "
-                + "AND obj.carPhysicsHash = :carPhysicsHash "
-                + "ORDER BY obj.timeMS "),//
+
+@NamedQuery(name = "RecordsEntity.checkAllRecords", 
+        query = "SELECT obj FROM RecordsEntity obj WHERE obj.userBan = false AND obj.isObsolete = false "),//
+
 })
 public class RecordsEntity {
 
@@ -86,6 +71,7 @@ public class RecordsEntity {
 	private int eventModeId;
 	private boolean userBan;
 	private boolean training;
+	private boolean isObsolete;
 	
 	@ManyToOne
 	@JoinColumn(name = "EVENTPOWERUPSID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "RECORDS_EVENT_POWERUPS_FK"))
@@ -317,6 +303,14 @@ public class RecordsEntity {
 
 	public void setIsTraining(boolean training) {
 		this.training = training;
+	}
+	
+	public boolean isObsolete() {
+		return isObsolete;
+	}
+
+	public void setIsObsolete(boolean isObsolete) {
+		this.isObsolete = isObsolete;
 	}
 	
 }
