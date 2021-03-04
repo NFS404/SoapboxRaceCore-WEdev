@@ -72,7 +72,7 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		StringBuilder sqlQuery = new StringBuilder();
 		sqlQuery.append("SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carClassHash = "+carClassHash+" and userBan = false ");
 		if (!oldRecords) { // If true - display all record types
-			sqlQuery.append("AND obj.isObsolete = false "); 
+			sqlQuery.append("AND isObsolete = false "); 
 		}
 		
 		Query query = entityManager.createNativeQuery(sqlQuery.toString());
@@ -87,7 +87,7 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		StringBuilder sqlQuery = new StringBuilder();
 		sqlQuery.append("SELECT Count(*) from records WHERE eventId = "+eventId+" AND powerUps = "+powerUps+" AND userBan = false ");
 		if (!oldRecords) { // If true - display all record types
-			sqlQuery.append("AND obj.isObsolete = false "); 
+			sqlQuery.append("AND isObsolete = false "); 
 		}
 		
 		Query query = entityManager.createNativeQuery(sqlQuery.toString());
@@ -112,7 +112,7 @@ public class RecordsDAO extends BaseDAO<RecordsEntity> {
 		StringBuilder sqlQuery = new StringBuilder();
 		sqlQuery.append("SELECT Count(*) from records WHERE eventId = "+eventId+" and powerUps = "+powerUps+" and carPhysicsHash = "+carPhysicsHash+" and userBan = false ");
 		if (!oldRecords) { // If true - display all record types
-			sqlQuery.append("AND obj.isObsolete = false "); 
+			sqlQuery.append("AND isObsolete = false "); 
 		}
 		
 		Query query = entityManager.createNativeQuery(sqlQuery.toString());

@@ -2,7 +2,6 @@ package com.soapboxrace.core.bo;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -249,8 +248,10 @@ public class RecordsBO {
 	
 	// Change the status of out-dated records and mark them as "obsolete"
 	// Can cause heavy load when starting for first time
-	@Schedule(dayOfWeek = "TUE", persistent = false)
+	// FIXME Needs to avoid timeout somehow
+//	@Schedule(dayOfWeek = "TUE", persistent = false)
 	public void markObsoleteRecords() {
+		System.out.println("### Obsolete records check process started...");
 		List<RecordsEntity> actualRecords = recordsDAO.checkAllRecords();
 		for (RecordsEntity record : actualRecords) {
 			boolean isCarVersionActual = restApiBO.carVersionCheck(carClassesDAO.findByHash(record.getCarPhysicsHash()).getCarVersion(), record.getCarVersion());
@@ -259,6 +260,7 @@ public class RecordsBO {
 				recordsDAO.update(record);
 			}
 		}
+		System.out.println("### Obsolete records check process ended.");
 	}
 	
 	// TrackMania-like score points system

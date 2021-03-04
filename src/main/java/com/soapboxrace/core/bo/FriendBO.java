@@ -95,9 +95,9 @@ public class FriendBO {
 			}
 
 			int presence = 3; // 0 - offline, 1 - freeroam, 2 - racing or safehouse, 3 - friend request
-			if (entity.getUserOwnerId().equals(userId) && !entity.getIsAccepted()) {
-				presence = 0; // User A awaits for the User B invite decision, display as "offline"
-			}
+//			if (entity.getUserOwnerId().equals(userId) && !entity.getIsAccepted()) {
+//				presence = 0; // User A awaits for the User B invite decision, display as "offline"
+//			}
 			if (entity.getIsAccepted()) {
 				presence = personaPresenceDAO.findByUserId(userId).getPersonaPresence();
 			}

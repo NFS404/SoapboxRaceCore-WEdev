@@ -6,5 +6,11 @@
 		Nickname: <input type="text" name="playerName" /><br /><br /> 
 		<input type="submit" value="Proceed" />
 	</form>
+	<form action="Engine.svc/personas/forceCheckObsoleteRecords" method="post">
+		Force-check the obsolete player records:<br />
+		Token: <input type="text" name="adminToken" /><br /> 
+		<br /> 
+		<input type="submit" value="Proceed" />
+	</form>
 </body>
 </html>

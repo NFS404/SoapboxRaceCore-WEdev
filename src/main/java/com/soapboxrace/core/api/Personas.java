@@ -21,6 +21,7 @@ import com.soapboxrace.core.bo.CommerceBO;
 import com.soapboxrace.core.bo.InventoryBO;
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
+import com.soapboxrace.core.bo.RecordsBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.bo.util.CommerceOp;
 import com.soapboxrace.core.bo.util.OwnedCarConverter;
@@ -72,6 +73,9 @@ public class Personas {
 	
 	@EJB
 	private PersonaDAO personaDao;
+	
+	@EJB
+	private RecordsBO recordsBO;
 
 	@POST
 	@Secured
@@ -328,6 +332,15 @@ public class Personas {
 			return "Cars (" + carsBundle.length + ") was given to the player " + personaEntity.getName() + ".";
 		}
 		return "ERROR: invalid token";
+	}
+	
+	@POST
+	@Path("/forceCheckObsoleteRecords")
+	@Produces(MediaType.TEXT_PLAIN)
+	// TODO Move the method, temporary place
+	public String forceCheckObsoleteRecords(@FormParam("adminToken") String adminToken) {
+		recordsBO.markObsoleteRecords();
+		return "Records has been checked.";
 	}
 
 }
