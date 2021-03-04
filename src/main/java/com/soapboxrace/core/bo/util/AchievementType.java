@@ -365,13 +365,17 @@ public enum AchievementType {
 	 */
 	WEV3_SIDEQUEST(116), //
 	/**
+	 * own [x] [car-brand](s) in your garage
+	 */
+	BUICK_COLLECTOR(117), //
+	/**
 	 * drive in all events
 	 */
-	WEV2_TRAVELLER(117), //
+	WEV2_TRAVELLER(118), //
 	/**
 	 * install 4-star skills on all slots for X cars
 	 */
-	WEV2_SKILL_MASTER(118); //
+	WEV2_SKILL_MASTER(119); //
 	
 
 	private int id;

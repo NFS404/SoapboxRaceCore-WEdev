@@ -66,6 +66,7 @@ public class AchievementBrandsEntity {
 	private int smartWins;
 	private int teslaWins;
 	private int flankerWins;
+	private int buickWins;
 	
 	public Long getPersonaId() {
 		return personaId;
@@ -451,6 +452,14 @@ public class AchievementBrandsEntity {
 
 	public void setFlankerWins(int flankerWins) {
 		this.flankerWins = flankerWins;
+	}
+	
+	public int getBuickWins() {
+		return buickWins;
+	}
+
+	public void setBuickWins(int buickWins) {
+		this.buickWins = buickWins;
 	}
 	
 }
