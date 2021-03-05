@@ -91,7 +91,13 @@ public class DriverPersonaBO {
 	public ProfileData createPersona(Long userId, PersonaEntity personaEntity) {
 		UserEntity userEntity = userDao.findById(userId);
 
-		if (userEntity.getListOfProfile().size() >= 3) {
+		int size = 0;
+		for (PersonaEntity persona : userEntity.getListOfProfile()) {
+			if (!persona.isHidden()) { // Don't count "hidden" drivers
+				size++;
+			}
+		}
+		if (size >= 3) {
 			return null;
 		}
 		// Don't let the HEX cheaters get the player-exclusive avatars
