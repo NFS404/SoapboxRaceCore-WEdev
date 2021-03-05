@@ -83,6 +83,9 @@ public class WindowCommandsBO {
 	
 	@EJB
 	private VisualPartDAO visualPartDAO;
+	
+	@EJB
+	private FriendBO friendBO;
 
 	// Teams actions parser into "add a friend" window - Hypercycle
 	// XMPP messages can go into timeouts, if ' symbol is used
@@ -352,14 +355,7 @@ public class WindowCommandsBO {
 
 			XmppFriend xmppFriend = new XmppFriend(invitedId, openFireSoapBoxCli);
 			xmppFriend.sendFriendRequest(friendPersonaType);
-
-			// Insert db record for invited player
-			FriendListEntity friendListInsert = new FriendListEntity();
-			friendListInsert.setUserOwnerId(invitedUserId);
-			friendListInsert.setUserId(senderUserId);
-			friendListInsert.setPersonaId(senderId);
-			friendListInsert.setIsAccepted(false);
-			friendListDAO.insert(friendListInsert);
+			friendBO.createNewFriendListEntry(senderId, invitedUserId, senderUserId, false, false);
 
 			FriendPersona friendPersona = new FriendPersona();
 			friendPersona.setIconIndex(personaInvited.getIconIndex());
