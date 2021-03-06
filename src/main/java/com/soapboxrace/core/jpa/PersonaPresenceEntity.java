@@ -22,6 +22,9 @@ import javax.persistence.Table;
 		@NamedQuery(name = "PersonaPresenceEntity.updateCurrentEventPost", //
 		query = "UPDATE PersonaPresenceEntity obj " // 
 				+ "SET obj.currentEventDataId = :currentEventDataId, obj.currentEventModeId = :currentEventModeId, obj.currentEventSessionId = :currentEventSessionId, obj.disablePU = :disablePU WHERE obj.activePersonaId = :personaId"), //
+		@NamedQuery(name = "PersonaPresenceEntity.userQuitUpdate", //
+		query = "UPDATE PersonaPresenceEntity obj " // 
+				+ "SET obj.currentEventDataId = null, obj.currentEventModeId = 0, obj.currentEventSessionId = null, obj.disablePU = false WHERE obj.userId = :userId"), //
 		@NamedQuery(name = "PersonaPresenceEntity.updateDisablePU", //
 		query = "UPDATE PersonaPresenceEntity obj " // 
 				+ "SET obj.disablePU = :disablePU WHERE obj.activePersonaId = :personaId"), //

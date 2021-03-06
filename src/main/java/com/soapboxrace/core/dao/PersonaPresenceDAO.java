@@ -62,6 +62,12 @@ public class PersonaPresenceDAO extends BaseDAO<PersonaPresenceEntity> {
 		query.executeUpdate();
 	}
 	
+	public void userQuitUpdate(Long userId) {
+		Query query = entityManager.createNamedQuery("PersonaPresenceEntity.userQuitUpdate");
+		query.setParameter("userId", userId);
+		query.executeUpdate();
+	}
+	
 	public void updateDisablePU(Long personaId, boolean disablePU) {
 		Query query = entityManager.createNamedQuery("PersonaPresenceEntity.updateDisablePU");
 		query.setParameter("personaId", personaId);

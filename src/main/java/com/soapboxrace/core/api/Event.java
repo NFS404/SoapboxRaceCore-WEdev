@@ -80,7 +80,11 @@ public class Event {
 		
 		// Save the abort info on the event data
 		PersonaPresenceEntity personaPresenceEntity = personaPresenceDAO.findByUserId(userId);
-		EventDataEntity eventDataEntity = eventDataDAO.findById(personaPresenceEntity.getCurrentEventDataId());
+		Long currentEventData = personaPresenceEntity.getCurrentEventDataId();
+		if (currentEventData == null) {
+			return ""; // On some cases client will abort the event during "Ready" phase, the event data will be not present at all
+		}
+		EventDataEntity eventDataEntity = eventDataDAO.findById(currentEventData);
 		int eventMode = eventDataEntity.getEvent().getEventModeId();
 		eventDataEntity.setFinishReason(8202); // Aborted
 		eventDataEntity.setServerEventDuration(0);

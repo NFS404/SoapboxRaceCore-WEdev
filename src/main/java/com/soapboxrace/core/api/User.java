@@ -99,7 +99,6 @@ public class User {
 		PersonaEntity personaEntity = personaBO.getPersonaById(personaId);
 		friendBO.sendXmppPresenceToAllFriends(personaEntity, 0);
 		tokenBO.setActivePersonaId(securityToken, 0L, true);
-		personaPresenceDAO.updatePersonaPresence(personaId, 0);
 		personaPresenceDAO.updateCurrentEventPost(personaId, null, 0, null, false);
 		return "";
 	}
@@ -110,15 +109,15 @@ public class User {
 	@Produces(MediaType.APPLICATION_XML)
 	public String secureLogout(@HeaderParam("securityToken") String securityToken) {
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
-		System.out.println("### User logged out (SecureLogout), ID: " + tokenBO.getUser(securityToken).getId());
+		Long userId = tokenBO.getUser(securityToken).getId();
+		System.out.println("### User logged out (SecureLogout), ID: " + userId);
 		if (activePersonaId == null || activePersonaId.equals(0l)) {
 			return "";
 		}
 		PersonaEntity personaEntity = personaBO.getPersonaById(activePersonaId);
-		friendBO.sendXmppPresenceToAllFriends(personaEntity, 0);
 		tokenBO.setActivePersonaId(securityToken, 0L, true);
-		personaPresenceDAO.updatePersonaPresence(activePersonaId, 0);
-		personaPresenceDAO.updateCurrentEventPost(activePersonaId, null, 0, null, false);
+		personaPresenceDAO.userQuitUpdate(userId);
+		friendBO.sendXmppPresenceToAllFriends(personaEntity, 0);
 		return "";
 	}
 

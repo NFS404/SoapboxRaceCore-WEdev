@@ -14,12 +14,15 @@ import com.soapboxrace.core.api.util.Secured;
 import com.soapboxrace.core.bo.EventBO;
 import com.soapboxrace.core.bo.EventMissionsBO;
 import com.soapboxrace.core.bo.EventResultBO;
+import com.soapboxrace.core.bo.FriendBO;
 import com.soapboxrace.core.bo.LobbyBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.LobbyDAO;
+import com.soapboxrace.core.dao.PersonaDAO;
+import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
@@ -62,6 +65,15 @@ public class MatchMaking {
 	
 	@EJB
 	private OpenFireSoapBoxCli openFireSoapBoxCli;
+	
+	@EJB
+	private PersonaPresenceDAO personaPresenceDAO;
+	
+	@EJB
+	private FriendBO friendBO;
+	
+	@EJB
+	private PersonaDAO personaDAO;
 
 	@PUT
 	@Secured
@@ -128,7 +140,8 @@ public class MatchMaking {
 		sessionInfo.setChallenge(securityChallenge);
 		sessionInfo.setEventId(eventId);
 		EventSessionEntity createEventSession = eventBO.createEventSession(eventId);
-		sessionInfo.setSessionId(createEventSession.getId());
+		Long eventSessionId = createEventSession.getId();
+		sessionInfo.setSessionId(eventSessionId);
 		tokenSessionBO.setActiveLobbyId(securityToken, 0L);
 	
 		EventEntity eventEntity = eventDAO.findById(eventId);

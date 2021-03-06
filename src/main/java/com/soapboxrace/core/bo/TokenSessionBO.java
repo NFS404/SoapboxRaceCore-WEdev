@@ -285,8 +285,11 @@ public class TokenSessionBO {
 		if (teamsEntity != null) {teamId = teamsEntity.getTeamId();}
 		tokenSessionEntity.setTeamId(teamId);
 		
-//		personaPresenceDAO.updatePersonaPresence(personaId, 1);
-		personaPresenceEntity.setPersonaPresence(1);
+		int presence = 1;
+		if (personaId.equals(0L)) {
+			presence = 0; // For user logout
+		}
+		personaPresenceEntity.setPersonaPresence(presence);
 		personaPresenceEntity.setActivePersonaId(personaId);
 		// activePersonas.put(securityToken, tokenSessionEntity);
 		tokenDAO.update(tokenSessionEntity);
