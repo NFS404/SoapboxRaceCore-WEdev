@@ -383,7 +383,7 @@ public class LobbyBO {
 				if (serverCarClass == playerCarClass || serverCarClass == 0) { // carClass 0 = open races for all classes
 					if (!teamsBO.isPlayerCarAllowed(playerCarHash)) { // Player car-model check
 						openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Your car model is not suitable for the current Team Racing Season." +
-								"\n ## Check out the allowed car-list in our Game Guide."), teamRacerPersona);
+								"\n## Check out the allowed car-list in our Game Guide."), teamRacerPersona);
 					}
 					else {
 						teamsBO.teamRacingLobbyInit(lobbyEntity, racerTeamEntity, teamRacerPersona, entrants);

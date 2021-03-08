@@ -99,7 +99,7 @@ public class FriendBO {
 //				presence = 0; // User A awaits for the User B invite decision, display as "offline"
 //			}
 			if (entity.getIsAccepted()) {
-				presence = personaPresenceDAO.findByUserId(userId).getPersonaPresence();
+				presence = personaPresenceDAO.findByUserId(entity.getUserId()).getPersonaPresence();
 			}
 			addPersonaToFriendList(friendPersonaList, personaEntity, presence);
 		}
@@ -207,12 +207,22 @@ public class FriendBO {
 
 		FriendListEntity friendListEntity = friendListDAO.findByOwnerIdAndFriendPersona(personaInvited.getUser().getId(), personaSender.getPersonaId());
 		if (friendListEntity != null) {
-			friendListDAO.delete(friendListEntity);
+			isFriendBlocker(friendListEntity);
 		}
 
 		friendListEntity = friendListDAO.findByOwnerIdAndFriendPersona(personaSender.getUser().getId(), personaInvited.getPersonaId());
 		if (friendListEntity != null) {
+			isFriendBlocker(friendListEntity);
+		}
+	}
+	
+	public void isFriendBlocker(FriendListEntity friendListEntity) {
+		if (!friendListEntity.getIsBlocked()) {
 			friendListDAO.delete(friendListEntity);
+		}
+		else {
+			friendListEntity.setIsAccepted(false);
+			friendListDAO.update(friendListEntity);
 		}
 	}
 

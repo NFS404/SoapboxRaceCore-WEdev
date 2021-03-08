@@ -28,6 +28,8 @@ import javax.persistence.Table;
 		@NamedQuery(name = "PersonaPresenceEntity.updateDisablePU", //
 		query = "UPDATE PersonaPresenceEntity obj " // 
 				+ "SET obj.disablePU = :disablePU WHERE obj.activePersonaId = :personaId"), //
+		@NamedQuery(name = "PersonaPresenceEntity.forceResetPresence", //
+		query = "UPDATE PersonaPresenceEntity obj SET obj.personaPresence = 0"), //
 		@NamedQuery(name = "PersonaPresenceEntity.isUserOnline", query = "SELECT obj FROM PersonaPresenceEntity obj WHERE obj.userId = :userId AND obj.personaPresence <> 0") //
 })
 public class PersonaPresenceEntity {

@@ -189,9 +189,9 @@ public class LobbyCountdownBO {
 			}
 			lobbyEntrantInfo.add(lobbyEntrantInfoType);
 			
-			if (entrantPersona.getTeam() != null) {
+			if (entrantPersona.getTeam() != null && team2Id != null) {
 				Long playerTeamId = entrantPersona.getTeam().getTeamId();
-				if (playerTeamId.equals(team1Id) || playerTeamId.equals(team1Id)) { // Get the opponent team name and make a notification
+				if (playerTeamId.equals(team1Id) || playerTeamId.equals(team2Id)) { // Get the opponent team name and make a notification
 					String opponentTeamName = "!pls fix!";
 					if (entrantPersona.getTeam().getTeamId().equals(team2Id)) {
 						opponentTeamName = teamsDAO.findById(team1Id).getTeamName();

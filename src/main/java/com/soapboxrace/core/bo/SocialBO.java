@@ -132,14 +132,15 @@ public class SocialBO {
         }
 
         Long otherPersonaUserId = otherPersonaEntity.getUser().getId();
-        FriendListEntity localSide = friendListDAO.findByOwnerIdAndFriendPersona(userId, otherPersonaUserId);
-        FriendListEntity remoteSide = friendListDAO.findByOwnerIdAndFriendPersona(otherPersonaUserId, userId);
+        FriendListEntity localSide = friendListDAO.findByOwnerIdAndFriendPersona(userId, otherPersonaId);
+        FriendListEntity remoteSide = friendListDAO.findByOwnerIdAndFriendPersona(otherPersonaUserId, activePersonaId);
 
         if (localSide == null) { // Create new FList entry
         	friendBO.createNewFriendListEntry(otherPersonaId, userId, otherPersonaUserId, false, true);
         } 
         else { // Friend became Enemy...
             localSide.setIsBlocked(true);
+            localSide.setIsAccepted(false);
             friendListDAO.update(localSide);
         }
         if (remoteSide != null) { // Remove the FList entry on the other side, since we have a block
