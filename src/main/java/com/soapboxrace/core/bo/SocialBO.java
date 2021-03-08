@@ -94,23 +94,26 @@ public class SocialBO {
         
         List<FriendListEntity> blockedPlayersList = friendListDAO.findBlockedByOwnerId(userId);
         for (FriendListEntity friendListEntity : blockedPlayersList) {
+        	// System.out.println("blockedUserList userId: " + friendListEntity.getUserId() + ", userOwnerId: " + friendListEntity.getUserOwnerId());
             this.addBlockedUserToList(arrayOfBasicBlockPlayerInfo, friendListEntity);
         }
         return arrayOfBasicBlockPlayerInfo;
     }
 
 	// Parts taken from WorldUnited.gg 
+	// FIXME For unknown reason, when player gets his blockers list, he will be unable to see own messages on public chats
     public ArrayOfLong getBlockersByUsers(Long personaId, Long userId) {
-        PersonaEntity personaEntity = personaDao.findById(personaId);
-        if (personaEntity == null) {
-        	System.out.println("### User " + userId + "has tried to request blocked players list without Persona ID somehow.");
-        	return null;
-        }
+//      PersonaEntity personaEntity = personaDao.findById(personaId);
+//      if (personaEntity == null) {
+//      	System.out.println("### User " + userId + "has tried to request blocked players list without Persona ID somehow.");
+//      	return null;
+//      }
 
         ArrayOfLong arrayOfLong = new ArrayOfLong();
-        for (FriendListEntity friendListEntity : friendListDAO.findByRemoteUserBlockedId(userId)) {
-            arrayOfLong.getLong().add(friendListEntity.getUserId());
-        }
+//      for (FriendListEntity friendListEntity : friendListDAO.findByRemoteUserBlockedId(userId)) {
+//      	System.out.println("blockersByUsers userId: " + friendListEntity.getUserId() + ", userOwnerId: " + friendListEntity.getUserOwnerId());
+//          arrayOfLong.getLong().add(friendListEntity.getUserId());
+//      }
         return arrayOfLong;
     }
     

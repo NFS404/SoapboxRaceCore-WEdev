@@ -17,6 +17,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import com.soapboxrace.core.bo.util.DiscordWebhook;
 import com.soapboxrace.core.bo.util.TimeReadConverter;
 import com.soapboxrace.core.dao.CarClassesDAO;
+import com.soapboxrace.core.dao.CustomCarDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
@@ -71,6 +72,9 @@ public class TeamsBO {
 	
 	@EJB
 	private CarClassesDAO carClassesDAO;
+	
+	@EJB
+	private CustomCarDAO customCarDAO;
 	
 	@EJB
 	private TimeReadConverter timeReadConverter;
@@ -275,7 +279,8 @@ public class TeamsBO {
 				String racerEventTime = timeReadConverter.convertRecord(eventDuration);
 				timeDiffStr = " time diff.: " + racerEventTime;
 			}
-			message = message.concat(rankCounter + " - " + racerEntityDebug.getName() + " (*" + racerTime + "*) " + teamIcon + timeDiffStr + " \n");
+			String playerCar = carClassesDAO.findByHash(customCarDAO.findById(racerDebug.getCarId()).getPhysicsProfileHash()).getModelSmall();
+			message = message.concat(rankCounter + " - " + racerEntityDebug.getName() + " (*" + racerTime + ", " + playerCar + "*) " + teamIcon + timeDiffStr + " \n");
 			
 			rankCounter++;
 		}
