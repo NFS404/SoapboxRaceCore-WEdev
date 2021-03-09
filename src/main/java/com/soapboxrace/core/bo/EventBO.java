@@ -125,7 +125,7 @@ public class EventBO {
 		return eventCarInfoEntity;
 	}
 
-	public EventSessionEntity createEventSession(int eventId) {
+	public EventSessionEntity createSPEventSession(int eventId, Long personaId) {
 		EventEntity eventEntity = eventDao.findById(eventId);
 		if (eventEntity == null) {
 			return null;
@@ -134,6 +134,7 @@ public class EventBO {
 		eventSessionEntity.setEvent(eventEntity);
 		eventSessionEntity.setStarted(System.currentTimeMillis());
 		eventSessionEntity.setTeamNOS(false); // Temporal value
+		eventSessionEntity.setPlayerList(personaId.toString()); // Save the Id of the persona-hoster
 		eventSessionDao.insert(eventSessionEntity);
 		return eventSessionEntity;
 	}

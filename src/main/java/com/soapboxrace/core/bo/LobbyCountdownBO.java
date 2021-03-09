@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
@@ -20,6 +21,7 @@ import com.soapboxrace.core.bo.util.StringListConverter;
 import com.soapboxrace.core.bo.util.TimeReadConverter;
 import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.LobbyDAO;
+import com.soapboxrace.core.dao.LobbyEntrantDAO;
 import com.soapboxrace.core.dao.OwnedCarDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
@@ -50,6 +52,9 @@ public class LobbyCountdownBO {
 	
 	@EJB
 	private LobbyDAO lobbyDao;
+	
+	@EJB
+	private LobbyEntrantDAO lobbyEntrantDAO;
 	
 	@EJB
 	private EventSessionDAO eventSessionDao;
@@ -109,6 +114,7 @@ public class LobbyCountdownBO {
 			for (LobbyEntrantEntity poorPlayer : entrants) {
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Too low or too many players in this lobby - cancelled."), poorPlayer.getPersona().getPersonaId());
 			}
+			endLobby(lobbyEntity);
 			return;
 		}
 		Collections.sort(entrants);
@@ -131,7 +137,6 @@ public class LobbyCountdownBO {
 		eventSessionEntity.setTeamNOS(false); // False by default
 		// TeamNOS - if race has been randomly started without PUs, team players wouldn't be able to use it, but others will be able
 		// Permanently disabled due to the community request
-		eventSessionDao.insert(eventSessionEntity);
 		String udpRaceIp = parameterBO.getStrParam("UDP_RACE_IP");
 		
 		boolean isInterceptorEvent = eventEntity.getEventModeId() == 100 ? true : false;
@@ -142,6 +147,7 @@ public class LobbyCountdownBO {
 			timeLimit = timeReadConverter.convertRecord(eventEntity.getTimeLimit());
 		}
 		
+		List<Long> personaArray = new ArrayList<Long>();
 		for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
 			// eventDataEntity.setIsSinglePlayer(false);
 			PersonaEntity entrantPersona = lobbyEntrantEntity.getPersona();
@@ -184,7 +190,7 @@ public class LobbyCountdownBO {
 				}
 			}
 			if ("127.0.0.1".equals(udpRaceIp)) {
-				TokenSessionEntity tokenEntity = tokenDAO.findByUserId(lobbyEntrantEntity.getPersona().getUser().getId());
+				TokenSessionEntity tokenEntity = tokenDAO.findByUserId(entrantPersona.getUser().getId());
 				lobbyEntrantInfoType.setUdpRaceHostIp(tokenEntity.getClientHostIp());
 			}
 			lobbyEntrantInfo.add(lobbyEntrantInfoType);
@@ -201,6 +207,7 @@ public class LobbyCountdownBO {
 					personaPresenceDAO.updateDisablePU(personaId, true); // Disable Power-Ups for Team Racing player
 			    }
 			}
+			personaArray.add(personaId);
 //			if (entrantPersona.getTeam() != null && team2NOS != null) {
 //				String puStatus = "TXT_WEV3_BASEANNOUNCER_TEAMPU_ON";
 //				if (!teamNOS) {puStatus = "TXT_WEV3_BASEANNOUNCER_TEAMPU_OFF";}
@@ -211,7 +218,6 @@ public class LobbyCountdownBO {
 			if (!personaCops.isEmpty() && !personaRacers.isEmpty()) {	
 				eventSessionEntity.setPersonaCops(stringListConverter.listToStr(personaCops));
 				eventSessionEntity.setPersonaRacers(stringListConverter.listToStr(personaRacers));
-				eventSessionDao.update(eventSessionEntity);
 				String playersList = "### Cops: " + stringListConverter.interceptorPersonaChatList(personaCops) + "\n"
 						+ "## Racers: " + stringListConverter.interceptorPersonaChatList(personaRacers);
 				for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
@@ -249,6 +255,16 @@ public class LobbyCountdownBO {
 
 		XmppLobby xmppLobby = new XmppLobby(0L, openFireSoapBoxCli);
 		xmppLobby.sendRelay(lobbyLaunched, xMPP_CryptoTicketsType);
+		
+		eventSessionEntity.setPlayerList(stringListConverter.listToStr(personaArray)); // Save the current entrants list
+		eventSessionDao.insert(eventSessionEntity);
+		endLobby(lobbyEntity);
+	}
+	
+	// Remove the lobby information from DB, we don't need it anymore
+	public void endLobby(LobbyEntity lobbyEntity) {
+		lobbyEntrantDAO.deleteByLobby(lobbyEntity);
+		lobbyDao.delete(lobbyEntity);
 	}
 	
 }

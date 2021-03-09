@@ -127,7 +127,7 @@ public class MatchMaking {
 
 	@GET
 	@Secured
-	@Path("/launchevent/{eventId}")
+	@Path("/launchevent/{eventId}") // Starts single-player event
 	@Produces(MediaType.APPLICATION_XML)
 	public SessionInfo launchEvent(@HeaderParam("securityToken") String securityToken, @PathParam("eventId") int eventId) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
@@ -139,8 +139,9 @@ public class MatchMaking {
 		SessionInfo sessionInfo = new SessionInfo();
 		sessionInfo.setChallenge(securityChallenge);
 		sessionInfo.setEventId(eventId);
-		EventSessionEntity createEventSession = eventBO.createEventSession(eventId);
+		EventSessionEntity createEventSession = eventBO.createSPEventSession(eventId, activePersonaId);
 		Long eventSessionId = createEventSession.getId();
+		
 		sessionInfo.setSessionId(eventSessionId);
 		tokenSessionBO.setActiveLobbyId(securityToken, 0L);
 	

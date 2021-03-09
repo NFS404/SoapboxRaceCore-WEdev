@@ -43,6 +43,40 @@ public class EventDAO extends BaseDAO<EventEntity> {
 		return query.getResultList();
 	}
 	/**
+	 * Все включенные эвенты (вкл. погони)
+	 * @author Vadimka
+	 */
+	public List<EventEntity> findAllSearchEnabled(int carClassHash) {
+		TypedQuery<EventEntity> query = entityManager.createNamedQuery("EventEntity.findAllSearchEnabled", EventEntity.class);
+		query.setParameter("rotation", parameterBO.getIntParam("ROTATIONID"));
+		query.setParameter("carClassHash", carClassHash);
+		return query.getResultList();
+	}
+	public List<EventEntity> findRacesSearchEnabled(int carClassHash) {
+		TypedQuery<EventEntity> query = entityManager.createNamedQuery("EventEntity.findRacesSearchEnabled", EventEntity.class);
+		query.setParameter("rotation", parameterBO.getIntParam("ROTATIONID"));
+		query.setParameter("carClassHash", carClassHash);
+		return query.getResultList();
+	}
+	public List<EventEntity> findAllRacesSearchEnabled(int carClassHash) {
+		TypedQuery<EventEntity> query = entityManager.createNamedQuery("EventEntity.findAllRacesSearchEnabled", EventEntity.class);
+		query.setParameter("rotation", parameterBO.getIntParam("ROTATIONID"));
+		query.setParameter("carClassHash", carClassHash);
+		return query.getResultList();
+	}
+	public List<EventEntity> findTESearchEnabled(int carClassHash) {
+		TypedQuery<EventEntity> query = entityManager.createNamedQuery("EventEntity.findTESearchEnabled", EventEntity.class);
+		query.setParameter("rotation", parameterBO.getIntParam("ROTATIONID"));
+		query.setParameter("carClassHash", carClassHash);
+		return query.getResultList();
+	}
+	public List<EventEntity> findDragSearchEnabled(int carClassHash) {
+		TypedQuery<EventEntity> query = entityManager.createNamedQuery("EventEntity.findDragSearchEnabled", EventEntity.class);
+		query.setParameter("rotation", parameterBO.getIntParam("ROTATIONID"));
+		query.setParameter("carClassHash", carClassHash);
+		return query.getResultList();
+	}
+	/**
 	 * Количество всех эвентов
 	 * @author Vadimka
 	 */

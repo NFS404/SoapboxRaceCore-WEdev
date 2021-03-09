@@ -14,6 +14,13 @@ import javax.persistence.Table;
 @NamedQueries({ //
 		@NamedQuery(name = "EventEntity.findAllStats", query = "SELECT obj FROM EventEntity obj WHERE obj.statsVisible = true AND isEnabled = true ORDER BY obj.name"), //
 		@NamedQuery(name = "EventEntity.findAllEnabledStats", query = "SELECT obj FROM EventEntity obj WHERE (rotation = :rotation OR rotation = 0) AND obj.statsVisible = true AND isEnabled = true ORDER BY obj.name"), //
+		
+		@NamedQuery(name = "EventEntity.findAllSearchEnabled", query = "SELECT obj FROM EventEntity obj WHERE (rotation = :rotation OR rotation = 0) AND obj.searchAvailable = true AND isEnabled = true AND (obj.carClassHash = 607077938 or obj.carClassHash = :carClassHash)"), //
+		@NamedQuery(name = "EventEntity.findRacesSearchEnabled", query = "SELECT obj FROM EventEntity obj WHERE (rotation = :rotation OR rotation = 0) AND obj.searchAvailable = true AND isEnabled = true AND (obj.eventModeId = 4 or obj.eventModeId = 9) AND (obj.carClassHash = 607077938 or obj.carClassHash = :carClassHash)"), //
+		@NamedQuery(name = "EventEntity.findAllRacesSearchEnabled", query = "SELECT obj FROM EventEntity obj WHERE (rotation = :rotation OR rotation = 0) AND obj.searchAvailable = true AND isEnabled = true AND (obj.eventModeId = 4 or obj.eventModeId = 9 or obj.eventModeId = 19) AND (obj.carClassHash = 607077938 or obj.carClassHash = :carClassHash)"), //
+		@NamedQuery(name = "EventEntity.findDragSearchEnabled", query = "SELECT obj FROM EventEntity obj WHERE (rotation = :rotation OR rotation = 0) AND obj.searchAvailable = true AND isEnabled = true AND obj.eventModeId = 19 AND (obj.carClassHash = 607077938 or obj.carClassHash = :carClassHash)"), //
+		@NamedQuery(name = "EventEntity.findTESearchEnabled", query = "SELECT obj FROM EventEntity obj WHERE (rotation = :rotation OR rotation = 0) AND obj.searchAvailable = true AND isEnabled = true AND obj.eventModeId = 24 AND (obj.carClassHash = 607077938 or obj.carClassHash = :carClassHash)"), //
+		
 		@NamedQuery(name = "EventEntity.findByLevel", query = "SELECT obj FROM EventEntity obj WHERE :level >= obj.minLevel AND :level <= obj.maxLevel AND isEnabled = true"), //
 		@NamedQuery(name = "EventEntity.findByRotation", query = "SELECT obj FROM EventEntity obj WHERE :level >= obj.minLevel AND :level <= obj.maxLevel AND isEnabled = true AND (rotation = :rotation OR rotation = 0)") //
 })

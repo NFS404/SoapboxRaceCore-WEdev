@@ -6,6 +6,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
+import com.soapboxrace.core.jpa.LobbyEntity;
 import com.soapboxrace.core.jpa.LobbyEntrantEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
 
@@ -24,6 +25,12 @@ public class LobbyEntrantDAO extends BaseDAO<LobbyEntrantEntity> {
 	public void deleteByPersona(PersonaEntity personaEntity) {
 		Query query = entityManager.createNamedQuery("LobbyEntrantEntity.deleteByPersona");
 		query.setParameter("persona", personaEntity);
+		query.executeUpdate();
+	}
+	
+	public void deleteByLobby(LobbyEntity lobbyEntity) {
+		Query query = entityManager.createNamedQuery("LobbyEntrantEntity.deleteByLobby");
+		query.setParameter("lobby", lobbyEntity);
 		query.executeUpdate();
 	}
 }

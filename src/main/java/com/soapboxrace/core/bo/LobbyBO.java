@@ -1,5 +1,6 @@
 package com.soapboxrace.core.bo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -29,7 +30,6 @@ import com.soapboxrace.jaxb.http.LobbyEntrantAdded;
 import com.soapboxrace.jaxb.http.LobbyEntrantInfo;
 import com.soapboxrace.jaxb.http.LobbyEntrantRemoved;
 import com.soapboxrace.jaxb.http.LobbyInfo;
-import com.soapboxrace.jaxb.http.OwnedCarTrans;
 import com.soapboxrace.jaxb.xmpp.XMPP_LobbyInviteType;
 
 @Stateless
@@ -90,11 +90,11 @@ public class LobbyBO {
 		
 	public void joinFastLobby(String securityToken, Long personaId, int carClassHash, int raceFilter) {
 		// List<LobbyEntity> lobbys = lobbyDao.findAllOpen(carClassHash);
-        // System.out.println("MM START Time: " + System.currentTimeMillis());
+        // System.out.println("MM START Time: " + LocalDateTime.now());
 		List<LobbyEntity> lobbys = lobbyDao.findAllMPLobbies(carClassHash, raceFilter);
 		if (lobbys.isEmpty() && parameterBO.getBoolParam("RACENOW_RANDOMRACES")) {
-			PersonaEntity personaEntity = personaDao.findById(personaId);
-			createRandomLobby(securityToken, personaEntity);
+			// System.out.println("MM RANDOM CREATE Time: " + LocalDateTime.now());
+			createRandomLobby(securityToken, personaId, raceFilter, carClassHash);
 		}
 		PersonaEntity personaEntity = personaDao.findById(personaId);
 		joinLobby(personaEntity, lobbys);
@@ -148,75 +148,57 @@ public class LobbyBO {
 //		lobbyEntity.setCarDivision(carDivision);
 		lobbyDao.insert(lobbyEntity);
 
-		sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity);
+		sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity, eventId);
 		lobbyCountdownBO.scheduleLobbyStart(lobbyEntity);
 	}
 	
-	private void createRandomLobby(String securityToken, PersonaEntity personaEntity) {
+	private void createRandomLobby(String securityToken, Long personaId, int raceFilter, int carClassHash) {
 		EventEntity eventEntity = new EventEntity();
-		eventEntity.setId(randomEventId(securityToken)); 
+		List<EventEntity> eventList = new ArrayList<EventEntity>();
+		switch (raceFilter) {
+		case 1: // Sprint & Circuit
+			eventList = eventDao.findRacesSearchEnabled(carClassHash);
+			break;
+		case 2: // Drag
+			eventList = eventDao.findDragSearchEnabled(carClassHash);
+			break;
+		case 3: // All Races
+			eventList = eventDao.findAllRacesSearchEnabled(carClassHash);
+			break;
+		case 4: // Team Escape
+			eventList = eventDao.findTESearchEnabled(carClassHash);
+			break;
+		default: // No filter
+			eventList = eventDao.findAllSearchEnabled(carClassHash);
+			break;
+		}
+		
+		// System.out.println("MM RANDOM LIST Time: " + LocalDateTime.now());
+		int listSize = eventList.size();
+		eventEntity.setId(randomEventId(eventList, listSize)); 
 
+		// System.out.println("MM RANDOM LOBBY Time: " + LocalDateTime.now());
 		LobbyEntity lobbyEntity = new LobbyEntity();
 		lobbyEntity.setEvent(eventEntity);
 		lobbyEntity.setIsPrivate(false);
-		lobbyEntity.setPersonaId(personaEntity.getPersonaId());
+		lobbyEntity.setPersonaId(personaId);
 		lobbyDao.insert(lobbyEntity);
 
-//		System.out.println("MM RANDOM END Time: " + System.currentTimeMillis());
-		sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity);
-		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### New MP race is created."), personaEntity.getPersonaId());
+		// System.out.println("MM RANDOM FINAL Time: " + LocalDateTime.now());
+		sendJoinEvent(personaId, lobbyEntity, eventEntity.getId());
+		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### New MP race is created."), personaId);
 		lobbyCountdownBO.scheduleLobbyStart(lobbyEntity);
+		// System.out.println("MM RANDOM END Time: " + LocalDateTime.now());
 	}
 	
-	// Random generated eventId, with carClassHash and isEnabled checks - Hypercycle
-	// FIXME predefined eventId arrays
-	private int randomEventId(String securityToken) {
+	// Random generated eventId
+	private int randomEventId(List<EventEntity> eventList, int listSize) {
 		Random rand = new Random();
-		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
-		OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);
-		int playerRaceFilter = defaultCar.getCustomCar().getRaceFilter();
-		int curRotation = parameterBO.getIntParam("ROTATIONID");
-		
-		int[] eventIdArray = { 3,9,10,13,14,15,16,17,18,19,20,21,23,24,
-				27,28,29,30,33,34,35,36,37,41,45,47,49,50,53,54,
-				55,56,57,61,71,72,76,78,79,80,81,83,85,97,100,103,108,116,
-				120,125,131,134,145,146,147,148,158,165,168,184,194,212,
-				222,227,228,235,252,269,276,277,279,280,287,290,291,292,296,
-				297,298,303,304,308,309,313,314,317,337,338,357,
-				359,360,362,366,367,368,370,375,376,377,392,393,499,500,501,502,503,
-				504,506,507,509,510,511,513,515,516,517,521,525,526,529,530,531,532,
-				533,534,535,600,1100,1101,1102,1103,1104,1105,1106,1107,1108,1109,1110,1111,
-				1112,1113,1114,1115,1116,1117,1118,1119,1120,1121,1122,1123,1124,1125,
-				1126,1127,1128,1129,1130,1131,1132,1133,1134,1135};
-	    int randomId = eventIdArray[rand.nextInt(eventIdArray.length)];
-		
-		EventEntity eventEntity = eventDao.findById(randomId);
-		    if (!eventEntity.getIsEnabled() || (eventEntity.getRotation() != curRotation && eventEntity.getRotation() != 0)) {
-		    //	System.out.println("randomEventId value is not available - REPEAT");
-	        	return randomEventId(securityToken);
-	        }
-		    if (playerRaceFilter == 1 && (eventEntity.getEventModeId() == 19 || eventEntity.getEventModeId() == 24)) {
-			//    	System.out.println("randomEventId value is not available by race filter (P2P) - REPEAT");
-		        	return randomEventId(securityToken);
-		        }
-		    if (playerRaceFilter == 2 && (eventEntity.getEventModeId() == 4 || eventEntity.getEventModeId() == 9 || eventEntity.getEventModeId() == 24)) {
-		    //	System.out.println("randomEventId value is not available by race filter (Drag) - REPEAT");
-	        	return randomEventId(securityToken);
-	        }
-		    if (playerRaceFilter == 3 && eventEntity.getEventModeId() == 24) {
-		    //	System.out.println("randomEventId value is not available by race filter (Race) - REPEAT");
-	        	return randomEventId(securityToken);
-	        }
-		    if (playerRaceFilter == 4 && (eventEntity.getEventModeId() == 4 || eventEntity.getEventModeId() == 9 || eventEntity.getEventModeId() == 19)) {
-		    //	System.out.println("randomEventId value is not available by race filter (Pursuit) - REPEAT");
-	        	return randomEventId(securityToken);
-	        }
-		    if (eventEntity.getCarClassHash() != 607077938 && (defaultCar.getCustomCar().getCarClassHash() != eventEntity.getCarClassHash())) {
-		    //	System.out.println("randomEventId value is restricted for player - REPEAT");
-	        	return randomEventId(securityToken);
-	        }
-		    //  System.out.println("randomEventId generation DONE, value is " + randomId);
-		    return randomId;
+		// System.out.println("MM RANDOM GETCAR Time: " + LocalDateTime.now());
+		int randomEntityId = rand.nextInt(listSize);
+	    EventEntity randomEvent = eventList.get(randomEntityId);
+		// System.out.println("MM RANDOM CHOOSE Time: " + LocalDateTime.now());
+		return randomEvent.getId();
 	}
 
 	// FIXME I'm not sure how the server will react on lobby-list, where all lobbies is full...
@@ -245,11 +227,11 @@ public class LobbyBO {
 		}
 		if (lobbyEntity != null) {
 //			System.out.println("MM END Time: " + System.currentTimeMillis());
-			sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity);
+			sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity, lobbyEntity.getEvent().getId());
 		}
 		if (lobbyEntity == null && lobbyEntityEmpty != null) { // If all lobbies on the search is empty, player will got the first created empty lobby
 //			System.out.println("MM END Time: " + System.currentTimeMillis());
-			sendJoinEvent(personaEntity.getPersonaId(), lobbyEntityEmpty);
+			sendJoinEvent(personaEntity.getPersonaId(), lobbyEntityEmpty, lobbyEntityEmpty.getEvent().getId());
 		}
 	}
 
@@ -263,8 +245,7 @@ public class LobbyBO {
 		return false;
 	}
 
-	private void sendJoinEvent(Long personaId, LobbyEntity lobbyEntity) {
-		int eventId = lobbyEntity.getEvent().getId();
+	private void sendJoinEvent(Long personaId, LobbyEntity lobbyEntity, int eventId) {
 		Long lobbyId = lobbyEntity.getId();
 
 		XMPP_LobbyInviteType xMPP_LobbyInviteType = new XMPP_LobbyInviteType();
