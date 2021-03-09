@@ -56,6 +56,7 @@ public class PersonaDAO extends BaseDAO<PersonaEntity> {
 	
 	public List<PersonaEntity> findAllHiddenDrivers() {
 		TypedQuery<PersonaEntity> query = entityManager.createNamedQuery("PersonaEntity.findAllHiddenDrivers", PersonaEntity.class);
+		query.setMaxResults(1000);
 		return query.getResultList();
 	}
 

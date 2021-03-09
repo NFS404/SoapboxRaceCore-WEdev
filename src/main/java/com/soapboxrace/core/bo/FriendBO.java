@@ -15,6 +15,7 @@ import com.soapboxrace.core.dao.UserDAO;
 import com.soapboxrace.core.dao.VinylStorageDAO;
 import com.soapboxrace.core.jpa.FriendListEntity;
 import com.soapboxrace.core.jpa.PersonaEntity;
+import com.soapboxrace.core.jpa.PersonaPresenceEntity;
 import com.soapboxrace.core.jpa.TokenSessionEntity;
 import com.soapboxrace.core.xmpp.OpenFireRestApiCli;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
@@ -99,7 +100,10 @@ public class FriendBO {
 //				presence = 0; // User A awaits for the User B invite decision, display as "offline"
 //			}
 			if (entity.getIsAccepted()) {
-				presence = personaPresenceDAO.findByUserId(entity.getUserId()).getPersonaPresence();
+				PersonaPresenceEntity personaPresenceEntity = personaPresenceDAO.findByUserId(entity.getUserId());
+				if (personaPresenceEntity != null) {
+					presence = personaPresenceEntity.getPersonaPresence();
+				}
 			}
 			addPersonaToFriendList(friendPersonaList, personaEntity, presence);
 		}
