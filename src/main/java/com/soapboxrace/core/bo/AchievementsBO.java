@@ -32,6 +32,7 @@ import com.soapboxrace.core.dao.BadgeDefinitionDAO;
 import com.soapboxrace.core.dao.BadgePersonaDAO;
 import com.soapboxrace.core.dao.BasketDefinitionDAO;
 import com.soapboxrace.core.dao.CarSlotDAO;
+import com.soapboxrace.core.dao.EventSessionDAO;
 import com.soapboxrace.core.dao.LobbyDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.RewardDropDAO;
@@ -142,6 +143,9 @@ public class AchievementsBO {
 	
 	@EJB
 	private AchievementBrandsDAO achievementBrandsDAO;
+	
+	@EJB
+	private EventSessionDAO eventSessionDAO;
 	
 	@EJB
 	private StringListConverter stringListConverter;
@@ -910,8 +914,7 @@ public class AchievementsBO {
 		Long activeLobbyId = tokenSessionEntity.getActiveLobbyId();
 		Boolean isPrivate = false;
 		if (!activeLobbyId.equals(0l)) {
-			LobbyEntity lobbyEntity = lobbyDAO.findById(activeLobbyId);
-			isPrivate = lobbyEntity.getIsPrivate();
+			isPrivate = eventSessionDAO.findById(eventDataEntity.getEventSessionId()).isPrivate();
 		}
 		AchievementPersonaEntity achievementPersonaEntity = achievementPersonaDAO.findByPersona(personaEntity);
 		if (isPrivate) {

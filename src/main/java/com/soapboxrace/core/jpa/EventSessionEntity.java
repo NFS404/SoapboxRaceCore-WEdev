@@ -61,6 +61,9 @@ public class EventSessionEntity {
 	
 	@Column(name = "PLAYERLIST")
 	private String playerList;
+	
+	@Column(name = "ISPRIVATE")
+	private boolean isPrivate;
 
 	public Long getId() {
 		return id;
@@ -180,5 +183,13 @@ public class EventSessionEntity {
 
 	public void setPlayerList(String playerList) {
 		this.playerList = playerList;
+	}
+	
+	public boolean isPrivate() {
+		return isPrivate;
+	}
+
+	public void setPrivate(boolean isPrivate) {
+		this.isPrivate = isPrivate;
 	}
 }

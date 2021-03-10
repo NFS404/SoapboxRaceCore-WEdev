@@ -1,9 +1,12 @@
 package com.soapboxrace.core.dao;
 
+import java.util.List;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.dao.util.BaseDAO;
 import com.soapboxrace.core.jpa.LobbyEntity;
@@ -32,5 +35,18 @@ public class LobbyEntrantDAO extends BaseDAO<LobbyEntrantEntity> {
 		Query query = entityManager.createNamedQuery("LobbyEntrantEntity.deleteByLobby");
 		query.setParameter("lobby", lobbyEntity);
 		query.executeUpdate();
+	}
+	
+	public boolean isLobbyEmpty(LobbyEntity lobbyEntity) {
+		TypedQuery<LobbyEntrantEntity> query = entityManager.createNamedQuery("LobbyEntrantEntity.isLobbyEmpty", LobbyEntrantEntity.class);
+		query.setParameter("lobby", lobbyEntity);
+		return (query.getResultList() != null && !query.getResultList().isEmpty() ) ? false : true;
+	}
+	
+	public int getPlayerCount(LobbyEntity lobbyEntity) { // Use the same query as "isLobbyEmpty"
+		TypedQuery<LobbyEntrantEntity> query = entityManager.createNamedQuery("LobbyEntrantEntity.isLobbyEmpty", LobbyEntrantEntity.class);
+		query.setParameter("lobby", lobbyEntity);
+		List<LobbyEntrantEntity> list = query.getResultList();
+		return (list != null && !list.isEmpty() ) ? list.size() : 0;
 	}
 }

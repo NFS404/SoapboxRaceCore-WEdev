@@ -109,8 +109,14 @@ public class LobbyCountdownBO {
 	public void eventInit(Timer timer) {
 		Long lobbyId = (Long) timer.getInfo();
 		LobbyEntity lobbyEntity = lobbyDao.findById(lobbyId);
+		if (lobbyEntity == null) {
+			System.out.println("### Lobby timer killed");
+			return; // Lobby timers can exist even after lobby deletion
+		}
+		int entrantCount = lobbyEntrantDAO.getPlayerCount(lobbyEntity);
+		
 		List<LobbyEntrantEntity> entrants = lobbyEntity.getEntrants();
-		if (entrants.size() < 2 || entrants.size() >= 8) {
+		if (entrantCount < 2 || entrantCount >= 8) {
 			for (LobbyEntrantEntity poorPlayer : entrants) {
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Too low or too many players in this lobby - cancelled."), poorPlayer.getPersona().getPersonaId());
 			}
@@ -138,6 +144,7 @@ public class LobbyCountdownBO {
 		// TeamNOS - if race has been randomly started without PUs, team players wouldn't be able to use it, but others will be able
 		// Permanently disabled due to the community request
 		String udpRaceIp = parameterBO.getStrParam("UDP_RACE_IP");
+		eventSessionDao.insert(eventSessionEntity);
 		
 		boolean isInterceptorEvent = eventEntity.getEventModeId() == 100 ? true : false;
 		String timeLimit = "!pls fix!";
@@ -257,7 +264,8 @@ public class LobbyCountdownBO {
 		xmppLobby.sendRelay(lobbyLaunched, xMPP_CryptoTicketsType);
 		
 		eventSessionEntity.setPlayerList(stringListConverter.listToStr(personaArray)); // Save the current entrants list
-		eventSessionDao.insert(eventSessionEntity);
+		eventSessionEntity.setPrivate(lobbyEntity.getIsPrivate());
+		eventSessionDao.update(eventSessionEntity);
 		endLobby(lobbyEntity);
 	}
 	

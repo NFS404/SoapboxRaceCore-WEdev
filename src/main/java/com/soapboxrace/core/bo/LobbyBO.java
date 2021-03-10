@@ -76,6 +76,12 @@ public class LobbyBO {
 	
 	@EJB
 	private TeamsBO teamsBO;
+	
+	@EJB
+	private MatchmakingBO matchmakingBO;
+	
+	@EJB
+	private LobbyEntrantDAO lobbyEntrantDAO;
 
 	// Checking the division of selected car - Hypercycle
 	public String carDivision(int carClassHash) {
@@ -91,16 +97,27 @@ public class LobbyBO {
 	public void joinFastLobby(String securityToken, Long personaId, int carClassHash, int raceFilter) {
 		// List<LobbyEntity> lobbys = lobbyDao.findAllOpen(carClassHash);
         // System.out.println("MM START Time: " + LocalDateTime.now());
+		System.out.println("joinFastLobby");
 		List<LobbyEntity> lobbys = lobbyDao.findAllMPLobbies(carClassHash, raceFilter);
-		if (lobbys.isEmpty() && parameterBO.getBoolParam("RACENOW_RANDOMRACES")) {
-			// System.out.println("MM RANDOM CREATE Time: " + LocalDateTime.now());
-			createRandomLobby(securityToken, personaId, raceFilter, carClassHash);
+		
+		if (parameterBO.getBoolParam("REDIS_ENABLE") && lobbys.isEmpty()) {
+			matchmakingBO.addPlayerToQueue(personaId, carClassHash, raceFilter);
 		}
-		PersonaEntity personaEntity = personaDao.findById(personaId);
-		joinLobby(personaEntity, lobbys);
+//		else {
+//			if (lobbys.isEmpty() && parameterBO.getBoolParam("RACENOW_RANDOMRACES")) {
+//				// System.out.println("MM RANDOM CREATE Time: " + LocalDateTime.now());
+//				System.out.println("createRandomLobby");
+//				createRandomLobby(securityToken, personaId, raceFilter, carClassHash);
+//			}
+//		}
+		if (!lobbys.isEmpty()) {
+			PersonaEntity personaEntity = personaDao.findById(personaId);
+			joinLobby(personaEntity, lobbys);
+		}
 	}
 
 	public void joinQueueEvent(Long personaId, int eventId, int carClassHash) {
+		System.out.println("joinQueueEvent");
 		PersonaEntity personaEntity = personaDao.findById(personaId);
 //		String carDivision = this.carDivision(carClassHash);
 		List<LobbyEntity> lobbys = lobbyDao.findByEventStarted(eventId);
@@ -138,18 +155,45 @@ public class LobbyBO {
 	}
 
 	private void createLobby(PersonaEntity personaEntity, int eventId, Boolean isPrivate) {
-		EventEntity eventEntity = new EventEntity();
-		eventEntity.setId(eventId);
-
+		EventEntity eventEntity = eventDao.findById(eventId);
+		int eventClass = eventEntity.getCarClassHash();
+		int eventMaxPlayers = eventEntity.getMaxPlayers();
+		
 		LobbyEntity lobbyEntity = new LobbyEntity();
 		lobbyEntity.setEvent(eventEntity);
 		lobbyEntity.setIsPrivate(isPrivate);
 		lobbyEntity.setPersonaId(personaEntity.getPersonaId());
+		lobbyEntity.setActiveLobby(false);
 //		lobbyEntity.setCarDivision(carDivision);
 		lobbyDao.insert(lobbyEntity);
 
-		sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity, eventId);
-		lobbyCountdownBO.scheduleLobbyStart(lobbyEntity);
+		if (parameterBO.getBoolParam("REDIS_ENABLE")) { // Queue Matchmaking
+			int playersFounded = 1;
+			for (int i = 1; i <= eventMaxPlayers - 1; i++) { // Search a players for all of the event slots
+	            if (lobbyEntrantDAO.getPlayerCount(lobbyEntity) >= eventMaxPlayers) break;
+
+	            System.out.println("### Get the player...");
+	            Long queuePersonaId = matchmakingBO.getPlayerFromQueue(eventClass);
+
+	            if (!queuePersonaId.equals(-1L) && !matchmakingBO.isEventIgnored(queuePersonaId, eventId)) {
+	            	 System.out.println("### Get the player THERE...");
+	                if (lobbyEntrantDAO.getPlayerCount(lobbyEntity) < eventMaxPlayers) {
+	                    sendJoinEvent(queuePersonaId, lobbyEntity, eventId);
+	                    playersFounded++;
+	                    System.out.println("### Get the player DONE");
+	                }
+	            }
+	        }
+			if (playersFounded > 1) {
+            	sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity, eventId);
+            	lobbyEntity.setActiveLobby(true);
+            	lobbyDao.update(lobbyEntity);
+            	lobbyCountdownBO.scheduleLobbyStart(lobbyEntity);
+            }
+		}
+		else {
+			sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity, eventId);
+		}
 	}
 	
 	private void createRandomLobby(String securityToken, Long personaId, int raceFilter, int carClassHash) {
@@ -203,6 +247,8 @@ public class LobbyBO {
 
 	// FIXME I'm not sure how the server will react on lobby-list, where all lobbies is full...
 	private void joinLobby(PersonaEntity personaEntity, List<LobbyEntity> lobbys) {
+		System.out.println("joinLobby");
+		Long personaId = personaEntity.getPersonaId();
 		LobbyEntity lobbyEntity = null;
 		LobbyEntity lobbyEntityEmpty = null;
 		for (LobbyEntity lobbyEntityTmp : lobbys) {
@@ -215,7 +261,7 @@ public class LobbyBO {
 				}
 				if (entrantsSize > 0) {
 					lobbyEntity = lobbyEntityTmp;
-					if (!isPersonaInside(personaEntity.getPersonaId(), lobbyEntrants)) {
+					if (!isPersonaInside(personaId, lobbyEntrants)) {
 						LobbyEntrantEntity lobbyEntrantEntity = new LobbyEntrantEntity();
 						lobbyEntrantEntity.setPersona(personaEntity);
 						lobbyEntrantEntity.setLobby(lobbyEntity);
@@ -227,7 +273,11 @@ public class LobbyBO {
 		}
 		if (lobbyEntity != null) {
 //			System.out.println("MM END Time: " + System.currentTimeMillis());
-			sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity, lobbyEntity.getEvent().getId());
+			int eventId = lobbyEntity.getEvent().getId();
+			sendJoinEvent(personaId, lobbyEntity, eventId);
+			if (!personaId.equals(lobbyEntity.getPersonaId())) {
+				sendJoinEvent(lobbyEntity.getPersonaId(), lobbyEntity, eventId); // Send the join request for race hoster
+			}
 		}
 		if (lobbyEntity == null && lobbyEntityEmpty != null) { // If all lobbies on the search is empty, player will got the first created empty lobby
 //			System.out.println("MM END Time: " + System.currentTimeMillis());
@@ -246,6 +296,7 @@ public class LobbyBO {
 	}
 
 	private void sendJoinEvent(Long personaId, LobbyEntity lobbyEntity, int eventId) {
+		System.out.println("sendJoinEvent");
 		Long lobbyId = lobbyEntity.getId();
 
 		XMPP_LobbyInviteType xMPP_LobbyInviteType = new XMPP_LobbyInviteType();
@@ -274,6 +325,7 @@ public class LobbyBO {
 		sendJoinMsg(personaId, entrants);
 		boolean personaInside = false;
 		
+		matchmakingBO.removePlayerFromQueue(personaId);
 		for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
 			Long teamRacerPersona = lobbyEntrantEntity.getPersona().getPersonaId();
 			LobbyEntrantInfo LobbyEntrantInfo = new LobbyEntrantInfo();
@@ -284,7 +336,6 @@ public class LobbyBO {
 			if (teamRacerPersona.equals(personaId)) {
 				personaInside = true;
 			}
-			
 		}
 		if (!personaInside) {
 			LobbyEntrantEntity lobbyEntrantEntity = new LobbyEntrantEntity();

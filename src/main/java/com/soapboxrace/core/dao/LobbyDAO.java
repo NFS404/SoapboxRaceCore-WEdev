@@ -28,7 +28,6 @@ public class LobbyDAO extends BaseDAO<LobbyEntity> {
 
 	public LobbyEntity findById(Long id) {
 		LobbyEntity lobbyEntity = entityManager.find(LobbyEntity.class, id);
-		lobbyEntity.getEntrants().size();
 		return lobbyEntity;
 	}
 
@@ -155,5 +154,21 @@ public class LobbyDAO extends BaseDAO<LobbyEntity> {
 
 		List<LobbyEntity> resultList = query.getResultList();
 		return !resultList.isEmpty() ? resultList.get(0) : null;
+	}
+	
+	public LobbyEntity findByHosterPersona(Long personaId) {
+		TypedQuery<LobbyEntity> query = entityManager.createNamedQuery("LobbyEntity.findByHosterPersona", LobbyEntity.class);
+		query.setParameter("personaId", personaId);
+
+		List<LobbyEntity> resultList = query.getResultList();
+		return !resultList.isEmpty() ? resultList.get(0) : null;
+	}
+	
+	public boolean findAsActiveLobby(Long id) {
+		TypedQuery<LobbyEntity> query = entityManager.createNamedQuery("LobbyEntity.findAsActiveLobby", LobbyEntity.class);
+		query.setParameter("id", id);
+
+		List<LobbyEntity> resultList = query.getResultList();
+		return (resultList != null && !resultList.isEmpty() ) ? false : true;
 	}
 }

@@ -90,7 +90,9 @@ import javax.persistence.Transient;
 				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND obj.event.eventModeId = 24 ORDER BY obj.lobbyDateTimeStart ASC"),
 		
 		@NamedQuery(name = "LobbyEntity.findByEventStarted", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2 AND obj.isPrivate = false"), //
-		@NamedQuery(name = "LobbyEntity.findByEventAndPersona", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2 AND obj.isPrivate = true AND obj.personaId = :personaId") //
+		@NamedQuery(name = "LobbyEntity.findByEventAndPersona", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2 AND obj.isPrivate = true AND obj.personaId = :personaId"), //
+		@NamedQuery(name = "LobbyEntity.findByHosterPersona", query = "SELECT obj FROM LobbyEntity obj WHERE obj.personaId = :personaId"), //
+		@NamedQuery(name = "LobbyEntity.findAsActiveLobby", query = "SELECT obj FROM LobbyEntity obj WHERE obj.id = :id AND obj.activeLobby = false") //
 })
 public class LobbyEntity {
 
@@ -117,6 +119,8 @@ public class LobbyEntity {
 	private Long team1Id;
 	
 	private Long team2Id;
+	
+	private Boolean activeLobby;
 
 	@Transient
 	private Long lobbyCountdownInMilliseconds = 45000L;
@@ -191,6 +195,14 @@ public class LobbyEntity {
 
 	public void setTeam2Id(Long team2Id) {
 		this.team2Id = team2Id;
+	}
+	
+	public Boolean isActiveLobby() {
+		return activeLobby;
+	}
+
+	public void setActiveLobby(Boolean activeLobby) {
+		this.activeLobby = activeLobby;
 	}
 
 	public boolean add(LobbyEntrantEntity e) {

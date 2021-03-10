@@ -1,6 +1,7 @@
 package com.soapboxrace.core.api;
 
 import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
@@ -8,6 +9,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import com.soapboxrace.core.api.util.Secured;
@@ -16,16 +18,20 @@ import com.soapboxrace.core.bo.EventMissionsBO;
 import com.soapboxrace.core.bo.EventResultBO;
 import com.soapboxrace.core.bo.FriendBO;
 import com.soapboxrace.core.bo.LobbyBO;
+import com.soapboxrace.core.bo.LobbyCountdownBO;
+import com.soapboxrace.core.bo.MatchmakingBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.EventDAO;
 import com.soapboxrace.core.dao.LobbyDAO;
+import com.soapboxrace.core.dao.LobbyEntrantDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
 import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
+import com.soapboxrace.core.jpa.LobbyEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.CustomCarTrans;
@@ -74,6 +80,18 @@ public class MatchMaking {
 	
 	@EJB
 	private PersonaDAO personaDAO;
+	
+	@EJB
+	private MatchmakingBO matchmakingBO;
+	
+	@EJB
+	private LobbyCountdownBO lobbyCountdownBO;
+	
+	@EJB
+	private LobbyEntrantDAO lobbyEntrantDAO;
+	
+	@Context
+	private HttpServletRequest sr;
 
 	@PUT
 	@Secured
@@ -108,7 +126,14 @@ public class MatchMaking {
 	@Secured
 	@Path("/leavequeue")
 	@Produces(MediaType.APPLICATION_XML)
-	public String leaveQueue() {
+	public String leaveQueue(@HeaderParam("securityToken") String securityToken) {
+		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
+		matchmakingBO.removePlayerFromQueue(activePersonaId);
+		LobbyEntity lobbyEntity = lobbyDAO.findByHosterPersona(activePersonaId);
+		if (lobbyEntity != null && lobbyEntrantDAO.isLobbyEmpty(lobbyEntity) && !lobbyEntity.isActiveLobby()) { // Delete the empty lobby
+			System.out.println("### /leavequeue delete");
+			lobbyCountdownBO.endLobby(lobbyEntity);
+		}
 		return "";
 	}
 
@@ -121,6 +146,12 @@ public class MatchMaking {
 		Long activeLobbyId = tokenSessionBO.getActiveLobbyId(securityToken);
 		if (activeLobbyId != null && !activeLobbyId.equals(0L)) {
 			lobbyBO.deleteLobbyEntrant(activePersonaId, activeLobbyId);
+		}
+		LobbyEntity lobbyEntity = lobbyDAO.findById(activeLobbyId);
+		System.out.println("### /leavelobby");
+		if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity) && !lobbyEntity.isActiveLobby()) { // Delete the empty lobby
+			System.out.println("### /leavelobby delete");
+			lobbyCountdownBO.endLobby(lobbyEntity);
 		}
 		return "";
 	}
@@ -177,6 +208,12 @@ public class MatchMaking {
 	@Path("/declineinvite")
 	@Produces(MediaType.APPLICATION_XML)
 	public String declineInvite(@HeaderParam("securityToken") String securityToken, @QueryParam("lobbyInviteId") Long lobbyInviteId) {
+		LobbyEntity lobbyEntity = lobbyDAO.findById(lobbyInviteId);
+		System.out.println("### /declineinvite");
+		if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity) && !lobbyEntity.isActiveLobby()) { // Delete the empty lobby
+			System.out.println("### /declineinvite delete");
+			lobbyCountdownBO.endLobby(lobbyEntity);
+		}
 		return "";
 	}
 
