@@ -104,6 +104,7 @@ public class MatchMaking {
 //		lobbyBO.joinFastLobby(securityToken, activePersonaId, defaultCar.getCustomCar().getCarClassHash(), lobbyBO.carDivision(defaultCar.getCustomCar().getCarClassHash()), defaultCar.getCustomCar().getRaceFilter());
 		if (!carClassesEntity.getQuickRaceAllowed()) {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You cannot join to racing on this vehicle."), activePersonaId);
+			return "";
 		}
 		else {
 			lobbyBO.joinFastLobby(securityToken, activePersonaId, customCar.getCarClassHash(), customCar.getRaceFilter());
@@ -130,10 +131,19 @@ public class MatchMaking {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 		matchmakingBO.removePlayerFromQueue(activePersonaId);
 		LobbyEntity lobbyEntity = lobbyDAO.findByHosterPersona(activePersonaId);
-		if (lobbyEntity != null && lobbyEntrantDAO.isLobbyEmpty(lobbyEntity) && !lobbyEntity.isActiveLobby()) { // Delete the empty lobby
-			System.out.println("### /leavequeue delete");
-			lobbyCountdownBO.endLobby(lobbyEntity);
+		if (lobbyEntity != null) {
+//			boolean isLobbyReserved = lobbyEntity.isReserved();
+//			if (isLobbyReserved) { // Disable the "reserve" status, so that lobby can be deleted if become empty
+//				System.out.println("### /leavequeue un-reserve");
+//				lobbyBO.setIsLobbyReserved(lobbyEntity, false);
+//			}
+//			if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity) && !isLobbyReserved) { // Delete the empty lobby
+			if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity)) { // Delete the empty lobby
+				System.out.println("### /leavequeue delete");
+				lobbyCountdownBO.endLobby(lobbyEntity);
+			}
 		}
+		tokenSessionBO.setActiveLobbyId(securityToken, 0L);
 		return "";
 	}
 
@@ -148,11 +158,18 @@ public class MatchMaking {
 			lobbyBO.deleteLobbyEntrant(activePersonaId, activeLobbyId);
 		}
 		LobbyEntity lobbyEntity = lobbyDAO.findById(activeLobbyId);
-		System.out.println("### /leavelobby");
-		if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity) && !lobbyEntity.isActiveLobby()) { // Delete the empty lobby
+//		boolean isLobbyReserved = lobbyEntity.isReserved();
+//		if (isLobbyReserved) { // Disable the "reserve" status, so that lobby can be deleted if become empty
+//			System.out.println("### /leavelobby un-reserve");
+//			lobbyBO.setIsLobbyReserved(lobbyEntity, false);
+//		}
+//		if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity) && !isLobbyReserved) { // Delete the empty lobby
+		if (lobbyEntity != null && lobbyEntrantDAO.isLobbyEmpty(lobbyEntity)) { // Delete the empty lobby
 			System.out.println("### /leavelobby delete");
 			lobbyCountdownBO.endLobby(lobbyEntity);
 		}
+		tokenSessionBO.setActiveLobbyId(securityToken, 0L);
+		System.out.println("### /leavelobby");
 		return "";
 	}
 
@@ -199,7 +216,13 @@ public class MatchMaking {
 	@Produces(MediaType.APPLICATION_XML)
 	public LobbyInfo acceptInvite(@HeaderParam("securityToken") String securityToken, @QueryParam("lobbyInviteId") Long lobbyInviteId) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
+		LobbyEntity checkLobbyEntity = lobbyDAO.findById(lobbyInviteId);
+		if (checkLobbyEntity == null) { // Since our requested lobby doesn't exist for some reason, we should create a new one
+			lobbyInviteId = lobbyBO.createLobby(personaDAO.findById(activePersonaId), tokenSessionBO.getSearchEventId(securityToken), false, true);
+			System.out.println("### /acceptinvite newlobby");
+		}
 		tokenSessionBO.setActiveLobbyId(securityToken, lobbyInviteId);
+		System.out.println("### /acceptinvite");
 		return lobbyBO.acceptinvite(activePersonaId, lobbyInviteId);
 	}
 
@@ -209,11 +232,20 @@ public class MatchMaking {
 	@Produces(MediaType.APPLICATION_XML)
 	public String declineInvite(@HeaderParam("securityToken") String securityToken, @QueryParam("lobbyInviteId") Long lobbyInviteId) {
 		LobbyEntity lobbyEntity = lobbyDAO.findById(lobbyInviteId);
-		System.out.println("### /declineinvite");
-		if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity) && !lobbyEntity.isActiveLobby()) { // Delete the empty lobby
-			System.out.println("### /declineinvite delete");
-			lobbyCountdownBO.endLobby(lobbyEntity);
+		if (lobbyEntity != null) {
+//			boolean isLobbyReserved = lobbyEntity.isReserved();
+//			if (isLobbyReserved) { // Disable the "reserve" status, so that lobby can be deleted if become empty
+//				System.out.println("### /declineinvite un-reserve");
+//				lobbyBO.setIsLobbyReserved(lobbyEntity, false);
+//			}
+//			if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity) && !isLobbyReserved) { // Delete the empty lobby
+			if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity)) { // Delete the empty lobby
+				System.out.println("### /declineinvite delete");
+				lobbyCountdownBO.endLobby(lobbyEntity);
+			}
 		}
+		tokenSessionBO.setActiveLobbyId(securityToken, 0L);
+		System.out.println("### /declineinvite");
 		return "";
 	}
 

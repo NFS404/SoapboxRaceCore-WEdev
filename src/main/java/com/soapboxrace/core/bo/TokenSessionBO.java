@@ -312,6 +312,18 @@ public class TokenSessionBO {
 		// activePersonas.put(securityToken, tokenSessionEntity);
 		tokenDAO.update(tokenSessionEntity);
 	}
+	
+	public int getSearchEventId(String securityToken) {
+		TokenSessionEntity tokenSessionEntity = tokenDAO.findBySecurityToken(securityToken);
+		return tokenSessionEntity.getSearchEventId();
+	}
+	
+	// Save the event ID value for search queue
+	public void setSearchEventId(Long activePersonaId, int eventId) {
+		TokenSessionEntity tokenSessionEntity = tokenDAO.findByActivePersonaId(activePersonaId);
+		tokenSessionEntity.setSearchEventId(eventId);
+		tokenDAO.update(tokenSessionEntity);
+	}
 
 	public boolean isPremium(String securityToken) {
 		return tokenDAO.findBySecurityToken(securityToken).isPremium();

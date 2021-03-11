@@ -21,6 +21,7 @@ import com.soapboxrace.core.api.util.Secured;
 import com.soapboxrace.core.bo.AuthenticationBO;
 import com.soapboxrace.core.bo.FriendBO;
 import com.soapboxrace.core.bo.InviteTicketBO;
+import com.soapboxrace.core.bo.LobbyBO;
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
@@ -62,6 +63,9 @@ public class User {
 	
 	@EJB
 	private PersonaPresenceDAO personaPresenceDAO;
+	
+	@EJB
+	private LobbyBO lobbyBO;
 
 	@POST
 	@Secured
@@ -110,14 +114,17 @@ public class User {
 	public String secureLogout(@HeaderParam("securityToken") String securityToken) {
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
 		Long userId = tokenBO.getUser(securityToken).getId();
+		lobbyBO.deleteLobbyEntrant(activePersonaId, tokenBO.getActiveLobbyId(securityToken)); // Remove the player from current lobby, if any present
 		System.out.println("### User logged out (SecureLogout), ID: " + userId);
 		if (activePersonaId == null || activePersonaId.equals(0l)) {
 			return "";
 		}
 		PersonaEntity personaEntity = personaBO.getPersonaById(activePersonaId);
-		tokenBO.setActivePersonaId(securityToken, 0L, true);
+		tokenBO.setSearchEventId(activePersonaId, 0);
+		tokenBO.setActiveLobbyId(securityToken, 0L);
 		personaPresenceDAO.userQuitUpdate(userId);
 		friendBO.sendXmppPresenceToAllFriends(personaEntity, 0);
+		tokenBO.setActivePersonaId(securityToken, 0L, true);
 		return "";
 	}
 

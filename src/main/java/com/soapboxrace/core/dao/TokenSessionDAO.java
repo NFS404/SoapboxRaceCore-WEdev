@@ -38,6 +38,16 @@ public class TokenSessionDAO extends BaseDAO<TokenSessionEntity> {
 		}
 		return resultList.get(0);
 	}
+	
+	public TokenSessionEntity findByActivePersonaId(Long activePersonaId) {
+		TypedQuery<TokenSessionEntity> query = entityManager.createNamedQuery("TokenSessionEntity.findByActivePersonaId", TokenSessionEntity.class);
+		query.setParameter("activePersonaId", activePersonaId);
+		List<TokenSessionEntity> resultList = query.getResultList();
+		if (resultList.isEmpty()) {
+			return null;
+		}
+		return resultList.get(0);
+	}
 
 	public int getUsersOnlineCount() {
 		return ((Number)entityManager.createNamedQuery("TokenSessionEntity.getUsersOnlineCount").getSingleResult()).intValue();

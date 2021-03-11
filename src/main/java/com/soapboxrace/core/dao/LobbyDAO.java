@@ -7,6 +7,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import com.soapboxrace.core.bo.ParameterBO;
@@ -164,11 +165,16 @@ public class LobbyDAO extends BaseDAO<LobbyEntity> {
 		return !resultList.isEmpty() ? resultList.get(0) : null;
 	}
 	
-	public boolean findAsActiveLobby(Long id) {
-		TypedQuery<LobbyEntity> query = entityManager.createNamedQuery("LobbyEntity.findAsActiveLobby", LobbyEntity.class);
+	public boolean isThisLobbyReserved(Long id) {
+		TypedQuery<LobbyEntity> query = entityManager.createNamedQuery("LobbyEntity.isThisLobbyReserved", LobbyEntity.class);
 		query.setParameter("id", id);
 
 		List<LobbyEntity> resultList = query.getResultList();
 		return (resultList != null && !resultList.isEmpty() ) ? false : true;
+	}
+	
+	public void deleteAll() {
+		Query query = entityManager.createNamedQuery("LobbyEntity.deleteAll");
+		query.executeUpdate();
 	}
 }

@@ -1,6 +1,7 @@
 package com.soapboxrace.core.bo;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -122,7 +123,7 @@ public class LobbyBO {
 //		String carDivision = this.carDivision(carClassHash);
 		List<LobbyEntity> lobbys = lobbyDao.findByEventStarted(eventId);
 		if (lobbys.size() == 0) {
-			createLobby(personaEntity, eventId, false);
+			createLobby(personaEntity, eventId, false, false);
 		} else {
 			joinLobby(personaEntity, lobbys);
 		}
@@ -133,7 +134,7 @@ public class LobbyBO {
 		if (!listOfPersona.isEmpty()) {
 			PersonaEntity personaEntity = personaDao.findById(personaId);
 //			String carDivision = this.carDivision(carClassHash);
-			createLobby(personaEntity, eventId, true);
+			createLobby(personaEntity, eventId, true, false);
 
 			LobbyEntity lobbys = lobbyDao.findByEventAndPersona(eventId, personaId);
 			if (lobbys != null) {
@@ -154,7 +155,7 @@ public class LobbyBO {
 		}
 	}
 
-	private void createLobby(PersonaEntity personaEntity, int eventId, Boolean isPrivate) {
+	public Long createLobby(PersonaEntity personaEntity, int eventId, Boolean isPrivate, boolean tempCreated) {
 		EventEntity eventEntity = eventDao.findById(eventId);
 		int eventClass = eventEntity.getCarClassHash();
 		int eventMaxPlayers = eventEntity.getMaxPlayers();
@@ -163,7 +164,8 @@ public class LobbyBO {
 		lobbyEntity.setEvent(eventEntity);
 		lobbyEntity.setIsPrivate(isPrivate);
 		lobbyEntity.setPersonaId(personaEntity.getPersonaId());
-		lobbyEntity.setActiveLobby(false);
+		lobbyEntity.setIsReserved(false);
+		lobbyEntity.setLobbyDateTimeStart(null); // Don't count the time until any player gets the invite
 //		lobbyEntity.setCarDivision(carDivision);
 		lobbyDao.insert(lobbyEntity);
 
@@ -185,15 +187,31 @@ public class LobbyBO {
 	            }
 	        }
 			if (playersFounded > 1) {
+				System.out.println("### Get the player ACTIVE");
             	sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity, eventId);
-            	lobbyEntity.setActiveLobby(true);
-            	lobbyDao.update(lobbyEntity);
-            	lobbyCountdownBO.scheduleLobbyStart(lobbyEntity);
+            	setIsLobbyReserved(lobbyEntity, true);
+            	if (!tempCreated) {
+            		lobbyEntity.setLobbyDateTimeStart(new Date());
+            		lobbyDao.update(lobbyEntity);
+            		lobbyCountdownBO.scheduleLobbyStart(lobbyEntity);
+            	}
             }
 		}
 		else {
 			sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity, eventId);
 		}
+		if (tempCreated) {
+			System.out.println("### tempCreated timer");
+			lobbyEntity.setLobbyDateTimeStart(new Date());
+    		lobbyDao.update(lobbyEntity);
+			lobbyCountdownBO.scheduleLobbyStart(lobbyEntity); // On some cases we need to start the timer for 1-player lobby
+		}
+		return lobbyEntity.getId();
+	}
+	
+	public void setIsLobbyReserved(LobbyEntity lobbyEntity, boolean reserved) {
+		lobbyEntity.setIsReserved(reserved);
+		lobbyDao.update(lobbyEntity);
 	}
 	
 	private void createRandomLobby(String securityToken, Long personaId, int raceFilter, int carClassHash) {
@@ -225,13 +243,17 @@ public class LobbyBO {
 		LobbyEntity lobbyEntity = new LobbyEntity();
 		lobbyEntity.setEvent(eventEntity);
 		lobbyEntity.setIsPrivate(false);
+		lobbyEntity.setLobbyDateTimeStart(null);
 		lobbyEntity.setPersonaId(personaId);
 		lobbyDao.insert(lobbyEntity);
 
 		// System.out.println("MM RANDOM FINAL Time: " + LocalDateTime.now());
-		sendJoinEvent(personaId, lobbyEntity, eventEntity.getId());
 		openFireSoapBoxCli.send(XmppChat.createSystemMessage("### New MP race is created."), personaId);
+		sendJoinEvent(personaId, lobbyEntity, eventEntity.getId());
+		setIsLobbyReserved(lobbyEntity, true);
+		lobbyEntity.setLobbyDateTimeStart(new Date());
 		lobbyCountdownBO.scheduleLobbyStart(lobbyEntity);
+		lobbyDao.update(lobbyEntity);
 		// System.out.println("MM RANDOM END Time: " + LocalDateTime.now());
 	}
 	
@@ -247,11 +269,14 @@ public class LobbyBO {
 
 	// FIXME I'm not sure how the server will react on lobby-list, where all lobbies is full...
 	private void joinLobby(PersonaEntity personaEntity, List<LobbyEntity> lobbys) {
-		System.out.println("joinLobby");
 		Long personaId = personaEntity.getPersonaId();
+		System.out.println("joinLobby for " + personaId);
 		LobbyEntity lobbyEntity = null;
 		LobbyEntity lobbyEntityEmpty = null;
 		for (LobbyEntity lobbyEntityTmp : lobbys) {
+			if (lobbyEntityTmp.getPersonaId().equals(personaId) && !lobbyEntityTmp.isReserved()) {
+				continue; // Player cannot join the lobby, which is being hosted by player himself and not yet populated
+			}
 			int maxEntrants = lobbyEntityTmp.getEvent().getMaxPlayers();
 			List<LobbyEntrantEntity> lobbyEntrants = lobbyEntityTmp.getEntrants();
 			int entrantsSize = lobbyEntrants.size();
@@ -275,13 +300,21 @@ public class LobbyBO {
 //			System.out.println("MM END Time: " + System.currentTimeMillis());
 			int eventId = lobbyEntity.getEvent().getId();
 			sendJoinEvent(personaId, lobbyEntity, eventId);
-			if (!personaId.equals(lobbyEntity.getPersonaId())) {
-				sendJoinEvent(lobbyEntity.getPersonaId(), lobbyEntity, eventId); // Send the join request for race hoster
-			}
 		}
 		if (lobbyEntity == null && lobbyEntityEmpty != null) { // If all lobbies on the search is empty, player will got the first created empty lobby
 //			System.out.println("MM END Time: " + System.currentTimeMillis());
-			sendJoinEvent(personaEntity.getPersonaId(), lobbyEntityEmpty, lobbyEntityEmpty.getEvent().getId());
+			int eventId = lobbyEntityEmpty.getEvent().getId();
+			System.out.println("second choice for " + lobbyEntityEmpty.getPersonaId());
+			sendJoinEvent(personaId, lobbyEntityEmpty, eventId);
+			Long hosterPersonaId = lobbyEntityEmpty.getPersonaId();
+			if (!personaId.equals(hosterPersonaId)) {
+				System.out.println("callbackRequest for " + hosterPersonaId);
+				setIsLobbyReserved(lobbyEntityEmpty, true);
+				sendJoinEvent(hosterPersonaId, lobbyEntityEmpty, eventId); // Send the join request for race hoster
+				lobbyEntityEmpty.setLobbyDateTimeStart(new Date());
+				lobbyDao.update(lobbyEntityEmpty);
+				lobbyCountdownBO.scheduleLobbyStart(lobbyEntityEmpty);
+			}
 		}
 	}
 
@@ -296,26 +329,29 @@ public class LobbyBO {
 	}
 
 	private void sendJoinEvent(Long personaId, LobbyEntity lobbyEntity, int eventId) {
-		System.out.println("sendJoinEvent");
+		System.out.println("sendJoinEvent for " + personaId);
 		Long lobbyId = lobbyEntity.getId();
 
 		XMPP_LobbyInviteType xMPP_LobbyInviteType = new XMPP_LobbyInviteType();
 		xMPP_LobbyInviteType.setEventId(eventId);
 		xMPP_LobbyInviteType.setLobbyInviteId(lobbyId);
 
+		tokenSessionBO.setSearchEventId(personaId, eventId);
 		XmppLobby xmppLobby = new XmppLobby(personaId, openFireSoapBoxCli);
 		xmppLobby.sendLobbyInvite(xMPP_LobbyInviteType);
 	}
 
 	public LobbyInfo acceptinvite(Long personaId, Long lobbyInviteId) {
+		System.out.println("acceptinvite for " + personaId);
 		LobbyEntity lobbyEntity = lobbyDao.findById(lobbyInviteId);
 		EventEntity eventEntity = lobbyEntity.getEvent();
+		
 		int eventId = eventEntity.getId();
 
 		LobbyCountdown lobbyCountdown = new LobbyCountdown();
 		lobbyCountdown.setLobbyId(lobbyInviteId);
 		lobbyCountdown.setEventId(eventId);
-		lobbyCountdown.setLobbyCountdownInMilliseconds(lobbyEntity.getLobbyCountdownInMilliseconds());
+		lobbyCountdown.setLobbyCountdownInMilliseconds(getLobbyCountdownInMilliseconds(lobbyEntity.getLobbyDateTimeStart()));
 		lobbyCountdown.setLobbyStuckDurationInMilliseconds(7500);
 
 		ArrayOfLobbyEntrantInfo arrayOfLobbyEntrantInfo = new ArrayOfLobbyEntrantInfo();
@@ -378,13 +414,18 @@ public class LobbyBO {
 	}
 
 	public void deleteLobbyEntrant(Long personaId, Long lobbyId) {
-		PersonaEntity personaEntity = personaDao.findById(personaId);
-		lobbyEntrantDao.deleteByPersona(personaEntity);
-		updateLobby(personaId, lobbyId);
+		if (lobbyId != 0L) {
+			PersonaEntity personaEntity = personaDao.findById(personaId);
+			lobbyEntrantDao.deleteByPersona(personaEntity);
+			updateLobby(personaId, lobbyId);
+		}
 	}
 
 	private void updateLobby(Long personaId, Long lobbyId) {
 		LobbyEntity lobbyEntity = lobbyDao.findById(lobbyId);
+		if (lobbyEntity == null) {
+			return;
+		}
 		List<LobbyEntrantEntity> listLobbyEntrantEntity = lobbyEntity.getEntrants();
 		for (LobbyEntrantEntity entity : listLobbyEntrantEntity) {
 			LobbyEntrantRemoved lobbyEntrantRemoved = new LobbyEntrantRemoved();
@@ -423,5 +464,16 @@ public class LobbyBO {
 				}
 			}
 		}
+	}
+	
+	public int getLobbyCountdownInMilliseconds(Date lobbyDateTimeStart) {
+		Long time = 0L;
+		if (lobbyDateTimeStart != null) {
+			Date now = new Date();
+			time = now.getTime() - lobbyDateTimeStart.getTime();
+			time = parameterBO.getIntParam("LOBBY_TIME").longValue() - time;
+			return time.intValue();
+		}
+		return time.intValue();
 	}
 }

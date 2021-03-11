@@ -1,6 +1,7 @@
 package com.soapboxrace.core.bo;
 
 import java.nio.ByteBuffer;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -107,10 +108,11 @@ public class LobbyCountdownBO {
 	
 	@Timeout
 	public void eventInit(Timer timer) {
+		System.out.println("### Lobby timer init, " + LocalDateTime.now());
 		Long lobbyId = (Long) timer.getInfo();
 		LobbyEntity lobbyEntity = lobbyDao.findById(lobbyId);
 		if (lobbyEntity == null) {
-			System.out.println("### Lobby timer killed");
+			System.out.println("### Lobby timer killed, " + LocalDateTime.now());
 			return; // Lobby timers can exist even after lobby deletion
 		}
 		int entrantCount = lobbyEntrantDAO.getPlayerCount(lobbyEntity);

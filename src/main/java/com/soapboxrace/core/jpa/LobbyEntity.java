@@ -27,7 +27,7 @@ import javax.persistence.Transient;
 				query = "SELECT obj FROM LobbyEntity obj WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 "), //
 		@NamedQuery(name = "LobbyEntity.findAllOpenByCarClass", //
 				query = "SELECT obj FROM LobbyEntity obj " //
-						+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
+						+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null) " //
 						+ "and (obj.event.carClassHash = 607077938 or obj.event.carClassHash = :carClassHash ) AND obj.isPrivate = false "
 						+ "AND obj.event.searchAvailable = true "),
 		
@@ -36,63 +36,64 @@ import javax.persistence.Transient;
 		
 		@NamedQuery(name = "LobbyEntity.findAllMPLobbiesClasses", // All Races (Classes)
 		query = "SELECT obj FROM LobbyEntity obj " //
-				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
+				+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null) " //
 				+ "AND obj.isPrivate = false "
 				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash ORDER BY obj.lobbyDateTimeStart ASC"),
 		@NamedQuery(name = "LobbyEntity.findAllMPLobbiesOpen", // All Races (Open)
 		query = "SELECT obj FROM LobbyEntity obj " //
-				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
+				+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null)" //
 				+ "AND obj.isPrivate = false "
 				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 ORDER BY obj.lobbyDateTimeStart ASC"),
 		
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesP2PClasses", // Circuits and Sprints (Classes)
 		query = "SELECT obj FROM LobbyEntity obj " //
-				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
+				+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null)" //
 				+ "AND obj.isPrivate = false "
 				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9) ORDER BY obj.lobbyDateTimeStart ASC"),
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesP2POpen", // Circuits and Sprints (Open)
 		query = "SELECT obj FROM LobbyEntity obj " //
-				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
+				+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null) " //
 				+ "AND obj.isPrivate = false "
 				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9) ORDER BY obj.lobbyDateTimeStart ASC"),
 		
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesDragClasses", // Drags (Classes)
 		query = "SELECT obj FROM LobbyEntity obj " //
-				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
+				+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null) " //
 				+ "AND obj.isPrivate = false "
 				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND obj.event.eventModeId = 19 ORDER BY obj.lobbyDateTimeStart ASC"),
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesDragOpen", // Drags (Open)
 		query = "SELECT obj FROM LobbyEntity obj " //
-				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
+				+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null) " //
 				+ "AND obj.isPrivate = false "
 				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND obj.event.eventModeId = 19 ORDER BY obj.lobbyDateTimeStart ASC"),
 		
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesRaceClasses", // Circuits, Sprints, Drags (Classes)
 		query = "SELECT obj FROM LobbyEntity obj " //
-				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
+				+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null) " //
 				+ "AND obj.isPrivate = false "
 				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9 or obj.event.eventModeId = 19) ORDER BY obj.lobbyDateTimeStart ASC"),
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesRaceOpen", // Circuits, Sprints, Drags (Open)
 		query = "SELECT obj FROM LobbyEntity obj " //
-				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
+				+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null) " //
 				+ "AND obj.isPrivate = false "
 				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9 or obj.event.eventModeId = 19) ORDER BY obj.lobbyDateTimeStart ASC"),
 		
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesPursuitClasses", // Team Escapes (Classes)
 		query = "SELECT obj FROM LobbyEntity obj " //
-				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
+				+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null) " //
 				+ "AND obj.isPrivate = false "
 				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND obj.event.eventModeId = 24 ORDER BY obj.lobbyDateTimeStart ASC"),
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesPursuitOpen", // Team Escapes (Open)
 		query = "SELECT obj FROM LobbyEntity obj " //
-				+ "WHERE obj.lobbyDateTimeStart between :dateTime1 and :dateTime2 " //
+				+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null) " //
 				+ "AND obj.isPrivate = false "
 				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND obj.event.eventModeId = 24 ORDER BY obj.lobbyDateTimeStart ASC"),
 		
 		@NamedQuery(name = "LobbyEntity.findByEventStarted", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2 AND obj.isPrivate = false"), //
 		@NamedQuery(name = "LobbyEntity.findByEventAndPersona", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2 AND obj.isPrivate = true AND obj.personaId = :personaId"), //
 		@NamedQuery(name = "LobbyEntity.findByHosterPersona", query = "SELECT obj FROM LobbyEntity obj WHERE obj.personaId = :personaId"), //
-		@NamedQuery(name = "LobbyEntity.findAsActiveLobby", query = "SELECT obj FROM LobbyEntity obj WHERE obj.id = :id AND obj.activeLobby = false") //
+		@NamedQuery(name = "LobbyEntity.isThisLobbyReserved", query = "SELECT obj FROM LobbyEntity obj WHERE obj.id = :id AND obj.isReserved = false"), //
+		@NamedQuery(name = "LobbyEntity.deleteAll", query = "DELETE FROM LobbyEntity obj") //
 })
 public class LobbyEntity {
 
@@ -108,7 +109,7 @@ public class LobbyEntity {
 	@OneToMany(mappedBy = "lobby", targetEntity = LobbyEntrantEntity.class, cascade = CascadeType.MERGE)
 	private List<LobbyEntrantEntity> entrants;
 
-	private Date lobbyDateTimeStart = new Date();
+	private Date lobbyDateTimeStart;
 
 	private Boolean isPrivate;
 
@@ -120,7 +121,7 @@ public class LobbyEntity {
 	
 	private Long team2Id;
 	
-	private Boolean activeLobby;
+	private Boolean isReserved;
 
 	@Transient
 	private Long lobbyCountdownInMilliseconds = 45000L;
@@ -197,12 +198,12 @@ public class LobbyEntity {
 		this.team2Id = team2Id;
 	}
 	
-	public Boolean isActiveLobby() {
-		return activeLobby;
+	public Boolean isReserved() {
+		return isReserved;
 	}
 
-	public void setActiveLobby(Boolean activeLobby) {
-		this.activeLobby = activeLobby;
+	public void setIsReserved(Boolean isReserved) {
+		this.isReserved = isReserved;
 	}
 
 	public boolean add(LobbyEntrantEntity e) {
@@ -210,16 +211,6 @@ public class LobbyEntity {
 			entrants = new ArrayList<>();
 		}
 		return entrants.add(e);
-	}
-
-	public int getLobbyCountdownInMilliseconds() {
-		if (lobbyDateTimeStart != null) {
-			Date now = new Date();
-			Long time = now.getTime() - lobbyDateTimeStart.getTime();
-			time = 45000L - time;
-			return time.intValue();
-		}
-		return lobbyCountdownInMilliseconds.intValue();
 	}
 
 }

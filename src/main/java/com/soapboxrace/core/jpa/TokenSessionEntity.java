@@ -15,6 +15,7 @@ import javax.persistence.Table;
 @Table(name = "TOKEN_SESSION")
 @NamedQueries({ //
 		@NamedQuery(name = "TokenSessionEntity.findByUserId", query = "SELECT obj FROM TokenSessionEntity obj WHERE obj.userId = :userId"), //
+		@NamedQuery(name = "TokenSessionEntity.findByActivePersonaId", query = "SELECT obj FROM TokenSessionEntity obj WHERE obj.activePersonaId = :activePersonaId"), //
 		@NamedQuery(name = "TokenSessionEntity.findBySecurityToken", query = "SELECT obj FROM TokenSessionEntity obj WHERE obj.securityToken = :securityToken"), //
 		@NamedQuery(name = "TokenSessionEntity.deleteByUserId", query = "DELETE FROM TokenSessionEntity obj WHERE obj.userId = :userId"), //
 		@NamedQuery(name = "TokenSessionEntity.updateRelayCrytoTicket", //
@@ -55,6 +56,8 @@ public class TokenSessionEntity {
 	private boolean isLoggedIn;
 	
 	private Long teamId;
+	
+	private int searchEventId;
 
 	public String getSecurityToken() {
 		return securityToken;
@@ -142,6 +145,14 @@ public class TokenSessionEntity {
 
 	public void setTeamId(Long teamId) {
 		this.teamId = teamId;
+	}
+	
+	public int getSearchEventId() {
+		return searchEventId;
+	}
+
+	public void setSearchEventId(int searchEventId) {
+		this.searchEventId = searchEventId;
 	}
 
 }

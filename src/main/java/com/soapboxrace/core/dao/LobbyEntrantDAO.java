@@ -37,6 +37,11 @@ public class LobbyEntrantDAO extends BaseDAO<LobbyEntrantEntity> {
 		query.executeUpdate();
 	}
 	
+	public void deleteAll() {
+		Query query = entityManager.createNamedQuery("LobbyEntrantEntity.deleteAll");
+		query.executeUpdate();
+	}
+	
 	public boolean isLobbyEmpty(LobbyEntity lobbyEntity) {
 		TypedQuery<LobbyEntrantEntity> query = entityManager.createNamedQuery("LobbyEntrantEntity.isLobbyEmpty", LobbyEntrantEntity.class);
 		query.setParameter("lobby", lobbyEntity);
