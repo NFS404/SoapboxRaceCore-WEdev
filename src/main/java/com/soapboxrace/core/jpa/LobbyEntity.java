@@ -28,7 +28,7 @@ import javax.persistence.Transient;
 		@NamedQuery(name = "LobbyEntity.findAllOpenByCarClass", //
 				query = "SELECT obj FROM LobbyEntity obj " //
 						+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null) " //
-						+ "and (obj.event.carClassHash = 607077938 or obj.event.carClassHash = :carClassHash ) AND obj.isPrivate = false "
+						+ "and (obj.event.carClassHash = 607077938 or obj.event.carClassHash = :carClassHash) AND obj.isPrivate = false "
 						+ "AND obj.event.searchAvailable = true "),
 		
 		// CarDivision check
@@ -82,12 +82,12 @@ import javax.persistence.Transient;
 		query = "SELECT obj FROM LobbyEntity obj " //
 				+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null) " //
 				+ "AND obj.isPrivate = false "
-				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND obj.event.eventModeId = 24 ORDER BY obj.lobbyDateTimeStart ASC"),
+				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = :carClassHash AND (obj.event.eventModeId = 24 or obj.event.eventModeId = 100) ORDER BY obj.lobbyDateTimeStart ASC"),
 		@NamedQuery(name = "LobbyEntity.findMPLobbiesPursuitOpen", // Team Escapes (Open)
 		query = "SELECT obj FROM LobbyEntity obj " //
 				+ "WHERE (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null) " //
 				+ "AND obj.isPrivate = false "
-				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND obj.event.eventModeId = 24 ORDER BY obj.lobbyDateTimeStart ASC"),
+				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND (obj.event.eventModeId = 24 or obj.event.eventModeId = 100) ORDER BY obj.lobbyDateTimeStart ASC"),
 		
 		@NamedQuery(name = "LobbyEntity.findByEventStarted", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND (obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2) OR (obj.lobbyDateTimeStart = null) AND obj.isPrivate = false"), //
 		@NamedQuery(name = "LobbyEntity.findByEventAndPersona", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND (obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2) OR (obj.lobbyDateTimeStart = null) AND obj.isPrivate = true AND obj.personaId = :personaId"), //

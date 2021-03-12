@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import com.soapboxrace.core.api.util.Secured;
 import com.soapboxrace.core.bo.EventBO;
 import com.soapboxrace.core.bo.EventsBO;
+import com.soapboxrace.core.bo.MatchmakingBO;
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
@@ -52,6 +53,9 @@ public class Events {
 	
 	@EJB
 	private CarClassesDAO carClassesDAO;
+	
+	@EJB
+	private MatchmakingBO matchmakingBO;
 
 	@GET
 	@Path("/availableatlevel")
@@ -59,6 +63,7 @@ public class Events {
 	public EventsPacket availableAtLevel(@HeaderParam("securityToken") String securityToken) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 		personaPresenceDAO.updateCurrentEventPost(activePersonaId, null, 0, null, false);
+		matchmakingBO.resetIgnoredEvents(activePersonaId);
 		OwnedCarTrans defaultCar = personaBO.getDefaultCar(activePersonaId);
 		CustomCarTrans customCarTrans = defaultCar.getCustomCar();
 		int carClassHash = customCarTrans.getCarClassHash();

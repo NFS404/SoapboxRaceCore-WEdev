@@ -22,6 +22,7 @@ import com.soapboxrace.core.bo.AuthenticationBO;
 import com.soapboxrace.core.bo.FriendBO;
 import com.soapboxrace.core.bo.InviteTicketBO;
 import com.soapboxrace.core.bo.LobbyBO;
+import com.soapboxrace.core.bo.MatchmakingBO;
 import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
@@ -66,6 +67,9 @@ public class User {
 	
 	@EJB
 	private LobbyBO lobbyBO;
+	
+	@EJB
+	private MatchmakingBO matchmakingBO;
 
 	@POST
 	@Secured
@@ -102,6 +106,10 @@ public class User {
 			@QueryParam("personaId") Long personaId) {
 		PersonaEntity personaEntity = personaBO.getPersonaById(personaId);
 		friendBO.sendXmppPresenceToAllFriends(personaEntity, 0);
+		matchmakingBO.resetIgnoredEvents(personaId);
+		tokenBO.setSearchEventId(personaId, 0);
+		tokenBO.setActiveLobbyId(securityToken, 0L);
+		friendBO.sendXmppPresenceToAllFriends(personaEntity, 0);
 		tokenBO.setActivePersonaId(securityToken, 0L, true);
 		personaPresenceDAO.updateCurrentEventPost(personaId, null, 0, null, false);
 		return "";
@@ -113,18 +121,20 @@ public class User {
 	@Produces(MediaType.APPLICATION_XML)
 	public String secureLogout(@HeaderParam("securityToken") String securityToken) {
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
-		Long userId = tokenBO.getUser(securityToken).getId();
-		lobbyBO.deleteLobbyEntrant(activePersonaId, tokenBO.getActiveLobbyId(securityToken)); // Remove the player from current lobby, if any present
-		System.out.println("### User logged out (SecureLogout), ID: " + userId);
 		if (activePersonaId == null || activePersonaId.equals(0l)) {
 			return "";
 		}
+		Long userId = tokenBO.getUser(securityToken).getId();
+		lobbyBO.deleteLobbyEntrant(activePersonaId, tokenBO.getActiveLobbyId(securityToken)); // Remove the player from current lobby, if any present
+		
+		matchmakingBO.resetIgnoredEvents(activePersonaId);
 		PersonaEntity personaEntity = personaBO.getPersonaById(activePersonaId);
 		tokenBO.setSearchEventId(activePersonaId, 0);
 		tokenBO.setActiveLobbyId(securityToken, 0L);
 		personaPresenceDAO.userQuitUpdate(userId);
 		friendBO.sendXmppPresenceToAllFriends(personaEntity, 0);
 		tokenBO.setActivePersonaId(securityToken, 0L, true);
+		System.out.println("### User logged out (SecureLogout), ID: " + userId);
 		return "";
 	}
 

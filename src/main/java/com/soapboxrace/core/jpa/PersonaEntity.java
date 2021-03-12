@@ -47,6 +47,7 @@ public class PersonaEntity {
 	private int racesCount;
 	private LocalDate dailyRaceDate;
 	private boolean isHidden; // Temporarily removed persona
+	private boolean ignoreRaces; // Permanent "Ignore the event after being declined on the search" switch
 
 	@ManyToOne
 	@JoinColumn(name = "USERID", referencedColumnName = "ID", foreignKey = @ForeignKey(name = "FK_PERSONA_USER"))
@@ -220,6 +221,14 @@ public class PersonaEntity {
 
 	public void setHidden(boolean isHidden) {
 		this.isHidden = isHidden;
+	}
+	
+	public boolean isIgnoreRaces() {
+		return ignoreRaces;
+	}
+
+	public void setIgnoreRaces(boolean ignoreRaces) {
+		this.ignoreRaces = ignoreRaces;
 	}
 
 }

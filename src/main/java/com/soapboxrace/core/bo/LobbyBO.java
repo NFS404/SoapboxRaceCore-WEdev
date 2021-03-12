@@ -99,10 +99,29 @@ public class LobbyBO {
 		// List<LobbyEntity> lobbys = lobbyDao.findAllOpen(carClassHash);
         // System.out.println("MM START Time: " + LocalDateTime.now());
 		System.out.println("joinFastLobby");
+		PersonaEntity personaEntity = personaDao.findById(personaId);
+		boolean redis = parameterBO.getBoolParam("REDIS_ENABLE");
 		List<LobbyEntity> lobbys = lobbyDao.findAllMPLobbies(carClassHash, raceFilter);
 		
-		if (parameterBO.getBoolParam("REDIS_ENABLE") && lobbys.isEmpty()) {
-			matchmakingBO.addPlayerToQueue(personaId, carClassHash, raceFilter);
+		if (redis) { // Do two "for" loops to avoid ConcurrentModificationException
+			List<Integer> eventIgnoredList = matchmakingBO.getEventIgnoredList(personaId);
+			if (personaEntity.isIgnoreRaces() && !eventIgnoredList.isEmpty()) {
+				List<Integer> idsToRemove = new ArrayList<Integer>();
+				for (LobbyEntity lobby : lobbys) {
+					if (eventIgnoredList.contains(lobby.getEvent().getId())) {
+						idsToRemove.add(lobbys.indexOf(lobby)); // Hold that lobby ID to remove it
+					}
+				}
+				if (!idsToRemove.isEmpty()) {
+					for (int idToRemove : idsToRemove) {
+						lobbys.remove(idToRemove); // Remove the lobby with ignored event ID
+					}
+				}
+			}
+		}
+		
+		if (redis && lobbys.isEmpty()) {
+			matchmakingBO.addPlayerToQueue(personaId, carClassHash, raceFilter, 1);
 		}
 //		else {
 //			if (lobbys.isEmpty() && parameterBO.getBoolParam("RACENOW_RANDOMRACES")) {
@@ -112,8 +131,9 @@ public class LobbyBO {
 //			}
 //		}
 		if (!lobbys.isEmpty()) {
-			PersonaEntity personaEntity = personaDao.findById(personaId);
-			joinLobby(personaEntity, lobbys);
+			System.out.println("### addFakeToQueue");
+			matchmakingBO.addPlayerToQueue(personaId, carClassHash, raceFilter, 0); // Temporary entry for "Ignore Races" feature
+			joinLobby(personaEntity, lobbys, true);
 		}
 	}
 
@@ -125,7 +145,7 @@ public class LobbyBO {
 		if (lobbys.size() == 0) {
 			createLobby(personaEntity, eventId, false, false);
 		} else {
-			joinLobby(personaEntity, lobbys);
+			joinLobby(personaEntity, lobbys, false);
 		}
 	}
 
@@ -178,7 +198,7 @@ public class LobbyBO {
 	            if (lobbyEntrantDAO.getPlayerCount(lobbyEntity) >= eventMaxPlayers) break;
 
 	            System.out.println("### Get the player...");
-	            Long queuePersonaId = matchmakingBO.getPlayerFromQueue(eventClass);
+	            Long queuePersonaId = matchmakingBO.getPlayerFromQueue(eventClass, eventEntity.getEventModeId());
 
 	            if (!queuePersonaId.equals(-1L) && !matchmakingBO.isEventIgnored(queuePersonaId, eventId)) {
 	            	 System.out.println("### Get the player THERE...");
@@ -273,15 +293,19 @@ public class LobbyBO {
 	}
 
 	// FIXME I'm not sure how the server will react on lobby-list, where all lobbies is full...
-	private void joinLobby(PersonaEntity personaEntity, List<LobbyEntity> lobbys) {
+	private void joinLobby(PersonaEntity personaEntity, List<LobbyEntity> lobbys, boolean checkIgnoredEvents) {
 		Long personaId = personaEntity.getPersonaId();
 		System.out.println("joinLobby for " + personaId);
 		LobbyEntity lobbyEntity = null;
 		LobbyEntity lobbyEntityEmpty = null;
+		int eventId = 0;
 		for (LobbyEntity lobbyEntityTmp : lobbys) {
+			eventId = lobbyEntityTmp.getEvent().getId();
 			if (lobbyEntityTmp.getPersonaId().equals(personaId) && !lobbyEntityTmp.isReserved()) {
 				continue; // Player cannot join the lobby, which is being hosted by player himself and not yet populated
 			}
+			if (checkIgnoredEvents && matchmakingBO.isEventIgnored(personaEntity.getPersonaId(), eventId))
+                continue; // This event is being ignored by player, look for others
 			int maxEntrants = lobbyEntityTmp.getEvent().getMaxPlayers();
 			List<LobbyEntrantEntity> lobbyEntrants = lobbyEntityTmp.getEntrants();
 			int entrantsSize = lobbyEntrants.size();
@@ -303,12 +327,11 @@ public class LobbyBO {
 		}
 		if (lobbyEntity != null) {
 //			System.out.println("MM END Time: " + System.currentTimeMillis());
-			int eventId = lobbyEntity.getEvent().getId();
 			sendJoinEvent(personaId, lobbyEntity, eventId);
 		}
 		if (lobbyEntity == null && lobbyEntityEmpty != null) { // If all lobbies on the search is empty, player will got the first created empty lobby
 //			System.out.println("MM END Time: " + System.currentTimeMillis());
-			int eventId = lobbyEntityEmpty.getEvent().getId();
+			
 			System.out.println("second choice for " + lobbyEntityEmpty.getPersonaId());
 			sendJoinEvent(personaId, lobbyEntityEmpty, eventId);
 			Long hosterPersonaId = lobbyEntityEmpty.getPersonaId();

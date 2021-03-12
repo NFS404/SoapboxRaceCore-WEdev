@@ -8,11 +8,17 @@ import io.lettuce.core.KeyValue;
 import io.lettuce.core.ScanIterator;
 import io.lettuce.core.api.StatefulRedisConnection;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.*;
 
+import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.PersonaPresenceEntity;
+import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppChat;
 
 /**
  * Responsible for managing the multiplayer matchmaking system.
@@ -34,6 +40,9 @@ public class MatchmakingBO {
 
     @EJB
     private ParameterBO parameterBO;
+    
+    @EJB
+	private OpenFireSoapBoxCli openFireSoapBoxCli;
 
     private StatefulRedisConnection<String, String> redisConnection;
 
@@ -41,7 +50,7 @@ public class MatchmakingBO {
     public void initialize() {
         if (parameterBO.getBoolParam("REDIS_ENABLE")) {
             this.redisConnection = this.redisBO.getConnection();
-            this.redisConnection.sync().set("matchmaking_playercount", "0"); // Create the player count entry
+            // this.redisConnection.sync().set("matchmaking_playercount", "0"); // Create the player count entry
             System.out.println("Initialized matchmaking system");
         } else {
         	System.out.println("Redis is not enabled! Matchmaking queue is disabled.");
@@ -58,16 +67,16 @@ public class MatchmakingBO {
 
     /**
      * Adds the given Persona ID to the queue under the given search priorities.
-     * CarClass and RaceFilter is saved as "PlayerVehicleInfo" string (Value), since personaId is a Key.
+     * CarClass, RaceFilter and isAvailable is saved as "PlayerVehicleInfo" string (Value), since personaId is a Key.
      *
      * @param personaId The ID of the persona to add to the queue.
      * @param carClass The class of the persona's current car.
      */
-    public void addPlayerToQueue(Long personaId, Integer carClass, Integer raceFilter) {
-    	String playerVehicleInfo = carClass.toString() + "," + raceFilter.toString();
+    public void addPlayerToQueue(Long personaId, Integer carClass, Integer raceFilter, int isAvailable) {
+    	String playerVehicleInfo = carClass.toString() + "," + raceFilter.toString() + "," + isAvailable;
         if (this.redisConnection != null) {
             this.redisConnection.sync().hset("matchmaking_queue", personaId.toString(), playerVehicleInfo);
-            changePlayerCountInQueue(true);
+            matchmakingWebStatus();
 //          System.out.println("playerCount add (+1): " + curPlayerCount);
         }
     }
@@ -80,7 +89,7 @@ public class MatchmakingBO {
     public void removePlayerFromQueue(Long personaId) {
         if (this.redisConnection != null) {
             this.redisConnection.sync().hdel("matchmaking_queue", personaId.toString());
-            changePlayerCountInQueue(false);
+            matchmakingWebStatus();
 //          System.out.println("playerCount remove (+1): " + curPlayerCount);
         }
     }
@@ -91,6 +100,7 @@ public class MatchmakingBO {
      *
      * @param increase increase or decrease the counter (true/false)
      */
+    // Not used
     public void changePlayerCountInQueue(boolean increase) {
         if (this.redisConnection != null) {
         	int curPlayerCount = Integer.parseInt(this.redisConnection.sync().get("matchmaking_playercount")); // Get the queue player count
@@ -104,12 +114,12 @@ public class MatchmakingBO {
     /**
      * Gets the ID of a persona from the queue, as long as that persona is listed under the given car class.
      * Basically, we are "pulling" the racers from MM queue to our event, if they able to participate.
-     * playerVehicleInfo: 0 - Car Class, 1 - Race Filter value
+     * playerVehicleInfo array: slot 0 - Car Class, slot 1 - Race Filter value, slot 2 - isAvailable value
      *
      * @param carClass The car class hash to find a persona in.
      * @return The ID of the persona, or {@literal -1} if no persona was found.
      */
-    public Long getPlayerFromQueue(Integer carClass) {
+    public Long getPlayerFromQueue(Integer carClass, int eventModeId) {
         if (this.redisConnection == null) {
         	System.out.println("### redisConnection FUCKED");
             return -1L;
@@ -125,10 +135,14 @@ public class MatchmakingBO {
             System.out.println("### getPlayerFromQueue 2");
             
             // Open event, or when player have a valid car class for restricted event
-            // FIXME RaceFilter should filter stuff
-            if (carClass == 607077938 || Integer.parseInt(playerVehicleInfo[0]) == carClass) {
+            int playerCarClass = Integer.parseInt(playerVehicleInfo[0]);
+            int playerRaceFilter = Integer.parseInt(playerVehicleInfo[1]);
+            if (Integer.parseInt(playerVehicleInfo[2]) == 1 && isRaceFilterAllowed(playerRaceFilter, eventModeId) 
+            		&& (carClass == 607077938 || playerCarClass == carClass)) {
                 personaId = Long.parseLong(keyValue.getKey());
-                removePlayerFromQueue(personaId);
+                String newPlayerVehicleInfo = playerCarClass + "," + playerRaceFilter + "," + 0; // This entrant is not available for new invites
+                this.redisConnection.sync().hset("matchmaking_queue", keyValue.getKey(), newPlayerVehicleInfo);
+                // removePlayerFromQueue(personaId);
                 System.out.println("### getPlayerFromQueue FINAL");
                 break;
             }
@@ -138,20 +152,68 @@ public class MatchmakingBO {
     
 //  @Schedule(minute = "*/1", hour = "*", persistent = false)
     public void matchmakingWebStatus() {
-    	String test = this.redisConnection.sync().get("matchmaking_playercount");
+    	Long test = this.redisConnection.sync().hlen("matchmaking_queue"); // Get the count of Key-Value pairs (player entries) by "queue" hash
         System.out.println("### Players searching: " + test);
+    }
+    
+    /**
+     * Checks if player Race Filter is allowing him to participate on the suggested event.
+     *
+     * @param playerRaceFilter Race Filter value (mode)
+     * @param eventModeId Game mode ID of the event
+     * @return Is that event allowed by Race Filter (true/false)
+     */
+    public boolean isRaceFilterAllowed(int playerRaceFilter, int eventModeId) {
+    	boolean isRaceFilterAllowed = false;
+    	switch (playerRaceFilter) {
+    	case 1: // Sprint & Circuit
+			if (eventModeId == 4 || eventModeId == 9) {isRaceFilterAllowed = true;}
+			break;
+		case 2: // Drag
+			if (eventModeId == 19) {isRaceFilterAllowed = true;}
+			break;	
+		case 3: // All Races
+			if (eventModeId == 4 || eventModeId == 9 || eventModeId == 19) {isRaceFilterAllowed = true;}
+			break;
+		case 4: // Team Escape
+			if (eventModeId == 24 || eventModeId == 100) {isRaceFilterAllowed = true;}
+			break;
+		default: // No Filter
+			isRaceFilterAllowed = true;
+			break;
+    	}
+        System.out.println("### isRaceFilterAllowed: " + isRaceFilterAllowed);
+        return isRaceFilterAllowed;
     }
 
     /**
      * Add the given event ID to the list of ignored events for the given persona ID.
      *
      * @param personaId the persona ID
-     * @param eventId   the event ID
+     * @param eventId the event ID
      */
-    public void ignoreEvent(long personaId, long eventId) {
+    public void ignoreEvent(long personaId, EventEntity EventEntity) {
+    	// Event will be ignored only when player is on Race Now search
         if (this.redisConnection != null) {
-            this.redisConnection.sync().sadd("ignored_events." + personaId, Long.toString(eventId));
+        	System.out.println("### hexists: " + this.redisConnection.sync().hexists("matchmaking_queue", Long.toString(personaId)));
+        	if (this.redisConnection.sync().hexists("matchmaking_queue", Long.toString(personaId))) {
+        		this.redisConnection.sync().sadd("ignored_events." + personaId, Long.toString(EventEntity.getId()));
+                openFireSoapBoxCli.send(XmppChat.createSystemMessage("### " + EventEntity.getName() + " will be ignored in the Race Now search for a while."), personaId);
+        	}
         }
+    }
+    
+    /**
+     * Checks if the specified player is on Race Now search.
+     *
+     * @param personaId the persona ID
+     */
+    public boolean isPlayerOnMMSearch(long personaId) {
+    	boolean isExists = false;
+        if (this.redisConnection != null) {
+        	isExists = this.redisConnection.sync().hexists("matchmaking_queue", Long.toString(personaId));
+        }
+        return isExists;
     }
 
     /**
@@ -169,15 +231,32 @@ public class MatchmakingBO {
      * Checks if the given event ID is in the list of ignored events for the given persona ID
      *
      * @param personaId the persona ID
-     * @param eventId   the event ID
+     * @param eventId the event ID
      * @return {@code true} if the given event ID is in the list of ignored events for the given persona ID
      */
     public boolean isEventIgnored(long personaId, long eventId) {
         if (this.redisConnection != null) {
             return this.redisConnection.sync().sismember("ignored_events." + personaId, Long.toString(eventId));
         }
-
         return false;
+    }
+    
+    /**
+     * Get the ignored by persona events list
+     *
+     * @param personaId the persona ID
+     * @return int-list of ignored eventId
+     */
+    public List<Integer> getEventIgnoredList(long personaId) {
+    	List<Integer> eventIgnoreList = new ArrayList<Integer>();
+        if (this.redisConnection != null) {
+            ScanIterator<String> ignoreIterator = ScanIterator.sscan(this.redisConnection.sync(), "ignored_events." + personaId);
+            while (ignoreIterator.hasNext()) {
+            	String eventId = ignoreIterator.next();
+            	eventIgnoreList.add(Integer.parseInt(eventId));
+            }
+        }
+        return eventIgnoreList;
     }
 
     @Asynchronous

@@ -110,6 +110,7 @@ public class DriverPersonaBO {
 		personaEntity.setLevel(parameterBO.getIntParam("STARTING_LEVEL_NUMBER"));
 		personaEntity.setCreated(LocalDateTime.now());
 		personaEntity.setHidden(false);
+		personaEntity.setIgnoreRaces(true);
 		personaDao.insert(personaEntity);
 
 		inventoryBO.createInventory(personaEntity);

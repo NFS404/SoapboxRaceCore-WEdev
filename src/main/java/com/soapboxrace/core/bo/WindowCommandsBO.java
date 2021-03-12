@@ -90,6 +90,7 @@ public class WindowCommandsBO {
 	// Teams actions parser into "add a friend" window - Hypercycle
 	// XMPP messages can go into timeouts, if ' symbol is used
 	// so i did some weird 'else' outputs for messages
+	// FIXME Need to rework that code
 	public FriendResult sendFriendRequest(Long personaId, String displayName, String reqMessage) {
 		boolean teamsActionInit = false;
 		PersonaEntity personaSender = personaDAO.findById(personaId);
@@ -320,6 +321,19 @@ public class WindowCommandsBO {
 			if (displayName.contains("/DELHIDDENPARTS")) {
 				visualPartDAO.deleteHiddenItems(personaBO.getDefaultCarEntity(personaId).getOwnedCar().getCustomCar());
 				openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Hidden parts is removed, go to the Garage and return back."), personaId);
+				return null;
+			}
+			// Switch the "Ignore races on search" feature for persona
+			if (displayName.contains("/IGNORERACES")) {
+				if (personaSender.isIgnoreRaces()) {
+					personaSender.setIgnoreRaces(false);
+					personaDAO.update(personaSender);
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Ignore Races feature is disabled."), personaId);
+				} else {
+					personaSender.setIgnoreRaces(true);
+					personaDAO.update(personaSender);
+					openFireSoapBoxCli.send(XmppChat.createSystemMessage("### Server will mark the declined races as to be ignored."), personaId);
+				}
 				return null;
 			}
 		}

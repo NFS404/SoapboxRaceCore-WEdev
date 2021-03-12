@@ -18,6 +18,7 @@ import com.soapboxrace.core.bo.AchievementsBO;
 import com.soapboxrace.core.bo.EventBO;
 import com.soapboxrace.core.bo.EventResultBO;
 import com.soapboxrace.core.bo.FriendBO;
+import com.soapboxrace.core.bo.MatchmakingBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.dao.EventDataDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
@@ -67,6 +68,9 @@ public class Event {
 	
 	@EJB
 	private PersonaDAO personaDAO;
+	
+	@EJB
+	private MatchmakingBO matchmakingBO;
 
 	@POST
 	@Secured
@@ -100,6 +104,7 @@ public class Event {
 		if (eventMode == 19) { // Drag
 			eventBO.sendXmppPacketDragAbort(eventSessionId, activePersonaId);
 		}
+		matchmakingBO.resetIgnoredEvents(activePersonaId);
 		return "";
 	}
 
@@ -159,6 +164,7 @@ public class Event {
 			break;
 		}
 		personaPresenceDAO.updateCurrentEventPost(activePersonaId, null, 0, null, false);
+		matchmakingBO.resetIgnoredEvents(activePersonaId);
 		return "";
 	}
 
@@ -174,6 +180,7 @@ public class Event {
 		Long activePersonaId = tokenBO.getActivePersonaId(securityToken);
 		pursuitEventResult = eventResultBO.handlePursuitEnd(eventSessionEntity, activePersonaId, pursuitArbitrationPacket, true, eventEnded);
 		personaPresenceDAO.updateCurrentEventPost(activePersonaId, null, 0, null, false);
+		matchmakingBO.resetIgnoredEvents(activePersonaId);
 		return pursuitEventResult;
 	}
 }

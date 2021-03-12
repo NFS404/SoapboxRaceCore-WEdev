@@ -28,10 +28,13 @@ import com.soapboxrace.core.dao.LobbyDAO;
 import com.soapboxrace.core.dao.LobbyEntrantDAO;
 import com.soapboxrace.core.dao.PersonaDAO;
 import com.soapboxrace.core.dao.PersonaPresenceDAO;
+import com.soapboxrace.core.engine.EngineException;
+import com.soapboxrace.core.engine.EngineExceptionCode;
 import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
 import com.soapboxrace.core.jpa.LobbyEntity;
+import com.soapboxrace.core.jpa.PersonaEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
 import com.soapboxrace.jaxb.http.CustomCarTrans;
@@ -118,6 +121,10 @@ public class MatchMaking {
 	@Produces(MediaType.APPLICATION_XML)
 	public String joinQueueEvent(@HeaderParam("securityToken") String securityToken, @PathParam("eventId") int eventId) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
+		if (matchmakingBO.isPlayerOnMMSearch(activePersonaId)) { // Player can't search the race, while searching the race...
+			System.out.println("### exception");
+			throw new EngineException(EngineExceptionCode.GameLocked, false);
+		}
 		CustomCarTrans customCar = personaBO.getDefaultCar(activePersonaId).getCustomCar();
 		lobbyBO.joinQueueEvent(activePersonaId, eventId, customCar.getCarClassHash());
 		return "";
@@ -132,12 +139,6 @@ public class MatchMaking {
 		matchmakingBO.removePlayerFromQueue(activePersonaId);
 		LobbyEntity lobbyEntity = lobbyDAO.findByHosterPersona(activePersonaId);
 		if (lobbyEntity != null) {
-//			boolean isLobbyReserved = lobbyEntity.isReserved();
-//			if (isLobbyReserved) { // Disable the "reserve" status, so that lobby can be deleted if become empty
-//				System.out.println("### /leavequeue un-reserve");
-//				lobbyBO.setIsLobbyReserved(lobbyEntity, false);
-//			}
-//			if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity) && !isLobbyReserved) { // Delete the empty lobby
 			if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity)) { // Delete the empty lobby
 				System.out.println("### /leavequeue delete");
 				lobbyCountdownBO.endLobby(lobbyEntity);
@@ -158,17 +159,12 @@ public class MatchMaking {
 			lobbyBO.deleteLobbyEntrant(activePersonaId, activeLobbyId);
 		}
 		LobbyEntity lobbyEntity = lobbyDAO.findById(activeLobbyId);
-//		boolean isLobbyReserved = lobbyEntity.isReserved();
-//		if (isLobbyReserved) { // Disable the "reserve" status, so that lobby can be deleted if become empty
-//			System.out.println("### /leavelobby un-reserve");
-//			lobbyBO.setIsLobbyReserved(lobbyEntity, false);
-//		}
-//		if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity) && !isLobbyReserved) { // Delete the empty lobby
 		if (lobbyEntity != null && lobbyEntrantDAO.isLobbyEmpty(lobbyEntity)) { // Delete the empty lobby
 			System.out.println("### /leavelobby delete");
 			lobbyCountdownBO.endLobby(lobbyEntity);
 		}
 		tokenSessionBO.setActiveLobbyId(securityToken, 0L);
+		tokenSessionBO.setSearchEventId(activePersonaId, 0);
 		System.out.println("### /leavelobby");
 		return "";
 	}
@@ -222,6 +218,7 @@ public class MatchMaking {
 			System.out.println("### /acceptinvite newlobby");
 		}
 		tokenSessionBO.setActiveLobbyId(securityToken, lobbyInviteId);
+		tokenSessionBO.setSearchEventId(activePersonaId, 0);
 		System.out.println("### /acceptinvite");
 		return lobbyBO.acceptinvite(activePersonaId, lobbyInviteId);
 	}
@@ -232,19 +229,21 @@ public class MatchMaking {
 	@Produces(MediaType.APPLICATION_XML)
 	public String declineInvite(@HeaderParam("securityToken") String securityToken, @QueryParam("lobbyInviteId") Long lobbyInviteId) {
 		LobbyEntity lobbyEntity = lobbyDAO.findById(lobbyInviteId);
-		if (lobbyEntity != null) {
-//			boolean isLobbyReserved = lobbyEntity.isReserved();
-//			if (isLobbyReserved) { // Disable the "reserve" status, so that lobby can be deleted if become empty
-//				System.out.println("### /declineinvite un-reserve");
-//				lobbyBO.setIsLobbyReserved(lobbyEntity, false);
-//			}
-//			if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity) && !isLobbyReserved) { // Delete the empty lobby
-			if (lobbyEntrantDAO.isLobbyEmpty(lobbyEntity)) { // Delete the empty lobby
-				System.out.println("### /declineinvite delete");
-				lobbyCountdownBO.endLobby(lobbyEntity);
-			}
+		EventEntity eventEntity = eventDAO.findById(tokenSessionBO.getSearchEventId(securityToken));
+		if (lobbyEntity != null && lobbyEntrantDAO.isLobbyEmpty(lobbyEntity)) { // Delete the empty lobby
+			System.out.println("### /declineinvite delete");
+			lobbyCountdownBO.endLobby(lobbyEntity);
 		}
 		tokenSessionBO.setActiveLobbyId(securityToken, 0L);
+		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
+		PersonaEntity personaEntity = personaDAO.findById(activePersonaId);
+		// We cannot check if player declines this event from a event map or Race Now, so do some additional checks
+		if ((lobbyEntity != null || matchmakingBO.isPlayerOnMMSearch(activePersonaId)) && personaEntity.isIgnoreRaces()) {
+			matchmakingBO.ignoreEvent(tokenSessionBO.getActivePersonaId(securityToken), eventEntity);
+			System.out.println("### /declineinvite ignore");
+		}
+		matchmakingBO.removePlayerFromQueue(activePersonaId);
+		tokenSessionBO.setSearchEventId(activePersonaId, 0);
 		System.out.println("### /declineinvite");
 		return "";
 	}
