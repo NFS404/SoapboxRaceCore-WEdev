@@ -41,7 +41,7 @@ public class MatchmakingBO {
     public void initialize() {
         if (parameterBO.getBoolParam("REDIS_ENABLE")) {
             this.redisConnection = this.redisBO.getConnection();
-            this.redisConnection.sync().hset("matchmaking_info", "playerCount", "0"); // Create the player count entry
+            this.redisConnection.sync().set("matchmaking_playercount", "0"); // Create the player count entry
             System.out.println("Initialized matchmaking system");
         } else {
         	System.out.println("Redis is not enabled! Matchmaking queue is disabled.");
@@ -67,8 +67,8 @@ public class MatchmakingBO {
     	String playerVehicleInfo = carClass.toString() + "," + raceFilter.toString();
         if (this.redisConnection != null) {
             this.redisConnection.sync().hset("matchmaking_queue", personaId.toString(), playerVehicleInfo);
-            //int playerCountOld = Integer.getInteger(this.redisConnection.sync().hget("matchmaking_info", "playerCount")); // Get the queue player count
-            //this.redisConnection.sync().hset("matchmaking_info", "playerCount", String.valueOf(playerCountOld++)); // Save the new queue player count
+            changePlayerCountInQueue(true);
+//          System.out.println("playerCount add (+1): " + curPlayerCount);
         }
     }
 
@@ -80,8 +80,24 @@ public class MatchmakingBO {
     public void removePlayerFromQueue(Long personaId) {
         if (this.redisConnection != null) {
             this.redisConnection.sync().hdel("matchmaking_queue", personaId.toString());
-            //int playerCountOld = Integer.getInteger(this.redisConnection.sync().hget("matchmaking_info", "playerCount")); // Get the queue player count
-            //this.redisConnection.sync().hset("matchmaking_info", "playerCount", String.valueOf(playerCountOld--)); // Save the new queue player count
+            changePlayerCountInQueue(false);
+//          System.out.println("playerCount remove (+1): " + curPlayerCount);
+        }
+    }
+    
+    /**
+     * Controls the player count in the Race Now search queue.
+     * Does not count the players, who has started the search for specific event.
+     *
+     * @param increase increase or decrease the counter (true/false)
+     */
+    public void changePlayerCountInQueue(boolean increase) {
+        if (this.redisConnection != null) {
+        	int curPlayerCount = Integer.parseInt(this.redisConnection.sync().get("matchmaking_playercount")); // Get the queue player count
+        	if (increase) {curPlayerCount = curPlayerCount + 1;}
+        	else {curPlayerCount = curPlayerCount - 1;}
+        	this.redisConnection.sync().set("matchmaking_playercount", String.valueOf(curPlayerCount)); // Save the new queue player count
+        	matchmakingWebStatus();
         }
     }
 
@@ -120,9 +136,9 @@ public class MatchmakingBO {
         return personaId;
     }
     
-    // @Schedule(minute = "*/1", hour = "*", persistent = false)
+//  @Schedule(minute = "*/1", hour = "*", persistent = false)
     public void matchmakingWebStatus() {
-    	String test = this.redisConnection.sync().hget("matchmaking_info", "playerCount");
+    	String test = this.redisConnection.sync().get("matchmaking_playercount");
         System.out.println("### Players searching: " + test);
     }
 

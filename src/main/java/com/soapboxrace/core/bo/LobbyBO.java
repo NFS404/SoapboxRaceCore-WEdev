@@ -129,6 +129,8 @@ public class LobbyBO {
 		}
 	}
 
+	// Send the invites to your current in-game group
+	// TODO Manual invites for players?
 	public void createPrivateLobby(Long personaId, int eventId, int carClassHash) {
 		List<Long> listOfPersona = openFireRestApiCli.getAllPersonaByGroup(personaId);
 		if (!listOfPersona.isEmpty()) {
@@ -170,6 +172,7 @@ public class LobbyBO {
 		lobbyDao.insert(lobbyEntity);
 
 		if (parameterBO.getBoolParam("REDIS_ENABLE")) { // Queue Matchmaking
+//			matchmakingBO.changePlayerCountInQueue(true); // Add the hoster to the queue player count, but not in the queue itself
 			int playersFounded = 1;
 			for (int i = 1; i <= eventMaxPlayers - 1; i++) { // Search a players for all of the event slots
 	            if (lobbyEntrantDAO.getPlayerCount(lobbyEntity) >= eventMaxPlayers) break;
@@ -188,6 +191,7 @@ public class LobbyBO {
 	        }
 			if (playersFounded > 1) {
 				System.out.println("### Get the player ACTIVE");
+//				matchmakingBO.changePlayerCountInQueue(false); // Remove the hoster from queue player count
             	sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity, eventId);
             	setIsLobbyReserved(lobbyEntity, true);
             	if (!tempCreated) {
@@ -200,7 +204,8 @@ public class LobbyBO {
 		else {
 			sendJoinEvent(personaEntity.getPersonaId(), lobbyEntity, eventId);
 		}
-		if (tempCreated) {
+		// This lobby has been created again, when player got a invite, but the lobby itself is not exists anymore (e.g other player has declined the invite)
+		if (tempCreated) { 
 			System.out.println("### tempCreated timer");
 			lobbyEntity.setLobbyDateTimeStart(new Date());
     		lobbyDao.update(lobbyEntity);
@@ -311,6 +316,7 @@ public class LobbyBO {
 				System.out.println("callbackRequest for " + hosterPersonaId);
 				setIsLobbyReserved(lobbyEntityEmpty, true);
 				sendJoinEvent(hosterPersonaId, lobbyEntityEmpty, eventId); // Send the join request for race hoster
+//				matchmakingBO.changePlayerCountInQueue(false); // Remove the hoster from queue player count
 				lobbyEntityEmpty.setLobbyDateTimeStart(new Date());
 				lobbyDao.update(lobbyEntityEmpty);
 				lobbyCountdownBO.scheduleLobbyStart(lobbyEntityEmpty);

@@ -89,8 +89,8 @@ import javax.persistence.Transient;
 				+ "AND obj.isPrivate = false "
 				+ "AND obj.event.searchAvailable = true AND obj.event.carClassHash = 607077938 AND obj.event.eventModeId = 24 ORDER BY obj.lobbyDateTimeStart ASC"),
 		
-		@NamedQuery(name = "LobbyEntity.findByEventStarted", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2 AND obj.isPrivate = false"), //
-		@NamedQuery(name = "LobbyEntity.findByEventAndPersona", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2 AND obj.isPrivate = true AND obj.personaId = :personaId"), //
+		@NamedQuery(name = "LobbyEntity.findByEventStarted", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND (obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2) OR (obj.lobbyDateTimeStart = null) AND obj.isPrivate = false"), //
+		@NamedQuery(name = "LobbyEntity.findByEventAndPersona", query = "SELECT obj FROM LobbyEntity obj WHERE obj.event = :event AND (obj.lobbyDateTimeStart between :dateTime1 AND :dateTime2) OR (obj.lobbyDateTimeStart = null) AND obj.isPrivate = true AND obj.personaId = :personaId"), //
 		@NamedQuery(name = "LobbyEntity.findByHosterPersona", query = "SELECT obj FROM LobbyEntity obj WHERE obj.personaId = :personaId"), //
 		@NamedQuery(name = "LobbyEntity.isThisLobbyReserved", query = "SELECT obj FROM LobbyEntity obj WHERE obj.id = :id AND obj.isReserved = false"), //
 		@NamedQuery(name = "LobbyEntity.deleteAll", query = "DELETE FROM LobbyEntity obj") //
