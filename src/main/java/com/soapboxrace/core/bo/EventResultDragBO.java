@@ -219,11 +219,7 @@ public class EventResultDragBO {
 		dragEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, dragArbitrationPacket, dragArbitrationPacket.getNumberOfCollisions()));
 		dragEventResult.setEntrants(arrayOfDragEntrantResult);
 		dragEventResult.setEventId(currentEventId);
-		dragEventResult.setEventSessionId(eventSessionId);
-		dragEventResult.setExitPath(ExitPath.EXIT_TO_FREEROAM);
-		dragEventResult.setInviteLifetimeInMilliseconds(0);
-		dragEventResult.setLobbyInviteId(0);
-		dragEventResult.setPersonaId(activePersonaId);
+		eventResultBO.defineFinishLobby(dragEventResult, eventSessionEntity);
 		
 		// Check race record
 		legitRaceBO.isRecordVaildDrag(dragArbitrationPacket, eventDataEntity, customCarEntity, speedBugChance, personaEntity, eventEntity);

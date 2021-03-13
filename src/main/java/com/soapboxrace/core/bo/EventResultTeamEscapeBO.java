@@ -236,11 +236,7 @@ public class EventResultTeamEscapeBO {
 		teamEscapeEventResult.setDurability(carDamageBO.updateDamageCar(activePersonaId, teamEscapeArbitrationPacket, teamEscapeArbitrationPacket.getNumberOfCollisions()));
 		teamEscapeEventResult.setEntrants(arrayOfTeamEscapeEntrantResult);
 		teamEscapeEventResult.setEventId(currentEventId);
-		teamEscapeEventResult.setEventSessionId(eventSessionId);
-		teamEscapeEventResult.setExitPath(ExitPath.EXIT_TO_FREEROAM);
-		teamEscapeEventResult.setInviteLifetimeInMilliseconds(0);
-		teamEscapeEventResult.setLobbyInviteId(0);
-		teamEscapeEventResult.setPersonaId(activePersonaId);
+		eventResultBO.defineFinishLobby(teamEscapeEventResult, eventSessionEntity);
 		return teamEscapeEventResult;
 	}
 }

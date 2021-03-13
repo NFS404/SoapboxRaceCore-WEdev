@@ -135,6 +135,7 @@ public class EventBO {
 		eventSessionEntity.setStarted(System.currentTimeMillis());
 		eventSessionEntity.setTeamNOS(false); // Temporal value
 		eventSessionEntity.setPlayerList(personaId.toString()); // Save the Id of the persona-hoster
+		eventSessionEntity.setLobbyId(0L); // Lobby ID could be defined during lobby logic
 		eventSessionDao.insert(eventSessionEntity);
 		return eventSessionEntity;
 	}

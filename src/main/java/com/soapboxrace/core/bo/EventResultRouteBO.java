@@ -222,12 +222,8 @@ public class EventResultRouteBO {
 		if (currentEventId == tournamentEventId && speedBugChance) {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### This event can be affected by SpeedBug, restart the game."), personaId);
 		}
-		routeEventResult.setEventSessionId(eventSessionId);
-		routeEventResult.setExitPath(ExitPath.EXIT_TO_FREEROAM);
-		routeEventResult.setInviteLifetimeInMilliseconds(0);
-		routeEventResult.setLobbyInviteId(0);
-		routeEventResult.setPersonaId(activePersonaId);
 		
+		eventResultBO.defineFinishLobby(routeEventResult, eventSessionEntity);
 		// eventResultBO.physicsMetricsInfoDebug(routeArbitrationPacket);
 		int carclasshash = eventEntity.getCarClassHash();
 		boolean isDNFActive = parameterBO.getBoolParam("DNF_ENABLED");

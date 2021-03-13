@@ -20,6 +20,7 @@ import com.soapboxrace.core.bo.FriendBO;
 import com.soapboxrace.core.bo.LobbyBO;
 import com.soapboxrace.core.bo.LobbyCountdownBO;
 import com.soapboxrace.core.bo.MatchmakingBO;
+import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.bo.PersonaBO;
 import com.soapboxrace.core.bo.TokenSessionBO;
 import com.soapboxrace.core.dao.CarClassesDAO;
@@ -93,6 +94,9 @@ public class MatchMaking {
 	@EJB
 	private LobbyEntrantDAO lobbyEntrantDAO;
 	
+	@EJB
+    private ParameterBO parameterBO;
+	
 	@Context
 	private HttpServletRequest sr;
 
@@ -103,14 +107,19 @@ public class MatchMaking {
 	public String joinQueueRaceNow(@HeaderParam("securityToken") String securityToken) {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 		CustomCarTrans customCar = personaBO.getDefaultCar(activePersonaId).getCustomCar();
+		int playerCarClass = customCar.getCarClassHash();
+		boolean isSClassFilterActive = parameterBO.getBoolParam("RACENOW_SCLASS_SEPARATE");
+		if (playerCarClass == -2142411446 && isSClassFilterActive) {
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### S-Class cars matchmaking is separate."), activePersonaId);
+		}
 		CarClassesEntity carClassesEntity = carClassesDAO.findByHash(customCar.getPhysicsProfileHash());
 //		lobbyBO.joinFastLobby(securityToken, activePersonaId, defaultCar.getCustomCar().getCarClassHash(), lobbyBO.carDivision(defaultCar.getCustomCar().getCarClassHash()), defaultCar.getCustomCar().getRaceFilter());
 		if (!carClassesEntity.getQuickRaceAllowed()) {
 			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### You cannot join to racing on this vehicle."), activePersonaId);
-			return "";
+			throw new EngineException(EngineExceptionCode.GameLocked, false);
 		}
 		else {
-			lobbyBO.joinFastLobby(securityToken, activePersonaId, customCar.getCarClassHash(), customCar.getRaceFilter());
+			lobbyBO.joinFastLobby(securityToken, activePersonaId, playerCarClass, customCar.getRaceFilter(), isSClassFilterActive);
 		}
 		return "";
 	}
@@ -214,7 +223,8 @@ public class MatchMaking {
 		Long activePersonaId = tokenSessionBO.getActivePersonaId(securityToken);
 		LobbyEntity checkLobbyEntity = lobbyDAO.findById(lobbyInviteId);
 		if (checkLobbyEntity == null) { // Since our requested lobby doesn't exist for some reason, we should create a new one
-			lobbyInviteId = lobbyBO.createLobby(personaDAO.findById(activePersonaId), tokenSessionBO.getSearchEventId(securityToken), false, true);
+			int playerCarClass = personaBO.getCurrentPlayerCarClass(activePersonaId);
+			lobbyInviteId = lobbyBO.createLobby(personaDAO.findById(activePersonaId), tokenSessionBO.getSearchEventId(securityToken), false, true, playerCarClass);
 			System.out.println("### /acceptinvite newlobby");
 		}
 		tokenSessionBO.setActiveLobbyId(securityToken, lobbyInviteId);

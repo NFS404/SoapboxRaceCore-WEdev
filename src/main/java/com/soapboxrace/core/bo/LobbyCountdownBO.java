@@ -266,8 +266,22 @@ public class LobbyCountdownBO {
 		
 		eventSessionEntity.setPlayerList(stringListConverter.listToStr(personaArray)); // Save the current entrants list
 		eventSessionEntity.setPrivate(lobbyEntity.getIsPrivate());
+		eventSessionEntity.setLobbyId(lobbyId);
+		lockLobby(lobbyEntity);
 		eventSessionDao.update(eventSessionEntity);
-		endLobby(lobbyEntity);
+	}
+	
+	// Lock the lobby for Race Again feature, so players could be able to populate that lobby again
+	public void lockLobby(LobbyEntity lobbyEntity) {
+		if (parameterBO.getBoolParam("ENABLE_FINISHLOBBY")) {
+			lobbyEntity.setStarted(true);
+			lobbyEntity.setLobbyDateTimeStart(null);
+			lobbyEntrantDAO.deleteByLobby(lobbyEntity);
+			lobbyDao.update(lobbyEntity);
+		}
+		else {
+			endLobby(lobbyEntity);
+		}
 	}
 	
 	// Remove the lobby information from DB, we don't need it anymore

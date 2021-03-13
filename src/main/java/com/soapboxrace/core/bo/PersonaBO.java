@@ -119,6 +119,23 @@ public class PersonaBO {
 		}
 		return null;
 	}
+	
+	public int getCurrentPlayerCarClass(Long personaId) {
+		PersonaEntity personaEntity = personaDAO.findById(personaId);
+		List<CarSlotEntity> carSlotList = getPersonasCar(personaId);
+		Integer curCarIndex = personaEntity.getCurCarIndex();
+		if (!carSlotList.isEmpty()) {
+			if (curCarIndex >= carSlotList.size()) {
+				curCarIndex = carSlotList.size() - 1;
+				CarSlotEntity ownedCarEntity = carSlotList.get(curCarIndex);
+				changeDefaultCar(personaId, ownedCarEntity.getId());
+			}
+			CarSlotEntity carSlotEntity = carSlotList.get(curCarIndex);
+			CustomCarEntity customCar = carSlotEntity.getOwnedCar().getCustomCar();
+			return customCar.getCarClassHash();
+		}
+		return 0;
+	}
 
 	public OwnedCarTrans getDefaultCar(Long personaId) {
 		CarSlotEntity carSlotEntity = getDefaultCarEntity(personaId);

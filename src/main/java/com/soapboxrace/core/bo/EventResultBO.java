@@ -1,6 +1,7 @@
 package com.soapboxrace.core.bo;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
@@ -12,17 +13,21 @@ import javax.ejb.TimerService;
 
 import com.soapboxrace.core.dao.CarClassesDAO;
 import com.soapboxrace.core.dao.EventDataDAO;
+import com.soapboxrace.core.dao.LobbyDAO;
 import com.soapboxrace.core.jpa.CarClassesEntity;
 import com.soapboxrace.core.jpa.CarSlotEntity;
 import com.soapboxrace.core.jpa.CustomCarEntity;
 import com.soapboxrace.core.jpa.EventDataEntity;
 import com.soapboxrace.core.jpa.EventSessionEntity;
+import com.soapboxrace.core.jpa.LobbyEntity;
 import com.soapboxrace.core.jpa.OwnedCarEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppEvent;
 import com.soapboxrace.jaxb.http.ArbitrationPacket;
 import com.soapboxrace.jaxb.http.DragArbitrationPacket;
 import com.soapboxrace.jaxb.http.DragEventResult;
+import com.soapboxrace.jaxb.http.EventResult;
+import com.soapboxrace.jaxb.http.ExitPath;
 import com.soapboxrace.jaxb.http.PursuitArbitrationPacket;
 import com.soapboxrace.jaxb.http.PursuitEventResult;
 import com.soapboxrace.jaxb.http.RouteArbitrationPacket;
@@ -56,6 +61,18 @@ public class EventResultBO {
 	
 	@EJB
 	private OpenFireSoapBoxCli openFireSoapBoxCli;
+	
+	@EJB
+	private ParameterBO parameterBO;
+	
+	@EJB
+	private LobbyDAO lobbyDAO;
+	
+	@EJB
+	private LobbyBO lobbyBO;
+	
+	@EJB
+	private LobbyCountdownBO lobbyCountdownBO;
 
 	@Resource
     private TimerService timerService;
@@ -222,5 +239,33 @@ public class EventResultBO {
 		}
 		return isModCar;
 	}
-
+	
+	public EventResult defineFinishLobby(EventResult eventResult, EventSessionEntity eventSessionEntity) {
+		boolean isFinishLobbyEnabled = parameterBO.getBoolParam("ENABLE_FINISHLOBBY");
+		eventResult.setEventSessionId(eventSessionEntity.getId());
+		Long lobbyId = eventSessionEntity.getLobbyId();
+		if (lobbyId == 0 || !isFinishLobbyEnabled) { // Don't initiate Race Again if the race is single-player
+			eventResult.setExitPath(ExitPath.EXIT_TO_FREEROAM);
+			eventResult.setInviteLifetimeInMilliseconds(0);
+			eventResult.setLobbyInviteId(0);
+			eventResult.setPersonaId(eventResult.getPersonaId());
+		}
+		else {
+			LobbyEntity oldLobbyEntity = lobbyDAO.findById(lobbyId);
+			if (oldLobbyEntity.isStarted()) {
+				oldLobbyEntity.setStarted(false); // Unlock our lobby for players
+				oldLobbyEntity.setLobbyDateTimeStart(new Date());
+				lobbyCountdownBO.scheduleLobbyStart(oldLobbyEntity);
+				lobbyDAO.update(oldLobbyEntity);
+			}
+			
+			eventResult.setExitPath(ExitPath.EXIT_TO_LOBBY);
+			// 8s delay is to prevent the transition to un-existing lobby, if too late
+			eventResult.setInviteLifetimeInMilliseconds(lobbyBO.getLobbyCountdownInMilliseconds(oldLobbyEntity.getLobbyDateTimeStart()) - 8000); 
+			eventResult.setLobbyInviteId(lobbyId);
+			eventResult.setPersonaId(eventResult.getPersonaId());
+		}
+		System.out.println("### defineFinishLobby");
+		return eventResult;
+	}
 }

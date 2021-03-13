@@ -117,9 +117,11 @@ public class MatchmakingBO {
      * playerVehicleInfo array: slot 0 - Car Class, slot 1 - Race Filter value, slot 2 - isAvailable value
      *
      * @param carClass The car class hash to find a persona in.
+     * @param eventModeId Event Mode ID
+     * @param hosterCarClass Car class hash of first player's car
      * @return The ID of the persona, or {@literal -1} if no persona was found.
      */
-    public Long getPlayerFromQueue(Integer carClass, int eventModeId) {
+    public Long getPlayerFromQueue(Integer carClass, int eventModeId, int hosterCarClass, boolean isSClassFilterActive) {
         if (this.redisConnection == null) {
         	System.out.println("### redisConnection FUCKED");
             return -1L;
@@ -138,7 +140,7 @@ public class MatchmakingBO {
             int playerCarClass = Integer.parseInt(playerVehicleInfo[0]);
             int playerRaceFilter = Integer.parseInt(playerVehicleInfo[1]);
             if (Integer.parseInt(playerVehicleInfo[2]) == 1 && isRaceFilterAllowed(playerRaceFilter, eventModeId) 
-            		&& (carClass == 607077938 || playerCarClass == carClass)) {
+            		&& isSClassFilterAllowed(playerCarClass, hosterCarClass, carClass, isSClassFilterActive) && (carClass == 607077938 || playerCarClass == carClass)) {
                 personaId = Long.parseLong(keyValue.getKey());
                 String newPlayerVehicleInfo = playerCarClass + "," + playerRaceFilter + "," + 0; // This entrant is not available for new invites
                 this.redisConnection.sync().hset("matchmaking_queue", keyValue.getKey(), newPlayerVehicleInfo);
@@ -184,6 +186,27 @@ public class MatchmakingBO {
     	}
         System.out.println("### isRaceFilterAllowed: " + isRaceFilterAllowed);
         return isRaceFilterAllowed;
+    }
+    
+    /**
+     * Checks if player is able to participate on event, where the hoster is on S-class car.
+     * Needs RACENOW_SCLASS_SEPARATE parameter to be active, otherwise it's always returns true.
+     *
+     * @param playerCarClass player car class
+     * @param hosterCarClass first player (hoster) car class
+     * @param eventCarClass event car class restriction
+     * @return Is that player is allowed to participate by S-Class Filter (true/false)
+     */
+    public boolean isSClassFilterAllowed(int playerCarClass, int hosterCarClass, int eventCarClass, boolean isSClassFilterActive) {
+    	int SClassHash = -2142411446;
+    	boolean isSClassFilterAllowed = true;
+    	// We don't need to check S-class restricted races
+    	if (eventCarClass != SClassHash && isSClassFilterActive && (hosterCarClass == SClassHash || SClassHash == playerCarClass) 
+    			&& playerCarClass != hosterCarClass) {
+    		isSClassFilterAllowed = false; // Only S-Class cars is able to participate on races, which is hosted by players on S-class cars 
+    	}
+        System.out.println("### isSClassFilterAllowed: " + isSClassFilterAllowed);
+        return isSClassFilterAllowed;
     }
 
     /**

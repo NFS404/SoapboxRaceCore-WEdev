@@ -64,6 +64,9 @@ public class EventSessionEntity {
 	
 	@Column(name = "ISPRIVATE")
 	private boolean isPrivate;
+	
+	@Column(name = "LOBBYID")
+	private Long lobbyId;
 
 	public Long getId() {
 		return id;
@@ -191,5 +194,13 @@ public class EventSessionEntity {
 
 	public void setPrivate(boolean isPrivate) {
 		this.isPrivate = isPrivate;
+	}
+	
+	public Long getLobbyId() {
+		return lobbyId;
+	}
+
+	public void setLobbyId(Long lobbyId) {
+		this.lobbyId = lobbyId;
 	}
 }
