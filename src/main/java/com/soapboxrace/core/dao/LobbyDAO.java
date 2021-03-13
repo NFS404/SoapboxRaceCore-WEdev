@@ -14,7 +14,6 @@ import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.dao.util.BaseDAO;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.LobbyEntity;
-import com.soapboxrace.core.jpa.LobbyEntrantEntity;
 
 @Stateless
 public class LobbyDAO extends BaseDAO<LobbyEntity> {
@@ -32,102 +31,100 @@ public class LobbyDAO extends BaseDAO<LobbyEntity> {
 		return lobbyEntity;
 	}
 
-	public List<LobbyEntity> findAllMPLobbies(int carClassHash, int raceFilter) {
+	// Search for Race Now, takes 3 tries, depending on car class and lobbies variety
+	@SuppressWarnings("unchecked")
+	public List<LobbyEntity> findAllMPLobbies(int carClassHash, int raceFilter, int searchStage) {
 		Date dateNow = new Date();
 		Date datePast = new Date(dateNow.getTime() - (parameterBO.getIntParam("LOBBY_TIME") - 8000)); // Don't count the last 8 seconds of lobby life-time
-
-		switch (raceFilter) {
-		case 1:
-			TypedQuery<LobbyEntity> queryC1 = entityManager.createNamedQuery("LobbyEntity.findMPLobbiesP2PClasses", LobbyEntity.class);
-			queryC1.setParameter("dateTime1", datePast);
-			queryC1.setParameter("dateTime2", dateNow);
-			queryC1.setParameter("carClassHash", carClassHash);
-			if (queryC1.getResultList().isEmpty()) {
-				TypedQuery<LobbyEntity> queryO = entityManager.createNamedQuery("LobbyEntity.findMPLobbiesP2POpen", LobbyEntity.class);
-				queryO.setParameter("dateTime1", datePast);
-				queryO.setParameter("dateTime2", dateNow);
-				return queryO.getResultList();
-			}
-			return queryC1.getResultList();
-		case 2:
-			TypedQuery<LobbyEntity> queryC2 = entityManager.createNamedQuery("LobbyEntity.findMPLobbiesDragClasses", LobbyEntity.class);
-			queryC2.setParameter("dateTime1", datePast);
-			queryC2.setParameter("dateTime2", dateNow);
-			queryC2.setParameter("carClassHash", carClassHash);
-			if (queryC2.getResultList().isEmpty()) {
-				TypedQuery<LobbyEntity> queryO = entityManager.createNamedQuery("LobbyEntity.findMPLobbiesDragOpen", LobbyEntity.class);
-				queryO.setParameter("dateTime1", datePast);
-				queryO.setParameter("dateTime2", dateNow);
-				return queryO.getResultList();
-			}
-			return queryC2.getResultList();
-		case 3:
-			TypedQuery<LobbyEntity> queryC3 = entityManager.createNamedQuery("LobbyEntity.findMPLobbiesRaceClasses", LobbyEntity.class);
-			queryC3.setParameter("dateTime1", datePast);
-			queryC3.setParameter("dateTime2", dateNow);
-			queryC3.setParameter("carClassHash", carClassHash);
-			if (queryC3.getResultList().isEmpty()) {
-				TypedQuery<LobbyEntity> queryO = entityManager.createNamedQuery("LobbyEntity.findMPLobbiesRaceOpen", LobbyEntity.class);
-				queryO.setParameter("dateTime1", datePast);
-				queryO.setParameter("dateTime2", dateNow);
-				return queryO.getResultList();
-			}
-			return queryC3.getResultList();
-		case 4:
-			TypedQuery<LobbyEntity> queryC4 = entityManager.createNamedQuery("LobbyEntity.findMPLobbiesPursuitClasses", LobbyEntity.class);
-			queryC4.setParameter("dateTime1", datePast);
-			queryC4.setParameter("dateTime2", dateNow);
-			queryC4.setParameter("carClassHash", carClassHash);
-			if (queryC4.getResultList().isEmpty()) {
-				TypedQuery<LobbyEntity> queryO = entityManager.createNamedQuery("LobbyEntity.findMPLobbiesPursuitOpen", LobbyEntity.class);
-				queryO.setParameter("dateTime1", datePast);
-				queryO.setParameter("dateTime2", dateNow);
-				return queryO.getResultList();
-			}
-			return queryC4.getResultList();
-		default:
-			TypedQuery<LobbyEntity> queryC = entityManager.createNamedQuery("LobbyEntity.findAllMPLobbiesClasses", LobbyEntity.class);
-			queryC.setParameter("dateTime1", datePast);
-			queryC.setParameter("dateTime2", dateNow);
-			queryC.setParameter("carClassHash", carClassHash);
-			if (queryC.getResultList().isEmpty()) {
-				TypedQuery<LobbyEntity> queryO = entityManager.createNamedQuery("LobbyEntity.findAllMPLobbiesOpen", LobbyEntity.class);
-				queryO.setParameter("dateTime1", datePast);
-				queryO.setParameter("dateTime2", dateNow);
-				return queryO.getResultList();
-			}
-			return queryC.getResultList();
-		}
-	}
-	
-	public List<LobbyEntity> findAllOpen(int carClassHash) {
-		Date dateNow = new Date();
-		Date datePast = new Date(dateNow.getTime() - (parameterBO.getIntParam("LOBBY_TIME") - 8000)); // Don't count the last 8 seconds of lobby life-time
-
-		TypedQuery<LobbyEntity> query = entityManager.createNamedQuery("LobbyEntity.findAllOpenByCarClass", LobbyEntity.class);
+		
+		Query query = entityManager.createNativeQuery(getSqlLobbySearch(raceFilter, searchStage, carClassHash), LobbyEntity.class);
 		query.setParameter("dateTime1", datePast);
 		query.setParameter("dateTime2", dateNow);
 		query.setParameter("carClassHash", carClassHash);
+		
+		if (query.getResultList().isEmpty() && searchStage == 1) {
+			findAllMPLobbies(carClassHash, raceFilter, 2); 
+			// 1 to 2 - Repeat the search without strict class restriction, to class groups priority
+			// 2 to 3 - Wait for priority timeout, and repeat the search for all existing lobbies
+			// 3 - No lobbies at all, wait for new lobbies on Queue MM
+		}
 		return query.getResultList();
 	}
-
-	public List<LobbyEntity> findAllRunning() {
+	
+	public String getSqlLobbySearch(int raceFilter, int searchStage, int carClassHash) {
+		StringBuilder searchQuery = new StringBuilder();
+		searchQuery.append("SELECT obj FROM LobbyEntity obj "); // SELECT command
+		searchQuery.append("WHERE obj.started = false AND (obj.lobbyDateTimeStart between :dateTime1 and :dateTime2) OR (obj.lobbyDateTimeStart = null)"); // Lobby should be available to search
+		searchQuery.append("AND obj.isPrivate = false AND obj.event.searchAvailable = true "); // Not private, and the event itself should be allowed for search
+		searchQuery.append(getSqlClassFilter(searchStage, carClassHash)); // Class restriction
+		searchQuery.append(getSqlRaceFilter(raceFilter)); // Event type action
+		searchQuery.append("ORDER BY obj.lobbyDateTimeStart ASC "); // Order lobbies by start time
+		return searchQuery.toString();
+	}
+	
+	public String getSqlClassFilter(int searchStage, int carClassHash) {
+		String append = "";
+		switch (searchStage) {
+		case 1:
+			append = "AND obj.event.carClassHash = :carClassHash ";
+			break;
+		case 2: // TODO This one could be re-worked
+			switch (carClassHash) {
+			case -2142411446: // S Class group
+				append = "AND obj.event.carClassHash = -2142411446 ";
+				break;
+			case -405837480:
+			case -406473455: // A-B Classes group
+				append = "AND (obj.event.carClassHash = -405837480) OR (obj.event.carClassHash = -406473455) ";
+				break;
+			case 1866825865:
+			case 415909161:
+			case 872416321: // C-D-E Classes group
+				append = "AND (obj.event.carClassHash = 1866825865) OR (obj.event.carClassHash = 415909161) OR (obj.event.carClassHash = 872416321) ";
+				break;
+			}
+			break;
+		case 3:
+			append = "AND obj.event.carClassHash = 607077938 ";
+			break;
+		}
+		return append;
+	}
+	
+	public String getSqlRaceFilter(int raceFilter) {
+		String append = "";
+		switch (raceFilter) {
+		case 1: // Sprint & Circuit
+			append = "AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9) ";
+			break;
+		case 2: // Drag
+			append = "AND obj.event.eventModeId = 19 ";
+			break;
+		case 3: // All Races
+			append = "AND (obj.event.eventModeId = 4 or obj.event.eventModeId = 9 or obj.event.eventModeId = 19) ";
+			break;
+		case 4: // Team Escape
+			append = "AND (obj.event.eventModeId = 24 or obj.event.eventModeId = 100) ";
+			break;
+		default: // No filter
+			append = "";
+			break;
+		}
+		return append;
+	}
+	
+	// Matchmaking information lobbies search
+	public List<LobbyEntity> findAllOpen() {
 		Date dateNow = new Date();
 		Date datePast = new Date(dateNow.getTime() - (parameterBO.getIntParam("LOBBY_TIME") - 8000)); // Don't count the last 8 seconds of lobby life-time
 
 		TypedQuery<LobbyEntity> query = entityManager.createNamedQuery("LobbyEntity.findAllOpen", LobbyEntity.class);
 		query.setParameter("dateTime1", datePast);
 		query.setParameter("dateTime2", dateNow);
-		List<LobbyEntity> resultList = query.getResultList();
-		for (LobbyEntity lobbyEntity : resultList) {
-			List<LobbyEntrantEntity> entrants = lobbyEntity.getEntrants();
-			for (LobbyEntrantEntity lobbyEntrantEntity : entrants) {
-				lobbyEntrantEntity.getPersona();
-			}
-		}
-		return resultList;
+		return query.getResultList();
 	}
 
+	// Search for event selected on World Map
 	public List<LobbyEntity> findByEventStarted(int eventId) {
 		Date dateNow = new Date();
 		Date datePast = new Date(dateNow.getTime() - (parameterBO.getIntParam("LOBBY_TIME") - 8000)); // Don't count the last 8 seconds of lobby life-time
@@ -141,6 +138,7 @@ public class LobbyDAO extends BaseDAO<LobbyEntity> {
 		return query.getResultList();
 	}
 
+	// Search for private mode
 	public LobbyEntity findByEventAndPersona(int eventId, Long personaId) {
 		Date dateNow = new Date();
 		Date datePast = new Date(dateNow.getTime() - (parameterBO.getIntParam("LOBBY_TIME") - 8000)); // Don't count the last 8 seconds of lobby life-time
@@ -157,6 +155,7 @@ public class LobbyDAO extends BaseDAO<LobbyEntity> {
 		return !resultList.isEmpty() ? resultList.get(0) : null;
 	}
 	
+	// Search for specific player lobbies
 	public LobbyEntity findByHosterPersona(Long personaId) {
 		TypedQuery<LobbyEntity> query = entityManager.createNamedQuery("LobbyEntity.findByHosterPersona", LobbyEntity.class);
 		query.setParameter("personaId", personaId);

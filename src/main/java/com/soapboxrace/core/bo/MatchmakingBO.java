@@ -15,7 +15,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.*;
 
+import com.soapboxrace.core.dao.LobbyDAO;
 import com.soapboxrace.core.jpa.EventEntity;
+import com.soapboxrace.core.jpa.LobbyEntity;
 import com.soapboxrace.core.jpa.PersonaPresenceEntity;
 import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
 import com.soapboxrace.core.xmpp.XmppChat;
@@ -42,6 +44,12 @@ public class MatchmakingBO {
     private ParameterBO parameterBO;
     
     @EJB
+    private LobbyDAO lobbyDAO;
+    
+    @EJB
+    private EventResultBO eventResultBO;
+    
+    @EJB
 	private OpenFireSoapBoxCli openFireSoapBoxCli;
 
     private StatefulRedisConnection<String, String> redisConnection;
@@ -50,7 +58,6 @@ public class MatchmakingBO {
     public void initialize() {
         if (parameterBO.getBoolParam("REDIS_ENABLE")) {
             this.redisConnection = this.redisBO.getConnection();
-            // this.redisConnection.sync().set("matchmaking_playercount", "0"); // Create the player count entry
             System.out.println("Initialized matchmaking system");
         } else {
         	System.out.println("Redis is not enabled! Matchmaking queue is disabled.");
@@ -91,23 +98,6 @@ public class MatchmakingBO {
             this.redisConnection.sync().hdel("matchmaking_queue", personaId.toString());
             matchmakingWebStatus();
 //          System.out.println("playerCount remove (+1): " + curPlayerCount);
-        }
-    }
-    
-    /**
-     * Controls the player count in the Race Now search queue.
-     * Does not count the players, who has started the search for specific event.
-     *
-     * @param increase increase or decrease the counter (true/false)
-     */
-    // Not used
-    public void changePlayerCountInQueue(boolean increase) {
-        if (this.redisConnection != null) {
-        	int curPlayerCount = Integer.parseInt(this.redisConnection.sync().get("matchmaking_playercount")); // Get the queue player count
-        	if (increase) {curPlayerCount = curPlayerCount + 1;}
-        	else {curPlayerCount = curPlayerCount - 1;}
-        	this.redisConnection.sync().set("matchmaking_playercount", String.valueOf(curPlayerCount)); // Save the new queue player count
-        	matchmakingWebStatus();
         }
     }
 
@@ -152,10 +142,42 @@ public class MatchmakingBO {
         return personaId;
     }
     
-//  @Schedule(minute = "*/1", hour = "*", persistent = false)
+    @Schedule(minute = "*/1", hour = "*", persistent = false)
     public void matchmakingWebStatus() {
     	Long test = this.redisConnection.sync().hlen("matchmaking_queue"); // Get the count of Key-Value pairs (player entries) by "queue" hash
-        System.out.println("### Players searching: " + test);
+        System.out.println("### Players searching on Race Now: " + test);
+        List<LobbyEntity> lobbiesList = lobbyDAO.findAllOpen();
+        if (lobbiesList.isEmpty()) {
+        	System.out.println("### No public lobbies is available yet.");
+        }
+        else {
+        	for (LobbyEntity lobby : lobbiesList) {
+        		int lobbyHosterCarClass = lobby.getCarClassHash();
+        		EventEntity lobbyEvent = lobby.getEvent();
+        		String isTimerActive = "Search";
+        		if (lobby.getLobbyDateTimeStart() != null) {
+        			isTimerActive = "Waiting";
+        		}
+        		String eventName = lobbyEvent.getName();
+        		int eventMode = lobbyEvent.getEventModeId();
+        		int eventCarClass = lobbyEvent.getCarClassHash();
+        		Long lobbyTeamPlayer = lobby.getTeam1Id();
+        		
+        		String lobbyHosterCarClassStr = eventResultBO.getCarClassLetter(lobbyHosterCarClass);
+        		String eventCarClassStr = eventResultBO.getCarClassLetter(eventCarClass);
+        		
+        		StringBuilder lobbyInfoOutput = new StringBuilder();
+        		lobbyInfoOutput.append("### Mode: " + eventMode + ", ");
+        		lobbyInfoOutput.append("Class: " + eventCarClassStr + ", ");
+        		lobbyInfoOutput.append("Event: " + eventName + ", ");
+        		lobbyInfoOutput.append("Priority Class: " + lobbyHosterCarClassStr + ", ");
+        		if (lobbyTeamPlayer != null) {
+        			lobbyInfoOutput.append("[T], ");
+        		}
+        		lobbyInfoOutput.append("Status: " + isTimerActive + ", ");
+        		System.out.println(lobbyInfoOutput.toString());
+            }
+        }
     }
     
     /**

@@ -83,6 +83,9 @@ public class LobbyBO {
 	
 	@EJB
 	private LobbyEntrantDAO lobbyEntrantDAO;
+	
+	@EJB
+	private LobbyKeepAliveBO lobbyKeepAliveBO;
 
 	// Checking the division of selected car - Hypercycle
 	public String carDivision(int carClassHash) {
@@ -95,13 +98,13 @@ public class LobbyBO {
 		return "bas";
 	}
 		
-	public void joinFastLobby(String securityToken, Long personaId, int carClassHash, int raceFilter, boolean isSClassFilterActive) {
+	public void joinFastLobby(Long personaId, int carClassHash, int raceFilter, boolean isSClassFilterActive, int searchStage) {
 		// List<LobbyEntity> lobbys = lobbyDao.findAllOpen(carClassHash);
         // System.out.println("MM START Time: " + LocalDateTime.now());
 		System.out.println("joinFastLobby");
 		PersonaEntity personaEntity = personaDao.findById(personaId);
 		boolean redis = parameterBO.getBoolParam("REDIS_ENABLE");
-		List<LobbyEntity> lobbys = lobbyDao.findAllMPLobbies(carClassHash, raceFilter);
+		List<LobbyEntity> lobbys = lobbyDao.findAllMPLobbies(carClassHash, raceFilter, searchStage);
 		
 		if (redis) { // Do two "for" loops to avoid ConcurrentModificationException
 			List<Integer> eventIgnoredList = matchmakingBO.getEventIgnoredList(personaId);
@@ -122,6 +125,8 @@ public class LobbyBO {
 		
 		if (redis && lobbys.isEmpty()) {
 			matchmakingBO.addPlayerToQueue(personaId, carClassHash, raceFilter, 1);
+			lobbyKeepAliveBO.searchPriorityTimer(personaId, carClassHash, raceFilter, isSClassFilterActive, parameterBO.getIntParam("RACENOW_PRIORITYTIMER"));
+			// TODO Block Queue MM player entry when lobbies finding that player, and unblock it when all class types can be accepted
 		}
 //		else {
 //			if (lobbys.isEmpty() && parameterBO.getBoolParam("RACENOW_RANDOMRACES")) {

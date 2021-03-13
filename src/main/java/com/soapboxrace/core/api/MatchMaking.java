@@ -119,7 +119,7 @@ public class MatchMaking {
 			throw new EngineException(EngineExceptionCode.GameLocked, false);
 		}
 		else {
-			lobbyBO.joinFastLobby(securityToken, activePersonaId, playerCarClass, customCar.getRaceFilter(), isSClassFilterActive);
+			lobbyBO.joinFastLobby(activePersonaId, playerCarClass, customCar.getRaceFilter(), isSClassFilterActive, 1);
 		}
 		return "";
 	}
