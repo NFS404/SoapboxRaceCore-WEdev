@@ -122,7 +122,7 @@ public class Reporting {
 	@Path("/renamePersonaAdmin")
 	@Produces(MediaType.TEXT_HTML)
 	public String createPromoCode(@FormParam("token") String token, @FormParam("nickname") String nickname, @FormParam("newNickname") String newNickname) {
-		if (parameterBO.getStrParam("MODERATOR_TOKEN").equals(token) && nickname != null && newNickname != null) {
+		if (parameterBO.getStrParam("TOKEN_STAFF").equals(token) && nickname != null && newNickname != null) {
 			return adminBO.renamePersonaAdmin(nickname, newNickname);
 		}
 		return "ERROR: invalid token (not a staff? quit right now, hacker)";

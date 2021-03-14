@@ -14,6 +14,7 @@ import com.soapboxrace.core.bo.ParameterBO;
 import com.soapboxrace.core.dao.util.BaseDAO;
 import com.soapboxrace.core.jpa.EventEntity;
 import com.soapboxrace.core.jpa.LobbyEntity;
+import com.soapboxrace.core.jpa.RewardDropEntity;
 
 @Stateless
 public class LobbyDAO extends BaseDAO<LobbyEntity> {
@@ -32,22 +33,26 @@ public class LobbyDAO extends BaseDAO<LobbyEntity> {
 	}
 
 	// Search for Race Now, takes 3 tries, depending on car class and lobbies variety
-	@SuppressWarnings("unchecked")
 	public List<LobbyEntity> findAllMPLobbies(int carClassHash, int raceFilter, int searchStage) {
+		System.out.println("### findAllMPLobbies, searchStage: " + searchStage);
 		Date dateNow = new Date();
 		Date datePast = new Date(dateNow.getTime() - (parameterBO.getIntParam("LOBBY_TIME") - 8000)); // Don't count the last 8 seconds of lobby life-time
 		
-		Query query = entityManager.createNativeQuery(getSqlLobbySearch(raceFilter, searchStage, carClassHash), LobbyEntity.class);
+		TypedQuery<LobbyEntity> query = entityManager.createQuery(getSqlLobbySearch(raceFilter, searchStage, carClassHash), LobbyEntity.class);
 		query.setParameter("dateTime1", datePast);
 		query.setParameter("dateTime2", dateNow);
-		query.setParameter("carClassHash", carClassHash);
+		if (searchStage == 1) {
+			query.setParameter("carClassHash", carClassHash); // carClassHash will be requested only when finding class-restricted races
+		}
 		
 		if (query.getResultList().isEmpty() && searchStage == 1) {
+			System.out.println("### going to searchStage 2");
 			findAllMPLobbies(carClassHash, raceFilter, 2); 
 			// 1 to 2 - Repeat the search without strict class restriction, to class groups priority
 			// 2 to 3 - Wait for priority timeout, and repeat the search for all existing lobbies
 			// 3 - No lobbies at all, wait for new lobbies on Queue MM
 		}
+		System.out.println("### lobbyDAO finished, searchStage " + searchStage);
 		return query.getResultList();
 	}
 	

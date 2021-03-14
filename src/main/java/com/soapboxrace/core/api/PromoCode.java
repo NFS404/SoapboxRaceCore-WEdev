@@ -27,10 +27,10 @@ public class PromoCode {
 	@Path("/createPromoCode")
 	@Produces(MediaType.TEXT_HTML)
 	public String createPromoCode(@FormParam("token") String token, @FormParam("codeType") String codeType) {
-		if (parameterBO.getStrParam("MODERATOR_TOKEN").equals(token) && codeType != null) {
+		if (parameterBO.getStrParam("TOKEN_PROMOCODE").equals(token) && codeType != null) {
 			return bo.createPromoCode(codeType);
 		}
-		if (parameterBO.getStrParam("MODERATOR_TOKEN").equals(token) && codeType == null) {
+		if (parameterBO.getStrParam("TOKEN_PROMOCODE").equals(token) && codeType == null) {
 			return "ERROR: Code type is not selected, please try again";
 		}
 		return "ERROR: invalid token (not a staff? quit right now, hacker)";
@@ -46,7 +46,7 @@ public class PromoCode {
 		if (token == null && (promoCode.isEmpty() || email.isEmpty() || password.isEmpty() || nickname.isEmpty())) {
 			return "ERROR: empty email, password, nickname or code";
 		}
-		if (token != null && !parameterBO.getStrParam("MODERATOR_TOKEN").equals(token)) {
+		if (token != null && !parameterBO.getStrParam("TOKEN_PROMOCODE").equals(token)) {
 			return "ERROR: invalid token (not a staff? quit right now, hacker)";
 		}
 		return bo.usePromoCode(promoCode, email, password, nickname, token);
@@ -56,7 +56,7 @@ public class PromoCode {
 	@Path("/useDebug")
 	@Produces(MediaType.TEXT_HTML)
 	public String useDebug(@FormParam("adminToken") String adminToken, @FormParam("premiumType") String premiumType, @FormParam("extraMoney") String extraMoney, @FormParam("nickname") String nickname, @FormParam("timeYear") String timeYear, @FormParam("timeMonth") String timeMonth, @FormParam("timeDay") String timeDay) {
-		if (adminToken != null && !parameterBO.getStrParam("ADMIN_TOKEN").equals(adminToken)) {
+		if (adminToken != null && !parameterBO.getStrParam("TOKEN_ADMIN").equals(adminToken)) {
 			return "ERROR: invalid token";
 		}
 		return bo.useDebug(premiumType, extraMoney, nickname, timeYear, timeMonth, timeDay);
@@ -66,7 +66,7 @@ public class PromoCode {
 	@Path("/saleGen")
 	@Produces(MediaType.TEXT_HTML)
 	public String saleGen(@FormParam("saleManagerToken") String saleManagerToken, @FormParam("saleCar1") String saleCar1, @FormParam("saleCar2") String saleCar2, @FormParam("saleCar3") String saleCar3, @FormParam("saleCar4") String saleCar4, @FormParam("saleName") String saleName) {
-		if (saleManagerToken != null && !parameterBO.getStrParam("SALE_MANAGERTOKEN").equals(saleManagerToken)) {
+		if (saleManagerToken != null && !parameterBO.getStrParam("TOKEN_SALEMANAGER").equals(saleManagerToken)) {
 			return "ERROR: invalid token";
 		}
 		return salesBO.saleGen(saleName, saleCar1, saleCar2, saleCar3, saleCar4);

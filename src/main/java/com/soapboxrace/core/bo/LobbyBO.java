@@ -104,7 +104,11 @@ public class LobbyBO {
 		System.out.println("joinFastLobby");
 		PersonaEntity personaEntity = personaDao.findById(personaId);
 		boolean redis = parameterBO.getBoolParam("REDIS_ENABLE");
+		System.out.println("### joinFastLobby, searchStage: " + searchStage);
 		List<LobbyEntity> lobbys = lobbyDao.findAllMPLobbies(carClassHash, raceFilter, searchStage);
+		if (lobbys.isEmpty() && searchStage == 1) { // If class-restricted and class group search is not succeed, initiate Priority Class Group search
+			searchStage = 2;
+		}
 		
 		if (redis) { // Do two "for" loops to avoid ConcurrentModificationException
 			List<Integer> eventIgnoredList = matchmakingBO.getEventIgnoredList(personaId);
@@ -124,9 +128,11 @@ public class LobbyBO {
 		}
 		
 		if (redis && lobbys.isEmpty()) {
-			matchmakingBO.addPlayerToQueue(personaId, carClassHash, raceFilter, 1);
-			lobbyKeepAliveBO.searchPriorityTimer(personaId, carClassHash, raceFilter, isSClassFilterActive, parameterBO.getIntParam("RACENOW_PRIORITYTIMER"));
-			// TODO Block Queue MM player entry when lobbies finding that player, and unblock it when all class types can be accepted
+			matchmakingBO.addPlayerToQueue(personaId, carClassHash, raceFilter, 1, searchStage);
+			System.out.println("### searchStage: " + searchStage);
+			if (searchStage == 2) {
+				lobbyKeepAliveBO.searchPriorityTimer(personaId, carClassHash, raceFilter, isSClassFilterActive, parameterBO.getIntParam("RACENOW_PRIORITYTIMER"));
+			}
 		}
 //		else {
 //			if (lobbys.isEmpty() && parameterBO.getBoolParam("RACENOW_RANDOMRACES")) {
@@ -137,7 +143,7 @@ public class LobbyBO {
 //		}
 		if (!lobbys.isEmpty()) {
 			System.out.println("### addFakeToQueue");
-			matchmakingBO.addPlayerToQueue(personaId, carClassHash, raceFilter, 0); // Temporary entry for "Ignore Races" feature
+			matchmakingBO.addPlayerToQueue(personaId, carClassHash, raceFilter, 0, 0); // Temporary entry for "Ignore Races" feature
 			joinLobby(personaEntity, lobbys, true, carClassHash, isSClassFilterActive);
 		}
 	}

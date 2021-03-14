@@ -58,6 +58,7 @@ public class MatchmakingBO {
     public void initialize() {
         if (parameterBO.getBoolParam("REDIS_ENABLE")) {
             this.redisConnection = this.redisBO.getConnection();
+            this.redisConnection.sync().del("matchmaking_queue"); // Delete any of MM queue entrants, if any exists
             System.out.println("Initialized matchmaking system");
         } else {
         	System.out.println("Redis is not enabled! Matchmaking queue is disabled.");
@@ -78,9 +79,12 @@ public class MatchmakingBO {
      *
      * @param personaId The ID of the persona to add to the queue.
      * @param carClass The class of the persona's current car.
+     * @param raceFilter Race Filter value
+     * @param isAvailable Is that entrant is available to be invited to races (1 - true, 0 - false)
+     * @param searchStage Player lobby search stage (1 - class-restricted races only, 2 - priority class groups search, 3 - search all open lobbies)
      */
-    public void addPlayerToQueue(Long personaId, Integer carClass, Integer raceFilter, int isAvailable) {
-    	String playerVehicleInfo = carClass.toString() + "," + raceFilter.toString() + "," + isAvailable;
+    public void addPlayerToQueue(Long personaId, Integer carClass, Integer raceFilter, int isAvailable, int searchStage) {
+    	String playerVehicleInfo = carClass.toString() + "," + raceFilter.toString() + "," + isAvailable + "," + searchStage;
         if (this.redisConnection != null) {
             this.redisConnection.sync().hset("matchmaking_queue", personaId.toString(), playerVehicleInfo);
             matchmakingWebStatus();
@@ -129,8 +133,10 @@ public class MatchmakingBO {
             // Open event, or when player have a valid car class for restricted event
             int playerCarClass = Integer.parseInt(playerVehicleInfo[0]);
             int playerRaceFilter = Integer.parseInt(playerVehicleInfo[1]);
+            int searchStage = Integer.parseInt(playerVehicleInfo[3]);
             if (Integer.parseInt(playerVehicleInfo[2]) == 1 && isRaceFilterAllowed(playerRaceFilter, eventModeId) 
-            		&& isSClassFilterAllowed(playerCarClass, hosterCarClass, carClass, isSClassFilterActive) && (carClass == 607077938 || playerCarClass == carClass)) {
+            		&& isSClassFilterAllowed(playerCarClass, hosterCarClass, carClass, isSClassFilterActive) 
+            		&& isPriorityClassFilterAllowed(playerCarClass, carClass, hosterCarClass, searchStage)) {
                 personaId = Long.parseLong(keyValue.getKey());
                 String newPlayerVehicleInfo = playerCarClass + "," + playerRaceFilter + "," + 0; // This entrant is not available for new invites
                 this.redisConnection.sync().hset("matchmaking_queue", keyValue.getKey(), newPlayerVehicleInfo);
@@ -208,6 +214,51 @@ public class MatchmakingBO {
     	}
         System.out.println("### isRaceFilterAllowed: " + isRaceFilterAllowed);
         return isRaceFilterAllowed;
+    }
+    
+    /**
+     * Checks if player car class fits with his search stage (class group priority) and the event class-restriction.
+     *
+     * @param playerCarClass Car class hash of player car
+     * @param eventCarClass Class-restriction of the event
+     * @param hosterCarClass Car class hash of first player's car
+     * @param Player lobby search stage (1 - class-restricted races only, 2 - priority class groups search, 3 - search all open lobbies)
+     * @return Is that event allowed by Priority Class Filter (true/false)
+     */
+    public boolean isPriorityClassFilterAllowed(int playerCarClass, int eventCarClass, int hosterCarClass, int searchStage) {
+    	boolean isPriorityClassFilterAllowed = false;
+    	if (eventCarClass == 607077938) {
+    		if (searchStage == 2) { // If race search is on stage 2, player should get the lobbies which fits his class priority group
+        		switch (hosterCarClass) {
+        		case -2142411446: // S Class group
+        			if (playerCarClass == -2142411446) {
+        				isPriorityClassFilterAllowed = true;
+        			}
+        			break;
+        		case -405837480:
+    			case -406473455: // A-B Classes group
+    				if (playerCarClass == -405837480 || playerCarClass == -406473455) {
+        				isPriorityClassFilterAllowed = true;
+        			}
+    				break;
+    			case 1866825865:
+    			case 415909161:
+    			case 872416321: // C-D-E Classes group
+    				if (playerCarClass == 1866825865 || playerCarClass == 415909161 || playerCarClass == 872416321) {
+        				isPriorityClassFilterAllowed = true;
+        			}
+    				break;
+        		}
+        	}
+        	if (searchStage == 3) { // Filter is inactive, search for any open lobby
+        		isPriorityClassFilterAllowed = true;
+        	}
+    	}
+    	else if (playerCarClass == eventCarClass) { // Class-restricted race and player fits in
+        		isPriorityClassFilterAllowed = true;
+        }
+        System.out.println("### isPriorityClassFilterAllowed: " + isPriorityClassFilterAllowed + ", searchStage: " + searchStage);
+        return isPriorityClassFilterAllowed;
     }
     
     /**

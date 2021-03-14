@@ -15,6 +15,8 @@ import javax.ejb.TimerService;
 import com.soapboxrace.core.dao.LobbyDAO;
 import com.soapboxrace.core.jpa.LobbyEntity;
 import com.soapboxrace.core.jpa.LobbyEntrantEntity;
+import com.soapboxrace.core.xmpp.OpenFireSoapBoxCli;
+import com.soapboxrace.core.xmpp.XmppChat;
 
 @Startup
 @Singleton
@@ -29,26 +31,39 @@ public class LobbyKeepAliveBO {
 	@EJB
 	private LobbyBO lobbyBO;
 	
+	@EJB
+	private OpenFireSoapBoxCli openFireSoapBoxCli;
+	
+	@EJB
+	private MatchmakingBO matchmakingBO;
+	
 	@Resource
     private TimerService timerService;
 
 	public void searchPriorityTimer(Long personaId, int carClassHash, int raceFilter, boolean isSClassFilterActive, int priorityTimer) {
-	    TimerConfig timerConfig = new TimerConfig();
+		TimerConfig timerConfig = new TimerConfig(null, false); // Must be not-persistent
 	    String[] infoArray = new String[4];
 	    infoArray[0] = personaId.toString();
 	    infoArray[1] = String.valueOf(carClassHash);
 	    infoArray[2] = String.valueOf(raceFilter);
 	    infoArray[3] = String.valueOf(isSClassFilterActive);
+	    
 	    timerConfig.setInfo(infoArray);
 	    timerService.createSingleActionTimer(priorityTimer, timerConfig);
+	    System.out.println("### searchPriorityTimer is started for " + personaId);
 	}
 	
 	@Timeout
 	public void searchPriorityTimeout(Timer timer) {
 		String[] infoArray = (String[]) timer.getInfo();
 		int searchStage = 3;
-		lobbyBO.joinFastLobby(Long.getLong(infoArray[0]), Integer.parseInt(infoArray[1]), Integer.parseInt(infoArray[2]), 
-				Boolean.getBoolean(infoArray[3]), searchStage); // personaId, carClassHash, raceFilter, isSClassFilterActive
+		Long personaId = Long.valueOf(infoArray[0]);
+		System.out.println("### searchPriorityTimeout for " + personaId);
+		if (matchmakingBO.isPlayerOnMMSearch(personaId)) { // Don't let the timer do stuff if player already quits the Race Now search
+			openFireSoapBoxCli.send(XmppChat.createSystemMessage("### No lobbies to fit with Priority Class Group, looking for all lobbies..."), personaId);
+			lobbyBO.joinFastLobby(personaId, Integer.parseInt(infoArray[1]), Integer.parseInt(infoArray[2]), 
+					Boolean.getBoolean(infoArray[3]), searchStage); // personaId, carClassHash, raceFilter, isSClassFilterActive
+		}
 	}
 	
 	// What reason for this? Is this necessary for lobbies?

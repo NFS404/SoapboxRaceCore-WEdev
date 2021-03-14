@@ -100,7 +100,7 @@ public class LobbyCountdownBO {
 
 	// Using some code parts from SBRW (WU.gg) code branch
 	public void scheduleLobbyStart(LobbyEntity lobbyEntity) {
-	    TimerConfig timerConfig = new TimerConfig();
+	    TimerConfig timerConfig = new TimerConfig(null, false); // Must be not-persistent
 	    timerConfig.setInfo(lobbyEntity.getId());
 	    timerService.createSingleActionTimer(parameterBO.getIntParam("LOBBY_TIME"), timerConfig);
 	}

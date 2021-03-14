@@ -318,7 +318,7 @@ public class Personas {
 	@Produces(MediaType.TEXT_PLAIN)
 	// Give the special bundle, cars of which is included in ITEM_SPECIALCARS_BUNDLE
 	public String giveCarsBundle(@FormParam("adminToken") String adminToken, @FormParam("playerName") String playerName) {
-		if (parameterBO.getStrParam("ADMIN_TOKEN").equals(adminToken)) {
+		if (parameterBO.getStrParam("TOKEN_ADMIN").equals(adminToken)) {
 			PersonaEntity personaEntity = personaDao.findByNameIgnoreCase(playerName);
 			if (personaEntity == null) {
 				return "ERROR: wrong nickname";
@@ -339,8 +339,11 @@ public class Personas {
 	@Produces(MediaType.TEXT_PLAIN)
 	// TODO Move the method, temporary place
 	public String forceCheckObsoleteRecords(@FormParam("adminToken") String adminToken) {
-		recordsBO.markObsoleteRecords();
-		return "Records has been checked.";
+		if (parameterBO.getStrParam("TOKEN_ADMIN").equals(adminToken)) {
+			recordsBO.markObsoleteRecords();
+			return "Records has been checked.";
+		}
+		return "ERROR: invalid token";
 	}
 
 }
